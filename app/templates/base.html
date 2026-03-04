@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{% block title %}NutriConnect{% endblock %}</title>
+
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/custom.css') }}">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,300;0,400;0,500;0,700;0,900;1,400&display=swap" rel="stylesheet">
+
+  {% block extra_css %}{% endblock %}
+</head>
+<body>
+
+  <nav class="nc-navbar">
+    <div class="container">
+      <div class="nc-navbar__inner">
+
+        <!-- ══ APPLE LOGO ══ -->
+        <a class="nc-brand" href="{{ url_for('main.home') }}">
+          <div class="nc-brand__icon">
+            <svg width="42" height="42" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <defs>
+                <linearGradient id="appleBody" x1="20" y1="10" x2="80" y2="95" gradientUnits="userSpaceOnUse">
+                  <stop offset="0%"   stop-color="#0096c7"/>
+                  <stop offset="55%"  stop-color="#0077b6"/>
+                  <stop offset="100%" stop-color="#023e8a"/>
+                </linearGradient>
+                <linearGradient id="appleShine" x1="30" y1="20" x2="55" y2="60" gradientUnits="userSpaceOnUse">
+                  <stop offset="0%"   stop-color="rgba(255,255,255,0.55)"/>
+                  <stop offset="100%" stop-color="rgba(255,255,255,0)"/>
+                </linearGradient>
+                <linearGradient id="stemGrad" x1="0" y1="0" x2="0" y2="1" gradientUnits="objectBoundingBox">
+                  <stop offset="0%"   stop-color="#00b4d8"/>
+                  <stop offset="100%" stop-color="#0077b6"/>
+                </linearGradient>
+              </defs>
+
+              <!-- Apple body: classic two-lobe apple silhouette -->
+              <path d="
+                M50 28
+                C50 28 36 18 26 24
+                C14 31 13 48 16 60
+                C19 72 26 88 36 90
+                C41 91 46 86 50 86
+                C54 86 59 91 64 90
+                C74 88 81 72 84 60
+                C87 48 86 31 74 24
+                C64 18 50 28 50 28Z
+              " fill="url(#appleBody)"/>
+
+              <!-- Shine / gloss highlight on left lobe -->
+              <ellipse cx="36" cy="46" rx="10" ry="15"
+                       fill="url(#appleShine)"
+                       transform="rotate(-15 36 46)"/>
+
+              <!-- Bite chunk removed (right side) — classic apple icon -->
+              <path d="
+                M74 24
+                C68 20 60 22 56 26
+                C60 30 66 28 70 31
+                C76 35 78 43 76 50
+                C80 46 86 36 84 28
+                C82 24 78 20 74 24Z
+              " fill="rgba(255,255,255,0.08)"/>
+
+              <!-- Stem: thin curved line above apple -->
+              <path d="M50 28 C50 18 56 10 62 8"
+                    stroke="#00b4d8" stroke-width="3.5"
+                    stroke-linecap="round" fill="none"/>
+
+              <!-- Leaf on stem -->
+              <path d="M56 16 C60 10 68 10 66 17 C64 22 56 20 56 16Z"
+                    fill="#00b4d8" opacity="0.9"/>
+              <!-- Leaf vein -->
+              <path d="M57 16 C61 13 65 12"
+                    stroke="rgba(255,255,255,0.6)" stroke-width="1"
+                    stroke-linecap="round" fill="none"/>
+            </svg>
+          </div>
+
+          <span class="nc-brand__text">
+            <span class="nc-brand__nutri">Nutri</span><span class="nc-brand__connect">Connect</span>
+          </span>
+        </a>
+
+        <!-- Desktop Nav -->
+        <ul class="nc-nav d-none d-lg-flex">
+          {% if current_user.is_authenticated %}
+            <li><a class="nc-nav__link" href="{{ url_for('user_dashboard.index') }}"><i class="fas fa-table-cells-large"></i> Dashboard</a></li>
+            <li><a class="nc-nav__link" href="{{ url_for('user_dashboard.view_profile') }}"><i class="fas fa-user"></i> Profile</a></li>
+            {% if current_user.is_user() %}
+            <li><a class="nc-nav__link" href="{{ url_for('user_dashboard.dietary_preferences') }}"><i class="fas fa-bowl-food"></i> Diet Prefs</a></li>
+            {% endif %}
+          {% else %}
+            <li><a class="nc-nav__link" href="{{ url_for('auth.login') }}">Login</a></li>
+          {% endif %}
+        </ul>
+
+        <!-- Right Actions -->
+        <div class="nc-navbar__actions">
+
+          <!-- Light/Dark Toggle -->
+          <button class="nc-toggle" id="themeToggle" aria-label="Toggle dark mode">
+            <span class="nc-toggle__track">
+              <i class="fas fa-sun  nc-toggle__icon nc-toggle__icon--sun"></i>
+              <i class="fas fa-moon nc-toggle__icon nc-toggle__icon--moon"></i>
+              <span class="nc-toggle__thumb"></span>
+            </span>
+          </button>
+
+          {% if current_user.is_authenticated %}
+            <div class="nc-user-menu">
+              <button class="nc-user-btn" id="userMenuBtn">
+                <span class="nc-avatar">{{ current_user.username[0]|upper }}</span>
+                <span class="nc-user-btn__name d-none d-md-inline">{{ current_user.username }}</span>
+                {% for role in current_user.roles %}<span class="nc-chip">{{ role.name }}</span>{% endfor %}
+                <i class="fas fa-chevron-down nc-chevron"></i>
+              </button>
+              <div class="nc-dropdown" id="userDropdown">
+                <div class="nc-dropdown__header">
+                  <span class="nc-avatar nc-avatar--lg">{{ current_user.username[0]|upper }}</span>
+                  <div>
+                    <div class="nc-dropdown__name">{{ current_user.username }}</div>
+                    <div class="nc-dropdown__role">{% for role in current_user.roles %}{{ role.name }}{% endfor %}</div>
+                  </div>
+                </div>
+                <div class="nc-dropdown__sep"></div>
+                <a class="nc-dropdown__item" href="{{ url_for('user_dashboard.edit_profile') }}"><i class="fas fa-pen-to-square"></i> Edit Profile</a>
+                <a class="nc-dropdown__item" href="{{ url_for('user_dashboard.index') }}"><i class="fas fa-chart-bar"></i> Dashboard</a>
+                <div class="nc-dropdown__sep"></div>
+                <a class="nc-dropdown__item nc-dropdown__item--red" href="{{ url_for('auth.logout') }}"><i class="fas fa-right-from-bracket"></i> Logout</a>
+              </div>
+            </div>
+          {% else %}
+            <a class="nc-btn" href="{{ url_for('auth.register') }}">Get Started <i class="fas fa-arrow-right"></i></a>
+          {% endif %}
+
+          <button class="nc-hamburger d-lg-none" id="mobileMenuBtn">
+            <span></span><span></span><span></span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Mobile Drawer -->
+    <div class="nc-mobile-drawer" id="mobileMenu">
+      <div class="container py-3">
+        {% if current_user.is_authenticated %}
+          <a class="nc-mobile-link" href="{{ url_for('user_dashboard.index') }}"><i class="fas fa-table-cells-large"></i> Dashboard</a>
+          <a class="nc-mobile-link" href="{{ url_for('user_dashboard.view_profile') }}"><i class="fas fa-user"></i> Profile</a>
+          {% if current_user.is_user() %}
+          <a class="nc-mobile-link" href="{{ url_for('user_dashboard.dietary_preferences') }}"><i class="fas fa-bowl-food"></i> Diet Preferences</a>
+          {% endif %}
+          <a class="nc-mobile-link" href="{{ url_for('user_dashboard.edit_profile') }}"><i class="fas fa-pen-to-square"></i> Edit Profile</a>
+          <div class="nc-mobile-sep"></div>
+          <a class="nc-mobile-link nc-mobile-link--red" href="{{ url_for('auth.logout') }}"><i class="fas fa-right-from-bracket"></i> Logout</a>
+        {% else %}
+          <a class="nc-mobile-link" href="{{ url_for('auth.login') }}"><i class="fas fa-sign-in-alt"></i> Login</a>
+          <a class="nc-mobile-link nc-mobile-link--primary" href="{{ url_for('auth.register') }}"><i class="fas fa-user-plus"></i> Get Started</a>
+        {% endif %}
+      </div>
+    </div>
+  </nav>
+
+  <!-- Flash Messages -->
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      <div class="nc-alerts container mt-3">
+        {% for category, message in messages %}
+          <div class="nc-alert nc-alert--{{ category }}">
+            <span class="nc-alert__icon">
+              {% if category == 'success' %}<i class="fas fa-circle-check"></i>
+              {% elif category == 'danger' %}<i class="fas fa-circle-xmark"></i>
+              {% elif category == 'warning' %}<i class="fas fa-triangle-exclamation"></i>
+              {% else %}<i class="fas fa-circle-info"></i>{% endif %}
+            </span>
+            <span>{{ message }}</span>
+            <button class="nc-alert__close" onclick="this.closest('.nc-alert').remove()"><i class="fas fa-xmark"></i></button>
+          </div>
+        {% endfor %}
+      </div>
+    {% endif %}
+  {% endwith %}
+
+  <main class="container my-5">
+    {% block content %}{% endblock %}
+  </main>
+
+  <!-- Footer -->
+  <footer class="nc-footer">
+    <div class="container">
+      <div class="nc-footer__row">
+        <a class="nc-brand nc-brand--sm" href="{{ url_for('main.home') }}">
+          <div class="nc-brand__icon">
+            <svg width="30" height="30" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <defs>
+                <linearGradient id="appleBodyF" x1="20" y1="10" x2="80" y2="95" gradientUnits="userSpaceOnUse">
+                  <stop offset="0%"   stop-color="#0096c7"/>
+                  <stop offset="55%"  stop-color="#0077b6"/>
+                  <stop offset="100%" stop-color="#023e8a"/>
+                </linearGradient>
+                <linearGradient id="appleShineF" x1="30" y1="20" x2="55" y2="60" gradientUnits="userSpaceOnUse">
+                  <stop offset="0%"   stop-color="rgba(255,255,255,0.55)"/>
+                  <stop offset="100%" stop-color="rgba(255,255,255,0)"/>
+                </linearGradient>
+              </defs>
+              <path d="M50 28 C50 28 36 18 26 24 C14 31 13 48 16 60 C19 72 26 88 36 90 C41 91 46 86 50 86 C54 86 59 91 64 90 C74 88 81 72 84 60 C87 48 86 31 74 24 C64 18 50 28 50 28Z" fill="url(#appleBodyF)"/>
+              <ellipse cx="36" cy="46" rx="10" ry="15" fill="url(#appleShineF)" transform="rotate(-15 36 46)"/>
+              <path d="M50 28 C50 18 56 10 62 8" stroke="#00b4d8" stroke-width="3.5" stroke-linecap="round" fill="none"/>
+              <path d="M56 16 C60 10 68 10 66 17 C64 22 56 20 56 16Z" fill="#00b4d8" opacity="0.9"/>
+            </svg>
+          </div>
+          <span class="nc-brand__text">
+            <span class="nc-brand__nutri">Nutri</span><span class="nc-brand__connect">Connect</span>
+          </span>
+        </a>
+        <p class="nc-footer__copy">&copy; 2026 NutriConnect &mdash; Nourish smarter, live better.</p>
+        <div class="nc-footer__links">
+          <a href="#">Privacy</a>
+          <a href="#">Terms</a>
+          <a href="#">Help</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    const html = document.documentElement;
+    const tBtn = document.getElementById('themeToggle');
+    html.setAttribute('data-theme', localStorage.getItem('nc-theme') || 'light');
+    tBtn.addEventListener('click', () => {
+      const n = html.getAttribute('data-theme') === 'light' ? 'dark' : 'light';
+      html.setAttribute('data-theme', n);
+      localStorage.setItem('nc-theme', n);
+    });
+    const uBtn = document.getElementById('userMenuBtn');
+    const uDrop = document.getElementById('userDropdown');
+    if (uBtn && uDrop) {
+      uBtn.addEventListener('click', e => { e.stopPropagation(); const o = uDrop.classList.toggle('open'); uBtn.classList.toggle('open', o); });
+      document.addEventListener('click', () => { uDrop.classList.remove('open'); uBtn.classList.remove('open'); });
+    }
+    const mBtn = document.getElementById('mobileMenuBtn');
+    const mMenu = document.getElementById('mobileMenu');
+    if (mBtn && mMenu) { mBtn.addEventListener('click', () => { mMenu.classList.toggle('open'); mBtn.classList.toggle('open'); }); }
+    const nav = document.querySelector('.nc-navbar');
+    window.addEventListener('scroll', () => nav.classList.toggle('scrolled', scrollY > 8), {passive:true});
+  </script>
+
+  {% block extra_js %}{% endblock %}
+</body>
+</html>

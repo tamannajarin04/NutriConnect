@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+{% block title %}User Dashboard{% endblock %}
+
+{% block content %}
+<h2>Welcome, {{ user.first_name or user.username }}!</h2>
+<p class="lead">
+  Your Role: <span class="badge bg-success">User</span>
+</p>
+<hr>
+
+<div class="row">
+
+  <!-- Profile Card -->
+  <div class="col-md-6 mb-4">
+    <div class="card h-100 shadow-sm">
+      <div class="card-header bg-primary text-white">
+        <h5 class="mb-0">
+          <i class="fas fa-user"></i> My Profile
+        </h5>
+      </div>
+      <div class="card-body">
+        <p>
+          <strong>Name:</strong>
+          {{ user.first_name or '' }} {{ user.last_name or '' }}
+        </p>
+        <p><strong>Email:</strong> {{ user.email }}</p>
+        <p><strong>Username:</strong> {{ user.username }}</p>
+
+        <a
+          href="{{ url_for('user_dashboard.view_profile') }}"
+          class="btn btn-primary"
+        >
+          <i class="fas fa-eye"></i> View Full Profile
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Dietary Preferences Card -->
+  <div class="col-md-6 mb-4">
+    <div class="card h-100 shadow-sm">
+      <div class="card-header bg-success text-white">
+        <h5 class="mb-0">
+          <i class="fas fa-utensils"></i> Dietary Preferences
+        </h5>
+      </div>
+      <div class="card-body">
+        {% if user.dietary_preference %}
+          <p>
+            <strong>Diet Type:</strong>
+            {{ user.dietary_preference.diet_type or 'Not set' }}
+          </p>
+          <p>
+            <strong>Meals/Day:</strong>
+            {{ user.dietary_preference.meals_per_day or 'Not set' }}
+          </p>
+          <p>
+            <strong>Calorie Goal:</strong>
+            {{ user.dietary_preference.calorie_goal or 'Not set' }}
+          </p>
+        {% else %}
+          <p class="text-muted">
+            No dietary preferences set yet.
+          </p>
+        {% endif %}
+
+        <a
+          href="{{ url_for('user_dashboard.dietary_preferences') }}"
+          class="btn btn-success"
+        >
+          <i class="fas fa-cog"></i> Manage Preferences
+        </a>
+      </div>
+    </div>
+  </div>
+
+</div>
+{% endblock %}

@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block title %}Food Provider Dashboard{% endblock %}
+
+{% block content %}
+<h2>Welcome, {{ user.first_name or user.username }}!</h2>
+
+<p class="lead">
+  Your Role: <span class="badge bg-warning text-dark">Food Provider</span>
+</p>
+
+<hr>
+
+<div class="alert alert-info">
+  <i class="fas fa-info-circle"></i>
+  Dietary preferences are only available for regular users.
+</div>
+{% endblock %}

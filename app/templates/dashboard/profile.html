@@ -1,0 +1,94 @@
+{% extends "base.html" %}
+{% block title %}My Profile{% endblock %}
+
+{% block content %}
+<div class="row">
+  <div class="col-md-4">
+    <div class="card">
+      <div class="card-body text-center">
+
+        {% if user.profile_picture %}
+          <img
+            src="{{ url_for('static', filename=user.profile_picture) }}"
+            alt="Profile Picture"
+            class="rounded-circle mb-3"
+            style="width:150px;height:150px;object-fit:cover;"
+          >
+        {% else %}
+          <div
+            class="rounded-circle bg-primary text-white d-inline-flex align-items-center justify-content-center mb-3"
+            style="width:150px;height:150px;font-size:48px;"
+          >
+            {{ (user.first_name or user.username or 'U')[0] }}
+          </div>
+        {% endif %}
+
+        <h4>{{ user.first_name }} {{ user.last_name }}</h4>
+        <p class="text-muted">@{{ user.username }}</p>
+
+        <div class="mb-3">
+          {% for role in user.roles %}
+            <span class="badge bg-info">{{ role.name }}</span>
+          {% endfor %}
+        </div>
+
+        <a href="{{ url_for('user_dashboard.edit_profile') }}" class="btn btn-primary btn-sm">
+          <i class="fas fa-edit"></i> Edit Profile
+        </a>
+
+      </div>
+    </div>
+  </div>
+
+  <div class="col-md-8">
+
+    <div class="card mb-3">
+      <div class="card-header">
+        <h5 class="mb-0">Profile Information</h5>
+      </div>
+      <div class="card-body">
+        <table class="table table-borderless mb-0">
+          <tr>
+            <th style="width:200px;">Email:</th>
+            <td>{{ user.email }}</td>
+          </tr>
+          <tr>
+            <th>Username:</th>
+            <td>{{ user.username }}</td>
+          </tr>
+          <tr>
+            <th>Member Since:</th>
+            <td>{{ user.created_at.strftime('%B %d, %Y') }}</td>
+          </tr>
+        </table>
+      </div>
+    </div>
+
+    {% if user.is_user() %}
+    <div class="card">
+      <div class="card-header d-flex justify-content-between align-items-center">
+        <h5 class="mb-0">Dietary Preferences</h5>
+        <a href="{{ url_for('user_dashboard.dietary_preferences') }}" class="btn btn-sm btn-outline-primary">
+          <i class="fas fa-cog"></i> Manage
+        </a>
+      </div>
+      <div class="card-body">
+
+        {% if user.dietary_preference %}
+          <p><strong>Diet Type:</strong> {{ user.dietary_preference.diet_type or 'Not specified' }}</p>
+          <p><strong>Meals per Day:</strong> {{ user.dietary_preference.meals_per_day }}</p>
+          <p><strong>Daily Calorie Goal:</strong> {{ user.dietary_preference.calorie_goal or 'Not set' }}</p>
+        {% else %}
+          <p class="text-muted">No dietary preferences set yet.</p>
+          <a href="{{ url_for('user_dashboard.dietary_preferences') }}" class="btn btn-primary">
+            Set Dietary Preferences
+          </a>
+        {% endif %}
+
+      </div>
+    </div>
+    {% endif %}
+
+  </div>
+</div>
+{% endblock %}
