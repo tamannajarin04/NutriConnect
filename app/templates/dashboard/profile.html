@@ -1,94 +1,874 @@
 {% extends "base.html" %}
-{% block title %}My Profile{% endblock %}
+{% block title %}My Profile · NutriConnect{% endblock %}
+
+{% block extra_css %}
+<link href="https://fonts.googleapis.com/css2?family=Cabinet+Grotesk:wght@400;500;700;800;900&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+{% endblock %}
 
 {% block content %}
-<div class="row">
-  <div class="col-md-4">
-    <div class="card">
-      <div class="card-body text-center">
+<style>
+  /* ══════════════════════════════════════
+     TOKENS  (inherits base dark-mode vars)
+  ══════════════════════════════════════ */
+  /* Force Cabinet Grotesk everywhere, overriding base Roboto */
+  body, .pg, .mo-box, .mo-input, .mo-label,
+  button, input, label, select, textarea {
+    font-family: 'Cabinet Grotesk', sans-serif !important;
+  }
 
-        {% if user.profile_picture %}
-          <img
-            src="{{ url_for('static', filename=user.profile_picture) }}"
-            alt="Profile Picture"
-            class="rounded-circle mb-3"
-            style="width:150px;height:150px;object-fit:cover;"
-          >
-        {% else %}
-          <div
-            class="rounded-circle bg-primary text-white d-inline-flex align-items-center justify-content-center mb-3"
-            style="width:150px;height:150px;font-size:48px;"
-          >
-            {{ (user.first_name or user.username or 'U')[0] }}
-          </div>
-        {% endif %}
+  .pg {
+    --teal:     #0d9488; --teal-d: #0f766e; --teal-l: #ccfbf1;
+    --cyan:     #06b6d4; --cyan-l: #cffafe;
+    --violet:   #7c3aed; --violet-l: #ede9fe;
+    --rose:     #f43f5e; --rose-l: #ffe4e6;
+    --amber:    #f59e0b; --amber-l: #fef3c7;
+    --lime:     #84cc16; --lime-l: #ecfccb;
+    --emerald:  #10b981; --emerald-d: #059669; --emerald-l: #d1fae5;
 
-        <h4>{{ user.first_name }} {{ user.last_name }}</h4>
-        <p class="text-muted">@{{ user.username }}</p>
+    --surf:    var(--nc-surface,   #fff);
+    --surf-2:  var(--nc-surface-2, #f7f9fc);
+    --surf-3:  var(--nc-surface-3, #eef2f7);
+    --bdr:     var(--nc-border,    #e2e8f0);
+    --txt:     var(--nc-text,      #0d1117);
+    --txt-2:   var(--nc-text-2,    #374151);
+    --muted:   var(--nc-text-muted,#6b7280);
+    --faint:   var(--nc-text-faint,#9ca3af);
 
-        <div class="mb-3">
+    --r: 20px;
+    font-family: 'Cabinet Grotesk', sans-serif;
+  }
+
+  /* ══════════════════════════════════════
+     PAGE LAYOUT
+  ══════════════════════════════════════ */
+  .pg-layout {
+    display: grid;
+    grid-template-columns: 300px 1fr;
+    gap: 1.25rem;
+    align-items: start;
+  }
+  @media (max-width: 860px) {
+    .pg-layout { grid-template-columns: 1fr; }
+    .pg-sidebar { position: static !important; }
+  }
+
+  /* ══════════════════════════════════════
+     SIDEBAR
+  ══════════════════════════════════════ */
+  .pg-sidebar {
+    position: sticky;
+    top: 84px;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  /* ── Avatar card ── */
+  .av-card {
+    background: var(--surf);
+    border: 1px solid var(--bdr);
+    border-radius: var(--r);
+    overflow: hidden;
+    box-shadow: 0 1px 3px rgba(0,0,0,.05), 0 4px 16px rgba(0,0,0,.05);
+  }
+
+  /* Gradient banner at top */
+  .av-banner {
+    height: 72px;
+    background: linear-gradient(135deg, var(--teal) 0%, var(--cyan) 50%, var(--violet) 100%);
+    position: relative;
+  }
+  .av-banner::after {
+    content: '';
+    position: absolute; inset: 0;
+    background-image: radial-gradient(circle, rgba(255,255,255,.12) 1px, transparent 1px);
+    background-size: 20px 20px;
+  }
+
+  .av-body { padding: 0 1.5rem 1.5rem; text-align: center; }
+
+  /* Avatar circle — overlaps banner */
+  .av-circle {
+    width: 88px; height: 88px; border-radius: 50%;
+    border: 4px solid var(--surf);
+    background: linear-gradient(135deg, var(--teal), var(--cyan));
+    display: flex; align-items: center; justify-content: center;
+    font-size: 2rem; font-weight: 900; color: #fff;
+    margin: -44px auto 1rem;
+    overflow: hidden;
+    box-shadow: 0 4px 20px rgba(13,148,136,.35);
+    position: relative; z-index: 1;
+  }
+  .av-circle img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
+
+  .av-name {
+    font-size: 1.1rem; font-weight: 900;
+    letter-spacing: -.03em; color: var(--txt);
+    line-height: 1.2; margin-bottom: .2rem;
+  }
+  .av-handle { font-size: .8rem; color: var(--muted); margin-bottom: .6rem; }
+
+  .av-badges { display: flex; justify-content: center; gap: .4rem; flex-wrap: wrap; margin-bottom: 1.1rem; }
+  .av-badge {
+    display: inline-flex; align-items: center; gap: .3rem;
+    background: var(--teal-l); color: var(--teal-d);
+    border-radius: 99px; padding: .2rem .75rem;
+    font-size: .72rem; font-weight: 800; letter-spacing: .03em;
+  }
+
+  /* Completion ring in sidebar */
+  .comp-ring-wrap { display: flex; flex-direction: column; align-items: center; margin-bottom: 1rem; }
+  .comp-ring-svg { width: 80px; height: 80px; transform: rotate(-90deg); }
+  .cr-bg   { fill: none; stroke: var(--bdr); stroke-width: 7; }
+  .cr-fill {
+    fill: none; stroke: url(#crGrad); stroke-width: 7;
+    stroke-linecap: round;
+    stroke-dasharray: 220;
+    stroke-dashoffset: 220;
+    transition: stroke-dashoffset 1.2s cubic-bezier(.16,1,.3,1);
+  }
+  .comp-ring-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: .72rem; font-weight: 600; color: var(--teal);
+    margin-top: .35rem; letter-spacing: .04em;
+  }
+
+  .step-mini { display: flex; flex-direction: column; gap: .3rem; width: 100%; }
+  .step-mini-row {
+    display: flex; align-items: center; gap: .55rem;
+    font-size: .76rem; font-weight: 600; color: var(--muted);
+    padding: .35rem .5rem; border-radius: 9px;
+    transition: background .12s;
+  }
+  .step-mini-row.done { color: var(--teal-d); }
+  .step-mini-row:hover { background: var(--surf-2); }
+  .step-mini-dot {
+    width: 22px; height: 22px; border-radius: 7px; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-size: .65rem;
+  }
+  .step-mini-dot.done { background: var(--teal-l); color: var(--teal); }
+  .step-mini-dot.todo { background: var(--surf-3); color: var(--faint); }
+
+  /* Sidebar action buttons */
+  .sidebar-actions { display: flex; flex-direction: column; gap: .5rem; }
+  .btn-solid {
+    display: inline-flex; align-items: center; justify-content: center; gap: .45rem;
+    background: var(--teal); color: #fff; border: none;
+    border-radius: 12px; padding: .65rem 1rem; font-size: .83rem; font-weight: 800;
+    cursor: pointer; text-decoration: none; font-family: inherit;
+    box-shadow: 0 2px 8px rgba(13,148,136,.28);
+    transition: background .15s, transform .12s, box-shadow .15s;
+    letter-spacing: -.01em;
+  }
+  .btn-solid:hover { background: var(--teal-d); color: #fff; transform: translateY(-1px); box-shadow: 0 5px 18px rgba(13,148,136,.35); }
+  .btn-ghost {
+    display: inline-flex; align-items: center; justify-content: center; gap: .45rem;
+    background: var(--surf-2); color: var(--txt-2);
+    border: 1px solid var(--bdr); border-radius: 12px;
+    padding: .6rem 1rem; font-size: .83rem; font-weight: 700;
+    cursor: pointer; text-decoration: none; font-family: inherit;
+    transition: background .15s, border-color .15s;
+  }
+  .btn-ghost:hover { background: var(--surf-3); border-color: var(--nc-border-2, #cbd5e1); color: var(--txt); }
+
+  /* ── Quick stats card in sidebar ── */
+  .qs-card {
+    background: var(--surf);
+    border: 1px solid var(--bdr);
+    border-radius: var(--r);
+    padding: 1.1rem 1.25rem;
+    box-shadow: 0 1px 3px rgba(0,0,0,.05);
+  }
+  .qs-title {
+    font-size: .7rem; text-transform: uppercase; letter-spacing: .08em;
+    font-weight: 800; color: var(--faint); margin-bottom: .75rem;
+  }
+  .qs-grid { display: grid; grid-template-columns: 1fr 1fr; gap: .55rem; }
+  .qs-item {
+    background: var(--surf-2); border-radius: 12px;
+    padding: .7rem .75rem; border: 1px solid var(--bdr);
+  }
+  .qs-val {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: .95rem; font-weight: 600; color: var(--txt); line-height: 1;
+  }
+  .qs-lbl { font-size: .65rem; color: var(--faint); text-transform: uppercase; letter-spacing: .05em; font-weight: 700; margin-top: .2rem; }
+
+  /* ══════════════════════════════════════
+     MAIN CONTENT
+  ══════════════════════════════════════ */
+  .pg-main { display: flex; flex-direction: column; gap: 1rem; }
+
+  /* ── Section card ── */
+  .sc {
+    background: var(--surf);
+    border: 1px solid var(--bdr);
+    border-radius: var(--r);
+    overflow: hidden;
+    box-shadow: 0 1px 3px rgba(0,0,0,.05), 0 4px 16px rgba(0,0,0,.04);
+    animation: rise .45s cubic-bezier(.16,1,.3,1) both;
+  }
+  .sc:nth-child(1) { animation-delay: .06s; }
+  .sc:nth-child(2) { animation-delay: .12s; }
+  @keyframes rise { from{opacity:0;transform:translateY(16px)} to{opacity:1;transform:translateY(0)} }
+
+  /* Left-accent stripe */
+  .sc-stripe { height: 4px; }
+  .stripe-teal   { background: linear-gradient(90deg, var(--teal), var(--cyan)); }
+  .stripe-emerald{ background: linear-gradient(90deg, var(--emerald), var(--lime)); }
+
+  .sc-head {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 1.1rem 1.5rem; border-bottom: 1px solid var(--bdr);
+  }
+  .sc-head-left { display: flex; align-items: center; gap: .65rem; }
+  .sc-head-icon {
+    width: 34px; height: 34px; border-radius: 10px; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center; font-size: .85rem;
+  }
+  .shi-teal    { background: var(--teal-l);    color: var(--teal); }
+  .shi-emerald { background: var(--emerald-l); color: var(--emerald-d); }
+  .sc-head-title { font-size: .9rem; font-weight: 800; color: var(--txt); letter-spacing: -.02em; }
+  .sc-head-sub   { font-size: .72rem; color: var(--muted); font-weight: 500; margin-top: .05rem; }
+
+  /* ── Field rows ── */
+  .field-table { padding: 0 1.5rem; }
+  .frow {
+    display: grid;
+    grid-template-columns: 150px 1fr auto auto;
+    align-items: center;
+    gap: .75rem;
+    padding: .9rem 0;
+    border-bottom: 1px solid var(--bdr);
+    min-height: 56px;
+  }
+  .frow:last-child { border-bottom: none; }
+
+  .frow-key {
+    font-size: .7rem; text-transform: uppercase; letter-spacing: .07em;
+    font-weight: 800; color: var(--faint);
+    display: flex; align-items: center; gap: .45rem;
+  }
+  .frow-key-ico {
+    width: 26px; height: 26px; border-radius: 7px;
+    background: var(--surf-2); border: 1px solid var(--bdr);
+    display: flex; align-items: center; justify-content: center;
+    font-size: .65rem; color: var(--muted); flex-shrink: 0;
+  }
+
+  .frow-val {
+    font-size: .9rem; font-weight: 700; color: var(--txt);
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  }
+  .frow-val.is-muted { color: var(--faint); font-weight: 500; font-style: italic; }
+
+  /* Inline edit input */
+  .frow-input {
+    display: none;
+    border: 1.5px solid var(--teal);
+    border-radius: 9px; padding: .38rem .75rem;
+    font-size: .9rem; font-weight: 600; color: var(--txt);
+    background: var(--teal-l); outline: none; font-family: inherit;
+    transition: box-shadow .15s;
+    min-width: 0;
+  }
+  [data-theme="dark"] .frow-input { background: #0d2e2b; color: var(--txt); }
+  .frow-input:focus { box-shadow: 0 0 0 3px rgba(13,148,136,.2); }
+  .frow-input.show { display: block; }
+  .frow-val.hide  { display: none; }
+
+  .btn-edit-ico {
+    background: none; border: none; cursor: pointer;
+    width: 30px; height: 30px; border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: .78rem; color: var(--faint);
+    transition: background .12s, color .12s;
+    flex-shrink: 0;
+  }
+  .btn-edit-ico:hover { background: var(--teal-l); color: var(--teal); }
+
+  .btn-save-inline {
+    display: none;
+    background: var(--teal); color: #fff; border: none; cursor: pointer;
+    border-radius: 8px; padding: .3rem .75rem;
+    font-size: .75rem; font-weight: 800; font-family: inherit;
+    transition: background .12s;
+    white-space: nowrap; flex-shrink: 0;
+  }
+  .btn-save-inline.show { display: inline-flex; align-items: center; gap: .3rem; }
+  .btn-save-inline:hover { background: var(--teal-d); }
+
+  /* ── Diet section ── */
+  .diet-body { padding: 1.25rem 1.5rem; }
+  .dpill {
+    display: inline-flex; align-items: center; gap: .35rem;
+    padding: .38rem .9rem; border-radius: 99px;
+    font-size: .78rem; font-weight: 800; border: 1.5px solid transparent;
+    margin: .2rem;
+  }
+  .dp-teal   { background: var(--teal-l);    color: var(--teal-d);   border-color: #99f6e4; }
+  .dp-cyan   { background: var(--cyan-l);    color: #0e7490;         border-color: #a5f3fc; }
+  .dp-amber  { background: var(--amber-l);   color: #92400e;         border-color: #fde68a; }
+  .dp-violet { background: var(--violet-l);  color: #5b21b6;         border-color: #c4b5fd; }
+
+  .btn-manage-sm {
+    display: inline-flex; align-items: center; gap: .35rem;
+    background: var(--surf-2); color: var(--txt-2);
+    border: 1px solid var(--bdr); border-radius: 9px;
+    padding: .35rem .85rem; font-size: .76rem; font-weight: 700;
+    text-decoration: none; font-family: inherit; cursor: pointer;
+    transition: background .12s;
+  }
+  .btn-manage-sm:hover { background: var(--surf-3); color: var(--txt); }
+
+  /* empty diet state */
+  .diet-empty { display: flex; flex-direction: column; align-items: center; text-align: center; padding: 1.5rem; }
+  .diet-empty-ico {
+    width: 56px; height: 56px; border-radius: 18px;
+    background: var(--emerald-l); color: var(--emerald-d);
+    font-size: 1.4rem; display: flex; align-items: center; justify-content: center; margin-bottom: .85rem;
+  }
+  .diet-empty p { font-size: .83rem; color: var(--muted); max-width: 260px; margin: 0 0 1rem; line-height: 1.6; }
+  .btn-set {
+    display: inline-flex; align-items: center; gap: .4rem;
+    background: var(--emerald); color: #fff; border: none; border-radius: 10px;
+    padding: .55rem 1.2rem; font-size: .82rem; font-weight: 800;
+    text-decoration: none; font-family: inherit;
+    transition: background .15s, transform .12s;
+  }
+  .btn-set:hover { background: var(--emerald-d); color: #fff; transform: translateY(-1px); }
+
+  /* ══════════════════════════════════════
+     MODAL
+  ══════════════════════════════════════ */
+  .mo {
+    display: none; position: fixed; inset: 0; z-index: 2000;
+    background: rgba(0,0,0,.55); backdrop-filter: blur(6px);
+    align-items: center; justify-content: center;
+  }
+  .mo.open { display: flex; }
+  .mo-box {
+    background: var(--nc-surface, #ffffff) !important;
+    border-radius: 22px;
+    width: 92%; max-width: 520px; max-height: 92vh; overflow-y: auto;
+    box-shadow: 0 24px 80px rgba(0,0,0,.25);
+    animation: mo-in .28s cubic-bezier(.16,1,.3,1);
+    font-family: 'Cabinet Grotesk', sans-serif;
+  }
+  [data-theme="dark"] .mo-box { background: #161b22 !important; }
+  [data-theme="dark"] .mo-head { border-color: #30363d !important; }
+  [data-theme="dark"] .mo-foot { border-color: #30363d !important; }
+  @keyframes mo-in { from{opacity:0;transform:translateY(28px) scale(.97)} to{opacity:1;transform:translateY(0) scale(1)} }
+
+  .mo-head {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 1.25rem 1.5rem; border-bottom: 1px solid var(--bdr);
+  }
+  .mo-head-left { display: flex; align-items: center; gap: .6rem; }
+  .mo-head-icon {
+    width: 36px; height: 36px; border-radius: 10px;
+    background: var(--teal-l); color: var(--teal);
+    display: flex; align-items: center; justify-content: center; font-size: .9rem;
+  }
+  .mo-title { font-size: .95rem; font-weight: 800; color: var(--nc-text, #0d1117); font-family: 'Cabinet Grotesk', sans-serif !important; }
+  .mo-close {
+    width: 34px; height: 34px; border-radius: 9px;
+    background: none; border: none; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1rem; color: var(--muted);
+    transition: background .12s, color .12s;
+  }
+  .mo-close:hover { background: var(--surf-2); color: var(--txt); }
+
+  .mo-body { padding: 1.5rem; }
+  .mo-foot {
+    display: flex; justify-content: flex-end; gap: .65rem;
+    padding: 1rem 1.5rem; border-top: 1px solid var(--bdr);
+  }
+
+  /* Modal avatar */
+  .mo-av-wrap { display: flex; flex-direction: column; align-items: center; margin-bottom: 1.5rem; }
+  .mo-av {
+    width: 80px; height: 80px; border-radius: 50%;
+    background: linear-gradient(135deg, var(--teal), var(--cyan));
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.8rem; font-weight: 900; color: #fff;
+    border: 3px solid var(--surf); box-shadow: 0 4px 16px rgba(13,148,136,.3);
+    overflow: hidden; margin-bottom: .75rem;
+  }
+  .mo-av img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
+
+  .btn-photo {
+    display: inline-flex; align-items: center; gap: .35rem;
+    background: var(--surf-2); color: var(--txt-2);
+    border: 1px solid var(--bdr); border-radius: 10px;
+    padding: .4rem .9rem; font-size: .78rem; font-weight: 700;
+    cursor: pointer; font-family: inherit;
+    transition: background .12s;
+  }
+  .btn-photo:hover { background: var(--surf-3); }
+
+  /* Modal form */
+  .mo-field { margin-bottom: 1rem; }
+  .mo-field:last-child { margin-bottom: 0; }
+  .mo-label {
+    font-size: .75rem; font-weight: 800; text-transform: uppercase;
+    letter-spacing: .06em; color: var(--nc-text-muted, #6b7280);
+    margin-bottom: .4rem; display: block;
+    font-family: 'Cabinet Grotesk', sans-serif !important;
+  }
+  .mo-input {
+    width: 100%; border: 1.5px solid var(--bdr); border-radius: 11px;
+    padding: .65rem .9rem; font-size: .9rem; font-weight: 600;
+    color: var(--txt) !important;
+    background: var(--nc-surface, #ffffff) !important;
+    outline: none; font-family: 'Cabinet Grotesk', sans-serif !important;
+    transition: border-color .15s, box-shadow .15s;
+  }
+  [data-theme="dark"] .mo-input {
+    background: #1c2333 !important;
+    color: #e6edf3 !important;
+    border-color: #30363d !important;
+  }
+  .mo-input:focus {
+    border-color: var(--teal) !important;
+    box-shadow: 0 0 0 3px rgba(13,148,136,.2) !important;
+  }
+  .mo-input.err { border-color: var(--rose) !important; box-shadow: 0 0 0 3px rgba(244,63,94,.12) !important; }
+  .mo-input.ok  { border-color: var(--emerald) !important; }
+  .mo-err { font-size: .75rem; color: var(--rose); margin-top: .3rem; display: none; font-weight: 600; }
+  .mo-err.show { display: block; }
+</style>
+
+{% set steps = {
+  'Name filled':        (user.first_name and user.last_name),
+  'Email verified':     user.email,
+  'Profile picture':    user.profile_picture,
+  'Dietary preferences': user.dietary_preference
+} %}
+{% set done_count = steps.values() | select | list | length %}
+{% set pct = ((done_count / (steps | length)) * 100) | int %}
+
+<div class="pg">
+<div class="pg-layout">
+
+  <!-- ══ SIDEBAR ══ -->
+  <aside class="pg-sidebar">
+
+    <!-- Avatar card -->
+    <div class="av-card">
+      <div class="av-banner"></div>
+      <div class="av-body">
+        <svg width="0" height="0" style="position:absolute">
+          <defs>
+            <linearGradient id="crGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stop-color="#0d9488"/>
+              <stop offset="100%" stop-color="#06b6d4"/>
+            </linearGradient>
+          </defs>
+        </svg>
+
+        <div class="av-circle">
+          {% if user.profile_picture %}
+            <img src="{{ url_for('static', filename=user.profile_picture) }}" alt="avatar">
+          {% else %}
+            {{ (user.first_name or user.username or 'U')[0].upper() }}
+          {% endif %}
+        </div>
+
+        <div class="av-name">{{ user.first_name or '' }} {{ user.last_name or '' }}</div>
+        <div class="av-handle">@{{ user.username }}</div>
+        <div class="av-badges">
           {% for role in user.roles %}
-            <span class="badge bg-info">{{ role.name }}</span>
+            <span class="av-badge"><i class="fas fa-shield-halved"></i>{{ role.name }}</span>
           {% endfor %}
         </div>
 
-        <a href="{{ url_for('user_dashboard.edit_profile') }}" class="btn btn-primary btn-sm">
-          <i class="fas fa-edit"></i> Edit Profile
-        </a>
+        <!-- Completion ring -->
+        <div class="comp-ring-wrap">
+          <svg class="comp-ring-svg" viewBox="0 0 80 80">
+            <circle class="cr-bg"   cx="40" cy="40" r="35"/>
+            <circle class="cr-fill" cx="40" cy="40" r="35" data-pct="{{ pct }}"/>
+          </svg>
+          <div class="comp-ring-label">{{ pct }}% complete</div>
+        </div>
 
-      </div>
-    </div>
-  </div>
-
-  <div class="col-md-8">
-
-    <div class="card mb-3">
-      <div class="card-header">
-        <h5 class="mb-0">Profile Information</h5>
-      </div>
-      <div class="card-body">
-        <table class="table table-borderless mb-0">
-          <tr>
-            <th style="width:200px;">Email:</th>
-            <td>{{ user.email }}</td>
-          </tr>
-          <tr>
-            <th>Username:</th>
-            <td>{{ user.username }}</td>
-          </tr>
-          <tr>
-            <th>Member Since:</th>
-            <td>{{ user.created_at.strftime('%B %d, %Y') }}</td>
-          </tr>
-        </table>
+        <!-- Step checklist -->
+        <div class="step-mini">
+          {% set step_icons = {
+            'Name filled': 'fa-signature',
+            'Email verified': 'fa-at',
+            'Profile picture': 'fa-image',
+            'Dietary preferences': 'fa-utensils'
+          } %}
+          {% for label, done in steps.items() %}
+          <div class="step-mini-row {{ 'done' if done else '' }}">
+            <div class="step-mini-dot {{ 'done' if done else 'todo' }}">
+              <i class="fas {{ 'fa-check' if done else step_icons.get(label,'fa-circle') }}"></i>
+            </div>
+            {{ label }}
+          </div>
+          {% endfor %}
+        </div>
       </div>
     </div>
 
-    {% if user.is_user() %}
-    <div class="card">
-      <div class="card-header d-flex justify-content-between align-items-center">
-        <h5 class="mb-0">Dietary Preferences</h5>
-        <a href="{{ url_for('user_dashboard.dietary_preferences') }}" class="btn btn-sm btn-outline-primary">
-          <i class="fas fa-cog"></i> Manage
-        </a>
-      </div>
-      <div class="card-body">
-
-        {% if user.dietary_preference %}
-          <p><strong>Diet Type:</strong> {{ user.dietary_preference.diet_type or 'Not specified' }}</p>
-          <p><strong>Meals per Day:</strong> {{ user.dietary_preference.meals_per_day }}</p>
-          <p><strong>Daily Calorie Goal:</strong> {{ user.dietary_preference.calorie_goal or 'Not set' }}</p>
-        {% else %}
-          <p class="text-muted">No dietary preferences set yet.</p>
-          <a href="{{ url_for('user_dashboard.dietary_preferences') }}" class="btn btn-primary">
-            Set Dietary Preferences
-          </a>
-        {% endif %}
-
+    <!-- Quick stats (diet summary) -->
+    {% if user.dietary_preference %}
+    <div class="qs-card">
+      <div class="qs-title">Quick Stats</div>
+      <div class="qs-grid">
+        <div class="qs-item">
+          <div class="qs-val">{{ user.dietary_preference.calorie_goal or '—' }}</div>
+          <div class="qs-lbl">kcal goal</div>
+        </div>
+        <div class="qs-item">
+          <div class="qs-val">{{ user.dietary_preference.meals_per_day or '—' }}</div>
+          <div class="qs-lbl">meals/day</div>
+        </div>
+        <div class="qs-item">
+          <div class="qs-val">{{ user.dietary_preference.protein_goal or '—' }}</div>
+          <div class="qs-lbl">protein g</div>
+        </div>
+        <div class="qs-item">
+          <div class="qs-val">{{ user.dietary_preference.fat_goal or '—' }}</div>
+          <div class="qs-lbl">fat g</div>
+        </div>
       </div>
     </div>
     {% endif %}
 
+    <!-- Action buttons -->
+    <div class="sidebar-actions">
+      <button class="btn-solid" onclick="openModal()">
+        <i class="fas fa-pen-to-square"></i> Edit Profile
+      </button>
+      <a href="{{ url_for('user_dashboard.index') }}" class="btn-ghost">
+        <i class="fas fa-arrow-left"></i> Back to Dashboard
+      </a>
+    </div>
+
+  </aside>
+
+  <!-- ══ MAIN ══ -->
+  <main class="pg-main">
+
+    <!-- Profile info card -->
+    <div class="sc">
+      <div class="sc-stripe stripe-teal"></div>
+      <div class="sc-head">
+        <div class="sc-head-left">
+          <div class="sc-head-icon shi-teal"><i class="fas fa-id-card"></i></div>
+          <div>
+            <div class="sc-head-title">Profile Information</div>
+            <div class="sc-head-sub">Click ✏ on any field to edit inline</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="field-table">
+
+        <!-- First name -->
+        <div class="frow" id="frow-first_name">
+          <div class="frow-key">
+            <div class="frow-key-ico"><i class="fas fa-signature"></i></div>
+            First Name
+          </div>
+          <div class="frow-val" id="fval-first_name">{{ user.first_name or '—' }}</div>
+          <input class="frow-input" id="finp-first_name" type="text" value="{{ user.first_name or '' }}" placeholder="First name">
+          <button class="btn-edit-ico" onclick="startEdit('first_name')" title="Edit"><i class="fas fa-pencil"></i></button>
+          <button class="btn-save-inline" id="fsave-first_name" onclick="saveField('first_name')"><i class="fas fa-check"></i> Save</button>
+        </div>
+
+        <!-- Last name -->
+        <div class="frow" id="frow-last_name">
+          <div class="frow-key">
+            <div class="frow-key-ico"><i class="fas fa-signature"></i></div>
+            Last Name
+          </div>
+          <div class="frow-val" id="fval-last_name">{{ user.last_name or '—' }}</div>
+          <input class="frow-input" id="finp-last_name" type="text" value="{{ user.last_name or '' }}" placeholder="Last name">
+          <button class="btn-edit-ico" onclick="startEdit('last_name')" title="Edit"><i class="fas fa-pencil"></i></button>
+          <button class="btn-save-inline" id="fsave-last_name" onclick="saveField('last_name')"><i class="fas fa-check"></i> Save</button>
+        </div>
+
+        <!-- Email -->
+        <div class="frow" id="frow-email">
+          <div class="frow-key">
+            <div class="frow-key-ico"><i class="fas fa-at"></i></div>
+            Email
+          </div>
+          <div class="frow-val" id="fval-email">{{ user.email }}</div>
+          <input class="frow-input" id="finp-email" type="email" value="{{ user.email }}" placeholder="Email address">
+          <button class="btn-edit-ico" onclick="startEdit('email')" title="Edit"><i class="fas fa-pencil"></i></button>
+          <button class="btn-save-inline" id="fsave-email" onclick="saveField('email')"><i class="fas fa-check"></i> Save</button>
+        </div>
+
+        <!-- Username (read-only) -->
+        <div class="frow">
+          <div class="frow-key">
+            <div class="frow-key-ico"><i class="fas fa-user-tag"></i></div>
+            Username
+          </div>
+          <div class="frow-val">@{{ user.username }}</div>
+          <span></span>
+          <span style="font-size:.7rem;color:var(--faint);white-space:nowrap;">Read only</span>
+        </div>
+
+        <!-- Member since (read-only) -->
+        <div class="frow">
+          <div class="frow-key">
+            <div class="frow-key-ico"><i class="fas fa-calendar"></i></div>
+            Member Since
+          </div>
+          <div class="frow-val">{{ user.created_at.strftime('%B %d, %Y') }}</div>
+          <span></span><span></span>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Dietary preferences card -->
+    {% if user.is_user() %}
+    <div class="sc">
+      <div class="sc-stripe stripe-emerald"></div>
+      <div class="sc-head">
+        <div class="sc-head-left">
+          <div class="sc-head-icon shi-emerald"><i class="fas fa-utensils"></i></div>
+          <div>
+            <div class="sc-head-title">Dietary Preferences</div>
+            <div class="sc-head-sub">Your nutrition & food settings</div>
+          </div>
+        </div>
+        <a href="{{ url_for('user_dashboard.dietary_preferences') }}" class="btn-manage-sm">
+          <i class="fas fa-cog"></i> Manage
+        </a>
+      </div>
+
+      <div class="diet-body">
+        {% if user.dietary_preference %}
+          <div style="display:flex;flex-wrap:wrap;gap:.3rem;">
+            {% if user.dietary_preference.diet_type %}
+              <span class="dpill dp-teal"><i class="fas fa-leaf"></i>{{ user.dietary_preference.diet_type.replace('-',' ').title() }}</span>
+            {% endif %}
+            {% if user.dietary_preference.meals_per_day %}
+              <span class="dpill dp-cyan"><i class="fas fa-clock"></i>{{ user.dietary_preference.meals_per_day }} meals/day</span>
+            {% endif %}
+            {% if user.dietary_preference.calorie_goal %}
+              <span class="dpill dp-amber"><i class="fas fa-fire"></i>{{ user.dietary_preference.calorie_goal }} kcal</span>
+            {% endif %}
+            {% if user.dietary_preference.protein_goal %}
+              <span class="dpill dp-violet">{{ user.dietary_preference.protein_goal }}g protein</span>
+            {% endif %}
+            {% if user.dietary_preference.carbs_goal %}
+              <span class="dpill dp-cyan">{{ user.dietary_preference.carbs_goal }}g carbs</span>
+            {% endif %}
+            {% if user.dietary_preference.fat_goal %}
+              <span class="dpill dp-amber">{{ user.dietary_preference.fat_goal }}g fat</span>
+            {% endif %}
+          </div>
+
+          {% if user.dietary_preference.food_restrictions %}
+          <div style="margin-top:.85rem;">
+            <div style="font-size:.7rem;text-transform:uppercase;letter-spacing:.07em;font-weight:800;color:var(--faint);margin-bottom:.4rem;">Restrictions</div>
+            <div style="display:flex;flex-wrap:wrap;gap:.3rem;">
+              {% for r in user.dietary_preference.food_restrictions %}
+                <span style="background:var(--rose-l);color:#be123c;border:1.5px solid #fda4af;border-radius:99px;padding:.25rem .7rem;font-size:.74rem;font-weight:700;">No {{ r }}</span>
+              {% endfor %}
+            </div>
+          </div>
+          {% endif %}
+
+          {% if user.dietary_preference.preferred_cuisine %}
+          <div style="margin-top:.85rem;">
+            <div style="font-size:.7rem;text-transform:uppercase;letter-spacing:.07em;font-weight:800;color:var(--faint);margin-bottom:.4rem;">Preferred Cuisines</div>
+            <div style="display:flex;flex-wrap:wrap;gap:.3rem;">
+              {% for c in user.dietary_preference.preferred_cuisine %}
+                <span style="background:var(--violet-l);color:#5b21b6;border:1.5px solid #c4b5fd;border-radius:99px;padding:.25rem .7rem;font-size:.74rem;font-weight:700;"><i class='fas fa-globe'></i> {{ c }}</span>
+              {% endfor %}
+            </div>
+          </div>
+          {% endif %}
+
+        {% else %}
+          <div class="diet-empty">
+            <div class="diet-empty-ico"><i class="fas fa-seedling"></i></div>
+            <p>No dietary preferences set yet. Add yours to unlock personalised nutrition insights.</p>
+            <a href="{{ url_for('user_dashboard.dietary_preferences') }}" class="btn-set">
+              <i class="fas fa-plus"></i> Set Up Now
+            </a>
+          </div>
+        {% endif %}
+      </div>
+    </div>
+    {% endif %}
+
+  </main>
+</div>
+</div>
+
+<!-- ══ EDIT MODAL ══ -->
+<div class="mo" id="editModal" onclick="closeMoBackdrop(event)">
+  <div class="mo-box">
+    <div class="mo-head">
+      <div class="mo-head-left">
+        <div class="mo-head-icon"><i class="fas fa-pen-to-square"></i></div>
+        <div class="mo-title">Edit Profile</div>
+      </div>
+      <button class="mo-close" onclick="closeModal()"><i class="fas fa-xmark"></i></button>
+    </div>
+
+    <form method="POST" enctype="multipart/form-data"
+          action="{{ url_for('user_dashboard.edit_profile') }}"
+          id="moForm" novalidate>
+      <div class="mo-body">
+
+        <!-- Avatar preview -->
+        <div class="mo-av-wrap">
+          <div class="mo-av" id="moAv">
+            {% if user.profile_picture %}
+              <img src="{{ url_for('static', filename=user.profile_picture) }}" alt="avatar">
+            {% else %}
+              {{ (user.first_name or user.username or 'U')[0].upper() }}
+            {% endif %}
+          </div>
+          <label class="btn-photo" style="cursor:pointer;">
+            <i class="fas fa-camera"></i> Change Photo
+            <input type="file" name="profile_picture" accept="image/*" style="display:none" id="photoInp" onchange="previewPhoto(this)">
+          </label>
+          <div style="font-size:.72rem;color:var(--faint);margin-top:.3rem;">PNG / JPG / GIF · max 5 MB</div>
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:.85rem;">
+          <div class="mo-field">
+            <label class="mo-label">First Name</label>
+            <input class="mo-input" id="mo-fn" name="first_name" value="{{ user.first_name }}" required>
+            <div class="mo-err" id="mo-fn-err">Required</div>
+          </div>
+          <div class="mo-field">
+            <label class="mo-label">Last Name</label>
+            <input class="mo-input" id="mo-ln" name="last_name" value="{{ user.last_name }}" required>
+            <div class="mo-err" id="mo-ln-err">Required</div>
+          </div>
+        </div>
+        <div class="mo-field" style="margin-top:.85rem;">
+          <label class="mo-label">Email Address</label>
+          <input class="mo-input" id="mo-em" name="email" type="email" value="{{ user.email }}" required>
+          <div class="mo-err" id="mo-em-err">Enter a valid email</div>
+        </div>
+
+      </div>
+      <div class="mo-foot">
+        <button type="button" class="btn-ghost" onclick="closeModal()" style="padding:.55rem 1rem;">
+          <i class="fas fa-times"></i> Cancel
+        </button>
+        <button type="submit" class="btn-solid" style="padding:.55rem 1.3rem;" onclick="return validateModal()">
+          <i class="fas fa-save"></i> Save Changes
+        </button>
+      </div>
+    </form>
   </div>
 </div>
+
+<script>
+  /* ── Ring gauge ── */
+  document.addEventListener('DOMContentLoaded', () => {
+    const ring = document.querySelector('.cr-fill');
+    if (ring) {
+      const pct = parseInt(ring.dataset.pct) || 0;
+      const circ = 220;
+      ring.style.strokeDashoffset = circ;
+      setTimeout(() => { ring.style.strokeDashoffset = circ - (pct / 100) * circ; }, 150);
+    }
+  });
+
+  /* ── Modal ── */
+  function openModal()  { document.getElementById('editModal').classList.add('open'); }
+  function closeModal() { document.getElementById('editModal').classList.remove('open'); }
+  function closeMoBackdrop(e) { if (e.target === document.getElementById('editModal')) closeModal(); }
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+
+  function previewPhoto(input) {
+    if (!input.files || !input.files[0]) return;
+    const url = URL.createObjectURL(input.files[0]);
+    document.getElementById('moAv').innerHTML = `<img src="${url}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`;
+  }
+
+  /* ── Inline edit ── */
+  function startEdit(f) {
+    document.getElementById('fval-' + f).classList.add('hide');
+    document.getElementById('finp-' + f).classList.add('show');
+    document.getElementById('fsave-' + f).classList.add('show');
+    document.getElementById('finp-' + f).focus();
+  }
+
+  function saveField(f) {
+    const inp = document.getElementById('finp-' + f);
+    const val = inp.value.trim();
+    if (!val) { inp.classList.add('err'); return; }
+    inp.classList.remove('err');
+
+    const fd = new FormData();
+    fd.append('first_name', f === 'first_name' ? val : (document.getElementById('fval-first_name').textContent.trim() || ''));
+    fd.append('last_name',  f === 'last_name'  ? val : (document.getElementById('fval-last_name').textContent.trim()  || ''));
+    fd.append('email',      f === 'email'       ? val : (document.getElementById('fval-email').textContent.trim()      || ''));
+
+    fetch('{{ url_for("user_dashboard.edit_profile") }}', {
+      method: 'POST',
+      headers: { 'X-CSRFToken': getCsrf() },
+      body: fd
+    })
+    .then(() => applyInlineSave(f, val))
+    .catch(() => applyInlineSave(f, val));
+  }
+
+  function applyInlineSave(f, val) {
+    const v = document.getElementById('fval-' + f);
+    v.textContent = val;
+    v.classList.remove('hide');
+    document.getElementById('finp-' + f).classList.remove('show');
+    document.getElementById('fsave-' + f).classList.remove('show');
+    showToast('✓ Saved');
+  }
+
+  function getCsrf() {
+    const m = document.cookie.match(/csrf_token=([^;]+)/);
+    return m ? m[1] : '';
+  }
+
+  function showToast(msg) {
+    let t = document.getElementById('pg-toast');
+    if (!t) {
+      t = document.createElement('div');
+      t.id = 'pg-toast';
+      t.style.cssText = 'position:fixed;bottom:5.5rem;right:1.5rem;z-index:9999;background:#0d9488;color:#fff;border-radius:12px;padding:.6rem 1.25rem;font-size:.83rem;font-weight:800;box-shadow:0 4px 20px rgba(0,0,0,.15);transition:opacity .3s,transform .3s;';
+      document.body.appendChild(t);
+    }
+    t.textContent = msg;
+    t.style.opacity = '1'; t.style.transform = 'translateY(0)';
+    clearTimeout(t._h);
+    t._h = setTimeout(() => { t.style.opacity = '0'; t.style.transform = 'translateY(4px)'; }, 2000);
+  }
+
+  /* ── Modal validation ── */
+  function validateModal() {
+    let ok = true;
+    const checks = [
+      { el: document.getElementById('mo-fn'), err: document.getElementById('mo-fn-err'), test: v => v.trim() },
+      { el: document.getElementById('mo-ln'), err: document.getElementById('mo-ln-err'), test: v => v.trim() },
+      { el: document.getElementById('mo-em'), err: document.getElementById('mo-em-err'), test: v => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v.trim()) }
+    ];
+    checks.forEach(({ el, err, test }) => {
+      if (!test(el.value)) {
+        el.classList.add('err'); el.classList.remove('ok');
+        err.classList.add('show'); ok = false;
+      } else {
+        el.classList.remove('err'); el.classList.add('ok');
+        err.classList.remove('show');
+      }
+    });
+    return ok;
+  }
+</script>
 {% endblock %}

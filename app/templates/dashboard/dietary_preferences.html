@@ -1,146 +1,644 @@
 {% extends "base.html" %}
-{% block title %}Dietary Preferences{% endblock %}
+{% block title %}Dietary Preferences · NutriConnect{% endblock %}
+
+{% block extra_css %}
+<link href="https://fonts.googleapis.com/css2?family=Cabinet+Grotesk:wght@400;500;700;800;900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+{% endblock %}
 
 {% block content %}
+<style>
+  /* ══ Force font everywhere ══ */
+  body, button, input, label, select, textarea {
+    font-family: 'Cabinet Grotesk', sans-serif !important;
+  }
+
+  /* ══ Tokens ══ */
+  .dp-page {
+    --teal:    #0d9488; --teal-d: #0f766e; --teal-l: #ccfbf1;
+    --cyan:    #06b6d4; --cyan-l: #cffafe;
+    --emerald: #10b981; --emerald-d: #059669; --emerald-l: #d1fae5;
+    --lime:    #84cc16; --lime-l: #ecfccb;
+    --amber:   #f59e0b; --amber-l: #fef3c7;
+    --rose:    #f43f5e; --rose-l:  #ffe4e6;
+    --violet:  #7c3aed; --violet-l:#ede9fe;
+    --sky:     #0ea5e9; --sky-l:   #e0f2fe;
+
+    --surf:   var(--nc-surface,   #ffffff);
+    --surf-2: var(--nc-surface-2, #f7f9fc);
+    --surf-3: var(--nc-surface-3, #eef2f7);
+    --bdr:    var(--nc-border,    #e2e8f0);
+    --txt:    var(--nc-text,      #0d1117);
+    --txt-2:  var(--nc-text-2,    #374151);
+    --muted:  var(--nc-text-muted,#6b7280);
+    --faint:  var(--nc-text-faint,#9ca3af);
+    --r: 18px;
+  }
+
+  /* ══ Page header banner ══ */
+  .dp-banner {
+    background: var(--nc-text, #0d1117);
+    border-radius: 22px;
+    padding: 2rem 2.5rem;
+    margin-bottom: 1.5rem;
+    position: relative; overflow: hidden; isolation: isolate;
+    display: flex; align-items: center; justify-content: space-between; gap: 1.5rem;
+    flex-wrap: wrap;
+  }
+  .dp-banner::before {
+    content: ''; position: absolute; inset: 0; z-index: -2;
+    background:
+      radial-gradient(ellipse 65% 80% at 0% 50%,  rgba(13,148,136,.45) 0%, transparent 55%),
+      radial-gradient(ellipse 45% 70% at 100% 15%, rgba(132,204,22,.3)  0%, transparent 55%),
+      radial-gradient(ellipse 40% 50% at 55% 100%, rgba(6,182,212,.25)  0%, transparent 50%);
+  }
+  .dp-banner::after {
+    content: ''; position: absolute; inset: 0; z-index: -1;
+    background-image: radial-gradient(circle, rgba(255,255,255,.1) 1px, transparent 1px);
+    background-size: 24px 24px;
+  }
+ 
+  .dp-banner-eyebrow {
+    display: inline-flex; align-items: center; gap: .4rem;
+    background: rgba(255,255,255,.1); border: 1px solid rgba(255,255,255,.15);
+    border-radius: 99px; padding: .25rem .85rem;
+    font-size: .7rem; font-weight: 800; letter-spacing: .08em;
+    text-transform: uppercase; color: rgba(255,255,255,.7); margin-bottom: .65rem;
+  }
+  .dp-banner-title {
+    font-size: 1.7rem; font-weight: 900; color: #fff;
+    letter-spacing: -.04em; line-height: 1.1; margin: 0 0 .35rem;
+  }
+  .dp-banner-title span {
+    background: linear-gradient(135deg, #5eead4, #a5f3fc);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+  }
+  .dp-banner-sub { color: rgba(255,255,255,.5); font-size: .85rem; margin: 0; }
+
+  .dp-banner-stats {
+    display: flex; gap: 1.5rem; flex-wrap: wrap;
+  }
+  .dp-bstat {
+    display: flex; flex-direction: column; gap: .15rem;
+    border-left: 2px solid rgba(255,255,255,.15); padding-left: .9rem;
+  }
+  .dp-bstat-val {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 1.2rem; font-weight: 600; color: #fff; line-height: 1;
+  }
+  .dp-bstat-val.c-teal  { color: #5eead4; }
+  .dp-bstat-val.c-lime  { color: #bef264; }
+  .dp-bstat-val.c-amber { color: #fcd34d; }
+  .dp-bstat-lbl { font-size: .62rem; color: rgba(255,255,255,.38); text-transform: uppercase; letter-spacing: .08em; font-weight: 700; }
+
+  /* ══ Progress stepper ══ */
+  .dp-stepper {
+    display: flex; align-items: center; gap: 0;
+    background: var(--surf); border: 1px solid var(--bdr);
+    border-radius: var(--r); padding: 1rem 1.5rem;
+    margin-bottom: 1.5rem; overflow-x: auto;
+    box-shadow: 0 1px 3px rgba(0,0,0,.04);
+  }
+  .dp-step {
+    display: flex; align-items: center; gap: .5rem; flex-shrink: 0;
+    cursor: pointer; padding: .3rem .5rem; border-radius: 10px;
+    transition: background .12s;
+  }
+  .dp-step:hover { background: var(--surf-2); }
+  .dp-step-num {
+    width: 26px; height: 26px; border-radius: 50%;
+    background: var(--surf-3); border: 1.5px solid var(--bdr);
+    display: flex; align-items: center; justify-content: center;
+    font-size: .72rem; font-weight: 800; color: var(--muted);
+    transition: background .2s, border-color .2s, color .2s;
+    flex-shrink: 0;
+  }
+  .dp-step.active .dp-step-num { background: var(--teal); border-color: var(--teal); color: #fff; }
+  .dp-step.done   .dp-step-num { background: var(--teal-l); border-color: var(--teal); color: var(--teal); }
+  .dp-step-lbl { font-size: .78rem; font-weight: 700; color: var(--muted); white-space: nowrap; }
+  .dp-step.active .dp-step-lbl { color: var(--teal); }
+  .dp-step.done   .dp-step-lbl { color: var(--teal-d); }
+  .dp-step-line { flex: 1; height: 1.5px; background: var(--bdr); margin: 0 .25rem; min-width: 20px; }
+  .dp-step-line.done { background: var(--teal-l); }
+
+  /* ══ Section cards ══ */
+  .dp-card {
+    background: var(--surf);
+    border: 1px solid var(--bdr);
+    border-radius: var(--r);
+    overflow: hidden;
+    margin-bottom: 1rem;
+    box-shadow: 0 1px 3px rgba(0,0,0,.04), 0 4px 12px rgba(0,0,0,.04);
+    animation: rise .4s cubic-bezier(.16,1,.3,1) both;
+  }
+  @keyframes rise { from{opacity:0;transform:translateY(14px)} to{opacity:1;transform:translateY(0)} }
+  .dp-card:nth-child(1){animation-delay:.05s}
+  .dp-card:nth-child(2){animation-delay:.1s}
+  .dp-card:nth-child(3){animation-delay:.15s}
+  .dp-card:nth-child(4){animation-delay:.2s}
+  .dp-card:nth-child(5){animation-delay:.25s}
+  .dp-card:nth-child(6){animation-delay:.3s}
+
+  /* Left accent stripe */
+  .dp-card-stripe { height: 4px; }
+  .s-teal    { background: linear-gradient(90deg, var(--teal), var(--cyan)); }
+  .s-rose    { background: linear-gradient(90deg, var(--rose), #fb923c); }
+  .s-amber   { background: linear-gradient(90deg, var(--amber), var(--lime)); }
+  .s-violet  { background: linear-gradient(90deg, var(--violet), var(--sky)); }
+  .s-emerald { background: linear-gradient(90deg, var(--emerald), var(--teal)); }
+  .s-cyan    { background: linear-gradient(90deg, var(--cyan), var(--sky)); }
+
+  .dp-card-head {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 1rem 1.4rem; border-bottom: 1px solid var(--bdr);
+  }
+  .dp-card-head-left { display: flex; align-items: center; gap: .65rem; }
+  .dp-head-icon {
+    width: 34px; height: 34px; border-radius: 10px;
+    display: flex; align-items: center; justify-content: center; font-size: .85rem;
+    flex-shrink: 0;
+  }
+  .hi-teal    { background: var(--teal-l);    color: var(--teal); }
+  .hi-rose    { background: var(--rose-l);    color: var(--rose); }
+  .hi-amber   { background: var(--amber-l);   color: #d97706; }
+  .hi-violet  { background: var(--violet-l);  color: var(--violet); }
+  .hi-emerald { background: var(--emerald-l); color: var(--emerald-d); }
+  .hi-cyan    { background: var(--cyan-l);    color: #0e7490; }
+
+  .dp-card-title { font-size: .88rem; font-weight: 800; color: var(--txt); letter-spacing: -.02em; }
+  .dp-card-sub   { font-size: .7rem;  font-weight: 500; color: var(--muted); margin-top: .05rem; }
+  .dp-card-badge {
+    font-size: .7rem; font-weight: 700; padding: .2rem .65rem;
+    border-radius: 99px; background: var(--surf-2); color: var(--muted);
+    border: 1px solid var(--bdr);
+  }
+
+  .dp-card-body { padding: 1.25rem 1.4rem; }
+
+  /* ══ Diet type radio grid ══ */
+  .diet-type-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: .6rem;
+  }
+  @media (max-width: 640px) { .diet-type-grid { grid-template-columns: repeat(2, 1fr); } }
+
+  .dt-opt input[type=radio] { display: none; }
+  .dt-opt label {
+    display: flex; flex-direction: column; align-items: center;
+    padding: 1rem .5rem; border-radius: 14px;
+    border: 1.5px solid var(--bdr);
+    cursor: pointer; text-align: center;
+    background: var(--surf-2);
+    transition: border-color .15s, background .15s, transform .12s, box-shadow .15s;
+    gap: .4rem; min-height: 88px; justify-content: center;
+    position: relative; overflow: hidden;
+  }
+  .dt-opt label::before {
+    content: ''; position: absolute; inset: 0;
+    background: linear-gradient(135deg, rgba(13,148,136,.06), rgba(6,182,212,.06));
+    opacity: 0; transition: opacity .15s;
+  }
+  .dt-opt label:hover { border-color: var(--teal); transform: translateY(-2px); box-shadow: 0 4px 16px rgba(13,148,136,.15); }
+  .dt-opt label:hover::before { opacity: 1; }
+  .dt-opt input:checked + label {
+    border-color: var(--teal); background: var(--teal-l);
+    box-shadow: 0 4px 16px rgba(13,148,136,.2);
+    transform: translateY(-1px);
+  }
+  .dt-opt input:checked + label::before { opacity: 1; }
+  .dt-emoji { font-size: 1.6rem; line-height: 1; }
+  .dt-label { font-size: .78rem; font-weight: 800; color: var(--txt-2); letter-spacing: -.01em; }
+  .dt-opt input:checked + label .dt-label { color: var(--teal-d); }
+
+  /* Selected tick */
+  .dt-opt input:checked + label::after {
+    content: '✓';
+    position: absolute; top: 6px; right: 8px;
+    font-size: .65rem; font-weight: 900; color: var(--teal);
+    width: 16px; height: 16px; background: var(--surf);
+    border-radius: 50%; display: flex; align-items: center; justify-content: center;
+    line-height: 16px; text-align: center;
+    box-shadow: 0 1px 4px rgba(0,0,0,.1);
+  }
+
+  /* ══ Toggle chips ══ */
+  .chip-row { display: flex; flex-wrap: wrap; gap: .45rem; }
+  .tc input[type=checkbox] { display: none; }
+  .tc label {
+    display: inline-flex; align-items: center; gap: .35rem;
+    padding: .38rem .9rem; border-radius: 99px;
+    border: 1.5px solid var(--bdr);
+    cursor: pointer; font-size: .8rem; font-weight: 700;
+    background: var(--surf-2); color: var(--txt-2);
+    transition: all .15s; user-select: none;
+  }
+  .tc label:hover { border-color: var(--teal); color: var(--teal); background: var(--teal-l); }
+
+  /* restriction (blue) */
+  .tc.restriction input:checked + label { background: var(--sky-l); color: #0369a1; border-color: #7dd3fc; }
+  /* allergy (rose) */
+  .tc.allergy input:checked + label    { background: var(--rose-l); color: #be123c; border-color: #fda4af; }
+  /* cuisine (violet) */
+  .tc.cuisine input:checked + label    { background: var(--violet-l); color: #5b21b6; border-color: #c4b5fd; }
+
+  /* ══ Macro goal inputs ══ */
+  .macro-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: .85rem; }
+  @media (max-width: 500px) { .macro-grid { grid-template-columns: 1fr; } }
+
+  
+  .mg-label {
+    display: flex; align-items: center; gap: .4rem;
+    font-size: .7rem; font-weight: 800; text-transform: uppercase;
+    letter-spacing: .06em; color: var(--muted); margin-bottom: .4rem;
+  }
+  .mg-label-dot {
+    width: 8px; height: 8px; border-radius: 50%;
+  }
+  .dot-amber  { background: var(--amber); }
+  .dot-teal   { background: var(--teal); }
+  .dot-violet { background: var(--violet); }
+  .dot-rose   { background: var(--rose); }
+  .dot-cyan   { background: var(--cyan); }
+
+  .mg-input-wrap { position: relative; }
+  .mg-input {
+    width: 100%; border: 1.5px solid var(--bdr); border-radius: 11px;
+    padding: .6rem .9rem; font-size: .92rem; font-weight: 700;
+    color: var(--txt) !important; background: var(--surf-2) !important;
+    outline: none; font-family: 'Cabinet Grotesk', sans-serif !important;
+    transition: border-color .15s, box-shadow .15s;
+    -moz-appearance: textfield;
+  }
+  .mg-input::-webkit-inner-spin-button,
+  .mg-input::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+  [data-theme="dark"] .mg-input { background: #1c2333 !important; color: #e6edf3 !important; border-color: #30363d !important; }
+  .mg-input:focus { border-color: var(--teal) !important; background: var(--surf) !important; box-shadow: 0 0 0 3px rgba(13,148,136,.18) !important; }
+  .mg-input.is-invalid { border-color: var(--rose) !important; box-shadow: 0 0 0 3px rgba(244,63,94,.12) !important; }
+  .mg-input.is-warn    { border-color: var(--amber) !important; box-shadow: 0 0 0 3px rgba(245,158,11,.12) !important; }
+  .mg-input.is-valid   { border-color: var(--emerald) !important; }
+
+  .mg-unit {
+    position: absolute; right: .85rem; top: 50%; transform: translateY(-50%);
+    font-size: .72rem; font-weight: 700; color: var(--faint);
+    font-family: 'JetBrains Mono', monospace;
+    pointer-events: none;
+  }
+
+  .mg-msg { font-size: .74rem; margin-top: .3rem; font-weight: 600; display: none; }
+  .mg-msg.error { display: flex; align-items: center; gap: .3rem; color: var(--rose); }
+  .mg-msg.warn  { display: flex; align-items: center; gap: .3rem; color: var(--amber); }
+
+  /* ══ Text inputs (food lists) ══ */
+  .text-input {
+    width: 100%; border: 1.5px solid var(--bdr); border-radius: 11px;
+    padding: .6rem .9rem; font-size: .88rem; font-weight: 600;
+    color: var(--txt) !important; background: var(--surf-2) !important;
+    outline: none; font-family: 'Cabinet Grotesk', sans-serif !important;
+    transition: border-color .15s, box-shadow .15s;
+  }
+  [data-theme="dark"] .text-input { background: #1c2333 !important; color: #e6edf3 !important; border-color: #30363d !important; }
+  .text-input:focus { border-color: var(--teal) !important; background: var(--surf) !important; box-shadow: 0 0 0 3px rgba(13,148,136,.18) !important; }
+  .text-input::placeholder { color: var(--faint) !important; font-weight: 500; }
+
+  /* ══ Footer actions ══ */
+  .dp-footer {
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 1rem; padding: 1.25rem 0; flex-wrap: wrap;
+  }
+  .btn-cancel {
+    display: inline-flex; align-items: center; gap: .4rem;
+    background: var(--surf-2); color: var(--txt-2);
+    border: 1.5px solid var(--bdr); border-radius: 12px;
+    padding: .65rem 1.4rem; font-size: .88rem; font-weight: 800;
+    cursor: pointer; text-decoration: none; font-family: inherit;
+    transition: background .15s, border-color .15s;
+  }
+  .btn-cancel:hover { background: var(--surf-3); border-color: var(--nc-border-2, #cbd5e1); color: var(--txt); }
+  .btn-save {
+    display: inline-flex; align-items: center; gap: .45rem;
+    background: var(--teal); color: #fff; border: none;
+    border-radius: 12px; padding: .7rem 1.8rem; font-size: .88rem; font-weight: 800;
+    cursor: pointer; font-family: inherit; letter-spacing: -.01em;
+    box-shadow: 0 2px 8px rgba(13,148,136,.3), 0 1px 2px rgba(13,148,136,.2);
+    transition: background .15s, transform .12s, box-shadow .15s;
+  }
+  .btn-save:hover { background: var(--teal-d); transform: translateY(-1px); box-shadow: 0 5px 20px rgba(13,148,136,.35); }
+</style>
+
+<div class="dp-page">
 <div class="row justify-content-center">
-  <div class="col-lg-10">
-    <div class="card">
+<div class="col-xl-8 col-lg-10">
 
-      <div class="card-header">
-        <h4 class="mb-0">
-          <i class="fas fa-utensils"></i> Dietary Preferences
-        </h4>
-        <small class="text-muted">Only available for regular users</small>
+  <!-- ══ BANNER ══ -->
+  <div class="dp-banner">
+    <div class="dp-banner-left">
+      <div class="dp-banner-eyebrow">🥗 Nutrition Settings</div>
+      <div class="dp-banner-title">Dietary <span>Preferences</span></div>
+      <p class="dp-banner-sub">Personalise your nutrition profile · Regular users only</p>
+    </div>
+    <div class="dp-banner-stats">
+      <div class="dp-bstat">
+        <span class="dp-bstat-val c-teal">{{ preference.diet_type.replace('-',' ').title() if preference and preference.diet_type else '—' }}</span>
+        <span class="dp-bstat-lbl">Diet Plan</span>
       </div>
-
-      <div class="card-body">
-        <form method="POST" action="{{ url_for('user_dashboard.dietary_preferences') }}">
-
-          <div class="mb-4">
-            <label class="form-label fw-bold">Diet Type</label>
-            <select class="form-select" name="diet_type">
-              <option value="">Select</option>
-              {% for t in ['regular','vegetarian','vegan','keto','paleo','mediterranean','low-carb','gluten-free'] %}
-              <option value="{{ t }}" {% if preference and preference.diet_type == t %}selected{% endif %}>
-                {{ t.replace('-', ' ').title() }}
-              </option>
-              {% endfor %}
-            </select>
-          </div>
-
-          <hr>
-
-          <div class="mb-4">
-            <label class="form-label fw-bold">Food Restrictions</label>
-            <div class="row">
-              {% set restrictions = ['dairy','gluten','soy','eggs','fish','meat','shellfish','nuts'] %}
-              {% for r in restrictions %}
-              <div class="col-md-3 col-6 mb-2">
-                <div class="form-check">
-                  <input class="form-check-input" type="checkbox" name="food_restrictions" value="{{ r }}"
-                         {% if preference and preference.food_restrictions and r in preference.food_restrictions %}checked{% endif %}>
-                  <label class="form-check-label">{{ r.title() }}</label>
-                </div>
-              </div>
-              {% endfor %}
-            </div>
-          </div>
-
-          <hr>
-
-          <div class="mb-4">
-            <label class="form-label fw-bold">Allergies</label>
-            <div class="row">
-              {% set alls = ['peanuts','tree nuts','shellfish','wheat','soy','eggs','milk','fish'] %}
-              {% for a in alls %}
-              <div class="col-md-3 col-6 mb-2">
-                <div class="form-check">
-                  <input class="form-check-input" type="checkbox" name="allergies" value="{{ a }}"
-                         {% if preference and preference.allergies and a in preference.allergies %}checked{% endif %}>
-                  <label class="form-check-label">{{ a.title() }}</label>
-                </div>
-              </div>
-              {% endfor %}
-            </div>
-          </div>
-
-          <hr>
-
-          <div class="mb-4">
-            <label class="form-label">Meals per Day</label>
-            <input class="form-control" type="number" name="meals_per_day" min="1" max="10"
-                   value="{{ preference.meals_per_day if preference else 3 }}">
-          </div>
-
-          <hr>
-
-          <div class="mb-4">
-            <label class="form-label fw-bold">Preferred Cuisine</label>
-            <div class="row">
-              {% set cuisines = ['Italian','Asian','Mediterranean','Mexican','American','Indian','Chinese','Japanese'] %}
-              {% for c in cuisines %}
-              <div class="col-md-3 col-6 mb-2">
-                <div class="form-check">
-                  <input class="form-check-input" type="checkbox" name="preferred_cuisine" value="{{ c }}"
-                         {% if preference and preference.preferred_cuisine and c in preference.preferred_cuisine %}checked{% endif %}>
-                  <label class="form-check-label">{{ c }}</label>
-                </div>
-              </div>
-              {% endfor %}
-            </div>
-          </div>
-
-          <hr>
-
-          <div class="row">
-            <div class="col-md-6 mb-3">
-              <label class="form-label">Calorie Goal</label>
-              <input class="form-control" type="number" name="calorie_goal" min="0"
-                     value="{{ preference.calorie_goal if preference else '' }}">
-            </div>
-            <div class="col-md-6 mb-3">
-              <label class="form-label">Protein Goal (g)</label>
-              <input class="form-control" type="number" step="0.1" min="0"
-                     name="protein_goal" value="{{ preference.protein_goal if preference else '' }}">
-            </div>
-            <div class="col-md-6 mb-3">
-              <label class="form-label">Carbs Goal (g)</label>
-              <input class="form-control" type="number" step="0.1" min="0"
-                     name="carbs_goal" value="{{ preference.carbs_goal if preference else '' }}">
-            </div>
-            <div class="col-md-6 mb-3">
-              <label class="form-label">Fat Goal (g)</label>
-              <input class="form-control" type="number" step="0.1" min="0"
-                     name="fat_goal" value="{{ preference.fat_goal if preference else '' }}">
-            </div>
-          </div>
-
-          <hr>
-
-          <div class="mb-3">
-            <label class="form-label">Foods to Avoid (comma separated)</label>
-            <input class="form-control" name="avoid_foods"
-                   value="{{ preference.avoid_foods|join(', ') if preference and preference.avoid_foods else '' }}">
-          </div>
-
-          <div class="mb-3">
-            <label class="form-label">Favorite Foods (comma separated)</label>
-            <input class="form-control" name="favorite_foods"
-                   value="{{ preference.favorite_foods|join(', ') if preference and preference.favorite_foods else '' }}">
-          </div>
-
-          <div class="d-flex justify-content-between mt-4">
-            <a href="{{ url_for('user_dashboard.view_profile') }}" class="btn btn-secondary">
-              <i class="fas fa-times"></i> Cancel
-            </a>
-            <button class="btn btn-primary" type="submit">
-              <i class="fas fa-save"></i> Save Preferences
-            </button>
-          </div>
-
-        </form>
+      <div class="dp-bstat">
+        <span class="dp-bstat-val c-lime">{{ preference.calorie_goal if preference and preference.calorie_goal else '—' }}</span>
+        <span class="dp-bstat-lbl">kcal Goal</span>
+      </div>
+      <div class="dp-bstat">
+        <span class="dp-bstat-val c-amber">{{ preference.meals_per_day if preference and preference.meals_per_day else '—' }}</span>
+        <span class="dp-bstat-lbl">Meals/Day</span>
       </div>
     </div>
   </div>
+
+  <form method="POST" action="{{ url_for('user_dashboard.dietary_preferences') }}"
+        id="dpForm" novalidate>
+
+    <!-- ══ 1. DIET TYPE ══ -->
+    <div class="dp-card">
+      <div class="dp-card-stripe s-teal"></div>
+      <div class="dp-card-head">
+        <div class="dp-card-head-left">
+          <div class="dp-head-icon hi-teal"><i class="fas fa-leaf"></i></div>
+          <div>
+            <div class="dp-card-title">Diet Type</div>
+            <div class="dp-card-sub">Choose the eating style that fits your lifestyle</div>
+          </div>
+        </div>
+        <span class="dp-card-badge">Pick one</span>
+      </div>
+      <div class="dp-card-body">
+        {% set diet_icons = {
+          'regular':'🍽️','vegetarian':'🥦','vegan':'🌱','keto':'🥑',
+          'paleo':'🥩','mediterranean':'🫒','low-carb':'🥗','gluten-free':'🌾'
+        } %}
+        <div class="diet-type-grid">
+          {% for t in ['regular','vegetarian','vegan','keto','paleo','mediterranean','low-carb','gluten-free'] %}
+          <div class="dt-opt">
+            <input type="radio" name="diet_type" id="dt-{{ t }}" value="{{ t }}"
+                   {% if preference and preference.diet_type == t %}checked{% endif %}>
+            <label for="dt-{{ t }}">
+              <span class="dt-emoji">{{ diet_icons.get(t,'🍴') }}</span>
+              <span class="dt-label">{{ t.replace('-',' ').title() }}</span>
+            </label>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ 2. FOOD RESTRICTIONS ══ -->
+    <div class="dp-card">
+      <div class="dp-card-stripe s-cyan"></div>
+      <div class="dp-card-head">
+        <div class="dp-card-head-left">
+          <div class="dp-head-icon hi-cyan"><i class="fas fa-ban"></i></div>
+          <div>
+            <div class="dp-card-title">Food Restrictions</div>
+            <div class="dp-card-sub">Foods you avoid by choice or preference</div>
+          </div>
+        </div>
+        <span class="dp-card-badge">Multi-select</span>
+      </div>
+      <div class="dp-card-body">
+        <div class="chip-row">
+          {% for r in ['dairy','gluten','soy','eggs','fish','meat','shellfish','nuts'] %}
+          <div class="tc restriction">
+            <input type="checkbox" id="fr-{{ r }}" name="food_restrictions" value="{{ r }}"
+                   {% if preference and preference.food_restrictions and r in preference.food_restrictions %}checked{% endif %}>
+            <label for="fr-{{ r }}">{{ r.title() }}</label>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ 3. ALLERGIES ══ -->
+    <div class="dp-card">
+      <div class="dp-card-stripe s-rose"></div>
+      <div class="dp-card-head">
+        <div class="dp-card-head-left">
+          <div class="dp-head-icon hi-rose"><i class="fas fa-triangle-exclamation"></i></div>
+          <div>
+            <div class="dp-card-title">Allergies</div>
+            <div class="dp-card-sub">Ingredients that cause allergic reactions</div>
+          </div>
+        </div>
+        <span class="dp-card-badge" style="color:#be123c;background:var(--rose-l);border-color:#fda4af;">⚠ Important</span>
+      </div>
+      <div class="dp-card-body">
+        <div class="chip-row">
+          {% for a in ['peanuts','tree nuts','shellfish','wheat','soy','eggs','milk','fish'] %}
+          <div class="tc allergy">
+            <input type="checkbox" id="al-{{ a }}" name="allergies" value="{{ a }}"
+                   {% if preference and preference.allergies and a in preference.allergies %}checked{% endif %}>
+            <label for="al-{{ a }}">{{ a.title() }}</label>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ 4. CUISINE ══ -->
+    <div class="dp-card">
+      <div class="dp-card-stripe s-violet"></div>
+      <div class="dp-card-head">
+        <div class="dp-card-head-left">
+          <div class="dp-head-icon hi-violet"><i class="fas fa-globe"></i></div>
+          <div>
+            <div class="dp-card-title">Preferred Cuisines</div>
+            <div class="dp-card-sub">Culinary styles you enjoy most</div>
+          </div>
+        </div>
+        <span class="dp-card-badge">Multi-select</span>
+      </div>
+      <div class="dp-card-body">
+        <div class="chip-row">
+          {% for c in ['Italian','Asian','Mediterranean','Mexican','American','Indian','Chinese','Japanese'] %}
+          <div class="tc cuisine">
+            <input type="checkbox" id="cu-{{ c }}" name="preferred_cuisine" value="{{ c }}"
+                   {% if preference and preference.preferred_cuisine and c in preference.preferred_cuisine %}checked{% endif %}>
+            <label for="cu-{{ c }}">{{ c }}</label>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ 5. DAILY GOALS ══ -->
+    <div class="dp-card">
+      <div class="dp-card-stripe s-amber"></div>
+      <div class="dp-card-head">
+        <div class="dp-card-head-left">
+          <div class="dp-head-icon hi-amber"><i class="fas fa-bullseye"></i></div>
+          <div>
+            <div class="dp-card-title">Daily Nutrition Goals</div>
+            <div class="dp-card-sub">Set your macro & calorie targets</div>
+          </div>
+        </div>
+      </div>
+      <div class="dp-card-body">
+        <div class="macro-grid">
+
+          <div class="mg-field">
+            <div class="mg-label"><span class="mg-label-dot dot-cyan"></span>Meals per Day</div>
+            <div class="mg-input-wrap">
+              <input class="mg-input" type="number" id="meals_per_day" name="meals_per_day"
+                     min="1" max="10" value="{{ preference.meals_per_day if preference else 3 }}"
+                     oninput="validateMeals(this)">
+              <span class="mg-unit">meals</span>
+            </div>
+            <div class="mg-msg" id="msg-meals"></div>
+          </div>
+
+          <div class="mg-field">
+            <div class="mg-label"><span class="mg-label-dot dot-amber"></span>Calorie Goal</div>
+            <div class="mg-input-wrap">
+              <input class="mg-input" type="number" id="calorie_goal" name="calorie_goal"
+                     min="0" value="{{ preference.calorie_goal if preference else '' }}"
+                     oninput="validatePositive(this,'msg-calories')" placeholder="e.g. 2000">
+              <span class="mg-unit">kcal</span>
+            </div>
+            <div class="mg-msg" id="msg-calories"></div>
+          </div>
+
+          <div class="mg-field">
+            <div class="mg-label"><span class="mg-label-dot dot-teal"></span>Protein Goal</div>
+            <div class="mg-input-wrap">
+              <input class="mg-input" type="number" step="0.1" id="protein_goal" name="protein_goal"
+                     min="0" value="{{ preference.protein_goal if preference else '' }}"
+                     oninput="validatePositive(this,'msg-protein')" placeholder="e.g. 150">
+              <span class="mg-unit">g</span>
+            </div>
+            <div class="mg-msg" id="msg-protein"></div>
+          </div>
+
+          <div class="mg-field">
+            <div class="mg-label"><span class="mg-label-dot dot-violet"></span>Carbs Goal</div>
+            <div class="mg-input-wrap">
+              <input class="mg-input" type="number" step="0.1" id="carbs_goal" name="carbs_goal"
+                     min="0" value="{{ preference.carbs_goal if preference else '' }}"
+                     oninput="validatePositive(this,'msg-carbs')" placeholder="e.g. 250">
+              <span class="mg-unit">g</span>
+            </div>
+            <div class="mg-msg" id="msg-carbs"></div>
+          </div>
+
+          <div class="mg-field">
+            <div class="mg-label"><span class="mg-label-dot dot-rose"></span>Fat Goal</div>
+            <div class="mg-input-wrap">
+              <input class="mg-input" type="number" step="0.1" id="fat_goal" name="fat_goal"
+                     min="0" value="{{ preference.fat_goal if preference else '' }}"
+                     oninput="validatePositive(this,'msg-fat')" placeholder="e.g. 65">
+              <span class="mg-unit">g</span>
+            </div>
+            <div class="mg-msg" id="msg-fat"></div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ 6. FOOD LISTS ══ -->
+    <div class="dp-card">
+      <div class="dp-card-stripe s-emerald"></div>
+      <div class="dp-card-head">
+        <div class="dp-card-head-left">
+          <div class="dp-head-icon hi-emerald"><i class="fas fa-list-check"></i></div>
+          <div>
+            <div class="dp-card-title">Food Lists</div>
+            <div class="dp-card-sub">Fine-tune what you love and what to avoid</div>
+          </div>
+        </div>
+      </div>
+      <div class="dp-card-body">
+        <div style="display:flex;flex-direction:column;gap:.85rem;">
+          <div class="mg-field">
+            <div class="mg-label"><span class="mg-label-dot dot-rose"></span>Foods to Avoid
+              <span style="text-transform:none;font-weight:500;color:var(--faint);letter-spacing:0;">— comma separated</span>
+            </div>
+            <input class="text-input" name="avoid_foods"
+                   placeholder="e.g. mushrooms, cilantro, olives"
+                   value="{{ preference.avoid_foods|join(', ') if preference and preference.avoid_foods else '' }}">
+          </div>
+          <div class="mg-field">
+            <div class="mg-label"><span class="mg-label-dot dot-teal"></span>Favourite Foods
+              <span style="text-transform:none;font-weight:500;color:var(--faint);letter-spacing:0;">— comma separated</span>
+            </div>
+            <input class="text-input" name="favorite_foods"
+                   placeholder="e.g. pasta, salmon, avocado"
+                   value="{{ preference.favorite_foods|join(', ') if preference and preference.favorite_foods else '' }}">
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ FOOTER ══ -->
+    <div class="dp-footer">
+      <a href="{{ url_for('user_dashboard.view_profile') }}" class="btn-cancel">
+        <i class="fas fa-arrow-left"></i> Cancel
+      </a>
+      <button class="btn-save" type="submit" onclick="return validateAll()">
+        <i class="fas fa-check"></i> Save Preferences
+      </button>
+    </div>
+
+  </form>
 </div>
+</div>
+</div>
+
+<script>
+  function validateMeals(el) {
+    const v = parseInt(el.value);
+    const msg = document.getElementById('msg-meals');
+    if (el.value === '') { resetField(el, msg); return; }
+    if (isNaN(v) || v < 1 || v > 10) {
+      el.classList.add('is-invalid'); el.classList.remove('is-valid','is-warn');
+      setMsg(msg, 'error', v > 10 ? '😅 Max 10 meals/day' : 'Minimum 1 meal/day');
+    } else if (v > 6) {
+      el.classList.add('is-warn'); el.classList.remove('is-invalid','is-valid');
+      setMsg(msg, 'warn', `${v} meals/day — that's a lot!`);
+    } else {
+      el.classList.add('is-valid'); el.classList.remove('is-invalid','is-warn');
+      resetMsg(msg);
+    }
+  }
+
+  function validatePositive(el, msgId) {
+    const v = parseFloat(el.value);
+    const msg = document.getElementById(msgId);
+    if (el.value === '') { resetField(el, msg); return; }
+    if (v < 0) {
+      el.classList.add('is-invalid'); el.classList.remove('is-valid');
+      setMsg(msg, 'error', 'Cannot be negative');
+    } else {
+      el.classList.add('is-valid'); el.classList.remove('is-invalid');
+      resetMsg(msg);
+    }
+  }
+
+  function setMsg(el, type, text) {
+    el.className = 'mg-msg ' + type;
+    el.innerHTML = `<i class="fas ${type === 'error' ? 'fa-circle-xmark' : 'fa-triangle-exclamation'}"></i> ${text}`;
+  }
+  function resetField(el, msg) { el.classList.remove('is-invalid','is-valid','is-warn'); resetMsg(msg); }
+  function resetMsg(el)        { el.className = 'mg-msg'; el.innerHTML = ''; }
+
+  function validateAll() {
+    let ok = true;
+    const meals = document.getElementById('meals_per_day');
+    if (meals.value) { validateMeals(meals); if (meals.classList.contains('is-invalid')) ok = false; }
+    ['calorie_goal','protein_goal','carbs_goal','fat_goal'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el && el.value) {
+        const map = {calorie_goal:'msg-calories',protein_goal:'msg-protein',carbs_goal:'msg-carbs',fat_goal:'msg-fat'};
+        validatePositive(el, map[id]);
+        if (el.classList.contains('is-invalid')) ok = false;
+      }
+    });
+    return ok;
+  }
+</script>
 {% endblock %}
