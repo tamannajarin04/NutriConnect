@@ -1,0 +1,142 @@
+{% extends "base.html" %}
+{% block title %}BMI Calculator{% endblock %}
+{% block content %}
+
+<div class="container mt-4" style="max-width: 560px;">
+
+    <h2 class="mb-4">⚖️ BMI Calculator</h2>
+
+    <!-- Flash Messages -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+    <!-- BMI Form -->
+    <div class="card shadow-sm p-4 mb-4">
+        <form method="POST" action="{{ url_for('bmi.bmi') }}">
+            <div class="mb-3">
+                <label for="height" class="form-label fw-semibold">Height (meters)</label>
+                <input type="number" step="0.01" min="0.5" max="3.0"
+                       class="form-control" id="height" name="height"
+                       placeholder="e.g. 1.75" required>
+                <div class="form-text">Enter in meters. Example: 5'9" = 1.75m</div>
+            </div>
+
+            <div class="mb-3">
+                <label for="weight" class="form-label fw-semibold">Weight (kg)</label>
+                <input type="number" step="0.1" min="1" max="500"
+                       class="form-control" id="weight" name="weight"
+                       placeholder="e.g. 70.5" required>
+            </div>
+
+            <button type="submit" class="btn btn-primary w-100">
+                Calculate BMI
+            </button>
+        </form>
+    </div>
+
+    <!-- Result (shown after POST) -->
+    {% if result %}
+    <div class="card shadow-sm p-4 mb-4 border-2
+        {% if result.category == 'Normal' %}border-success
+        {% elif result.category == 'Underweight' %}border-info
+        {% elif result.category == 'Overweight' %}border-warning
+        {% else %}border-danger{% endif %}">
+
+        <h5 class="mb-3">📊 Your Result</h5>
+        <div class="row text-center">
+            <div class="col-6">
+                <div class="fs-1 fw-bold
+                    {% if result.category == 'Normal' %}text-success
+                    {% elif result.category == 'Underweight' %}text-info
+                    {% elif result.category == 'Overweight' %}text-warning
+                    {% else %}text-danger{% endif %}">
+                    {{ result.bmi }}
+                </div>
+                <div class="text-muted small">BMI Score</div>
+            </div>
+            <div class="col-6">
+                <div class="fs-4 fw-semibold mt-2
+                    {% if result.category == 'Normal' %}text-success
+                    {% elif result.category == 'Underweight' %}text-info
+                    {% elif result.category == 'Overweight' %}text-warning
+                    {% else %}text-danger{% endif %}">
+                    {{ result.category }}
+                </div>
+                <div class="text-muted small">Category</div>
+            </div>
+        </div>
+
+        <hr>
+        <p class="mb-1 text-muted small">Height: {{ result.height }} m &nbsp;|&nbsp; Weight: {{ result.weight }} kg</p>
+    </div>
+    {% endif %}
+
+    <!-- BMI Reference Table -->
+    <div class="card shadow-sm p-4 mb-4">
+        <h6 class="mb-3">📋 BMI Reference Chart</h6>
+        <table class="table table-sm table-bordered mb-0">
+            <thead class="table-light">
+                <tr>
+                    <th>BMI Range</th>
+                    <th>Category</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr><td>&lt; 18.5</td><td class="text-info fw-semibold">Underweight</td></tr>
+                <tr><td>18.5 – 24.9</td><td class="text-success fw-semibold">Normal</td></tr>
+                <tr><td>25.0 – 29.9</td><td class="text-warning fw-semibold">Overweight</td></tr>
+                <tr><td>≥ 30.0</td><td class="text-danger fw-semibold">Obese</td></tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Past Records -->
+    {% if past_records %}
+    <div class="card shadow-sm p-4 mb-4">
+        <h6 class="mb-3">🕒 Your Recent Records</h6>
+        <table class="table table-sm table-hover mb-0">
+            <thead class="table-light">
+                <tr>
+                    <th>Date</th>
+                    <th>BMI</th>
+                    <th>Category</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for record in past_records %}
+                <tr>
+                    <td>{{ record.recorded_at.strftime('%d %b %Y') }}</td>
+                    <td>{{ record.bmi }}</td>
+                    <td>
+                        {% if record.category == 'Normal' %}
+                            <span class="badge bg-success">{{ record.category }}</span>
+                        {% elif record.category == 'Underweight' %}
+                            <span class="badge bg-info">{{ record.category }}</span>
+                        {% elif record.category == 'Overweight' %}
+                            <span class="badge bg-warning text-dark">{{ record.category }}</span>
+                        {% else %}
+                            <span class="badge bg-danger">{{ record.category }}</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% endif %}
+
+    <a href="{{ url_for('user_dashboard.index') }}" class="btn btn-outline-secondary w-100">
+        ← Back to Dashboard
+    </a>
+
+</div>
+
+{% endblock %}

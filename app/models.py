@@ -41,6 +41,14 @@ class User(UserMixin, db.Model):
         cascade="all, delete-orphan"
     )
 
+    # ✅ NEW: Link to BMI records
+    bmi_records = db.relationship(
+        "BMIRecord",
+        backref="user",
+        lazy="dynamic",
+        cascade="all, delete-orphan"
+    )
+
     def set_password(self, password: str):
         self.password_hash = generate_password_hash(password)
 
@@ -67,7 +75,6 @@ class DietaryPreference(db.Model):
 
     diet_type = db.Column(db.String(50))
 
-    # JSON works in PostgreSQL
     food_restrictions = db.Column(db.JSON, default=list)
     allergies = db.Column(db.JSON, default=list)
     preferred_cuisine = db.Column(db.JSON, default=list)
@@ -83,3 +90,21 @@ class DietaryPreference(db.Model):
 
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+
+# ✅ NEW MODEL — paste at the bottom
+class BMIRecord(db.Model):
+    __tablename__ = "bmi_records"
+
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
+
+    height = db.Column(db.Float, nullable=False)   # stored in meters
+    weight = db.Column(db.Float, nullable=False)   # stored in kg
+    bmi = db.Column(db.Float, nullable=False)
+    category = db.Column(db.String(50), nullable=False)  # Underweight / Normal / Overweight / Obese
+
+    recorded_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+    def __repr__(self):
+        return f"<BMIRecord user_id={self.user_id} bmi={self.bmi} category={self.category}>"

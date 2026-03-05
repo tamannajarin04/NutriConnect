@@ -1,3 +1,5 @@
+# app/__init__.py
+
 from flask import Flask
 from flask_login import LoginManager
 from flask_migrate import Migrate
@@ -26,12 +28,13 @@ def create_app(config_name="default"):
     from .routes.main import main_bp
     from .routes.auth import auth_bp
     from .routes.user_dashboard import user_dashboard_bp
+    from .routes.bmi import bmi_bp                          # ✅ ADD THIS
 
     app.register_blueprint(main_bp)
     app.register_blueprint(auth_bp, url_prefix="/auth")
     app.register_blueprint(user_dashboard_bp, url_prefix="/dashboard")
+    app.register_blueprint(bmi_bp, url_prefix="/dashboard") # ✅ ADD THIS
 
-    # SAFE: only run after tables exist
     with app.app_context():
         create_roles_if_ready()
 
@@ -39,17 +42,13 @@ def create_app(config_name="default"):
 
 
 def create_roles_if_ready():
-    """
-    Creates default roles ONLY if the roles table exists.
-    Prevents migration crashes.
-    """
     from sqlalchemy import inspect
     from app.models import Role
 
     inspector = inspect(db.engine)
 
     if "roles" not in inspector.get_table_names():
-        return  # table not created yet → skip safely
+        return
 
     roles_data = [
         {"name": "user", "description": "Regular user"},

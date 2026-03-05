@@ -2,7 +2,7 @@ import os
 from flask import Blueprint, render_template, redirect, url_for, flash, request, current_app
 from flask_login import login_required, current_user
 from werkzeug.utils import secure_filename
-from app.models import db, User, DietaryPreference
+from app.models import db, User, DietaryPreference, BMIRecord  # ✅ added BMIRecord
 
 user_dashboard_bp = Blueprint("user_dashboard", __name__)
 
@@ -10,19 +10,34 @@ user_dashboard_bp = Blueprint("user_dashboard", __name__)
 @login_required
 def index():
     if current_user.is_user():
-        return render_template("dashboard/user_dashboard.html", user=current_user)
+        # ✅ BMI data fetched here — not in the template
+        latest_bmi = BMIRecord.query.filter_by(user_id=current_user.id)\
+                     .order_by(BMIRecord.recorded_at.desc()).first()
+
+        bmi_records = BMIRecord.query.filter_by(user_id=current_user.id)\
+                      .order_by(BMIRecord.recorded_at.desc()).limit(3).all()
+
+        return render_template("dashboard/user_dashboard.html",
+            user=current_user,
+            latest_bmi=latest_bmi,
+            bmi_records=bmi_records
+        )
+
     if current_user.is_food_provider():
         return render_template("dashboard/food_provider_dashboard.html", user=current_user)
+
     if current_user.is_admin():
         return render_template("dashboard/admin_dashboard.html", user=current_user)
 
     flash("No role assigned. Please contact admin.", "warning")
     return redirect(url_for("auth.logout"))
 
+
 @user_dashboard_bp.route("/profile")
 @login_required
 def view_profile():
     return render_template("dashboard/profile.html", user=current_user)
+
 
 @user_dashboard_bp.route("/profile/edit", methods=["GET", "POST"])
 @login_required
@@ -57,7 +72,6 @@ def edit_profile():
                 "profiles"
             )
 
-            # Safety check
             if os.path.exists(upload_dir) and not os.path.isdir(upload_dir):
                 raise RuntimeError("'profiles' exists but is not a directory")
 
@@ -71,6 +85,7 @@ def edit_profile():
         return redirect(url_for("user_dashboard.view_profile"))
 
     return render_template("dashboard/edit_profile.html", user=current_user)
+
 
 @user_dashboard_bp.route("/dietary-preferences", methods=["GET", "POST"])
 @login_required
