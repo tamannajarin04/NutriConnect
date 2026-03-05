@@ -4,7 +4,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 from app import create_app
-from app.models import db, User, Role, DietaryPreference, BMIRecord  # ✅ added BMIRecord
+from app.models import db, User, Role, DietaryPreference, BMIRecord  
 
 app = create_app(os.getenv("FLASK_ENV") or "default")
 
@@ -15,7 +15,7 @@ def make_shell_context():
         "User": User,
         "Role": Role,
         "DietaryPreference": DietaryPreference,
-        "BMIRecord": BMIRecord  # ✅ added BMIRecord
+        "BMIRecord": BMIRecord  
     }
 
 if __name__ == "__main__":
