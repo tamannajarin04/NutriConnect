@@ -1,0 +1,561 @@
+{% extends "base.html" %}
+{% block title %}BMI Calculator · NutriConnect{% endblock %}
+
+{% block extra_css %}
+<link href="https://fonts.googleapis.com/css2?family=Cabinet+Grotesk:wght@400;500;700;800;900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+{% endblock %}
+
+{% block content %}
+<style>
+  body, button, input, label, select, textarea {
+    font-family: 'Cabinet Grotesk', sans-serif !important;
+  }
+
+  .bmi-page {
+    --teal:    #0d9488; --teal-d: #0f766e; --teal-l: #ccfbf1;
+    --cyan:    #06b6d4; --cyan-l: #cffafe;
+    --emerald: #10b981; --emerald-l: #d1fae5;
+    --rose:    #f43f5e; --rose-l: #ffe4e6;
+    --amber:   #f59e0b; --amber-l: #fef3c7;
+    --violet:  #7c3aed; --violet-l: #ede9fe;
+    --sky:     #0ea5e9; --sky-l: #e0f2fe;
+
+    --surf:   var(--nc-surface,   #ffffff);
+    --surf-2: var(--nc-surface-2, #f7f9fc);
+    --surf-3: var(--nc-surface-3, #eef2f7);
+    --bdr:    var(--nc-border,    #e2e8f0);
+    --txt:    var(--nc-text,      #0d1117);
+    --txt-2:  var(--nc-text-2,    #374151);
+    --muted:  var(--nc-text-muted,#6b7280);
+    --faint:  var(--nc-text-faint,#9ca3af);
+    --r: 18px;
+
+    max-width: 640px;
+    margin: 0 auto;
+    padding-bottom: 3rem;
+  }
+
+  /* ── Banner ── */
+  .bmi-banner {
+    background: linear-gradient(135deg, #0a2e2b 0%, #0d3d38 40%, #0f2d4a 100%);
+    border-radius: 22px;
+    padding: 2rem 2.5rem;
+    margin-bottom: 1.25rem;
+    position: relative; overflow: hidden; isolation: isolate;
+  }
+  .bmi-banner::before {
+    content: ''; position: absolute; inset: 0; z-index: -2;
+    background:
+      radial-gradient(ellipse 60% 80% at 0% 50%,  rgba(13,148,136,.55) 0%, transparent 55%),
+      radial-gradient(ellipse 50% 60% at 100% 20%, rgba(244,63,94,.3)  0%, transparent 55%),
+      radial-gradient(ellipse 40% 50% at 55% 110%, rgba(6,182,212,.3)  0%, transparent 50%);
+  }
+  .bmi-banner::after {
+    content: ''; position: absolute; inset: 0; z-index: -1;
+    background-image: radial-gradient(circle, rgba(255,255,255,.07) 1px, transparent 1px);
+    background-size: 24px 24px;
+  }
+  .bmi-banner-eyebrow {
+    display: inline-flex; align-items: center; gap: .4rem;
+    background: rgba(255,255,255,.12); border: 1px solid rgba(255,255,255,.2);
+    border-radius: 99px; padding: .25rem .85rem;
+    font-size: .7rem; font-weight: 800; letter-spacing: .08em;
+    text-transform: uppercase; color: rgba(255,255,255,.85); margin-bottom: .65rem;
+  }
+  .bmi-banner-title {
+    font-size: 1.65rem; font-weight: 900; color: #fff;
+    letter-spacing: -.04em; line-height: 1.1; margin: 0 0 .3rem;
+  }
+  .bmi-banner-title span {
+    background: linear-gradient(135deg, #5eead4, #a5f3fc);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+  }
+  .bmi-banner-sub { color: rgba(255,255,255,.55); font-size: .83rem; margin: 0; }
+
+  /* ── Cards ── */
+  .bmi-card {
+    background: var(--surf);
+    border: 1px solid var(--bdr);
+    border-radius: var(--r);
+    overflow: hidden;
+    margin-bottom: 1rem;
+    box-shadow: 0 1px 3px rgba(0,0,0,.04), 0 4px 12px rgba(0,0,0,.04);
+    animation: rise .4s cubic-bezier(.16,1,.3,1) both;
+  }
+  @keyframes rise { from{opacity:0;transform:translateY(14px)} to{opacity:1;transform:translateY(0)} }
+  .bmi-card:nth-child(2){animation-delay:.05s}
+  .bmi-card:nth-child(3){animation-delay:.10s}
+  .bmi-card:nth-child(4){animation-delay:.15s}
+  .bmi-card:nth-child(5){animation-delay:.20s}
+
+  .card-stripe { height: 4px; }
+  .s-teal    { background: linear-gradient(90deg, var(--teal), var(--cyan)); }
+  .s-rose    { background: linear-gradient(90deg, var(--rose), #fb923c); }
+  .s-amber   { background: linear-gradient(90deg, var(--amber), #84cc16); }
+  .s-violet  { background: linear-gradient(90deg, var(--violet), var(--sky)); }
+
+  .card-head {
+    display: flex; align-items: center; gap: .65rem;
+    padding: 1rem 1.4rem; border-bottom: 1px solid var(--bdr);
+  }
+  .card-head-icon {
+    width: 34px; height: 34px; border-radius: 10px;
+    display: flex; align-items: center; justify-content: center; font-size: .85rem;
+    flex-shrink: 0;
+  }
+  .hi-teal   { background: var(--teal-l);   color: var(--teal); }
+  .hi-rose   { background: var(--rose-l);   color: var(--rose); }
+  .hi-amber  { background: var(--amber-l);  color: #d97706; }
+  .hi-violet { background: var(--violet-l); color: var(--violet); }
+
+  .card-head-title { font-size: .88rem; font-weight: 800; color: var(--txt); letter-spacing: -.02em; }
+  .card-head-sub   { font-size: .7rem; font-weight: 500; color: var(--muted); margin-top: .05rem; }
+  .card-body { padding: 1.25rem 1.4rem; }
+
+  /* ── Form inputs ── */
+  .field-group { display: flex; flex-direction: column; gap: .85rem; }
+  .field-label {
+    display: flex; align-items: center; gap: .4rem;
+    font-size: .7rem; font-weight: 800; text-transform: uppercase;
+    letter-spacing: .06em; color: var(--muted); margin-bottom: .4rem;
+  }
+  .label-dot { width: 8px; height: 8px; border-radius: 50%; }
+  .dot-teal  { background: var(--teal); }
+  .dot-rose  { background: var(--rose); }
+
+  .input-wrap { position: relative; }
+  .bmi-input {
+    width: 100%; border: 1.5px solid var(--bdr); border-radius: 11px;
+    padding: .65rem .9rem; font-size: .95rem; font-weight: 700;
+    color: var(--txt) !important; background: var(--surf-2) !important;
+    outline: none; font-family: 'Cabinet Grotesk', sans-serif !important;
+    transition: border-color .15s, box-shadow .15s;
+    -moz-appearance: textfield;
+  }
+  .bmi-input::-webkit-inner-spin-button,
+  .bmi-input::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+  [data-theme="dark"] .bmi-input { background: #1c2333 !important; color: #e6edf3 !important; border-color: #30363d !important; }
+  .bmi-input:focus { border-color: var(--teal) !important; background: var(--surf) !important; box-shadow: 0 0 0 3px rgba(13,148,136,.18) !important; }
+  .bmi-input::placeholder { color: var(--faint) !important; font-weight: 500; }
+  .input-unit {
+    position: absolute; right: .9rem; top: 50%; transform: translateY(-50%);
+    font-size: .72rem; font-weight: 700; color: var(--faint);
+    font-family: 'JetBrains Mono', monospace; pointer-events: none;
+  }
+  .input-hint { font-size: .72rem; color: var(--faint); font-weight: 500; margin-top: .3rem; }
+
+  /* ── Two-col input layout ── */
+  .input-row { display: grid; grid-template-columns: 1fr 1fr; gap: .85rem; }
+  @media(max-width:480px){ .input-row { grid-template-columns: 1fr; } }
+
+  /* ── Submit button ── */
+  .btn-calc {
+    display: flex; align-items: center; justify-content: center; gap: .5rem;
+    width: 100%; background: var(--teal); color: #fff; border: none;
+    border-radius: 12px; padding: .8rem 1.5rem;
+    font-size: .9rem; font-weight: 800; font-family: inherit;
+    letter-spacing: -.01em; cursor: pointer; margin-top: 1rem;
+    box-shadow: 0 2px 8px rgba(13,148,136,.3), 0 1px 2px rgba(13,148,136,.2);
+    transition: background .15s, transform .12s, box-shadow .15s;
+  }
+  .btn-calc:hover { background: var(--teal-d); transform: translateY(-1px); box-shadow: 0 5px 20px rgba(13,148,136,.35); }
+
+  /* ── Flash alerts ── */
+  .flash-wrap { display: flex; flex-direction: column; gap: .5rem; margin-bottom: .85rem; }
+  .flash-alert {
+    display: flex; align-items: center; gap: .6rem;
+    padding: .7rem 1rem; border-radius: 12px;
+    font-size: .82rem; font-weight: 700; border: 1.5px solid transparent;
+  }
+  .flash-alert.success { background: var(--teal-l); color: var(--teal-d); border-color: #99f6e4; }
+  .flash-alert.danger  { background: var(--rose-l);  color: #be123c; border-color: #fda4af; }
+  .flash-alert.warning { background: var(--amber-l); color: #92400e; border-color: #fde68a; }
+  .flash-alert.info    { background: var(--sky-l);   color: #0369a1; border-color: #7dd3fc; }
+
+  /* ── Result card ── */
+  .result-body {
+    padding: 1.25rem 1.4rem;
+  }
+  .result-main {
+    display: flex; align-items: center; gap: 1.5rem;
+    margin-bottom: 1.25rem; flex-wrap: wrap;
+  }
+  .result-score-block {
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    width: 110px; height: 110px; border-radius: 20px; flex-shrink: 0;
+    background: var(--surf-2); border: 1.5px solid var(--bdr);
+    position: relative; overflow: hidden;
+  }
+  .result-score-block.cat-normal      { border-color: #99f6e4; background: var(--teal-l); }
+  .result-score-block.cat-underweight { border-color: #7dd3fc; background: var(--sky-l); }
+  .result-score-block.cat-overweight  { border-color: #fde68a; background: var(--amber-l); }
+  .result-score-block.cat-obese       { border-color: #fda4af; background: var(--rose-l); }
+
+  .result-num {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 2.1rem; font-weight: 600; line-height: 1;
+  }
+  .cat-normal      .result-num { color: var(--teal-d); }
+  .cat-underweight .result-num { color: #0369a1; }
+  .cat-overweight  .result-num { color: #92400e; }
+  .cat-obese       .result-num { color: #be123c; }
+
+  .result-num-lbl { font-size: .6rem; font-weight: 700; text-transform: uppercase; letter-spacing: .07em; color: var(--muted); margin-top: .25rem; }
+
+  .result-info { flex: 1; }
+  .result-cat-badge {
+    display: inline-flex; align-items: center; gap: .4rem;
+    border-radius: 99px; padding: .3rem .9rem;
+    font-size: .82rem; font-weight: 800; margin-bottom: .55rem;
+  }
+  .result-cat-badge.cat-normal      { background: var(--teal-l);  color: var(--teal-d); }
+  .result-cat-badge.cat-underweight { background: var(--sky-l);   color: #0369a1; }
+  .result-cat-badge.cat-overweight  { background: var(--amber-l); color: #92400e; }
+  .result-cat-badge.cat-obese       { background: var(--rose-l);  color: #be123c; }
+
+  .result-meta { font-size: .78rem; color: var(--muted); font-weight: 600; }
+  .result-meta span { color: var(--txt-2); }
+
+  /* Animated range bar in result */
+  .result-range { margin-top: .75rem; }
+  .result-range-label { font-size: .67rem; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: var(--faint); margin-bottom: .45rem; }
+  .result-range-track {
+    height: 8px; border-radius: 99px; display: flex;
+    overflow: visible; position: relative; margin-bottom: .4rem;
+    gap: 2px;
+  }
+  .rr-seg { border-radius: 99px; height: 8px; flex: 1; }
+  .rr-seg.s-cyan  { background: var(--cyan);  flex: 1.5; border-radius: 99px 0 0 99px; }
+  .rr-seg.s-teal  { background: var(--teal);  flex: 2.6; border-radius: 0; }
+  .rr-seg.s-amber { background: var(--amber); flex: 2.0; border-radius: 0; }
+  .rr-seg.s-rose  { background: var(--rose);  flex: 2.9; border-radius: 0 99px 99px 0; }
+
+  /* Marker pin on range */
+  .rr-marker-wrap { position: relative; height: 0; }
+  .rr-marker {
+    position: absolute; top: -14px;
+    width: 3px; height: 20px;
+    background: var(--txt); border-radius: 2px;
+    transform: translateX(-50%);
+    transition: left 1s cubic-bezier(.16,1,.3,1);
+    box-shadow: 0 2px 6px rgba(0,0,0,.2);
+  }
+  .rr-marker::after {
+    content: attr(data-val);
+    position: absolute; bottom: -18px; left: 50%; transform: translateX(-50%);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: .58rem; font-weight: 700; color: var(--txt);
+    white-space: nowrap;
+  }
+  .rr-ticks {
+    display: flex; justify-content: space-between;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: .6rem; color: var(--faint);
+    padding-top: .85rem;
+  }
+
+  /* ── Reference table ── */
+  .ref-table { width: 100%; border-collapse: collapse; }
+  .ref-table th {
+    font-size: .67rem; font-weight: 800; text-transform: uppercase;
+    letter-spacing: .07em; color: var(--muted);
+    padding: .5rem .75rem; border-bottom: 1.5px solid var(--bdr);
+    text-align: left;
+  }
+  .ref-table td {
+    padding: .6rem .75rem; font-size: .82rem; font-weight: 600;
+    border-bottom: 1px solid var(--surf-3); color: var(--txt-2);
+  }
+  .ref-table tr:last-child td { border-bottom: none; }
+  .ref-table tr:hover td { background: var(--surf-2); }
+  .ref-table td:first-child {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: .78rem; color: var(--muted);
+  }
+
+  .cat-pill {
+    display: inline-flex; align-items: center; gap: .3rem;
+    border-radius: 99px; padding: .22rem .7rem;
+    font-size: .72rem; font-weight: 800;
+  }
+  .cp-cyan   { background: var(--sky-l);   color: #0369a1; }
+  .cp-teal   { background: var(--teal-l);  color: var(--teal-d); }
+  .cp-amber  { background: var(--amber-l); color: #92400e; }
+  .cp-rose   { background: var(--rose-l);  color: #be123c; }
+
+  /* ── History table ── */
+  .hist-table { width: 100%; border-collapse: collapse; }
+  .hist-table th {
+    font-size: .67rem; font-weight: 800; text-transform: uppercase;
+    letter-spacing: .07em; color: var(--muted);
+    padding: .5rem .75rem; border-bottom: 1.5px solid var(--bdr);
+    text-align: left;
+  }
+  .hist-table td {
+    padding: .65rem .75rem; font-size: .82rem;
+    border-bottom: 1px solid var(--surf-3); color: var(--txt-2);
+  }
+  .hist-table tr:last-child td { border-bottom: none; }
+  .hist-table tr:hover td { background: var(--surf-2); transition: background .1s; }
+  .hist-table td.bmi-val {
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 600; color: var(--txt);
+  }
+  .hist-table td.date-val { color: var(--muted); font-size: .78rem; }
+
+  /* ── Back button ── */
+  .btn-back {
+    display: inline-flex; align-items: center; gap: .45rem;
+    background: var(--surf-2); color: var(--txt-2);
+    border: 1.5px solid var(--bdr); border-radius: 12px;
+    padding: .65rem 1.4rem; font-size: .88rem; font-weight: 800;
+    text-decoration: none; font-family: inherit; width: 100%;
+    justify-content: center; margin-top: .5rem;
+    transition: background .15s, border-color .15s, color .15s;
+  }
+  .btn-back:hover { background: var(--surf-3); border-color: var(--bdr); color: var(--txt); }
+</style>
+
+<div class="bmi-page">
+
+  <!-- ── Banner ── -->
+  <div class="bmi-banner" style="margin-bottom:1.25rem; animation: rise .35s cubic-bezier(.16,1,.3,1) both;">
+    <div class="bmi-banner-eyebrow">⚖️ Health Tools</div>
+    <div class="bmi-banner-title">BMI <span>Calculator</span></div>
+    <p class="bmi-banner-sub">Enter your measurements to calculate your Body Mass Index</p>
+  </div>
+
+  <!-- ── Flash Messages ── -->
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      <div class="flash-wrap">
+        {% for category, message in messages %}
+          <div class="flash-alert {{ category }}">
+            <i class="fas {% if category == 'success' %}fa-circle-check{% elif category == 'danger' %}fa-circle-xmark{% elif category == 'warning' %}fa-triangle-exclamation{% else %}fa-circle-info{% endif %}"></i>
+            {{ message }}
+          </div>
+        {% endfor %}
+      </div>
+    {% endif %}
+  {% endwith %}
+
+  <!-- ── Result (shown after POST) ── -->
+  {% if result %}
+  {% set cat_cls = result.category | lower %}
+  <div class="bmi-card" style="animation-delay:.02s;">
+    <div class="card-stripe
+      {% if result.category == 'Normal' %}s-teal
+      {% elif result.category == 'Underweight' %}s-violet
+      {% elif result.category == 'Overweight' %}s-amber
+      {% else %}s-rose{% endif %}">
+    </div>
+    <div class="card-head">
+      <div class="card-head-icon
+        {% if result.category == 'Normal' %}hi-teal
+        {% elif result.category == 'Underweight' %}hi-violet
+        {% elif result.category == 'Overweight' %}hi-amber
+        {% else %}hi-rose{% endif %}">
+        <i class="fas fa-chart-simple"></i>
+      </div>
+      <div>
+        <div class="card-head-title">Your Result</div>
+        <div class="card-head-sub">Calculated from your measurements</div>
+      </div>
+    </div>
+    <div class="result-body">
+      <div class="result-main">
+        <div class="result-score-block cat-{{ cat_cls }}">
+          <div class="result-num">{{ result.bmi }}</div>
+          <div class="result-num-lbl">BMI Score</div>
+        </div>
+        <div class="result-info">
+          <div class="result-cat-badge cat-{{ cat_cls }}">
+            {% if result.category == 'Normal' %}✅
+            {% elif result.category == 'Underweight' %}💧
+            {% elif result.category == 'Overweight' %}⚠️
+            {% else %}🔴{% endif %}
+            {{ result.category }}
+          </div>
+          <div class="result-meta">
+            Height: <span>{{ result.height }} m</span> &nbsp;·&nbsp; Weight: <span>{{ result.weight }} kg</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Range bar with marker -->
+      <div class="result-range">
+        <div class="result-range-label">Where you fall on the scale</div>
+        <div class="result-range-track" id="rangeTrack">
+          <div class="rr-seg s-cyan"></div>
+          <div class="rr-seg s-teal"></div>
+          <div class="rr-seg s-amber"></div>
+          <div class="rr-seg s-rose"></div>
+        </div>
+        <div class="rr-marker-wrap">
+          <div class="rr-marker" id="bmiMarker" data-bmi="{{ result.bmi }}" data-val="{{ result.bmi }}" style="left:50%"></div>
+        </div>
+        <div class="rr-ticks">
+          <span>15</span>
+          <span>18.5</span>
+          <span>25</span>
+          <span>30</span>
+          <span>40+</span>
+        </div>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- ── Calculator Form ── -->
+  <div class="bmi-card">
+    <div class="card-stripe s-teal"></div>
+    <div class="card-head">
+      <div class="card-head-icon hi-teal"><i class="fas fa-calculator"></i></div>
+      <div>
+        <div class="card-head-title">Calculate BMI</div>
+        <div class="card-head-sub">Enter your height and weight</div>
+      </div>
+    </div>
+    <div class="card-body">
+      <form method="POST" action="{{ url_for('bmi.bmi') }}">
+        <div class="input-row">
+          <div>
+            <div class="field-label"><span class="label-dot dot-teal"></span>Height</div>
+            <div class="input-wrap">
+              <input type="number" step="0.01" min="0.5" max="3.0"
+                     class="bmi-input" id="height" name="height"
+                     placeholder="1.75" required>
+              <span class="input-unit">m</span>
+            </div>
+            <div class="input-hint">e.g. 5'9" = 1.75 m</div>
+          </div>
+          <div>
+            <div class="field-label"><span class="label-dot dot-rose"></span>Weight</div>
+            <div class="input-wrap">
+              <input type="number" step="0.1" min="1" max="500"
+                     class="bmi-input" id="weight" name="weight"
+                     placeholder="70.5" required>
+              <span class="input-unit">kg</span>
+            </div>
+            <div class="input-hint">in kilograms</div>
+          </div>
+        </div>
+        <button type="submit" class="btn-calc">
+          <i class="fas fa-bolt"></i> Calculate My BMI
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- ── Reference Chart ── -->
+  <div class="bmi-card">
+    <div class="card-stripe s-violet"></div>
+    <div class="card-head">
+      <div class="card-head-icon hi-violet"><i class="fas fa-table-list"></i></div>
+      <div>
+        <div class="card-head-title">BMI Reference Chart</div>
+        <div class="card-head-sub">Standard WHO classification</div>
+      </div>
+    </div>
+    <div class="card-body" style="padding-top:.75rem;padding-bottom:.75rem;">
+      <table class="ref-table">
+        <thead>
+          <tr>
+            <th>BMI Range</th>
+            <th>Category</th>
+            <th>Indication</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>&lt; 18.5</td>
+            <td><span class="cat-pill cp-cyan">💧 Underweight</span></td>
+            <td style="font-size:.75rem;color:var(--muted);">May need to gain weight</td>
+          </tr>
+          <tr>
+            <td>18.5 – 24.9</td>
+            <td><span class="cat-pill cp-teal">✅ Normal</span></td>
+            <td style="font-size:.75rem;color:var(--muted);">Healthy weight range</td>
+          </tr>
+          <tr>
+            <td>25.0 – 29.9</td>
+            <td><span class="cat-pill cp-amber">⚠️ Overweight</span></td>
+            <td style="font-size:.75rem;color:var(--muted);">Consider lifestyle changes</td>
+          </tr>
+          <tr>
+            <td>≥ 30.0</td>
+            <td><span class="cat-pill cp-rose">🔴 Obese</span></td>
+            <td style="font-size:.75rem;color:var(--muted);">Consult a healthcare provider</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ── Past Records ── -->
+  {% if past_records %}
+  <div class="bmi-card">
+    <div class="card-stripe s-amber"></div>
+    <div class="card-head">
+      <div class="card-head-icon hi-amber"><i class="fas fa-clock-rotate-left"></i></div>
+      <div>
+        <div class="card-head-title">Recent Records</div>
+        <div class="card-head-sub">Your BMI history</div>
+      </div>
+    </div>
+    <div class="card-body" style="padding-top:.75rem;padding-bottom:.75rem;">
+      <table class="hist-table">
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>BMI</th>
+            <th>Category</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for record in past_records %}
+          {% set rc = record.category | lower %}
+          <tr>
+            <td class="date-val">{{ record.recorded_at.strftime('%d %b %Y') }}</td>
+            <td class="bmi-val">{{ record.bmi }}</td>
+            <td>
+              <span class="cat-pill
+                {% if record.category == 'Normal' %}cp-teal
+                {% elif record.category == 'Underweight' %}cp-cyan
+                {% elif record.category == 'Overweight' %}cp-amber
+                {% else %}cp-rose{% endif %}">
+                {{ record.category }}
+              </span>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- ── Back ── -->
+  <a href="{{ url_for('user_dashboard.index') }}" class="btn-back">
+    <i class="fas fa-arrow-left"></i> Back to Dashboard
+  </a>
+
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const marker = document.getElementById('bmiMarker');
+  if (!marker) return;
+
+  const bmi = parseFloat(marker.dataset.bmi);
+  // Map BMI to % position (scale: 15 → 0%, 40 → 100%)
+  const min = 15, max = 40;
+  const pct = Math.min(100, Math.max(0, ((bmi - min) / (max - min)) * 100));
+
+  setTimeout(() => {
+    marker.style.left = pct + '%';
+  }, 300);
+});
+</script>
+
+{% endblock %}

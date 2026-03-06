@@ -72,12 +72,14 @@
   .cell--stat-b     { grid-column: span 3; }
   .cell--stat-c     { grid-column: span 3; }
   .cell--stat-d     { grid-column: span 3; }
+  .cell--bmi        { grid-column: span 12; }
 
   @media (max-width: 900px) {
     .cell--completion,
     .cell--streak,
     .cell--profile,
-    .cell--diet { grid-column: span 12; }
+    .cell--diet,
+    .cell--bmi { grid-column: span 12; }
     .cell--stat-a,.cell--stat-b,
     .cell--stat-c,.cell--stat-d { grid-column: span 6; }
   }
@@ -87,11 +89,11 @@
   }
 
   /* ═══════════════════════════════════════
-     HERO CELL
+     HERO CELL  ← FIXED: no longer uses var(--d-text) as bg
   ═══════════════════════════════════════ */
   .hero-cell {
     padding: 2.75rem 3rem;
-    background: var(--d-text);
+    background: linear-gradient(135deg, #0a2e2b 0%, #0d3d38 40%, #0f2d4a 100%);
     color: #fff;
     position: relative;
     overflow: hidden;
@@ -108,29 +110,28 @@
     content: '';
     position: absolute; inset: 0; z-index: 0;
     background:
-      radial-gradient(ellipse 70% 80% at  -5% 50%, rgba(13,148,136,.5)   0%, transparent 55%),
-      radial-gradient(ellipse 50% 70% at 105% 20%, rgba(124,58,237,.45)  0%, transparent 55%),
-      radial-gradient(ellipse 40% 60% at  55% 110%,rgba(6,182,212,.3)    0%, transparent 50%);
+      radial-gradient(ellipse 70% 80% at  -5% 50%, rgba(13,148,136,.55)   0%, transparent 55%),
+      radial-gradient(ellipse 50% 70% at 105% 20%, rgba(124,58,237,.5)    0%, transparent 55%),
+      radial-gradient(ellipse 40% 60% at  55% 110%,rgba(6,182,212,.35)    0%, transparent 50%);
   }
 
   /* Dot grid */
   .hero-cell::after {
     content: '';
     position: absolute; inset: 0; z-index: 0;
-    background-image: radial-gradient(circle, rgba(255,255,255,.12) 1px, transparent 1px);
+    background-image: radial-gradient(circle, rgba(255,255,255,.08) 1px, transparent 1px);
     background-size: 28px 28px;
   }
 
   .hero-cell > * { position: relative; z-index: 1; }
 
-  
   .hero-eyebrow {
     display: inline-flex; align-items: center; gap: .45rem;
-    background: rgba(255,255,255,.1);
-    border: 1px solid rgba(255,255,255,.18);
+    background: rgba(255,255,255,.12);
+    border: 1px solid rgba(255,255,255,.2);
     border-radius: 99px; padding: .3rem .9rem;
     font-size: .72rem; font-weight: 700; letter-spacing: .08em;
-    text-transform: uppercase; margin-bottom: 1rem; color: rgba(255,255,255,.85);
+    text-transform: uppercase; margin-bottom: 1rem; color: rgba(255,255,255,.9);
   }
   .hero-eyebrow-dot { width: 6px; height: 6px; border-radius: 50%; background: #34d399; box-shadow: 0 0 6px #34d399; animation: pulse-dot 2s ease-in-out infinite; }
   @keyframes pulse-dot { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.5;transform:scale(.8)} }
@@ -150,7 +151,7 @@
     background-clip: text;
   }
   .hero-tagline {
-    font-size: .9rem; color: rgba(255,255,255,.5);
+    font-size: .9rem; color: rgba(255,255,255,.65);
     font-weight: 400; max-width: 340px; line-height: 1.5;
   }
 
@@ -159,7 +160,7 @@
 
   .ring-gauge { position: relative; width: 110px; height: 110px; flex-shrink: 0; }
   .ring-gauge svg { width: 110px; height: 110px; transform: rotate(-90deg); }
-  .ring-bg   { fill: none; stroke: rgba(255,255,255,.1); stroke-width: 8; }
+  .ring-bg   { fill: none; stroke: rgba(255,255,255,.12); stroke-width: 8; }
   .ring-fill {
     fill: none; stroke: url(#ringGrad); stroke-width: 8;
     stroke-linecap: round;
@@ -177,12 +178,12 @@
     font-family: 'JetBrains Mono', monospace;
     font-size: 1.4rem; font-weight: 600; line-height: 1;
   }
-  .ring-sub { font-size: .6rem; opacity: .5; text-transform: uppercase; letter-spacing: .06em; margin-top: .15rem; }
+  .ring-sub { font-size: .6rem; opacity: .55; text-transform: uppercase; letter-spacing: .06em; margin-top: .15rem; }
 
   .hero-stats-col { display: flex; flex-direction: column; gap: 1rem; }
   .hsc {
     display: flex; flex-direction: column; gap: .1rem;
-    border-left: 2px solid rgba(255,255,255,.15);
+    border-left: 2px solid rgba(255,255,255,.2);
     padding-left: .9rem;
   }
   .hsc-val {
@@ -193,8 +194,8 @@
   .hsc-val.c-amber  { color: #fcd34d; }
   .hsc-val.c-violet { color: #c4b5fd; }
   .hsc-val.c-cyan   { color: #67e8f9; }
-  .hsc-unit { font-size: .7rem; opacity: .55; margin-left: .1rem; }
-  .hsc-lbl  { font-size: .65rem; color: rgba(255,255,255,.38); text-transform: uppercase; letter-spacing: .08em; font-weight: 700; }
+  .hsc-unit { font-size: .7rem; opacity: .6; margin-left: .1rem; }
+  .hsc-lbl  { font-size: .65rem; color: rgba(255,255,255,.45); text-transform: uppercase; letter-spacing: .08em; font-weight: 700; }
 
   /* ═══════════════════════════════════════
      COMPLETION CELL
@@ -326,7 +327,7 @@
     overflow: hidden;
   }
   .profile-avatar img { width: 100%; height: 100%; object-fit: cover; border-radius: 16px; }
- 
+
   .profile-fullname { font-size: 1rem; font-weight: 800; color: var(--d-text); letter-spacing: -.02em; }
   .profile-handle   { font-size: .78rem; color: var(--d-muted); margin-top: .1rem; }
   .profile-role {
@@ -379,7 +380,8 @@
     width: 32px; height: 32px; border-radius: 10px;
     display: flex; align-items: center; justify-content: center; font-size: .8rem;
   }
-  .sl-lime { background: var(--lime-l); color: #4d7c0f; }
+  .sl-lime   { background: var(--lime-l);   color: #4d7c0f; }
+  .sl-rose   { background: var(--rose-l);   color: #be123c; }
 
   .btn-manage {
     display: inline-flex; align-items: center; gap: .35rem;
@@ -393,7 +395,7 @@
 
   /* Macro bars */
   .macro-grid { display: grid; grid-template-columns: 1fr 1fr; gap: .75rem; margin-bottom: 1.1rem; }
-  
+
   .mb-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: .4rem; }
   .mb-name { font-size: .72rem; font-weight: 700; color: var(--d-muted); text-transform: uppercase; letter-spacing: .05em; }
   .mb-val  { font-family: 'JetBrains Mono', monospace; font-size: .72rem; color: var(--d-text); font-weight: 500; }
@@ -438,6 +440,117 @@
   .btn-setup:hover { background: #365314; color: #fff; transform: translateY(-1px); }
 
   /* ═══════════════════════════════════════
+     BMI CELL
+  ═══════════════════════════════════════ */
+  .bmi-cell { padding: 1.5rem; }
+  .bmi-cell-header {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 1.25rem;
+  }
+
+  .bmi-content {
+    display: flex; align-items: center; gap: 2rem; flex-wrap: wrap;
+  }
+
+  .bmi-score-block {
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    width: 120px; height: 120px; border-radius: 22px; flex-shrink: 0;
+    background: var(--d-surface-2); border: 1px solid var(--d-border);
+    position: relative; overflow: hidden;
+  }
+  .bmi-score-block::before {
+    content: ''; position: absolute; inset: 0;
+    background: linear-gradient(135deg, rgba(244,63,94,.07), rgba(124,58,237,.07));
+  }
+  .bmi-score-num {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 2.2rem; font-weight: 600; line-height: 1;
+    color: var(--d-text); position: relative;
+  }
+  .bmi-score-lbl {
+    font-size: .62rem; font-weight: 700; text-transform: uppercase;
+    letter-spacing: .07em; color: var(--d-muted);
+    margin-top: .25rem; position: relative;
+  }
+  .bmi-cat-badge {
+    display: inline-flex; align-items: center; gap: .3rem;
+    border-radius: 99px; padding: .22rem .7rem;
+    font-size: .68rem; font-weight: 800;
+    margin-top: .45rem; position: relative;
+  }
+  .bmi-cat-badge.normal      { background: var(--teal-l);   color: var(--teal-d); }
+  .bmi-cat-badge.underweight { background: var(--cyan-l);   color: #0e7490; }
+  .bmi-cat-badge.overweight  { background: var(--amber-l);  color: #92400e; }
+  .bmi-cat-badge.obese       { background: var(--rose-l);   color: #be123c; }
+
+  .bmi-range-block { flex: 1; min-width: 200px; }
+  .bmi-range-label {
+    font-size: .7rem; font-weight: 700; text-transform: uppercase;
+    letter-spacing: .06em; color: var(--d-muted); margin-bottom: .6rem;
+  }
+  .bmi-range-track {
+    height: 10px; border-radius: 99px; overflow: hidden;
+    display: flex; margin-bottom: .5rem;
+  }
+  .bmi-range-seg { flex: 1; }
+  .bmi-range-seg.s-cyan  { background: var(--cyan);  flex: 1.5; border-radius: 99px 0 0 99px; }
+  .bmi-range-seg.s-teal  { background: var(--teal);  flex: 2.6; }
+  .bmi-range-seg.s-amber { background: var(--amber); flex: 2.0; }
+  .bmi-range-seg.s-rose  { background: var(--rose);  flex: 2.9; border-radius: 0 99px 99px 0; }
+  .bmi-range-ticks {
+    display: flex; justify-content: space-between;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: .62rem; color: var(--d-faint); line-height: 1.4;
+  }
+
+  .bmi-history { flex: 1; min-width: 180px; }
+  .bmi-history-title {
+    font-size: .7rem; font-weight: 700; text-transform: uppercase;
+    letter-spacing: .06em; color: var(--d-muted); margin-bottom: .6rem;
+  }
+  .bmi-history-row {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: .45rem 0; border-bottom: 1px solid var(--d-border); gap: .5rem;
+  }
+  .bmi-history-row:last-child { border-bottom: none; }
+  .bmi-history-date { color: var(--d-muted); font-size: .72rem; white-space: nowrap; }
+  .bmi-history-val  {
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 600; color: var(--d-text); font-size: .82rem;
+  }
+  .bmi-history-badge {
+    display: inline-flex; align-items: center;
+    border-radius: 99px; padding: .12rem .55rem;
+    font-size: .62rem; font-weight: 800;
+  }
+  .bmi-history-badge.normal      { background: var(--teal-l);  color: var(--teal-d); }
+  .bmi-history-badge.underweight { background: var(--cyan-l);  color: #0e7490; }
+  .bmi-history-badge.overweight  { background: var(--amber-l); color: #92400e; }
+  .bmi-history-badge.obese       { background: var(--rose-l);  color: #be123c; }
+
+  .bmi-empty {
+    display: flex; flex-direction: column; align-items: center;
+    padding: 1.25rem 1rem; text-align: center; flex: 1;
+  }
+  .bmi-empty-icon {
+    width: 56px; height: 56px; border-radius: 18px;
+    background: var(--rose-l); color: #be123c;
+    font-size: 1.5rem; display: flex; align-items: center;
+    justify-content: center; margin-bottom: .8rem;
+  }
+  .bmi-empty p { font-size: .82rem; color: var(--d-muted); margin: 0 0 .85rem; line-height: 1.6; max-width: 240px; }
+
+  .btn-rose {
+    display: inline-flex; align-items: center; gap: .4rem;
+    background: var(--rose); color: #fff; border: none; font-family: inherit;
+    border-radius: 10px; padding: .55rem 1.2rem; font-size: .82rem; font-weight: 800;
+    text-decoration: none; cursor: pointer;
+    transition: background .15s, transform .12s;
+    box-shadow: 0 2px 8px rgba(244,63,94,.25);
+  }
+  .btn-rose:hover { background: #e11d48; color: #fff; transform: translateY(-1px); }
+
+  /* ═══════════════════════════════════════
      ANIMATIONS
   ═══════════════════════════════════════ */
   @keyframes rise {
@@ -454,6 +567,7 @@
   .cell--stat-d     { animation-delay: .24s; }
   .cell--profile    { animation-delay: .27s; }
   .cell--diet       { animation-delay: .30s; }
+  .cell--bmi        { animation-delay: .33s; }
 </style>
 
 {% set pct = (((
@@ -683,7 +797,6 @@
       </div>
 
       {% if user.dietary_preference %}
-        <!-- Macro bars -->
         <div class="macro-grid">
           <div class="macro-bar-item">
             <div class="mb-header">
@@ -715,7 +828,6 @@
           </div>
         </div>
 
-        <!-- Tags -->
         <div class="diet-tags">
           {% if user.dietary_preference.diet_type %}
             <span class="dtag dtag-lime"><i class="fas fa-leaf"></i>{{ user.dietary_preference.diet_type.replace('-',' ').title() }}</span>
@@ -744,6 +856,76 @@
           </a>
         </div>
       {% endif %}
+    </div>
+  </div>
+
+  <!-- ══ BMI ══ -->
+  <div class="cell cell--bmi">
+    <div class="bmi-cell">
+      <div class="bmi-cell-header">
+        <div class="section-label">
+          <div class="sl-icon sl-rose"><i class="fas fa-weight-scale"></i></div>
+          BMI Tracker
+        </div>
+        <a href="{{ url_for('bmi.bmi') }}" class="btn-manage">
+          <i class="fas fa-plus"></i> Calculate BMI
+        </a>
+      </div>
+
+      {% if latest_bmi %}
+        <div class="bmi-content">
+          <div class="bmi-score-block">
+            <div class="bmi-score-num">{{ latest_bmi.bmi }}</div>
+            <div class="bmi-score-lbl">Your BMI</div>
+            <span class="bmi-cat-badge {{ latest_bmi.category | lower }}">
+              {% if latest_bmi.category == 'Normal' %}✅
+              {% elif latest_bmi.category == 'Underweight' %}💧
+              {% elif latest_bmi.category == 'Overweight' %}⚠️
+              {% else %}🔴{% endif %}
+              {{ latest_bmi.category }}
+            </span>
+          </div>
+
+          <div class="bmi-range-block">
+            <div class="bmi-range-label">BMI Scale Reference</div>
+            <div class="bmi-range-track">
+              <div class="bmi-range-seg s-cyan"></div>
+              <div class="bmi-range-seg s-teal"></div>
+              <div class="bmi-range-seg s-amber"></div>
+              <div class="bmi-range-seg s-rose"></div>
+            </div>
+            <div class="bmi-range-ticks">
+              <span>Under<br>18.5</span>
+              <span>Normal<br>18.5–25</span>
+              <span>Over<br>25–30</span>
+              <span>Obese<br>30+</span>
+            </div>
+          </div>
+
+          <div class="bmi-history">
+            <div class="bmi-history-title">Recent Records</div>
+            {% for record in bmi_records %}
+            <div class="bmi-history-row">
+              <span class="bmi-history-date">{{ record.recorded_at.strftime('%d %b %Y') }}</span>
+              <span class="bmi-history-val">{{ record.bmi }}</span>
+              <span class="bmi-history-badge {{ record.category | lower }}">{{ record.category }}</span>
+            </div>
+            {% endfor %}
+          </div>
+        </div>
+
+      {% else %}
+        <div class="bmi-content">
+          <div class="bmi-empty">
+            <div class="bmi-empty-icon"><i class="fas fa-weight-scale"></i></div>
+            <p>No BMI records yet. Calculate your BMI to start tracking your health.</p>
+            <a href="{{ url_for('bmi.bmi') }}" class="btn-rose">
+              <i class="fas fa-calculator"></i> Calculate My BMI
+            </a>
+          </div>
+        </div>
+      {% endif %}
+
     </div>
   </div>
 
