@@ -40,6 +40,11 @@ class User(UserMixin, db.Model):
         uselist=False,
         cascade="all, delete-orphan"
     )
+    upgrade_requests = db.relationship(
+    "RoleUpgradeRequest",
+    back_populates="user",
+    cascade="all, delete-orphan"
+    )
 
     
     bmi_records = db.relationship(

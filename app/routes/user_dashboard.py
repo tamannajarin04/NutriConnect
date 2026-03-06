@@ -6,6 +6,7 @@ from app.models import db, User, DietaryPreference, BMIRecord  # ✅ added BMIRe
 
 user_dashboard_bp = Blueprint("user_dashboard", __name__)
 
+
 @user_dashboard_bp.route("/")
 @login_required
 def index():
@@ -29,8 +30,19 @@ def index():
     if current_user.is_admin():
         return render_template("dashboard/admin_dashboard.html", user=current_user)
 
-    flash("No role assigned. Please contact admin.", "warning")
-    return redirect(url_for("auth.logout"))
+    # ✅ Default: User dashboard
+    my_requests = (
+        RoleUpgradeRequest.query.filter_by(user_id=current_user.id)
+        .order_by(RoleUpgradeRequest.created_at.desc())
+        .all()
+    )
+
+    return render_template(
+        "dashboard/user_dashboard.html",
+        user=current_user,
+        my_requests=my_requests
+    )
+
 
 
 @user_dashboard_bp.route("/profile")
@@ -56,10 +68,10 @@ def edit_profile():
 
         file = request.files.get("profile_picture")
         if file and file.filename:
-            allowed = {"png", "jpg", "jpeg", "gif"}
+            allowed_exts = {"png", "jpg", "jpeg", "gif"}
             ext = file.filename.rsplit(".", 1)[-1].lower() if "." in file.filename else ""
 
-            if ext not in allowed:
+            if ext not in allowed_exts:
                 flash("Invalid image type. Use PNG/JPG/JPEG/GIF only.", "danger")
                 return redirect(url_for("user_dashboard.edit_profile"))
 
@@ -90,7 +102,8 @@ def edit_profile():
 @user_dashboard_bp.route("/dietary-preferences", methods=["GET", "POST"])
 @login_required
 def dietary_preferences():
-    if not current_user.is_user():
+    # ✅ Only regular users can access dietary preferences
+    if not current_user.has_role("user"):
         flash("Dietary preferences are only available for regular users.", "warning")
         return redirect(url_for("user_dashboard.index"))
 
