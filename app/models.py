@@ -41,7 +41,7 @@ class User(UserMixin, db.Model):
         cascade="all, delete-orphan"
     )
 
-    # ✅ NEW: Link to BMI records
+    
     bmi_records = db.relationship(
         "BMIRecord",
         backref="user",
@@ -92,17 +92,17 @@ class DietaryPreference(db.Model):
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
 
-# ✅ NEW MODEL — paste at the bottom
+
 class BMIRecord(db.Model):
     __tablename__ = "bmi_records"
 
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
 
-    height = db.Column(db.Float, nullable=False)   # stored in meters
-    weight = db.Column(db.Float, nullable=False)   # stored in kg
+    height = db.Column(db.Float, nullable=False)   
+    weight = db.Column(db.Float, nullable=False)  
     bmi = db.Column(db.Float, nullable=False)
-    category = db.Column(db.String(50), nullable=False)  # Underweight / Normal / Overweight / Obese
+    category = db.Column(db.String(50), nullable=False)  
 
     recorded_at = db.Column(db.DateTime, default=datetime.utcnow)
 
