@@ -4,7 +4,10 @@
 {% block content %}
 <h2>Welcome, {{ user.first_name or user.username }}!</h2>
 <p class="lead">
-  Your Role: <span class="badge bg-success">User</span>
+  Your Role:
+<span class="badge bg-success">
+  {{ "Admin" if user.has_role("admin") else ("Food Provider" if user.has_role("food_provider") else "User") }}
+</span>
 </p>
 <hr>
 
@@ -26,10 +29,7 @@
         <p><strong>Email:</strong> {{ user.email }}</p>
         <p><strong>Username:</strong> {{ user.username }}</p>
 
-        <a
-          href="{{ url_for('user_dashboard.view_profile') }}"
-          class="btn btn-primary"
-        >
+        <a href="{{ url_for('user_dashboard.view_profile') }}" class="btn btn-primary">
           <i class="fas fa-eye"></i> View Full Profile
         </a>
       </div>
@@ -64,15 +64,68 @@
           </p>
         {% endif %}
 
-        <a
-          href="{{ url_for('user_dashboard.dietary_preferences') }}"
-          class="btn btn-success"
-        >
-          <i class="fas fa-cog"></i> Manage Preferences
-        </a>
+        <div class="d-flex flex-wrap gap-2">
+          <a href="{{ url_for('user_dashboard.dietary_preferences') }}"
+             class="btn btn-success">
+            <i class="fas fa-cog"></i> Manage Preferences
+          </a>
+        </div>
+
       </div>
     </div>
   </div>
 
 </div>
+
+<!-- Request History -->
+<div class="card shadow-sm mt-3">
+  <div class="card-header">
+    <div class="d-flex justify-content-between align-items-center">
+      <h5 class="mb-0">
+        <i class="fas fa-history"></i> My Role Upgrade Requests
+      </h5>
+
+      <a href="{{ url_for('user_dashboard.request_upgrade') }}"
+         class="btn btn-sm btn-outline-primary">
+        Request Role Upgrade
+      </a>
+    </div>
+  </div>
+
+  <div class="card-body">
+
+    {% if my_requests and my_requests|length > 0 %}
+      <div class="table-responsive">
+        <table class="table table-sm table-striped align-middle">
+          <thead>
+            <tr>
+              <th>Requested Role</th>
+              <th>Status</th>
+              <th>Note</th>
+              <th>Date</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for r in my_requests %}
+            <tr>
+              <td>{{ r.requested_role }}</td>
+              <td>
+                <span class="badge bg-{% if r.status=='pending' %}warning text-dark{% elif r.status=='approved' %}success{% else %}secondary{% endif %}">
+                  {{ r.status }}
+                </span>
+              </td>
+              <td>{{ r.note or "" }}</td>
+              <td>{{ r.created_at.strftime("%Y-%m-%d %H:%M") if r.created_at else "" }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% else %}
+      <p class="text-muted mb-0">No role upgrade requests yet.</p>
+    {% endif %}
+
+  </div>
+</div>
+
 {% endblock %}

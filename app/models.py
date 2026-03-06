@@ -40,6 +40,11 @@ class User(UserMixin, db.Model):
         uselist=False,
         cascade="all, delete-orphan"
     )
+    upgrade_requests = db.relationship(
+    "RoleUpgradeRequest",
+    back_populates="user",
+    cascade="all, delete-orphan"
+    )
 
     def set_password(self, password: str):
         self.password_hash = generate_password_hash(password)
@@ -66,7 +71,6 @@ class DietaryPreference(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False, unique=True)
 
     diet_type = db.Column(db.String(50))
-
     # JSON works in PostgreSQL
     food_restrictions = db.Column(db.JSON, default=list)
     allergies = db.Column(db.JSON, default=list)
@@ -83,3 +87,30 @@ class DietaryPreference(db.Model):
 
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+class RoleUpgradeRequest(db.Model):
+    __tablename__ = "role_upgrade_requests"
+
+    id = db.Column(db.Integer, primary_key=True)
+
+    user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
+
+    # requested_role: "food_provider" or "admin"
+    requested_role = db.Column(db.String(50), nullable=False)
+
+    # pending / approved / rejected
+    status = db.Column(db.String(20), default="pending", nullable=False)
+
+    # user message
+    note = db.Column(db.Text)
+
+    # admin message
+    admin_comment = db.Column(db.Text)
+
+    created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
+
+    user = db.relationship("User", back_populates="upgrade_requests")
+
+    def __repr__(self):
+        return f"<RoleUpgradeRequest user_id={self.user_id} role={self.requested_role} status={self.status}>"

@@ -2,16 +2,68 @@
 {% block title %}Admin Dashboard{% endblock %}
 
 {% block content %}
-<h2>Welcome, {{ user.first_name or user.username }}!</h2>
+<div class="d-flex justify-content-between align-items-start flex-wrap gap-2">
+  <div>
+    <h2 class="mb-1">Welcome, {{ user.first_name or user.username }}!</h2>
+    <p class="lead mb-0">
+      Your Role: <span class="badge bg-danger">Admin</span>
+    </p>
+  </div>
 
-<p class="lead">
-  Your Role: <span class="badge bg-danger">Admin</span>
-</p>
-
-<hr>
-
-<div class="alert alert-info">
-  <i class="fas fa-info-circle"></i>
-  Dietary preferences are only available for regular users.
+  <div class="d-flex gap-2">
+    <a href="{{ url_for('admin.role_requests') }}" class="btn btn-primary">
+      <i class="fas fa-clipboard-check"></i> Role Requests
+    </a>
+  </div>
 </div>
+
+<hr class="my-4">
+
+<!-- Placeholder area for future admin modules -->
+<div class="row g-3">
+  <div class="col-md-6">
+    <div class="card shadow-sm h-100">
+      <div class="card-header bg-light">
+        <h6 class="mb-0"><i class="fas fa-users-cog"></i> User Management</h6>
+      </div>
+      <div class="card-body text-muted">
+        Add user management features here later (block/unblock, reset roles, view reports, etc.).
+      </div>
+    </div>
+  </div>
+
+  <div class="col-md-6">
+    <div class="card shadow-sm h-100">
+      <div class="card-header bg-light">
+        <h6 class="mb-0"><i class="fas fa-store"></i> Food Provider Management</h6>
+      </div>
+      <div class="card-body text-muted">
+        Add provider verification, menu moderation, compliance checks, etc.
+      </div>
+    </div>
+  </div>
+
+  <div class="col-md-6">
+    <div class="card shadow-sm h-100">
+      <div class="card-header bg-light">
+        <h6 class="mb-0"><i class="fas fa-cogs"></i> System Settings</h6>
+      </div>
+      <div class="card-body text-muted">
+        Add settings, security controls, maintenance tools, etc.
+      </div>
+    </div>
+  </div>
+
+  <div class="col-md-6">
+    <div class="card shadow-sm h-100">
+      <div class="card-header bg-light">
+        <h6 class="mb-0"><i class="fas fa-chart-line"></i> Analytics / Reports</h6>
+      </div>
+      <div class="card-body text-muted">
+        Add admin analytics dashboards here later.
+      </div>
+    </div>
+  </div>
+</div>
+
 {% endblock %}
