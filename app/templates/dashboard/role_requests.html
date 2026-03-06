@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<h2>Role Upgrade Requests</h2>
+
+<table class="table">
+
+<tr>
+<th>User</th>
+<th>Requested Role</th>
+<th>Action</th>
+</tr>
+
+{% for r in requests %}
+
+<tr>
+
+<td>{{ r.user.username }}</td>
+
+<td>{{ r.requested_role }}</td>
+
+<td>
+
+<a href="{{ url_for('admin.approve_request', req_id=r.id) }}"
+class="btn btn-success btn-sm">Approve</a>
+
+<a href="{{ url_for('admin.reject_request', req_id=r.id) }}"
+class="btn btn-danger btn-sm">Reject</a>
+
+</td>
+
+</tr>
+
+{% endfor %}
+
+</table>
+
+{% endblock %}
