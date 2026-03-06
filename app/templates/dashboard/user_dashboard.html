@@ -1,131 +1,785 @@
 {% extends "base.html" %}
-{% block title %}User Dashboard{% endblock %}
+{% block title %}Dashboard · NutriConnect{% endblock %}
+
+{% block extra_css %}
+<link href="https://fonts.googleapis.com/css2?family=Cabinet+Grotesk:wght@400;500;700;800;900&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+{% endblock %}
 
 {% block content %}
-<h2>Welcome, {{ user.first_name or user.username }}!</h2>
-<p class="lead">
-  Your Role:
-<span class="badge bg-success">
-  {{ "Admin" if user.has_role("admin") else ("Food Provider" if user.has_role("food_provider") else "User") }}
-</span>
-</p>
-<hr>
+<style>
+  /* ═══════════════════════════════════════
+     DASHBOARD TOKENS  (dark-mode aware)
+  ═══════════════════════════════════════ */
+  .dash {
+    --d-bg:        var(--nc-bg,        #f0f4f8);
+    --d-surface:   var(--nc-surface,   #ffffff);
+    --d-surface-2: var(--nc-surface-2, #f7f9fc);
+    --d-border:    var(--nc-border,    #e2e8f0);
+    --d-text:      var(--nc-text,      #0d1117);
+    --d-text-2:    var(--nc-text-2,    #374151);
+    --d-muted:     var(--nc-text-muted,#6b7280);
+    --d-faint:     var(--nc-text-faint,#9ca3af);
 
-<div class="row">
+    --teal:   #0d9488;
+    --teal-d: #0f766e;
+    --teal-l: #ccfbf1;
+    --cyan:   #06b6d4;
+    --cyan-l: #cffafe;
+    --lime:   #84cc16;
+    --lime-l: #ecfccb;
+    --rose:   #f43f5e;
+    --rose-l: #ffe4e6;
+    --amber:  #f59e0b;
+    --amber-l:#fef3c7;
+    --violet: #7c3aed;
+    --violet-l:#ede9fe;
 
-  <!-- Profile Card -->
-  <div class="col-md-6 mb-4">
-    <div class="card h-100 shadow-sm">
-      <div class="card-header bg-primary text-white">
-        <h5 class="mb-0">
-          <i class="fas fa-user"></i> My Profile
-        </h5>
+    --r: 20px;
+    font-family: 'Cabinet Grotesk', sans-serif;
+  }
+
+  /* ─── Layout wrapper ─── */
+  .dash { min-height: 100vh; }
+
+  /* ═══════════════════════════════════════
+     BENTO GRID
+  ═══════════════════════════════════════ */
+  .bento {
+    display: grid;
+    grid-template-columns: repeat(12, 1fr);
+    grid-template-rows: auto;
+    gap: 1rem;
+  }
+
+  /* Cell base */
+  .cell {
+    background: var(--d-surface);
+    border: 1px solid var(--d-border);
+    border-radius: var(--r);
+    overflow: hidden;
+    position: relative;
+    transition: transform .2s, box-shadow .2s;
+  }
+  .cell:hover { transform: translateY(-2px); box-shadow: 0 8px 32px rgba(0,0,0,.1); }
+
+  /* Grid placement */
+  .cell--hero       { grid-column: span 12; }
+  .cell--completion { grid-column: span 8; }
+  .cell--streak     { grid-column: span 4; }
+  .cell--profile    { grid-column: span 5; }
+  .cell--diet       { grid-column: span 7; }
+  .cell--stat-a     { grid-column: span 3; }
+  .cell--stat-b     { grid-column: span 3; }
+  .cell--stat-c     { grid-column: span 3; }
+  .cell--stat-d     { grid-column: span 3; }
+
+  @media (max-width: 900px) {
+    .cell--completion,
+    .cell--streak,
+    .cell--profile,
+    .cell--diet { grid-column: span 12; }
+    .cell--stat-a,.cell--stat-b,
+    .cell--stat-c,.cell--stat-d { grid-column: span 6; }
+  }
+  @media (max-width: 540px) {
+    .cell--stat-a,.cell--stat-b,
+    .cell--stat-c,.cell--stat-d { grid-column: span 12; }
+  }
+
+  /* ═══════════════════════════════════════
+     HERO CELL
+  ═══════════════════════════════════════ */
+  .hero-cell {
+    padding: 2.75rem 3rem;
+    background: var(--d-text);
+    color: #fff;
+    position: relative;
+    overflow: hidden;
+    min-height: 220px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 2rem;
+  }
+
+  /* Layered mesh */
+  .hero-cell::before {
+    content: '';
+    position: absolute; inset: 0; z-index: 0;
+    background:
+      radial-gradient(ellipse 70% 80% at  -5% 50%, rgba(13,148,136,.5)   0%, transparent 55%),
+      radial-gradient(ellipse 50% 70% at 105% 20%, rgba(124,58,237,.45)  0%, transparent 55%),
+      radial-gradient(ellipse 40% 60% at  55% 110%,rgba(6,182,212,.3)    0%, transparent 50%);
+  }
+
+  /* Dot grid */
+  .hero-cell::after {
+    content: '';
+    position: absolute; inset: 0; z-index: 0;
+    background-image: radial-gradient(circle, rgba(255,255,255,.12) 1px, transparent 1px);
+    background-size: 28px 28px;
+  }
+
+  .hero-cell > * { position: relative; z-index: 1; }
+
+  
+  .hero-eyebrow {
+    display: inline-flex; align-items: center; gap: .45rem;
+    background: rgba(255,255,255,.1);
+    border: 1px solid rgba(255,255,255,.18);
+    border-radius: 99px; padding: .3rem .9rem;
+    font-size: .72rem; font-weight: 700; letter-spacing: .08em;
+    text-transform: uppercase; margin-bottom: 1rem; color: rgba(255,255,255,.85);
+  }
+  .hero-eyebrow-dot { width: 6px; height: 6px; border-radius: 50%; background: #34d399; box-shadow: 0 0 6px #34d399; animation: pulse-dot 2s ease-in-out infinite; }
+  @keyframes pulse-dot { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.5;transform:scale(.8)} }
+
+  .hero-name {
+    font-size: clamp(1.8rem, 4vw, 2.8rem);
+    font-weight: 900;
+    line-height: 1.05;
+    letter-spacing: -.04em;
+    margin-bottom: .5rem;
+  }
+  .hero-name-accent {
+    font-family: 'Instrument Serif', serif;
+    font-style: italic;
+    background: linear-gradient(135deg, #5eead4 0%, #67e8f9 50%, #a5f3fc 100%);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .hero-tagline {
+    font-size: .9rem; color: rgba(255,255,255,.5);
+    font-weight: 400; max-width: 340px; line-height: 1.5;
+  }
+
+  /* Right side: big ring gauge */
+  .hero-right { display: flex; align-items: center; gap: 2rem; }
+
+  .ring-gauge { position: relative; width: 110px; height: 110px; flex-shrink: 0; }
+  .ring-gauge svg { width: 110px; height: 110px; transform: rotate(-90deg); }
+  .ring-bg   { fill: none; stroke: rgba(255,255,255,.1); stroke-width: 8; }
+  .ring-fill {
+    fill: none; stroke: url(#ringGrad); stroke-width: 8;
+    stroke-linecap: round;
+    stroke-dasharray: 283;
+    stroke-dashoffset: 283;
+    transition: stroke-dashoffset 1.4s cubic-bezier(.16,1,.3,1);
+  }
+  .ring-label {
+    position: absolute; inset: 0;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    color: #fff;
+  }
+  .ring-pct {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 1.4rem; font-weight: 600; line-height: 1;
+  }
+  .ring-sub { font-size: .6rem; opacity: .5; text-transform: uppercase; letter-spacing: .06em; margin-top: .15rem; }
+
+  .hero-stats-col { display: flex; flex-direction: column; gap: 1rem; }
+  .hsc {
+    display: flex; flex-direction: column; gap: .1rem;
+    border-left: 2px solid rgba(255,255,255,.15);
+    padding-left: .9rem;
+  }
+  .hsc-val {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 1.1rem; font-weight: 600; color: #fff; line-height: 1;
+  }
+  .hsc-val.c-teal   { color: #5eead4; }
+  .hsc-val.c-amber  { color: #fcd34d; }
+  .hsc-val.c-violet { color: #c4b5fd; }
+  .hsc-val.c-cyan   { color: #67e8f9; }
+  .hsc-unit { font-size: .7rem; opacity: .55; margin-left: .1rem; }
+  .hsc-lbl  { font-size: .65rem; color: rgba(255,255,255,.38); text-transform: uppercase; letter-spacing: .08em; font-weight: 700; }
+
+  /* ═══════════════════════════════════════
+     COMPLETION CELL
+  ═══════════════════════════════════════ */
+  .comp-inner { padding: 1.5rem 1.75rem; }
+  .comp-header {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 1.25rem;
+  }
+  .comp-title {
+    display: flex; align-items: center; gap: .6rem;
+    font-size: .88rem; font-weight: 800; color: var(--d-text);
+  }
+  .comp-icon-wrap {
+    width: 32px; height: 32px; border-radius: 10px;
+    background: var(--teal-l); color: var(--teal);
+    display: flex; align-items: center; justify-content: center; font-size: .8rem;
+  }
+  .comp-pct-pill {
+    font-family: 'JetBrains Mono', monospace; font-size: .8rem; font-weight: 600;
+    background: var(--teal-l); color: var(--teal-d);
+    border-radius: 99px; padding: .2rem .75rem;
+  }
+
+  .seg-track {
+    display: flex; gap: 4px; height: 8px; border-radius: 99px;
+    overflow: hidden; margin-bottom: 1rem;
+  }
+  .seg {
+    flex: 1; border-radius: 99px;
+    background: var(--d-border);
+    transition: background .6s cubic-bezier(.16,1,.3,1);
+  }
+  .seg.lit { background: linear-gradient(90deg, var(--teal), var(--cyan)); }
+
+  .step-list { display: flex; flex-wrap: wrap; gap: .45rem; }
+  .step-pill {
+    display: inline-flex; align-items: center; gap: .35rem;
+    font-size: .74rem; font-weight: 700; padding: .3rem .8rem;
+    border-radius: 99px; border: 1.5px solid transparent;
+    transition: transform .15s;
+  }
+  .step-pill:hover { transform: translateY(-1px); }
+  .step-pill.done { background: var(--teal-l); color: var(--teal-d); border-color: #99f6e4; }
+  .step-pill.todo { background: var(--d-surface-2); color: var(--d-faint); border-color: var(--d-border); }
+
+  /* ═══════════════════════════════════════
+     STREAK CELL
+  ═══════════════════════════════════════ */
+  .streak-inner {
+    padding: 1.5rem;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    height: 100%; min-height: 160px;
+    text-align: center;
+    background: linear-gradient(145deg, #fff7ed, #fef3c7);
+    position: relative; overflow: hidden;
+  }
+  [data-theme="dark"] .streak-inner {
+    background: linear-gradient(145deg, #1c1508, #2d1f07) !important;
+  }
+  .streak-inner::before {
+    content: '🔥';
+    position: absolute; right: -10px; bottom: -10px;
+    font-size: 6rem; opacity: .08; line-height: 1;
+    transform: rotate(-15deg);
+  }
+  .streak-num {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 3rem; font-weight: 600;
+    color: var(--amber); line-height: 1;
+  }
+  .streak-label { font-size: .78rem; font-weight: 700; color: #92400e; margin-top: .3rem; letter-spacing: .04em; }
+  [data-theme="dark"] .streak-label { color: #fcd34d !important; }
+  .streak-dots { display: flex; gap: .35rem; margin-top: .9rem; }
+  .streak-dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: var(--d-border);
+    transition: background .3s;
+  }
+  .streak-dot.active { background: var(--amber); box-shadow: 0 0 6px rgba(245,158,11,.4); }
+
+  /* ═══════════════════════════════════════
+     MINI STAT CELLS
+  ═══════════════════════════════════════ */
+  .stat-cell {
+    padding: 1.35rem 1.5rem;
+    display: flex; flex-direction: column; justify-content: space-between;
+    min-height: 120px;
+  }
+  .stat-cell-top { display: flex; align-items: center; justify-content: space-between; }
+  .stat-cell-icon {
+    width: 36px; height: 36px; border-radius: 11px;
+    display: flex; align-items: center; justify-content: center; font-size: .95rem;
+  }
+  .sci-teal   { background: var(--teal-l);   color: var(--teal); }
+  .sci-amber  { background: var(--amber-l);  color: #d97706; }
+  .sci-violet { background: var(--violet-l); color: var(--violet); }
+  .sci-cyan   { background: var(--cyan-l);   color: #0e7490; }
+
+  .stat-trend {
+    display: inline-flex; align-items: center; gap: .25rem;
+    font-size: .7rem; font-weight: 700; border-radius: 99px; padding: .15rem .55rem;
+  }
+  .stat-trend.up   { background: var(--teal-l);  color: var(--teal-d); }
+  .stat-trend.down { background: var(--rose-l);  color: var(--rose); }
+  .stat-trend.neutral { background: var(--d-surface-2); color: var(--d-muted); }
+
+  .stat-val {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 1.65rem; font-weight: 600;
+    color: var(--d-text); line-height: 1; margin-top: .5rem;
+  }
+  .stat-val .unit { font-size: .75rem; opacity: .5; margin-left: .15rem; font-weight: 400; }
+  .stat-lbl { font-size: .72rem; color: var(--d-muted); font-weight: 600; text-transform: uppercase; letter-spacing: .05em; margin-top: .25rem; }
+
+  /* ═══════════════════════════════════════
+     PROFILE CELL
+  ═══════════════════════════════════════ */
+  .profile-cell { padding: 1.5rem; }
+  .profile-header { display: flex; align-items: center; gap: 1rem; margin-bottom: 1.25rem; }
+  .profile-avatar {
+    width: 56px; height: 56px; border-radius: 16px; flex-shrink: 0;
+    background: linear-gradient(135deg, var(--teal), var(--cyan));
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.4rem; font-weight: 800; color: #fff;
+    letter-spacing: -.03em;
+    box-shadow: 0 4px 16px rgba(13,148,136,.3);
+    overflow: hidden;
+  }
+  .profile-avatar img { width: 100%; height: 100%; object-fit: cover; border-radius: 16px; }
+ 
+  .profile-fullname { font-size: 1rem; font-weight: 800; color: var(--d-text); letter-spacing: -.02em; }
+  .profile-handle   { font-size: .78rem; color: var(--d-muted); margin-top: .1rem; }
+  .profile-role {
+    display: inline-flex; align-items: center; gap: .3rem;
+    background: var(--teal-l); color: var(--teal-d);
+    border-radius: 99px; padding: .15rem .65rem;
+    font-size: .7rem; font-weight: 700; margin-top: .35rem;
+  }
+
+  .profile-rows { display: flex; flex-direction: column; gap: 0; }
+  .profile-row {
+    display: flex; align-items: center; gap: .75rem;
+    padding: .7rem 0; border-bottom: 1px solid var(--d-border);
+  }
+  .profile-row:last-child { border-bottom: none; padding-bottom: 0; }
+  .pr-ico {
+    width: 30px; height: 30px; border-radius: 9px; flex-shrink: 0;
+    background: var(--d-surface-2); border: 1px solid var(--d-border);
+    display: flex; align-items: center; justify-content: center;
+    font-size: .75rem; color: var(--d-muted);
+  }
+  .pr-lbl { font-size: .67rem; text-transform: uppercase; letter-spacing: .06em; color: var(--d-faint); font-weight: 700; }
+  .pr-val { font-size: .85rem; font-weight: 700; color: var(--d-text); }
+
+  .profile-cell-foot { margin-top: 1.25rem; }
+  .btn-teal {
+    display: inline-flex; align-items: center; gap: .45rem;
+    background: var(--teal); color: #fff; border: none; font-family: inherit;
+    border-radius: 11px; padding: .6rem 1.35rem; font-size: .83rem; font-weight: 800;
+    text-decoration: none; cursor: pointer; width: 100%; justify-content: center;
+    box-shadow: 0 2px 8px rgba(13,148,136,.3), 0 1px 2px rgba(13,148,136,.2);
+    transition: background .15s, transform .12s, box-shadow .15s;
+    letter-spacing: -.01em;
+  }
+  .btn-teal:hover { background: var(--teal-d); color: #fff; transform: translateY(-1px); box-shadow: 0 6px 20px rgba(13,148,136,.35); }
+
+  /* ═══════════════════════════════════════
+     DIET CELL
+  ═══════════════════════════════════════ */
+  .diet-cell { padding: 1.5rem; }
+  .diet-cell-header {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 1.25rem;
+  }
+  .section-label {
+    display: flex; align-items: center; gap: .55rem;
+    font-size: .88rem; font-weight: 800; color: var(--d-text);
+  }
+  .sl-icon {
+    width: 32px; height: 32px; border-radius: 10px;
+    display: flex; align-items: center; justify-content: center; font-size: .8rem;
+  }
+  .sl-lime { background: var(--lime-l); color: #4d7c0f; }
+
+  .btn-manage {
+    display: inline-flex; align-items: center; gap: .35rem;
+    background: var(--d-surface-2); color: var(--d-text-2);
+    border: 1px solid var(--d-border); border-radius: 9px;
+    padding: .38rem .85rem; font-size: .76rem; font-weight: 700;
+    text-decoration: none; transition: background .15s, border-color .15s;
+    font-family: inherit;
+  }
+  .btn-manage:hover { background: var(--d-border); color: var(--d-text); }
+
+  /* Macro bars */
+  .macro-grid { display: grid; grid-template-columns: 1fr 1fr; gap: .75rem; margin-bottom: 1.1rem; }
+  
+  .mb-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: .4rem; }
+  .mb-name { font-size: .72rem; font-weight: 700; color: var(--d-muted); text-transform: uppercase; letter-spacing: .05em; }
+  .mb-val  { font-family: 'JetBrains Mono', monospace; font-size: .72rem; color: var(--d-text); font-weight: 500; }
+  .mb-track { height: 6px; background: var(--d-border); border-radius: 99px; overflow: hidden; }
+  .mb-fill  { height: 100%; border-radius: 99px; transition: width 1s cubic-bezier(.16,1,.3,1); }
+  .mb-fill.calories { background: linear-gradient(90deg, var(--amber), #fbbf24); }
+  .mb-fill.protein  { background: linear-gradient(90deg, var(--teal), var(--cyan)); }
+  .mb-fill.carbs    { background: linear-gradient(90deg, var(--violet), #a78bfa); }
+  .mb-fill.fat      { background: linear-gradient(90deg, var(--rose), #fb7185); }
+
+  /* Diet tag pills */
+  .diet-tags { display: flex; flex-wrap: wrap; gap: .4rem; }
+  .dtag {
+    display: inline-flex; align-items: center; gap: .3rem;
+    padding: .32rem .75rem; border-radius: 99px;
+    font-size: .76rem; font-weight: 700; border: 1.5px solid transparent;
+  }
+  .dtag-lime   { background: var(--lime-l);   color: #3f6212; border-color: #bef264; }
+  .dtag-cyan   { background: var(--cyan-l);   color: #0e7490; border-color: #a5f3fc; }
+  .dtag-amber  { background: var(--amber-l);  color: #92400e; border-color: #fde68a; }
+  .dtag-violet { background: var(--violet-l); color: #5b21b6; border-color: #c4b5fd; }
+
+  .diet-empty {
+    display: flex; flex-direction: column; align-items: center;
+    padding: 1.5rem 1rem; text-align: center;
+  }
+  .diet-empty-icon {
+    width: 60px; height: 60px; border-radius: 20px;
+    background: var(--lime-l); color: #4d7c0f;
+    font-size: 1.6rem; display: flex; align-items: center;
+    justify-content: center; margin-bottom: .85rem;
+  }
+  .diet-empty p { font-size: .82rem; color: var(--d-muted); margin: 0 0 .85rem; line-height: 1.6; max-width: 220px; }
+
+  .btn-setup {
+    display: inline-flex; align-items: center; gap: .4rem;
+    background: #4d7c0f; color: #fff; border: none; font-family: inherit;
+    border-radius: 10px; padding: .55rem 1.2rem; font-size: .82rem; font-weight: 800;
+    text-decoration: none; cursor: pointer;
+    transition: background .15s, transform .12s;
+  }
+  .btn-setup:hover { background: #365314; color: #fff; transform: translateY(-1px); }
+
+  /* ═══════════════════════════════════════
+     ANIMATIONS
+  ═══════════════════════════════════════ */
+  @keyframes rise {
+    from { opacity: 0; transform: translateY(20px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  .cell { animation: rise .5s cubic-bezier(.16,1,.3,1) both; }
+  .cell--hero       { animation-delay: .03s; }
+  .cell--completion { animation-delay: .09s; }
+  .cell--streak     { animation-delay: .12s; }
+  .cell--stat-a     { animation-delay: .15s; }
+  .cell--stat-b     { animation-delay: .18s; }
+  .cell--stat-c     { animation-delay: .21s; }
+  .cell--stat-d     { animation-delay: .24s; }
+  .cell--profile    { animation-delay: .27s; }
+  .cell--diet       { animation-delay: .30s; }
+</style>
+
+{% set pct = (((
+  (1 if (user.first_name and user.last_name) else 0) +
+  (1 if user.email else 0) +
+  (1 if user.profile_picture else 0) +
+  (1 if user.dietary_preference else 0)
+) / 4) * 100) | int %}
+
+<div class="dash">
+<div class="bento">
+
+  <!-- ══ HERO ══ -->
+  <div class="cell cell--hero" style="padding:0;border:none;background:transparent;box-shadow:none;">
+    <div class="hero-cell" style="border-radius:20px;">
+      <svg width="0" height="0" style="position:absolute">
+        <defs>
+          <linearGradient id="ringGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%"   stop-color="#5eead4"/>
+            <stop offset="100%" stop-color="#67e8f9"/>
+          </linearGradient>
+        </defs>
+      </svg>
+
+      <div class="hero-left">
+        <div class="hero-eyebrow">
+          <span class="hero-eyebrow-dot"></span>
+          Dashboard · NutriConnect
+        </div>
+        <div class="hero-name">
+          Hello, <span class="hero-name-accent">{{ user.first_name or user.username }}</span> 👋
+        </div>
+        <div class="hero-tagline">Track your nutrition, complete your profile, and stay on top of your health goals.</div>
       </div>
-      <div class="card-body">
-        <p>
-          <strong>Name:</strong>
-          {{ user.first_name or '' }} {{ user.last_name or '' }}
-        </p>
-        <p><strong>Email:</strong> {{ user.email }}</p>
-        <p><strong>Username:</strong> {{ user.username }}</p>
 
-        <a href="{{ url_for('user_dashboard.view_profile') }}" class="btn btn-primary">
+      <div class="hero-right">
+        <!-- Ring gauge -->
+        <div class="ring-gauge">
+          <svg viewBox="0 0 100 100">
+            <circle class="ring-bg"   cx="50" cy="50" r="45"/>
+            <circle class="ring-fill" cx="50" cy="50" r="45" data-pct="{{ pct }}"/>
+          </svg>
+          <div class="ring-label">
+            <span class="ring-pct">{{ pct }}%</span>
+            <span class="ring-sub">Complete</span>
+          </div>
+        </div>
+
+        <!-- Stats column -->
+        <div class="hero-stats-col">
+          <div class="hsc">
+            <span class="hsc-val c-teal">
+              {{ user.dietary_preference.diet_type.replace('-',' ').title() if user.dietary_preference and user.dietary_preference.diet_type else '—' }}
+            </span>
+            <span class="hsc-lbl">Diet Type</span>
+          </div>
+          <div class="hsc">
+            <span class="hsc-val c-amber">
+              {% if user.dietary_preference and user.dietary_preference.calorie_goal %}{{ user.dietary_preference.calorie_goal }}<span class="hsc-unit">kcal</span>{% else %}—{% endif %}
+            </span>
+            <span class="hsc-lbl">Daily Goal</span>
+          </div>
+          <div class="hsc">
+            <span class="hsc-val c-violet">
+              {% if user.dietary_preference and user.dietary_preference.meals_per_day %}{{ user.dietary_preference.meals_per_day }}<span class="hsc-unit">/day</span>{% else %}—{% endif %}
+            </span>
+            <span class="hsc-lbl">Meals / Day</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ COMPLETION ══ -->
+  {% set step_map = {
+    'Name':          (user.first_name and user.last_name),
+    'Email':         user.email,
+    'Photo':         user.profile_picture,
+    'Diet prefs':    user.dietary_preference
+  } %}
+  {% set done_count = step_map.values() | select | list | length %}
+
+  <div class="cell cell--completion">
+    <div class="comp-inner">
+      <div class="comp-header">
+        <div class="comp-title">
+          <div class="comp-icon-wrap"><i class="fas fa-chart-pie"></i></div>
+          Profile Completion
+        </div>
+        <span class="comp-pct-pill">{{ pct }}%</span>
+      </div>
+      <div class="seg-track" id="segTrack">
+        {% for i in range(4) %}
+          <div class="seg {% if i < done_count %}lit{% endif %}"></div>
+        {% endfor %}
+      </div>
+      <div class="step-list">
+        {% for label, completed in step_map.items() %}
+          <span class="step-pill {{ 'done' if completed else 'todo' }}">
+            <i class="fas {{ 'fa-check-circle' if completed else 'fa-circle' }}"></i>
+            {{ label }}
+          </span>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ STREAK ══ -->
+  <div class="cell cell--streak" style="padding:0;border:none;">
+    <div class="streak-inner" style="border-radius:20px;">
+      <div class="streak-num">7</div>
+      <div class="streak-label">Day Streak 🔥</div>
+      <div class="streak-dots">
+        {% for i in range(7) %}
+          <div class="streak-dot active"></div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ MINI STATS ══ -->
+  {% set calorie  = user.dietary_preference.calorie_goal    if user.dietary_preference and user.dietary_preference.calorie_goal    else None %}
+  {% set protein  = user.dietary_preference.protein_goal    if user.dietary_preference and user.dietary_preference.protein_goal    else None %}
+  {% set meals    = user.dietary_preference.meals_per_day   if user.dietary_preference and user.dietary_preference.meals_per_day   else None %}
+  {% set diet_t   = user.dietary_preference.diet_type       if user.dietary_preference and user.dietary_preference.diet_type       else None %}
+
+  <div class="cell cell--stat-a">
+    <div class="stat-cell">
+      <div class="stat-cell-top">
+        <div class="stat-cell-icon sci-amber"><i class="fas fa-fire"></i></div>
+        <span class="stat-trend neutral"><i class="fas fa-minus"></i> Goal</span>
+      </div>
+      <div class="stat-val">{{ calorie or '—' }}{% if calorie %}<span class="unit">kcal</span>{% endif %}</div>
+      <div class="stat-lbl">Daily Calories</div>
+    </div>
+  </div>
+
+  <div class="cell cell--stat-b">
+    <div class="stat-cell">
+      <div class="stat-cell-top">
+        <div class="stat-cell-icon sci-teal"><i class="fas fa-drumstick-bite"></i></div>
+        <span class="stat-trend up"><i class="fas fa-arrow-up"></i> Target</span>
+      </div>
+      <div class="stat-val">{{ protein or '—' }}{% if protein %}<span class="unit">g</span>{% endif %}</div>
+      <div class="stat-lbl">Protein Goal</div>
+    </div>
+  </div>
+
+  <div class="cell cell--stat-c">
+    <div class="stat-cell">
+      <div class="stat-cell-top">
+        <div class="stat-cell-icon sci-violet"><i class="fas fa-clock"></i></div>
+        <span class="stat-trend neutral"><i class="fas fa-minus"></i> Set</span>
+      </div>
+      <div class="stat-val">{{ meals or '—' }}{% if meals %}<span class="unit">/day</span>{% endif %}</div>
+      <div class="stat-lbl">Meals Per Day</div>
+    </div>
+  </div>
+
+  <div class="cell cell--stat-d">
+    <div class="stat-cell">
+      <div class="stat-cell-top">
+        <div class="stat-cell-icon sci-cyan"><i class="fas fa-leaf"></i></div>
+        <span class="stat-trend up"><i class="fas fa-check"></i> Active</span>
+      </div>
+      <div class="stat-val" style="font-size:1.1rem;font-family:'Cabinet Grotesk',sans-serif;letter-spacing:-.03em;">
+        {{ diet_t.replace('-',' ').title() if diet_t else '—' }}
+      </div>
+      <div class="stat-lbl">Diet Plan</div>
+    </div>
+  </div>
+
+  <!-- ══ PROFILE ══ -->
+  <div class="cell cell--profile">
+    <div class="profile-cell">
+      <div class="profile-header">
+        <div class="profile-avatar">
+          {% if user.profile_picture %}
+            <img src="{{ url_for('static', filename=user.profile_picture) }}" alt="avatar">
+          {% else %}
+            {{ (user.first_name or user.username or 'U')[0].upper() }}
+          {% endif %}
+        </div>
+        <div class="profile-name-block">
+          <div class="profile-fullname">{{ user.first_name or '' }} {{ user.last_name or '' }}</div>
+          <div class="profile-handle">@{{ user.username }}</div>
+          <div class="profile-role"><i class="fas fa-shield-halved"></i> User</div>
+        </div>
+      </div>
+
+      <div class="profile-rows">
+        <div class="profile-row">
+          <div class="pr-ico"><i class="fas fa-at"></i></div>
+          <div>
+            <div class="pr-lbl">Email</div>
+            <div class="pr-val" style="font-size:.8rem;">{{ user.email }}</div>
+          </div>
+        </div>
+        <div class="profile-row">
+          <div class="pr-ico"><i class="fas fa-calendar"></i></div>
+          <div>
+            <div class="pr-lbl">Member Since</div>
+            <div class="pr-val">{{ user.created_at.strftime('%b %d, %Y') }}</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="profile-cell-foot">
+        <a href="{{ url_for('user_dashboard.view_profile') }}" class="btn-teal">
           <i class="fas fa-eye"></i> View Full Profile
         </a>
       </div>
     </div>
   </div>
 
-  <!-- Dietary Preferences Card -->
-  <div class="col-md-6 mb-4">
-    <div class="card h-100 shadow-sm">
-      <div class="card-header bg-success text-white">
-        <h5 class="mb-0">
-          <i class="fas fa-utensils"></i> Dietary Preferences
-        </h5>
+  <!-- ══ DIET ══ -->
+  <div class="cell cell--diet">
+    <div class="diet-cell">
+      <div class="diet-cell-header">
+        <div class="section-label">
+          <div class="sl-icon sl-lime"><i class="fas fa-utensils"></i></div>
+          Dietary Preferences
+        </div>
+        <a href="{{ url_for('user_dashboard.dietary_preferences') }}" class="btn-manage">
+          <i class="fas fa-cog"></i> Manage
+        </a>
       </div>
-      <div class="card-body">
-        {% if user.dietary_preference %}
-          <p>
-            <strong>Diet Type:</strong>
-            {{ user.dietary_preference.diet_type or 'Not set' }}
-          </p>
-          <p>
-            <strong>Meals/Day:</strong>
-            {{ user.dietary_preference.meals_per_day or 'Not set' }}
-          </p>
-          <p>
-            <strong>Calorie Goal:</strong>
-            {{ user.dietary_preference.calorie_goal or 'Not set' }}
-          </p>
-        {% else %}
-          <p class="text-muted">
-            No dietary preferences set yet.
-          </p>
-        {% endif %}
 
-        <div class="d-flex flex-wrap gap-2">
-          <a href="{{ url_for('user_dashboard.dietary_preferences') }}"
-             class="btn btn-success">
-            <i class="fas fa-cog"></i> Manage Preferences
-          </a>
+      {% if user.dietary_preference %}
+        <!-- Macro bars -->
+        <div class="macro-grid">
+          <div class="macro-bar-item">
+            <div class="mb-header">
+              <span class="mb-name">Calories</span>
+              <span class="mb-val">{{ user.dietary_preference.calorie_goal or '—' }}{% if user.dietary_preference.calorie_goal %} kcal{% endif %}</span>
+            </div>
+            <div class="mb-track"><div class="mb-fill calories" data-w="75" style="width:0%"></div></div>
+          </div>
+          <div class="macro-bar-item">
+            <div class="mb-header">
+              <span class="mb-name">Protein</span>
+              <span class="mb-val">{{ user.dietary_preference.protein_goal or '—' }}{% if user.dietary_preference.protein_goal %}g{% endif %}</span>
+            </div>
+            <div class="mb-track"><div class="mb-fill protein" data-w="60" style="width:0%"></div></div>
+          </div>
+          <div class="macro-bar-item">
+            <div class="mb-header">
+              <span class="mb-name">Carbs</span>
+              <span class="mb-val">{{ user.dietary_preference.carbs_goal or '—' }}{% if user.dietary_preference.carbs_goal %}g{% endif %}</span>
+            </div>
+            <div class="mb-track"><div class="mb-fill carbs" data-w="45" style="width:0%"></div></div>
+          </div>
+          <div class="macro-bar-item">
+            <div class="mb-header">
+              <span class="mb-name">Fat</span>
+              <span class="mb-val">{{ user.dietary_preference.fat_goal or '—' }}{% if user.dietary_preference.fat_goal %}g{% endif %}</span>
+            </div>
+            <div class="mb-track"><div class="mb-fill fat" data-w="35" style="width:0%"></div></div>
+          </div>
         </div>
 
-      </div>
-    </div>
-  </div>
-
-</div>
-
-<!-- Request History -->
-<div class="card shadow-sm mt-3">
-  <div class="card-header">
-    <div class="d-flex justify-content-between align-items-center">
-      <h5 class="mb-0">
-        <i class="fas fa-history"></i> My Role Upgrade Requests
-      </h5>
-
-      <a href="{{ url_for('user_dashboard.request_upgrade') }}"
-         class="btn btn-sm btn-outline-primary">
-        Request Role Upgrade
-      </a>
-    </div>
-  </div>
-
-  <div class="card-body">
-
-    {% if my_requests and my_requests|length > 0 %}
-      <div class="table-responsive">
-        <table class="table table-sm table-striped align-middle">
-          <thead>
-            <tr>
-              <th>Requested Role</th>
-              <th>Status</th>
-              <th>Note</th>
-              <th>Date</th>
-            </tr>
-          </thead>
-          <tbody>
-            {% for r in my_requests %}
-            <tr>
-              <td>{{ r.requested_role }}</td>
-              <td>
-                <span class="badge bg-{% if r.status=='pending' %}warning text-dark{% elif r.status=='approved' %}success{% else %}secondary{% endif %}">
-                  {{ r.status }}
-                </span>
-              </td>
-              <td>{{ r.note or "" }}</td>
-              <td>{{ r.created_at.strftime("%Y-%m-%d %H:%M") if r.created_at else "" }}</td>
-            </tr>
+        <!-- Tags -->
+        <div class="diet-tags">
+          {% if user.dietary_preference.diet_type %}
+            <span class="dtag dtag-lime"><i class="fas fa-leaf"></i>{{ user.dietary_preference.diet_type.replace('-',' ').title() }}</span>
+          {% endif %}
+          {% if user.dietary_preference.meals_per_day %}
+            <span class="dtag dtag-cyan"><i class="fas fa-clock"></i>{{ user.dietary_preference.meals_per_day }} meals/day</span>
+          {% endif %}
+          {% if user.dietary_preference.food_restrictions %}
+            {% for r in user.dietary_preference.food_restrictions[:2] %}
+              <span class="dtag dtag-amber">No {{ r }}</span>
             {% endfor %}
-          </tbody>
-        </table>
-      </div>
-    {% else %}
-      <p class="text-muted mb-0">No role upgrade requests yet.</p>
-    {% endif %}
+          {% endif %}
+          {% if user.dietary_preference.preferred_cuisine %}
+            {% for c in user.dietary_preference.preferred_cuisine[:2] %}
+              <span class="dtag dtag-violet"><i class="fas fa-globe"></i>{{ c }}</span>
+            {% endfor %}
+          {% endif %}
+        </div>
 
+      {% else %}
+        <div class="diet-empty">
+          <div class="diet-empty-icon"><i class="fas fa-seedling"></i></div>
+          <p>No dietary preferences set. Add yours to personalise your experience.</p>
+          <a href="{{ url_for('user_dashboard.dietary_preferences') }}" class="btn-setup">
+            <i class="fas fa-plus"></i> Set Up Preferences
+          </a>
+        </div>
+      {% endif %}
+    </div>
   </div>
-</div>
 
+</div><!-- /bento -->
+</div><!-- /dash -->
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+
+  /* ── Ring gauge ── */
+  const ring = document.querySelector('.ring-fill');
+  if (ring) {
+    const pct = parseInt(ring.dataset.pct) || 0;
+    const circumference = 283;
+    const offset = circumference - (pct / 100) * circumference;
+    ring.style.strokeDashoffset = circumference;
+    setTimeout(() => { ring.style.strokeDashoffset = offset; }, 120);
+  }
+
+  /* ── Macro bars ── */
+  document.querySelectorAll('.mb-fill').forEach(el => {
+    const w = el.dataset.w || 0;
+    setTimeout(() => { el.style.width = w + '%'; }, 200);
+  });
+
+  /* ── Streak dots staggered glow ── */
+  document.querySelectorAll('.streak-dot.active').forEach((dot, i) => {
+    dot.style.opacity = '0';
+    dot.style.transform = 'scale(0)';
+    setTimeout(() => {
+      dot.style.transition = 'opacity .3s, transform .3s';
+      dot.style.opacity = '1';
+      dot.style.transform = 'scale(1)';
+    }, 400 + i * 80);
+  });
+
+});
+</script>
 {% endblock %}
