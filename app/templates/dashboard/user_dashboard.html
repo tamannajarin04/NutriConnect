@@ -89,11 +89,11 @@
   }
 
   /* ═══════════════════════════════════════
-     HERO CELL
+     HERO CELL  ← FIXED: no longer uses var(--d-text) as bg
   ═══════════════════════════════════════ */
   .hero-cell {
     padding: 2.75rem 3rem;
-    background: var(--d-text);
+    background: linear-gradient(135deg, #0a2e2b 0%, #0d3d38 40%, #0f2d4a 100%);
     color: #fff;
     position: relative;
     overflow: hidden;
@@ -110,16 +110,16 @@
     content: '';
     position: absolute; inset: 0; z-index: 0;
     background:
-      radial-gradient(ellipse 70% 80% at  -5% 50%, rgba(13,148,136,.5)   0%, transparent 55%),
-      radial-gradient(ellipse 50% 70% at 105% 20%, rgba(124,58,237,.45)  0%, transparent 55%),
-      radial-gradient(ellipse 40% 60% at  55% 110%,rgba(6,182,212,.3)    0%, transparent 50%);
+      radial-gradient(ellipse 70% 80% at  -5% 50%, rgba(13,148,136,.55)   0%, transparent 55%),
+      radial-gradient(ellipse 50% 70% at 105% 20%, rgba(124,58,237,.5)    0%, transparent 55%),
+      radial-gradient(ellipse 40% 60% at  55% 110%,rgba(6,182,212,.35)    0%, transparent 50%);
   }
 
   /* Dot grid */
   .hero-cell::after {
     content: '';
     position: absolute; inset: 0; z-index: 0;
-    background-image: radial-gradient(circle, rgba(255,255,255,.12) 1px, transparent 1px);
+    background-image: radial-gradient(circle, rgba(255,255,255,.08) 1px, transparent 1px);
     background-size: 28px 28px;
   }
 
@@ -127,11 +127,11 @@
 
   .hero-eyebrow {
     display: inline-flex; align-items: center; gap: .45rem;
-    background: rgba(255,255,255,.1);
-    border: 1px solid rgba(255,255,255,.18);
+    background: rgba(255,255,255,.12);
+    border: 1px solid rgba(255,255,255,.2);
     border-radius: 99px; padding: .3rem .9rem;
     font-size: .72rem; font-weight: 700; letter-spacing: .08em;
-    text-transform: uppercase; margin-bottom: 1rem; color: rgba(255,255,255,.85);
+    text-transform: uppercase; margin-bottom: 1rem; color: rgba(255,255,255,.9);
   }
   .hero-eyebrow-dot { width: 6px; height: 6px; border-radius: 50%; background: #34d399; box-shadow: 0 0 6px #34d399; animation: pulse-dot 2s ease-in-out infinite; }
   @keyframes pulse-dot { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.5;transform:scale(.8)} }
@@ -151,7 +151,7 @@
     background-clip: text;
   }
   .hero-tagline {
-    font-size: .9rem; color: rgba(255,255,255,.5);
+    font-size: .9rem; color: rgba(255,255,255,.65);
     font-weight: 400; max-width: 340px; line-height: 1.5;
   }
 
@@ -160,7 +160,7 @@
 
   .ring-gauge { position: relative; width: 110px; height: 110px; flex-shrink: 0; }
   .ring-gauge svg { width: 110px; height: 110px; transform: rotate(-90deg); }
-  .ring-bg   { fill: none; stroke: rgba(255,255,255,.1); stroke-width: 8; }
+  .ring-bg   { fill: none; stroke: rgba(255,255,255,.12); stroke-width: 8; }
   .ring-fill {
     fill: none; stroke: url(#ringGrad); stroke-width: 8;
     stroke-linecap: round;
@@ -178,12 +178,12 @@
     font-family: 'JetBrains Mono', monospace;
     font-size: 1.4rem; font-weight: 600; line-height: 1;
   }
-  .ring-sub { font-size: .6rem; opacity: .5; text-transform: uppercase; letter-spacing: .06em; margin-top: .15rem; }
+  .ring-sub { font-size: .6rem; opacity: .55; text-transform: uppercase; letter-spacing: .06em; margin-top: .15rem; }
 
   .hero-stats-col { display: flex; flex-direction: column; gap: 1rem; }
   .hsc {
     display: flex; flex-direction: column; gap: .1rem;
-    border-left: 2px solid rgba(255,255,255,.15);
+    border-left: 2px solid rgba(255,255,255,.2);
     padding-left: .9rem;
   }
   .hsc-val {
@@ -194,8 +194,8 @@
   .hsc-val.c-amber  { color: #fcd34d; }
   .hsc-val.c-violet { color: #c4b5fd; }
   .hsc-val.c-cyan   { color: #67e8f9; }
-  .hsc-unit { font-size: .7rem; opacity: .55; margin-left: .1rem; }
-  .hsc-lbl  { font-size: .65rem; color: rgba(255,255,255,.38); text-transform: uppercase; letter-spacing: .08em; font-weight: 700; }
+  .hsc-unit { font-size: .7rem; opacity: .6; margin-left: .1rem; }
+  .hsc-lbl  { font-size: .65rem; color: rgba(255,255,255,.45); text-transform: uppercase; letter-spacing: .08em; font-weight: 700; }
 
   /* ═══════════════════════════════════════
      COMPLETION CELL
@@ -440,7 +440,7 @@
   .btn-setup:hover { background: #365314; color: #fff; transform: translateY(-1px); }
 
   /* ═══════════════════════════════════════
-     BMI CELL  ← NEW
+     BMI CELL
   ═══════════════════════════════════════ */
   .bmi-cell { padding: 1.5rem; }
   .bmi-cell-header {
@@ -452,7 +452,6 @@
     display: flex; align-items: center; gap: 2rem; flex-wrap: wrap;
   }
 
-  /* Score block */
   .bmi-score-block {
     display: flex; flex-direction: column; align-items: center; justify-content: center;
     width: 120px; height: 120px; border-radius: 22px; flex-shrink: 0;
@@ -484,7 +483,6 @@
   .bmi-cat-badge.overweight  { background: var(--amber-l);  color: #92400e; }
   .bmi-cat-badge.obese       { background: var(--rose-l);   color: #be123c; }
 
-  /* Range bar */
   .bmi-range-block { flex: 1; min-width: 200px; }
   .bmi-range-label {
     font-size: .7rem; font-weight: 700; text-transform: uppercase;
@@ -505,7 +503,6 @@
     font-size: .62rem; color: var(--d-faint); line-height: 1.4;
   }
 
-  /* History list */
   .bmi-history { flex: 1; min-width: 180px; }
   .bmi-history-title {
     font-size: .7rem; font-weight: 700; text-transform: uppercase;
@@ -531,7 +528,6 @@
   .bmi-history-badge.overweight  { background: var(--amber-l); color: #92400e; }
   .bmi-history-badge.obese       { background: var(--rose-l);  color: #be123c; }
 
-  /* BMI empty state */
   .bmi-empty {
     display: flex; flex-direction: column; align-items: center;
     padding: 1.25rem 1rem; text-align: center; flex: 1;
@@ -801,7 +797,6 @@
       </div>
 
       {% if user.dietary_preference %}
-        <!-- Macro bars -->
         <div class="macro-grid">
           <div class="macro-bar-item">
             <div class="mb-header">
@@ -833,7 +828,6 @@
           </div>
         </div>
 
-        <!-- Tags -->
         <div class="diet-tags">
           {% if user.dietary_preference.diet_type %}
             <span class="dtag dtag-lime"><i class="fas fa-leaf"></i>{{ user.dietary_preference.diet_type.replace('-',' ').title() }}</span>
@@ -880,8 +874,6 @@
 
       {% if latest_bmi %}
         <div class="bmi-content">
-
-          <!-- Score Block -->
           <div class="bmi-score-block">
             <div class="bmi-score-num">{{ latest_bmi.bmi }}</div>
             <div class="bmi-score-lbl">Your BMI</div>
@@ -894,7 +886,6 @@
             </span>
           </div>
 
-          <!-- Range Bar -->
           <div class="bmi-range-block">
             <div class="bmi-range-label">BMI Scale Reference</div>
             <div class="bmi-range-track">
@@ -911,7 +902,6 @@
             </div>
           </div>
 
-          <!-- History -->
           <div class="bmi-history">
             <div class="bmi-history-title">Recent Records</div>
             {% for record in bmi_records %}
@@ -922,11 +912,9 @@
             </div>
             {% endfor %}
           </div>
-
         </div>
 
       {% else %}
-        <!-- Empty state -->
         <div class="bmi-content">
           <div class="bmi-empty">
             <div class="bmi-empty-icon"><i class="fas fa-weight-scale"></i></div>

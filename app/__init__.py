@@ -28,12 +28,12 @@ def create_app(config_name="default"):
     from .routes.main import main_bp
     from .routes.auth import auth_bp
     from .routes.user_dashboard import user_dashboard_bp
-    from .routes.bmi import bmi_bp                          # ✅ ADD THIS
+    from .routes.bmi import bmi_bp                          
 
     app.register_blueprint(main_bp)
     app.register_blueprint(auth_bp, url_prefix="/auth")
     app.register_blueprint(user_dashboard_bp, url_prefix="/dashboard")
-    app.register_blueprint(bmi_bp, url_prefix="/dashboard") # ✅ ADD THIS
+    app.register_blueprint(bmi_bp, url_prefix="/dashboard")
 
     with app.app_context():
         create_roles_if_ready()
