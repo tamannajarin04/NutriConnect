@@ -116,13 +116,27 @@ def request_upgrade():
         flash("Admins do not need a role upgrade request.", "warning")
         return redirect(url_for("admin.dashboard"))
 
+    history = (
+        RoleUpgradeRequest.query.filter_by(user_id=current_user.id)
+        .order_by(RoleUpgradeRequest.created_at.desc())
+        .all()
+    )
+
+    current_roles = {role.name for role in current_user.roles}
+
+    allowed = []
+    if "user" in current_roles:
+        if "food_provider" not in current_roles:
+            allowed.append("food_provider")
+        if "admin" not in current_roles:
+            allowed.append("admin")
+
     if request.method == "POST":
         requested_role = (request.form.get("requested_role") or "").strip()
         note = (request.form.get("note") or "").strip()
 
-        allowed_roles = {"food_provider", "admin"}
-        if requested_role not in allowed_roles:
-            flash("Invalid role selected.", "danger")
+        if requested_role not in allowed:
+            flash("You are not allowed to request this role.", "danger")
             return redirect(url_for("user_dashboard.request_upgrade"))
 
         existing_pending = RoleUpgradeRequest.query.filter_by(
@@ -145,20 +159,13 @@ def request_upgrade():
         db.session.commit()
 
         flash("Role upgrade request submitted successfully.", "success")
-        return redirect(url_for("user_dashboard.index"))
-
-    my_requests = (
-        RoleUpgradeRequest.query.filter_by(user_id=current_user.id)
-        .order_by(RoleUpgradeRequest.created_at.desc())
-        .all()
-    )
+        return redirect(url_for("user_dashboard.request_upgrade"))
 
     return render_template(
         "dashboard/request_upgrade.html",
-        user=current_user,
-        my_requests=my_requests
+        allowed=allowed,
+        history=history
     )
-
 
 @user_dashboard_bp.route("/dietary-preferences", methods=["GET", "POST"])
 @login_required
