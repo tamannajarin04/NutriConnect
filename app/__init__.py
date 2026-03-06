@@ -5,6 +5,7 @@ from flask_login import LoginManager
 from flask_migrate import Migrate
 from config import config
 from app.models import db, User
+import os
 
 login_manager = LoginManager()
 migrate = Migrate()

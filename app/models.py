@@ -113,3 +113,31 @@ class BMIRecord(db.Model):
 
     def __repr__(self):
         return f"<BMIRecord user_id={self.user_id} bmi={self.bmi} category={self.category}>"
+
+
+class RoleUpgradeRequest(db.Model):
+    __tablename__ = "role_upgrade_requests"
+
+    id = db.Column(db.Integer, primary_key=True)
+
+    user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
+
+    # requested_role: "food_provider" or "admin"
+    requested_role = db.Column(db.String(50), nullable=False)
+
+    # pending / approved / rejected
+    status = db.Column(db.String(20), default="pending", nullable=False)
+
+    # user message
+    note = db.Column(db.Text)
+
+    # admin message
+    admin_comment = db.Column(db.Text)
+
+    created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
+
+    user = db.relationship("User", back_populates="upgrade_requests")
+
+    def __repr__(self):
+        return f"<RoleUpgradeRequest user_id={self.user_id} role={self.requested_role} status={self.status}>"
