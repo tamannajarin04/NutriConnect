@@ -2,7 +2,7 @@ import os
 from flask import Blueprint, render_template, redirect, url_for, flash, request, current_app
 from flask_login import login_required, current_user
 from werkzeug.utils import secure_filename
-from app.models import db, User, DietaryPreference, BMIRecord  # ✅ added BMIRecord
+from app.models import db, User, DietaryPreference, BMIRecord, RoleUpgradeRequest
 
 user_dashboard_bp = Blueprint("user_dashboard", __name__)
 
@@ -10,40 +10,51 @@ user_dashboard_bp = Blueprint("user_dashboard", __name__)
 @user_dashboard_bp.route("/")
 @login_required
 def index():
-    if current_user.is_user():
-        # ✅ BMI data fetched here — not in the template
-        latest_bmi = BMIRecord.query.filter_by(user_id=current_user.id)\
-                     .order_by(BMIRecord.recorded_at.desc()).first()
-
-        bmi_records = BMIRecord.query.filter_by(user_id=current_user.id)\
-                      .order_by(BMIRecord.recorded_at.desc()).limit(3).all()
-
-        return render_template("dashboard/user_dashboard.html",
-            user=current_user,
-            latest_bmi=latest_bmi,
-            bmi_records=bmi_records
-        )
+    if current_user.is_admin():
+        return redirect(url_for("admin.dashboard"))
 
     if current_user.is_food_provider():
         return render_template("dashboard/food_provider_dashboard.html", user=current_user)
 
-    if current_user.is_admin():
-        return render_template("dashboard/admin_dashboard.html", user=current_user)
+    latest_bmi = None
+    bmi_records = []
+    my_requests = []
 
-    # ✅ Default: User dashboard
-    my_requests = (
-        RoleUpgradeRequest.query.filter_by(user_id=current_user.id)
-        .order_by(RoleUpgradeRequest.created_at.desc())
-        .all()
-    )
+    try:
+        latest_bmi = (
+            BMIRecord.query.filter_by(user_id=current_user.id)
+            .order_by(BMIRecord.recorded_at.desc())
+            .first()
+        )
+    except Exception:
+        latest_bmi = None
+
+    try:
+        bmi_records = (
+            BMIRecord.query.filter_by(user_id=current_user.id)
+            .order_by(BMIRecord.recorded_at.desc())
+            .limit(3)
+            .all()
+        )
+    except Exception:
+        bmi_records = []
+
+    try:
+        my_requests = (
+            RoleUpgradeRequest.query.filter_by(user_id=current_user.id)
+            .order_by(RoleUpgradeRequest.created_at.desc())
+            .all()
+        )
+    except Exception:
+        my_requests = []
 
     return render_template(
         "dashboard/user_dashboard.html",
         user=current_user,
+        latest_bmi=latest_bmi,
+        bmi_records=bmi_records,
         my_requests=my_requests
     )
-
-
 
 @user_dashboard_bp.route("/profile")
 @login_required
@@ -97,6 +108,56 @@ def edit_profile():
         return redirect(url_for("user_dashboard.view_profile"))
 
     return render_template("dashboard/edit_profile.html", user=current_user)
+
+@user_dashboard_bp.route("/request-upgrade", methods=["GET", "POST"])
+@login_required
+def request_upgrade():
+    if current_user.is_admin():
+        flash("Admins do not need a role upgrade request.", "warning")
+        return redirect(url_for("admin.dashboard"))
+
+    if request.method == "POST":
+        requested_role = (request.form.get("requested_role") or "").strip()
+        note = (request.form.get("note") or "").strip()
+
+        allowed_roles = {"food_provider", "admin"}
+        if requested_role not in allowed_roles:
+            flash("Invalid role selected.", "danger")
+            return redirect(url_for("user_dashboard.request_upgrade"))
+
+        existing_pending = RoleUpgradeRequest.query.filter_by(
+            user_id=current_user.id,
+            requested_role=requested_role,
+            status="pending"
+        ).first()
+
+        if existing_pending:
+            flash("You already have a pending request for this role.", "warning")
+            return redirect(url_for("user_dashboard.request_upgrade"))
+
+        req = RoleUpgradeRequest(
+            user_id=current_user.id,
+            requested_role=requested_role,
+            note=note,
+            status="pending"
+        )
+        db.session.add(req)
+        db.session.commit()
+
+        flash("Role upgrade request submitted successfully.", "success")
+        return redirect(url_for("user_dashboard.index"))
+
+    my_requests = (
+        RoleUpgradeRequest.query.filter_by(user_id=current_user.id)
+        .order_by(RoleUpgradeRequest.created_at.desc())
+        .all()
+    )
+
+    return render_template(
+        "dashboard/request_upgrade.html",
+        user=current_user,
+        my_requests=my_requests
+    )
 
 
 @user_dashboard_bp.route("/dietary-preferences", methods=["GET", "POST"])

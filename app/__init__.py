@@ -1,11 +1,9 @@
-# app/__init__.py
-
+import os
 from flask import Flask
 from flask_login import LoginManager
 from flask_migrate import Migrate
 from config import config
 from app.models import db, User
-import os
 
 login_manager = LoginManager()
 migrate = Migrate()
@@ -14,6 +12,8 @@ migrate = Migrate()
 def create_app(config_name="default"):
     app = Flask(__name__)
     app.config.from_object(config.get(config_name, config["default"]))
+    app.config["PROPAGATE_EXCEPTIONS"] = True
+    app.config["TRAP_HTTP_EXCEPTIONS"] = True
 
     db.init_app(app)
     login_manager.init_app(app)
@@ -26,17 +26,17 @@ def create_app(config_name="default"):
     def load_user(user_id):
         return User.query.get(int(user_id))
 
-    # Import blueprints
     from .routes.main import main_bp
     from .routes.auth import auth_bp
     from .routes.user_dashboard import user_dashboard_bp
-    from .routes.bmi import bmi_bp                          
+    from .routes.bmi import bmi_bp
+    from .routes.admin import admin_bp
 
-    # Register blueprints
     app.register_blueprint(main_bp)
     app.register_blueprint(auth_bp, url_prefix="/auth")
     app.register_blueprint(user_dashboard_bp, url_prefix="/dashboard")
     app.register_blueprint(bmi_bp, url_prefix="/dashboard")
+    app.register_blueprint(admin_bp, url_prefix="/admin")
 
     with app.app_context():
         create_roles_if_ready()
@@ -60,19 +60,23 @@ def create_roles_if_ready():
         {"name": "admin", "description": "Administrator"},
     ]
 
+    changed = False
     for r in roles_data:
         if not Role.query.filter_by(name=r["name"]).first():
             db.session.add(Role(**r))
+            changed = True
+
+    if changed:
+        db.session.commit()
+
+
 def seed_admins_if_ready():
-    """
-    Ensures at least one admin exists based on .env variables.
-    This prevents losing admin access forever.
-    """
     from sqlalchemy import inspect
-    from app.models import Role, User, db
+    from app.models import Role, User
 
     inspector = inspect(db.engine)
     tables = inspector.get_table_names()
+
     if not all(t in tables for t in ["users", "roles", "user_roles"]):
         return
 
@@ -93,16 +97,20 @@ def seed_admins_if_ready():
         db.session.flush()
 
     user = User.query.filter_by(email=email).first()
+
     if not user:
-        user = User(username=username, email=email, first_name=username, last_name="")
+        user = User(
+            username=username,
+            email=email,
+            first_name=username,
+            last_name=""
+        )
         user.set_password(password)
         user.roles = [admin_role]
         db.session.add(user)
         db.session.commit()
         return
 
-    # If user exists but is not admin, force admin (preserve admin access)
     if not user.has_role("admin"):
         user.roles = [admin_role]
         db.session.commit()
-    db.session.commit()

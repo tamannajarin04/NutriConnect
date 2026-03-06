@@ -779,6 +779,9 @@
         <a href="{{ url_for('user_dashboard.view_profile') }}" class="btn-teal">
           <i class="fas fa-eye"></i> View Full Profile
         </a>
+        <a href="{{ url_for('user_dashboard.request_upgrade') }}" class="btn-manage" style="justify-content:center;padding:.65rem 1rem;">
+          <i class="fas fa-arrow-up-right-dots"></i> Request Role Upgrade
+        </a>
       </div>
     </div>
   </div>
@@ -857,6 +860,60 @@
         </div>
       {% endif %}
     </div>
+  </div>
+  
+  <div class="cell cell--bmi">
+  <div class="bmi-cell">
+    <div class="bmi-cell-header">
+      <div class="section-label">
+        <div class="sl-icon sl-rose"><i class="fas fa-user-shield"></i></div>
+        Role Upgrade Requests
+      </div>
+      <a href="{{ url_for('user_dashboard.request_upgrade') }}" class="btn-manage">
+        <i class="fas fa-plus"></i> New Request
+      </a>
+    </div>
+
+    {% if my_requests %}
+      <div style="display:flex;flex-direction:column;gap:.75rem;">
+        {% for req in my_requests[:5] %}
+          <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:1rem;padding:.85rem 1rem;border:1px solid var(--d-border);border-radius:14px;background:var(--d-surface-2);">
+            <div>
+              <div style="font-weight:800;color:var(--d-text);">
+                {{ req.requested_role.replace('_', ' ').title() }}
+              </div>
+              <div style="font-size:.8rem;color:var(--d-muted);margin-top:.2rem;">
+                {{ req.created_at.strftime('%d %b %Y') if req.created_at else '—' }}
+              </div>
+              {% if req.note %}
+                <div style="font-size:.82rem;color:var(--d-text-2);margin-top:.35rem;">
+                  {{ req.note }}
+                </div>
+              {% endif %}
+            </div>
+
+            <div>
+              {% if req.status == 'pending' %}
+                <span class="dtag dtag-amber">Pending</span>
+              {% elif req.status == 'approved' %}
+                <span class="dtag dtag-lime">Approved</span>
+              {% else %}
+                <span class="dtag" style="background:var(--rose-l);color:#be123c;border-color:#fecdd3;">Rejected</span>
+              {% endif %}
+            </div>
+          </div>
+          {% endfor %}
+      </div>
+    {% else %}
+      <div class="diet-empty">
+        <div class="diet-empty-icon"><i class="fas fa-user-shield"></i></div>
+        <p>You have not submitted any role upgrade requests yet.</p>
+        <a href="{{ url_for('user_dashboard.request_upgrade') }}" class="btn-setup">
+          <i class="fas fa-plus"></i> Create Request
+        </a>
+      </div>
+      {% endif %}
+      </div>
   </div>
 
   <!-- ══ BMI ══ -->
