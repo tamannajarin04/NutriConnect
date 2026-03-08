@@ -10,12 +10,12 @@ def register():
         return redirect(url_for("user_dashboard.index"))
 
     if request.method == "POST":
+
         first_name = (request.form.get("first_name") or "").strip()
         last_name = (request.form.get("last_name") or "").strip()
         username = (request.form.get("username") or "").strip()
         email = (request.form.get("email") or "").strip().lower()
         password = request.form.get("password") or ""
-        selected_role = request.form.get("role") or "user"
 
         if not username or not email or not password or not first_name or not last_name:
             flash("All fields are required.", "danger")
@@ -29,11 +29,24 @@ def register():
             flash("Email already registered.", "danger")
             return redirect(url_for("auth.register"))
 
-        user = User(username=username, email=email, first_name=first_name, last_name=last_name)
+        user = User(
+            username=username,
+            email=email,
+            first_name=first_name,
+            last_name=last_name
+        )
+
         user.set_password(password)
 
-        role = Role.query.filter_by(name=selected_role).first() or Role.query.filter_by(name="user").first()
-        user.roles.append(role)
+        
+        # ✅ SECURITY: always register as "user"
+        role = Role.query.filter_by(name="user").first()
+        if not role:
+            role = Role(name="user", description="Regular user")
+            db.session.add(role)
+            db.session.flush()
+
+        user.roles = [role]   # single active role
 
         db.session.add(user)
         db.session.commit()
@@ -41,8 +54,7 @@ def register():
         flash("Registration successful! Please log in.", "success")
         return redirect(url_for("auth.login"))
 
-    roles = Role.query.all()
-    return render_template("auth/register.html", roles=roles)
+    return render_template("auth/register.html")
 
 @auth_bp.route("/login", methods=["GET", "POST"])
 def login():

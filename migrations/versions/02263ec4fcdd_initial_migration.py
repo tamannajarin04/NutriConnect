@@ -1,0 +1,33 @@
+"""initial migration
+
+Revision ID: 02263ec4fcdd
+Revises:
+Create Date: 2026-03-06 00:43:12.992606
+
+"""
+from alembic import op
+import sqlalchemy as sa
+
+
+# revision identifiers, used by Alembic.
+revision = '02263ec4fcdd'
+down_revision = None
+branch_labels = None
+depends_on = None
+
+
+def upgrade():
+    op.create_table(
+        'role_upgrade_requests',
+        sa.Column('id', sa.Integer(), nullable=False),
+        sa.Column('user_id', sa.Integer(), nullable=False),
+        sa.Column('requested_role', sa.String(length=50), nullable=False),
+        sa.Column('status', sa.String(length=20), nullable=True),
+        sa.Column('created_at', sa.DateTime(), nullable=True),
+        sa.ForeignKeyConstraint(['user_id'], ['users.id']),
+        sa.PrimaryKeyConstraint('id')
+    )
+
+
+def downgrade():
+    op.drop_table('role_upgrade_requests')

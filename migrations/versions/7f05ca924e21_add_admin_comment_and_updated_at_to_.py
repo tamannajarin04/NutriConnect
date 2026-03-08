@@ -1,0 +1,28 @@
+"""add admin_comment and updated_at to role_upgrade_requests
+
+Revision ID: 7f05ca924e21
+Revises: 02263ec4fcdd
+Create Date: 2026-03-06 01:20:43.272231
+
+"""
+from alembic import op
+import sqlalchemy as sa
+
+
+# revision identifiers, used by Alembic.
+revision = '7f05ca924e21'
+down_revision = '02263ec4fcdd'
+branch_labels = None
+depends_on = None
+
+
+def upgrade():
+    with op.batch_alter_table('role_upgrade_requests', schema=None) as batch_op:
+        batch_op.add_column(sa.Column('admin_comment', sa.String(length=255), nullable=True))
+        batch_op.add_column(sa.Column('updated_at', sa.DateTime(), nullable=True))
+
+
+def downgrade():
+    with op.batch_alter_table('role_upgrade_requests', schema=None) as batch_op:
+        batch_op.drop_column('updated_at')
+        batch_op.drop_column('admin_comment')

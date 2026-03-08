@@ -1,3 +1,4 @@
+import os
 from flask import Flask
 from flask_login import LoginManager
 from flask_migrate import Migrate
@@ -11,6 +12,8 @@ migrate = Migrate()
 def create_app(config_name="default"):
     app = Flask(__name__)
     app.config.from_object(config.get(config_name, config["default"]))
+    app.config["PROPAGATE_EXCEPTIONS"] = True
+    app.config["TRAP_HTTP_EXCEPTIONS"] = True
 
     db.init_app(app)
     login_manager.init_app(app)
@@ -26,30 +29,30 @@ def create_app(config_name="default"):
     from .routes.main import main_bp
     from .routes.auth import auth_bp
     from .routes.user_dashboard import user_dashboard_bp
+    from .routes.bmi import bmi_bp
+    from .routes.admin import admin_bp
 
     app.register_blueprint(main_bp)
     app.register_blueprint(auth_bp, url_prefix="/auth")
     app.register_blueprint(user_dashboard_bp, url_prefix="/dashboard")
+    app.register_blueprint(bmi_bp, url_prefix="/dashboard")
+    app.register_blueprint(admin_bp, url_prefix="/admin")
 
-    # SAFE: only run after tables exist
     with app.app_context():
         create_roles_if_ready()
+        seed_admins_if_ready()
 
     return app
 
 
 def create_roles_if_ready():
-    """
-    Creates default roles ONLY if the roles table exists.
-    Prevents migration crashes.
-    """
     from sqlalchemy import inspect
     from app.models import Role
 
     inspector = inspect(db.engine)
 
     if "roles" not in inspector.get_table_names():
-        return  # table not created yet → skip safely
+        return
 
     roles_data = [
         {"name": "user", "description": "Regular user"},
@@ -57,9 +60,57 @@ def create_roles_if_ready():
         {"name": "admin", "description": "Administrator"},
     ]
 
+    changed = False
     for r in roles_data:
         if not Role.query.filter_by(name=r["name"]).first():
             db.session.add(Role(**r))
+            changed = True
 
-    db.session.commit()
+    if changed:
+        db.session.commit()
 
+
+def seed_admins_if_ready():
+    from sqlalchemy import inspect
+    from app.models import Role, User
+
+    inspector = inspect(db.engine)
+    tables = inspector.get_table_names()
+
+    if not all(t in tables for t in ["users", "roles", "user_roles"]):
+        return
+
+    if os.environ.get("SEED_ADMINS", "0") != "1":
+        return
+
+    email = (os.environ.get("ADMIN1_EMAIL") or "").strip().lower()
+    username = (os.environ.get("ADMIN1_USERNAME") or "Admin").strip()
+    password = os.environ.get("ADMIN1_PASSWORD") or "Admin@12345"
+
+    if not email:
+        return
+
+    admin_role = Role.query.filter_by(name="admin").first()
+    if not admin_role:
+        admin_role = Role(name="admin", description="Administrator")
+        db.session.add(admin_role)
+        db.session.flush()
+
+    user = User.query.filter_by(email=email).first()
+
+    if not user:
+        user = User(
+            username=username,
+            email=email,
+            first_name=username,
+            last_name=""
+        )
+        user.set_password(password)
+        user.roles = [admin_role]
+        db.session.add(user)
+        db.session.commit()
+        return
+
+    if not user.has_role("admin"):
+        user.roles = [admin_role]
+        db.session.commit()

@@ -2,27 +2,65 @@ import os
 from flask import Blueprint, render_template, redirect, url_for, flash, request, current_app
 from flask_login import login_required, current_user
 from werkzeug.utils import secure_filename
-from app.models import db, User, DietaryPreference
+from app.models import db, User, DietaryPreference, BMIRecord, RoleUpgradeRequest
 
 user_dashboard_bp = Blueprint("user_dashboard", __name__)
+
 
 @user_dashboard_bp.route("/")
 @login_required
 def index():
-    if current_user.is_user():
-        return render_template("dashboard/user_dashboard.html", user=current_user)
+    if current_user.is_admin():
+        return redirect(url_for("admin.dashboard"))
+
     if current_user.is_food_provider():
         return render_template("dashboard/food_provider_dashboard.html", user=current_user)
-    if current_user.is_admin():
-        return render_template("dashboard/admin_dashboard.html", user=current_user)
 
-    flash("No role assigned. Please contact admin.", "warning")
-    return redirect(url_for("auth.logout"))
+    latest_bmi = None
+    bmi_records = []
+    my_requests = []
+
+    try:
+        latest_bmi = (
+            BMIRecord.query.filter_by(user_id=current_user.id)
+            .order_by(BMIRecord.recorded_at.desc())
+            .first()
+        )
+    except Exception:
+        latest_bmi = None
+
+    try:
+        bmi_records = (
+            BMIRecord.query.filter_by(user_id=current_user.id)
+            .order_by(BMIRecord.recorded_at.desc())
+            .limit(3)
+            .all()
+        )
+    except Exception:
+        bmi_records = []
+
+    try:
+        my_requests = (
+            RoleUpgradeRequest.query.filter_by(user_id=current_user.id)
+            .order_by(RoleUpgradeRequest.created_at.desc())
+            .all()
+        )
+    except Exception:
+        my_requests = []
+
+    return render_template(
+        "dashboard/user_dashboard.html",
+        user=current_user,
+        latest_bmi=latest_bmi,
+        bmi_records=bmi_records,
+        my_requests=my_requests
+    )
 
 @user_dashboard_bp.route("/profile")
 @login_required
 def view_profile():
     return render_template("dashboard/profile.html", user=current_user)
+
 
 @user_dashboard_bp.route("/profile/edit", methods=["GET", "POST"])
 @login_required
@@ -41,10 +79,10 @@ def edit_profile():
 
         file = request.files.get("profile_picture")
         if file and file.filename:
-            allowed = {"png", "jpg", "jpeg", "gif"}
+            allowed_exts = {"png", "jpg", "jpeg", "gif"}
             ext = file.filename.rsplit(".", 1)[-1].lower() if "." in file.filename else ""
 
-            if ext not in allowed:
+            if ext not in allowed_exts:
                 flash("Invalid image type. Use PNG/JPG/JPEG/GIF only.", "danger")
                 return redirect(url_for("user_dashboard.edit_profile"))
 
@@ -57,7 +95,6 @@ def edit_profile():
                 "profiles"
             )
 
-            # Safety check
             if os.path.exists(upload_dir) and not os.path.isdir(upload_dir):
                 raise RuntimeError("'profiles' exists but is not a directory")
 
@@ -72,10 +109,69 @@ def edit_profile():
 
     return render_template("dashboard/edit_profile.html", user=current_user)
 
+@user_dashboard_bp.route("/request-upgrade", methods=["GET", "POST"])
+@login_required
+def request_upgrade():
+    if current_user.is_admin():
+        flash("Admins do not need a role upgrade request.", "warning")
+        return redirect(url_for("admin.dashboard"))
+
+    history = (
+        RoleUpgradeRequest.query.filter_by(user_id=current_user.id)
+        .order_by(RoleUpgradeRequest.created_at.desc())
+        .all()
+    )
+
+    current_roles = {role.name for role in current_user.roles}
+
+    allowed = []
+    if "user" in current_roles:
+        if "food_provider" not in current_roles:
+            allowed.append("food_provider")
+        if "admin" not in current_roles:
+            allowed.append("admin")
+
+    if request.method == "POST":
+        requested_role = (request.form.get("requested_role") or "").strip()
+        note = (request.form.get("note") or "").strip()
+
+        if requested_role not in allowed:
+            flash("You are not allowed to request this role.", "danger")
+            return redirect(url_for("user_dashboard.request_upgrade"))
+
+        existing_pending = RoleUpgradeRequest.query.filter_by(
+            user_id=current_user.id,
+            requested_role=requested_role,
+            status="pending"
+        ).first()
+
+        if existing_pending:
+            flash("You already have a pending request for this role.", "warning")
+            return redirect(url_for("user_dashboard.request_upgrade"))
+
+        req = RoleUpgradeRequest(
+            user_id=current_user.id,
+            requested_role=requested_role,
+            note=note,
+            status="pending"
+        )
+        db.session.add(req)
+        db.session.commit()
+
+        flash("Role upgrade request submitted successfully.", "success")
+        return redirect(url_for("user_dashboard.request_upgrade"))
+
+    return render_template(
+        "dashboard/request_upgrade.html",
+        allowed=allowed,
+        history=history
+    )
+
 @user_dashboard_bp.route("/dietary-preferences", methods=["GET", "POST"])
 @login_required
 def dietary_preferences():
-    if not current_user.is_user():
+    # ✅ Only regular users can access dietary preferences
+    if not current_user.has_role("user"):
         flash("Dietary preferences are only available for regular users.", "warning")
         return redirect(url_for("user_dashboard.index"))
 
