@@ -2,574 +2,612 @@
 {% block title %}Dashboard · NutriConnect{% endblock %}
 
 {% block extra_css %}
-<link href="https://fonts.googleapis.com/css2?family=Cabinet+Grotesk:wght@400;500;700;800;900&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 {% endblock %}
 
 {% block content %}
 <style>
-  /* ═══════════════════════════════════════
-     DASHBOARD TOKENS  (dark-mode aware)
-  ═══════════════════════════════════════ */
-  .dash {
-    --d-bg:        var(--nc-bg,        #f0f4f8);
-    --d-surface:   var(--nc-surface,   #ffffff);
-    --d-surface-2: var(--nc-surface-2, #f7f9fc);
-    --d-border:    var(--nc-border,    #e2e8f0);
-    --d-text:      var(--nc-text,      #0d1117);
-    --d-text-2:    var(--nc-text-2,    #374151);
-    --d-muted:     var(--nc-text-muted,#6b7280);
-    --d-faint:     var(--nc-text-faint,#9ca3af);
+/* ═══════════════════════════════════════════════════════════
+   DESIGN TOKENS  — all wired to base.html nc-* variables
+═══════════════════════════════════════════════════════════ */
+.dash {
+  --surf:     var(--nc-surface);
+  --s2:       var(--nc-surface-2);
+  --s3:       var(--nc-surface-3);
+  --bdr:      var(--nc-border);
+  --bdr2:     var(--nc-border-2);
+  --txt:      var(--nc-text);
+  --txt2:     var(--nc-text-2);
+  --mu:       var(--nc-text-muted);
+  --fa:       var(--nc-text-faint);
+  --brand:    var(--nc-brand);
+  --brand-d:  var(--nc-brand-d);
+  --brand-l:  var(--nc-brand-l);
 
-    --teal:   #0d9488;
-    --teal-d: #0f766e;
-    --teal-l: #ccfbf1;
-    --cyan:   #06b6d4;
-    --cyan-l: #cffafe;
-    --lime:   #84cc16;
-    --lime-l: #ecfccb;
-    --rose:   #f43f5e;
-    --rose-l: #ffe4e6;
-    --amber:  #f59e0b;
-    --amber-l:#fef3c7;
-    --violet: #7c3aed;
-    --violet-l:#ede9fe;
+  /* Semantic palette */
+  --teal:   #0d9488; --teal-d: #0f766e; --teal-l:   #ccfbf1;
+  --cyan:   #06b6d4; --cyan-l: #cffafe;
+  --lime:   #84cc16; --lime-l: #ecfccb;
+  --rose:   #f43f5e; --rose-l: #ffe4e6;
+  --amber:  #f59e0b; --amber-l:#fef3c7; --amber-d: #d97706;
+  --violet: #7c3aed; --violet-l:#ede9fe;
+  --em:     #10b981; --em-l:    #d1fae5;
 
-    --r: 20px;
-    font-family: 'Cabinet Grotesk', sans-serif;
-  }
+  --r:      18px;
+  --r-sm:   12px;
+  font-family: 'Sora', sans-serif;
+}
 
-  /* ─── Layout wrapper ─── */
-  .dash { min-height: 100vh; }
+/* ─── ENTRY ANIMATIONS ─── */
+@keyframes rise {
+  from { opacity:0; transform:translateY(20px); }
+  to   { opacity:1; transform:translateY(0); }
+}
+@keyframes pulse-dot {
+  0%,100% { opacity:1; transform:scale(1); }
+  50%     { opacity:.45; transform:scale(.7); }
+}
 
-  /* ═══════════════════════════════════════
-     BENTO GRID
-  ═══════════════════════════════════════ */
-  .bento {
-    display: grid;
-    grid-template-columns: repeat(12, 1fr);
-    grid-template-rows: auto;
-    gap: 1rem;
-  }
+/* ═══════════════════════════════════════════════════════════
+   BENTO GRID
+═══════════════════════════════════════════════════════════ */
+.bento {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  gap: 1rem;
+}
 
-  /* Cell base */
-  .cell {
-    background: var(--d-surface);
-    border: 1px solid var(--d-border);
-    border-radius: var(--r);
-    overflow: hidden;
-    position: relative;
-    transition: transform .2s, box-shadow .2s;
-  }
-  .cell:hover { transform: translateY(-2px); box-shadow: 0 8px 32px rgba(0,0,0,.1); }
+.cell {
+  background: var(--nc-card-bg);
+  border: 1px solid var(--nc-card-border);
+  border-radius: var(--r);
+  overflow: hidden;
+  position: relative;
+  box-shadow: var(--nc-card-shadow);
+  transition: transform .22s cubic-bezier(.16,1,.3,1), box-shadow .22s, border-color .2s;
+  animation: rise .55s cubic-bezier(.16,1,.3,1) both;
+}
 
-  /* Grid placement */
-  .cell--hero       { grid-column: span 12; }
-  .cell--completion { grid-column: span 8; }
-  .cell--streak     { grid-column: span 4; }
-  .cell--profile    { grid-column: span 5; }
-  .cell--diet       { grid-column: span 7; }
-  .cell--stat-a     { grid-column: span 3; }
-  .cell--stat-b     { grid-column: span 3; }
-  .cell--stat-c     { grid-column: span 3; }
-  .cell--stat-d     { grid-column: span 3; }
-  .cell--bmi        { grid-column: span 12; }
+.cell:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 16px 48px rgba(0,0,0,.12);
+  border-color: var(--bdr2);
+}
+[data-theme="dark"] .cell:hover { box-shadow: 0 16px 48px rgba(0,0,0,.45); }
 
-  @media (max-width: 900px) {
-    .cell--completion,
-    .cell--streak,
-    .cell--profile,
-    .cell--diet,
-    .cell--bmi { grid-column: span 12; }
-    .cell--stat-a,.cell--stat-b,
-    .cell--stat-c,.cell--stat-d { grid-column: span 6; }
-  }
-  @media (max-width: 540px) {
-    .cell--stat-a,.cell--stat-b,
-    .cell--stat-c,.cell--stat-d { grid-column: span 12; }
-  }
+/* Spans */
+.c-hero       { grid-column: span 12; animation-delay:.04s; }
+.c-stat-a     { grid-column: span 3;  animation-delay:.08s; }
+.c-stat-b     { grid-column: span 3;  animation-delay:.11s; }
+.c-stat-c     { grid-column: span 3;  animation-delay:.14s; }
+.c-stat-d     { grid-column: span 3;  animation-delay:.17s; }
+.c-completion { grid-column: span 8;  animation-delay:.20s; }
+.c-streak     { grid-column: span 4;  animation-delay:.23s; }
+.c-profile    { grid-column: span 5;  animation-delay:.26s; }
+.c-diet       { grid-column: span 7;  animation-delay:.29s; }
+.c-upgrade    { grid-column: span 12; animation-delay:.32s; }
+.c-bmi        { grid-column: span 12; animation-delay:.35s; }
 
-  /* ═══════════════════════════════════════
-     HERO CELL  ← FIXED: no longer uses var(--d-text) as bg
-  ═══════════════════════════════════════ */
-  .hero-cell {
-    padding: 2.75rem 3rem;
-    background: linear-gradient(135deg, #0a2e2b 0%, #0d3d38 40%, #0f2d4a 100%);
-    color: #fff;
-    position: relative;
-    overflow: hidden;
-    min-height: 220px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    flex-wrap: wrap;
-    gap: 2rem;
-  }
+@media (max-width: 960px) {
+  .c-completion, .c-streak,
+  .c-profile, .c-diet,
+  .c-upgrade, .c-bmi { grid-column: span 12; }
+  .c-stat-a,.c-stat-b,.c-stat-c,.c-stat-d { grid-column: span 6; }
+}
+@media (max-width: 540px) {
+  .c-stat-a,.c-stat-b,.c-stat-c,.c-stat-d { grid-column: span 12; }
+}
 
-  /* Layered mesh */
-  .hero-cell::before {
-    content: '';
-    position: absolute; inset: 0; z-index: 0;
-    background:
-      radial-gradient(ellipse 70% 80% at  -5% 50%, rgba(13,148,136,.55)   0%, transparent 55%),
-      radial-gradient(ellipse 50% 70% at 105% 20%, rgba(124,58,237,.5)    0%, transparent 55%),
-      radial-gradient(ellipse 40% 60% at  55% 110%,rgba(6,182,212,.35)    0%, transparent 50%);
-  }
+/* ═══════════════════════════════════════════════════════════
+   SHARED ATOMS
+═══════════════════════════════════════════════════════════ */
+/* Top accent stripe */
+.stripe { height: 3px; }
+.st-brand  { background: linear-gradient(90deg, var(--brand), #06b6d4, #818cf8); }
+.st-teal   { background: linear-gradient(90deg, var(--teal), var(--cyan)); }
+.st-lime   { background: linear-gradient(90deg, var(--lime), var(--em)); }
+.st-amber  { background: linear-gradient(90deg, var(--amber), #fbbf24); }
+.st-violet { background: linear-gradient(90deg, var(--violet), var(--brand)); }
+.st-rose   { background: linear-gradient(90deg, var(--rose), #fb923c); }
 
-  /* Dot grid */
-  .hero-cell::after {
-    content: '';
-    position: absolute; inset: 0; z-index: 0;
-    background-image: radial-gradient(circle, rgba(255,255,255,.08) 1px, transparent 1px);
-    background-size: 28px 28px;
-  }
+/* Icon boxes */
+.ico-box {
+  width: 32px; height: 32px; border-radius: 9px; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center; font-size: .76rem;
+}
+.ib-brand   { background: var(--brand-l);  color: var(--brand-d); }
+.ib-teal    { background: var(--teal-l);   color: var(--teal-d); }
+.ib-lime    { background: var(--lime-l);   color: #4d7c0f; }
+.ib-amber   { background: var(--amber-l);  color: var(--amber-d); }
+.ib-violet  { background: var(--violet-l); color: #5b21b6; }
+.ib-rose    { background: var(--rose-l);   color: #be123c; }
+.ib-em      { background: var(--em-l);     color: #065f46; }
+.ib-cyan    { background: var(--cyan-l);   color: #0e7490; }
 
-  .hero-cell > * { position: relative; z-index: 1; }
+[data-theme="dark"] .ib-brand  { background: rgba(14,165,233,.13); color: #38bdf8; }
+[data-theme="dark"] .ib-teal   { background: rgba(13,148,136,.13); color: #2dd4bf; }
+[data-theme="dark"] .ib-lime   { background: rgba(132,204,22,.11); color: #a3e635; }
+[data-theme="dark"] .ib-amber  { background: rgba(245,158,11,.12); color: #fcd34d; }
+[data-theme="dark"] .ib-violet { background: rgba(124,58,237,.12); color: #c4b5fd; }
+[data-theme="dark"] .ib-rose   { background: rgba(244,63,94,.11);  color: #fb7185; }
+[data-theme="dark"] .ib-em     { background: rgba(16,185,129,.11); color: #34d399; }
+[data-theme="dark"] .ib-cyan   { background: rgba(6,182,212,.11);  color: #22d3ee; }
 
-  .hero-eyebrow {
-    display: inline-flex; align-items: center; gap: .45rem;
-    background: rgba(255,255,255,.12);
-    border: 1px solid rgba(255,255,255,.2);
-    border-radius: 99px; padding: .3rem .9rem;
-    font-size: .72rem; font-weight: 700; letter-spacing: .08em;
-    text-transform: uppercase; margin-bottom: 1rem; color: rgba(255,255,255,.9);
-  }
-  .hero-eyebrow-dot { width: 6px; height: 6px; border-radius: 50%; background: #34d399; box-shadow: 0 0 6px #34d399; animation: pulse-dot 2s ease-in-out infinite; }
-  @keyframes pulse-dot { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.5;transform:scale(.8)} }
+/* Card headers */
+.c-head {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 1rem 1.4rem; border-bottom: 1px solid var(--bdr);
+}
+.c-head-l { display: flex; align-items: center; gap: .6rem; }
+.c-head-title { font-size: .88rem; font-weight: 800; color: var(--txt); letter-spacing: -.02em; }
+.c-head-sub   { font-size: .69rem; color: var(--mu); font-weight: 500; margin-top: .04rem; }
 
-  .hero-name {
-    font-size: clamp(1.8rem, 4vw, 2.8rem);
-    font-weight: 900;
-    line-height: 1.05;
-    letter-spacing: -.04em;
-    margin-bottom: .5rem;
-  }
-  .hero-name-accent {
-    font-family: 'Instrument Serif', serif;
-    font-style: italic;
-    background: linear-gradient(135deg, #5eead4 0%, #67e8f9 50%, #a5f3fc 100%);
-    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-    background-clip: text;
-  }
-  .hero-tagline {
-    font-size: .9rem; color: rgba(255,255,255,.65);
-    font-weight: 400; max-width: 340px; line-height: 1.5;
-  }
+/* Buttons */
+.btn-ghost {
+  display: inline-flex; align-items: center; gap: .38rem;
+  background: var(--s2); color: var(--txt2);
+  border: 1px solid var(--bdr); border-radius: 9px;
+  padding: .35rem .9rem; font-size: .74rem; font-weight: 700;
+  font-family: 'Sora', sans-serif; text-decoration: none; cursor: pointer;
+  transition: background .14s, border-color .14s, color .14s;
+}
+.btn-ghost:hover { background: var(--s3); border-color: var(--bdr2); color: var(--txt); }
 
-  /* Right side: big ring gauge */
-  .hero-right { display: flex; align-items: center; gap: 2rem; }
+.btn-brand {
+  display: inline-flex; align-items: center; justify-content: center; gap: .42rem;
+  background: var(--brand); color: #fff; border: none;
+  border-radius: 11px; padding: .64rem 1.2rem;
+  font-family: 'Sora', sans-serif; font-size: .84rem; font-weight: 700;
+  text-decoration: none; cursor: pointer;
+  box-shadow: 0 2px 12px rgba(14,165,233,.32);
+  transition: background .15s, transform .12s, box-shadow .15s;
+}
+.btn-brand:hover { background: var(--brand-d); color:#fff; transform: translateY(-1px); box-shadow: 0 6px 22px rgba(14,165,233,.42); }
 
-  .ring-gauge { position: relative; width: 110px; height: 110px; flex-shrink: 0; }
-  .ring-gauge svg { width: 110px; height: 110px; transform: rotate(-90deg); }
-  .ring-bg   { fill: none; stroke: rgba(255,255,255,.12); stroke-width: 8; }
-  .ring-fill {
-    fill: none; stroke: url(#ringGrad); stroke-width: 8;
-    stroke-linecap: round;
-    stroke-dasharray: 283;
-    stroke-dashoffset: 283;
-    transition: stroke-dashoffset 1.4s cubic-bezier(.16,1,.3,1);
-  }
-  .ring-label {
-    position: absolute; inset: 0;
-    display: flex; flex-direction: column;
-    align-items: center; justify-content: center;
-    color: #fff;
-  }
-  .ring-pct {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 1.4rem; font-weight: 600; line-height: 1;
-  }
-  .ring-sub { font-size: .6rem; opacity: .55; text-transform: uppercase; letter-spacing: .06em; margin-top: .15rem; }
+.btn-teal {
+  display: inline-flex; align-items: center; justify-content: center; gap: .42rem;
+  background: var(--teal); color: #fff; border: none;
+  border-radius: 11px; padding: .64rem 1.2rem;
+  font-family: 'Sora', sans-serif; font-size: .84rem; font-weight: 700;
+  text-decoration: none; cursor: pointer;
+  box-shadow: 0 2px 12px rgba(13,148,136,.3);
+  transition: background .15s, transform .12s, box-shadow .15s;
+}
+.btn-teal:hover { background: var(--teal-d); color:#fff; transform: translateY(-1px); box-shadow: 0 6px 22px rgba(13,148,136,.38); }
 
-  .hero-stats-col { display: flex; flex-direction: column; gap: 1rem; }
-  .hsc {
-    display: flex; flex-direction: column; gap: .1rem;
-    border-left: 2px solid rgba(255,255,255,.2);
-    padding-left: .9rem;
-  }
-  .hsc-val {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 1.1rem; font-weight: 600; color: #fff; line-height: 1;
-  }
-  .hsc-val.c-teal   { color: #5eead4; }
-  .hsc-val.c-amber  { color: #fcd34d; }
-  .hsc-val.c-violet { color: #c4b5fd; }
-  .hsc-val.c-cyan   { color: #67e8f9; }
-  .hsc-unit { font-size: .7rem; opacity: .6; margin-left: .1rem; }
-  .hsc-lbl  { font-size: .65rem; color: rgba(255,255,255,.45); text-transform: uppercase; letter-spacing: .08em; font-weight: 700; }
+.btn-lime {
+  display: inline-flex; align-items: center; justify-content: center; gap: .42rem;
+  background: #4d7c0f; color: #fff; border: none;
+  border-radius: 11px; padding: .6rem 1.2rem;
+  font-family: 'Sora', sans-serif; font-size: .82rem; font-weight: 700;
+  text-decoration: none; cursor: pointer;
+  box-shadow: 0 2px 10px rgba(77,124,15,.28);
+  transition: background .15s, transform .12s;
+}
+.btn-lime:hover { background: #365314; color:#fff; transform: translateY(-1px); }
 
-  /* ═══════════════════════════════════════
-     COMPLETION CELL
-  ═══════════════════════════════════════ */
-  .comp-inner { padding: 1.5rem 1.75rem; }
-  .comp-header {
-    display: flex; align-items: center; justify-content: space-between;
-    margin-bottom: 1.25rem;
-  }
-  .comp-title {
-    display: flex; align-items: center; gap: .6rem;
-    font-size: .88rem; font-weight: 800; color: var(--d-text);
-  }
-  .comp-icon-wrap {
-    width: 32px; height: 32px; border-radius: 10px;
-    background: var(--teal-l); color: var(--teal);
-    display: flex; align-items: center; justify-content: center; font-size: .8rem;
-  }
-  .comp-pct-pill {
-    font-family: 'JetBrains Mono', monospace; font-size: .8rem; font-weight: 600;
-    background: var(--teal-l); color: var(--teal-d);
-    border-radius: 99px; padding: .2rem .75rem;
-  }
+.btn-rose {
+  display: inline-flex; align-items: center; justify-content: center; gap: .42rem;
+  background: var(--rose); color: #fff; border: none;
+  border-radius: 11px; padding: .6rem 1.2rem;
+  font-family: 'Sora', sans-serif; font-size: .82rem; font-weight: 700;
+  text-decoration: none; cursor: pointer;
+  box-shadow: 0 2px 10px rgba(244,63,94,.28);
+  transition: background .15s, transform .12s;
+}
+.btn-rose:hover { background: #e11d48; color:#fff; transform: translateY(-1px); }
 
-  .seg-track {
-    display: flex; gap: 4px; height: 8px; border-radius: 99px;
-    overflow: hidden; margin-bottom: 1rem;
-  }
-  .seg {
-    flex: 1; border-radius: 99px;
-    background: var(--d-border);
-    transition: background .6s cubic-bezier(.16,1,.3,1);
-  }
-  .seg.lit { background: linear-gradient(90deg, var(--teal), var(--cyan)); }
+/* Empty states */
+.empty-state {
+  display: flex; flex-direction: column; align-items: center;
+  padding: 2.2rem 1rem; text-align: center; gap: .7rem;
+}
+.empty-state-ico {
+  width: 58px; height: 58px; border-radius: 18px;
+  display: flex; align-items: center; justify-content: center; font-size: 1.4rem;
+}
+.empty-state h4 { font-size: .93rem; font-weight: 800; color: var(--txt); margin: 0; letter-spacing: -.02em; }
+.empty-state p  { font-size: .8rem; color: var(--mu); margin: 0; max-width: 230px; line-height: 1.6; }
 
-  .step-list { display: flex; flex-wrap: wrap; gap: .45rem; }
-  .step-pill {
-    display: inline-flex; align-items: center; gap: .35rem;
-    font-size: .74rem; font-weight: 700; padding: .3rem .8rem;
-    border-radius: 99px; border: 1.5px solid transparent;
-    transition: transform .15s;
-  }
-  .step-pill:hover { transform: translateY(-1px); }
-  .step-pill.done { background: var(--teal-l); color: var(--teal-d); border-color: #99f6e4; }
-  .step-pill.todo { background: var(--d-surface-2); color: var(--d-faint); border-color: var(--d-border); }
+/* ═══════════════════════════════════════════════════════════
+   HERO
+═══════════════════════════════════════════════════════════ */
+.hero-wrap {
+  background: linear-gradient(135deg, #02111f 0%, #06213d 40%, #092d55 72%, #0a3a6e 100%);
+  border-radius: var(--r); overflow: hidden; position: relative;
+  padding: 2.75rem 3rem;
+  display: flex; align-items: center;
+  justify-content: space-between; flex-wrap: wrap; gap: 2rem;
+}
 
-  /* ═══════════════════════════════════════
-     STREAK CELL
-  ═══════════════════════════════════════ */
-  .streak-inner {
-    padding: 1.5rem;
-    display: flex; flex-direction: column;
-    align-items: center; justify-content: center;
-    height: 100%; min-height: 160px;
-    text-align: center;
-    background: linear-gradient(145deg, #fff7ed, #fef3c7);
-    position: relative; overflow: hidden;
-  }
-  [data-theme="dark"] .streak-inner {
-    background: linear-gradient(145deg, #1c1508, #2d1f07) !important;
-  }
-  .streak-inner::before {
-    content: '🔥';
-    position: absolute; right: -10px; bottom: -10px;
-    font-size: 6rem; opacity: .08; line-height: 1;
-    transform: rotate(-15deg);
-  }
-  .streak-num {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 3rem; font-weight: 600;
-    color: var(--amber); line-height: 1;
-  }
-  .streak-label { font-size: .78rem; font-weight: 700; color: #92400e; margin-top: .3rem; letter-spacing: .04em; }
-  [data-theme="dark"] .streak-label { color: #fcd34d !important; }
-  .streak-dots { display: flex; gap: .35rem; margin-top: .9rem; }
-  .streak-dot {
-    width: 8px; height: 8px; border-radius: 50%;
-    background: var(--d-border);
-    transition: background .3s;
-  }
-  .streak-dot.active { background: var(--amber); box-shadow: 0 0 6px rgba(245,158,11,.4); }
+/* Layered glow blobs */
+.hero-wrap::before {
+  content: ''; position: absolute; inset: 0; z-index: 0;
+  background:
+    radial-gradient(ellipse 70% 85% at -8% 55%,  rgba(14,165,233,.50) 0%, transparent 58%),
+    radial-gradient(ellipse 55% 65% at 110% 15%, rgba(124,58,237,.42) 0%, transparent 55%),
+    radial-gradient(ellipse 45% 55% at 58% 115%, rgba(6,182,212,.32)  0%, transparent 52%);
+}
 
-  /* ═══════════════════════════════════════
-     MINI STAT CELLS
-  ═══════════════════════════════════════ */
-  .stat-cell {
-    padding: 1.35rem 1.5rem;
-    display: flex; flex-direction: column; justify-content: space-between;
-    min-height: 120px;
-  }
-  .stat-cell-top { display: flex; align-items: center; justify-content: space-between; }
-  .stat-cell-icon {
-    width: 36px; height: 36px; border-radius: 11px;
-    display: flex; align-items: center; justify-content: center; font-size: .95rem;
-  }
-  .sci-teal   { background: var(--teal-l);   color: var(--teal); }
-  .sci-amber  { background: var(--amber-l);  color: #d97706; }
-  .sci-violet { background: var(--violet-l); color: var(--violet); }
-  .sci-cyan   { background: var(--cyan-l);   color: #0e7490; }
+/* Dot texture */
+.hero-wrap::after {
+  content: ''; position: absolute; inset: 0; z-index: 0;
+  background-image: radial-gradient(circle, rgba(255,255,255,.07) 1px, transparent 1px);
+  background-size: 28px 28px;
+}
 
-  .stat-trend {
-    display: inline-flex; align-items: center; gap: .25rem;
-    font-size: .7rem; font-weight: 700; border-radius: 99px; padding: .15rem .55rem;
-  }
-  .stat-trend.up   { background: var(--teal-l);  color: var(--teal-d); }
-  .stat-trend.down { background: var(--rose-l);  color: var(--rose); }
-  .stat-trend.neutral { background: var(--d-surface-2); color: var(--d-muted); }
+/* Bottom accent line */
+.hero-line {
+  position: absolute; bottom: 0; left: 0; right: 0; height: 2px; z-index: 1;
+  background: linear-gradient(90deg, transparent, #38bdf8, #a5f3fc, transparent);
+}
 
-  .stat-val {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 1.65rem; font-weight: 600;
-    color: var(--d-text); line-height: 1; margin-top: .5rem;
-  }
-  .stat-val .unit { font-size: .75rem; opacity: .5; margin-left: .15rem; font-weight: 400; }
-  .stat-lbl { font-size: .72rem; color: var(--d-muted); font-weight: 600; text-transform: uppercase; letter-spacing: .05em; margin-top: .25rem; }
+.hero-wrap > * { position: relative; z-index: 1; }
 
-  /* ═══════════════════════════════════════
-     PROFILE CELL
-  ═══════════════════════════════════════ */
-  .profile-cell { padding: 1.5rem; }
-  .profile-header { display: flex; align-items: center; gap: 1rem; margin-bottom: 1.25rem; }
-  .profile-avatar {
-    width: 56px; height: 56px; border-radius: 16px; flex-shrink: 0;
-    background: linear-gradient(135deg, var(--teal), var(--cyan));
-    display: flex; align-items: center; justify-content: center;
-    font-size: 1.4rem; font-weight: 800; color: #fff;
-    letter-spacing: -.03em;
-    box-shadow: 0 4px 16px rgba(13,148,136,.3);
-    overflow: hidden;
-  }
-  .profile-avatar img { width: 100%; height: 100%; object-fit: cover; border-radius: 16px; }
+.hero-pill {
+  display: inline-flex; align-items: center; gap: .45rem;
+  background: rgba(255,255,255,.1); border: 1px solid rgba(255,255,255,.18);
+  border-radius: 99px; padding: .28rem .9rem;
+  font-size: .67rem; font-weight: 700; letter-spacing: .1em;
+  text-transform: uppercase; color: rgba(255,255,255,.85); margin-bottom: .9rem;
+}
+.hero-dot {
+  width: 7px; height: 7px; border-radius: 50%;
+  background: #34d399; box-shadow: 0 0 8px #34d399;
+  animation: pulse-dot 2s ease-in-out infinite;
+}
 
-  .profile-fullname { font-size: 1rem; font-weight: 800; color: var(--d-text); letter-spacing: -.02em; }
-  .profile-handle   { font-size: .78rem; color: var(--d-muted); margin-top: .1rem; }
-  .profile-role {
-    display: inline-flex; align-items: center; gap: .3rem;
-    background: var(--teal-l); color: var(--teal-d);
-    border-radius: 99px; padding: .15rem .65rem;
-    font-size: .7rem; font-weight: 700; margin-top: .35rem;
-  }
+.hero-name {
+  font-size: clamp(1.75rem, 4vw, 2.7rem);
+  font-weight: 800; line-height: 1.06;
+  letter-spacing: -.045em; color: #fff; margin-bottom: .5rem;
+}
+.hero-accent {
+  background: linear-gradient(135deg, #38bdf8 0%, #67e8f9 55%, #a5f3fc 100%);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
 
-  .profile-rows { display: flex; flex-direction: column; gap: 0; }
-  .profile-row {
-    display: flex; align-items: center; gap: .75rem;
-    padding: .7rem 0; border-bottom: 1px solid var(--d-border);
-  }
-  .profile-row:last-child { border-bottom: none; padding-bottom: 0; }
-  .pr-ico {
-    width: 30px; height: 30px; border-radius: 9px; flex-shrink: 0;
-    background: var(--d-surface-2); border: 1px solid var(--d-border);
-    display: flex; align-items: center; justify-content: center;
-    font-size: .75rem; color: var(--d-muted);
-  }
-  .pr-lbl { font-size: .67rem; text-transform: uppercase; letter-spacing: .06em; color: var(--d-faint); font-weight: 700; }
-  .pr-val { font-size: .85rem; font-weight: 700; color: var(--d-text); }
+.hero-sub {
+  font-size: .875rem; color: rgba(255,255,255,.5);
+  font-weight: 400; max-width: 340px; line-height: 1.6;
+}
 
-  .profile-cell-foot { margin-top: 1.25rem; }
-  .btn-teal {
-    display: inline-flex; align-items: center; gap: .45rem;
-    background: var(--teal); color: #fff; border: none; font-family: inherit;
-    border-radius: 11px; padding: .6rem 1.35rem; font-size: .83rem; font-weight: 800;
-    text-decoration: none; cursor: pointer; width: 100%; justify-content: center;
-    box-shadow: 0 2px 8px rgba(13,148,136,.3), 0 1px 2px rgba(13,148,136,.2);
-    transition: background .15s, transform .12s, box-shadow .15s;
-    letter-spacing: -.01em;
-  }
-  .btn-teal:hover { background: var(--teal-d); color: #fff; transform: translateY(-1px); box-shadow: 0 6px 20px rgba(13,148,136,.35); }
+/* Ring + stats */
+.hero-right { display: flex; align-items: center; gap: 2.2rem; flex-wrap: wrap; }
 
-  /* ═══════════════════════════════════════
-     DIET CELL
-  ═══════════════════════════════════════ */
-  .diet-cell { padding: 1.5rem; }
-  .diet-cell-header {
-    display: flex; align-items: center; justify-content: space-between;
-    margin-bottom: 1.25rem;
-  }
-  .section-label {
-    display: flex; align-items: center; gap: .55rem;
-    font-size: .88rem; font-weight: 800; color: var(--d-text);
-  }
-  .sl-icon {
-    width: 32px; height: 32px; border-radius: 10px;
-    display: flex; align-items: center; justify-content: center; font-size: .8rem;
-  }
-  .sl-lime   { background: var(--lime-l);   color: #4d7c0f; }
-  .sl-rose   { background: var(--rose-l);   color: #be123c; }
+.ring-wrap { position: relative; width: 112px; height: 112px; flex-shrink: 0; }
+.ring-wrap svg { width: 112px; height: 112px; transform: rotate(-90deg); }
+.rg-bg   { fill: none; stroke: rgba(255,255,255,.11); stroke-width: 7; }
+.rg-fill {
+  fill: none; stroke: url(#rgGrad); stroke-width: 7;
+  stroke-linecap: round;
+  stroke-dasharray: 283; stroke-dashoffset: 283;
+  transition: stroke-dashoffset 1.5s cubic-bezier(.16,1,.3,1);
+}
+.ring-lbl {
+  position: absolute; inset: 0;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; color: #fff;
+}
+.ring-pct  { font-family: 'JetBrains Mono', monospace; font-size: 1.42rem; font-weight: 600; line-height: 1; }
+.ring-note { font-size: .56rem; opacity: .5; text-transform: uppercase; letter-spacing: .08em; margin-top: .18rem; }
 
-  .btn-manage {
-    display: inline-flex; align-items: center; gap: .35rem;
-    background: var(--d-surface-2); color: var(--d-text-2);
-    border: 1px solid var(--d-border); border-radius: 9px;
-    padding: .38rem .85rem; font-size: .76rem; font-weight: 700;
-    text-decoration: none; transition: background .15s, border-color .15s;
-    font-family: inherit;
-  }
-  .btn-manage:hover { background: var(--d-border); color: var(--d-text); }
+.hero-stats { display: flex; flex-direction: column; gap: 1.05rem; }
+.hstat {
+  padding-left: .9rem;
+  border-left: 2px solid rgba(255,255,255,.18);
+}
+.hstat-val {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 1.05rem; font-weight: 600; color: #fff; line-height: 1;
+}
+.hv-sky    { color: #7dd3fc; }
+.hv-amber  { color: #fcd34d; }
+.hv-violet { color: #c4b5fd; }
+.hstat-lbl {
+  font-size: .6rem; color: rgba(255,255,255,.4);
+  text-transform: uppercase; letter-spacing: .09em; font-weight: 700; margin-top: .1rem;
+}
 
-  /* Macro bars */
-  .macro-grid { display: grid; grid-template-columns: 1fr 1fr; gap: .75rem; margin-bottom: 1.1rem; }
+/* ═══════════════════════════════════════════════════════════
+   MINI STAT CELLS
+═══════════════════════════════════════════════════════════ */
+.stat-pad { padding: 1.3rem 1.4rem; display: flex; flex-direction: column; justify-content: space-between; min-height: 125px; }
+.stat-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: .55rem; }
 
-  .mb-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: .4rem; }
-  .mb-name { font-size: .72rem; font-weight: 700; color: var(--d-muted); text-transform: uppercase; letter-spacing: .05em; }
-  .mb-val  { font-family: 'JetBrains Mono', monospace; font-size: .72rem; color: var(--d-text); font-weight: 500; }
-  .mb-track { height: 6px; background: var(--d-border); border-radius: 99px; overflow: hidden; }
-  .mb-fill  { height: 100%; border-radius: 99px; transition: width 1s cubic-bezier(.16,1,.3,1); }
-  .mb-fill.calories { background: linear-gradient(90deg, var(--amber), #fbbf24); }
-  .mb-fill.protein  { background: linear-gradient(90deg, var(--teal), var(--cyan)); }
-  .mb-fill.carbs    { background: linear-gradient(90deg, var(--violet), #a78bfa); }
-  .mb-fill.fat      { background: linear-gradient(90deg, var(--rose), #fb7185); }
+.stat-ico {
+  width: 36px; height: 36px; border-radius: 11px;
+  display: flex; align-items: center; justify-content: center; font-size: .88rem;
+}
+.si-amber  { background: var(--amber-l);  color: var(--amber-d); }
+.si-teal   { background: var(--teal-l);   color: var(--teal-d); }
+.si-violet { background: var(--violet-l); color: #5b21b6; }
+.si-cyan   { background: var(--cyan-l);   color: #0e7490; }
 
-  /* Diet tag pills */
-  .diet-tags { display: flex; flex-wrap: wrap; gap: .4rem; }
-  .dtag {
-    display: inline-flex; align-items: center; gap: .3rem;
-    padding: .32rem .75rem; border-radius: 99px;
-    font-size: .76rem; font-weight: 700; border: 1.5px solid transparent;
-  }
-  .dtag-lime   { background: var(--lime-l);   color: #3f6212; border-color: #bef264; }
-  .dtag-cyan   { background: var(--cyan-l);   color: #0e7490; border-color: #a5f3fc; }
-  .dtag-amber  { background: var(--amber-l);  color: #92400e; border-color: #fde68a; }
-  .dtag-violet { background: var(--violet-l); color: #5b21b6; border-color: #c4b5fd; }
+[data-theme="dark"] .si-amber  { background: rgba(245,158,11,.13); color: #fcd34d; }
+[data-theme="dark"] .si-teal   { background: rgba(13,148,136,.13); color: #2dd4bf; }
+[data-theme="dark"] .si-violet { background: rgba(124,58,237,.12); color: #c4b5fd; }
+[data-theme="dark"] .si-cyan   { background: rgba(6,182,212,.11);  color: #22d3ee; }
 
-  .diet-empty {
-    display: flex; flex-direction: column; align-items: center;
-    padding: 1.5rem 1rem; text-align: center;
-  }
-  .diet-empty-icon {
-    width: 60px; height: 60px; border-radius: 20px;
-    background: var(--lime-l); color: #4d7c0f;
-    font-size: 1.6rem; display: flex; align-items: center;
-    justify-content: center; margin-bottom: .85rem;
-  }
-  .diet-empty p { font-size: .82rem; color: var(--d-muted); margin: 0 0 .85rem; line-height: 1.6; max-width: 220px; }
+.trend-pill {
+  display: inline-flex; align-items: center; gap: .22rem;
+  font-size: .67rem; font-weight: 700; border-radius: 99px; padding: .14rem .55rem;
+}
+.tp-up      { background: var(--teal-l);  color: var(--teal-d); }
+.tp-neutral { background: var(--s2);      color: var(--fa); border: 1px solid var(--bdr); }
+[data-theme="dark"] .tp-up      { background: rgba(13,148,136,.13); color: #2dd4bf; }
+[data-theme="dark"] .tp-neutral { background: var(--s2); color: var(--fa); }
 
-  .btn-setup {
-    display: inline-flex; align-items: center; gap: .4rem;
-    background: #4d7c0f; color: #fff; border: none; font-family: inherit;
-    border-radius: 10px; padding: .55rem 1.2rem; font-size: .82rem; font-weight: 800;
-    text-decoration: none; cursor: pointer;
-    transition: background .15s, transform .12s;
-  }
-  .btn-setup:hover { background: #365314; color: #fff; transform: translateY(-1px); }
+.stat-num {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 1.7rem; font-weight: 600; color: var(--txt); line-height: 1.05;
+}
+.stat-num .u { font-size: .72rem; opacity: .42; margin-left: .08rem; font-weight: 400; }
+.stat-lbl {
+  font-size: .67rem; color: var(--mu); font-weight: 700;
+  text-transform: uppercase; letter-spacing: .07em; margin-top: .22rem;
+}
 
-  /* ═══════════════════════════════════════
-     BMI CELL
-  ═══════════════════════════════════════ */
-  .bmi-cell { padding: 1.5rem; }
-  .bmi-cell-header {
-    display: flex; align-items: center; justify-content: space-between;
-    margin-bottom: 1.25rem;
-  }
+/* ═══════════════════════════════════════════════════════════
+   COMPLETION
+═══════════════════════════════════════════════════════════ */
+.comp-body { padding: 1.25rem 1.4rem; }
 
-  .bmi-content {
-    display: flex; align-items: center; gap: 2rem; flex-wrap: wrap;
-  }
+.seg-track {
+  display: flex; gap: 5px; height: 7px; border-radius: 99px;
+  overflow: hidden; margin-bottom: 1.1rem;
+}
+.seg {
+  flex: 1; border-radius: 99px; background: var(--s3);
+  transition: background .7s cubic-bezier(.16,1,.3,1);
+}
+.seg.lit { background: linear-gradient(90deg, var(--teal), var(--cyan)); }
 
-  .bmi-score-block {
-    display: flex; flex-direction: column; align-items: center; justify-content: center;
-    width: 120px; height: 120px; border-radius: 22px; flex-shrink: 0;
-    background: var(--d-surface-2); border: 1px solid var(--d-border);
-    position: relative; overflow: hidden;
-  }
-  .bmi-score-block::before {
-    content: ''; position: absolute; inset: 0;
-    background: linear-gradient(135deg, rgba(244,63,94,.07), rgba(124,58,237,.07));
-  }
-  .bmi-score-num {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 2.2rem; font-weight: 600; line-height: 1;
-    color: var(--d-text); position: relative;
-  }
-  .bmi-score-lbl {
-    font-size: .62rem; font-weight: 700; text-transform: uppercase;
-    letter-spacing: .07em; color: var(--d-muted);
-    margin-top: .25rem; position: relative;
-  }
-  .bmi-cat-badge {
-    display: inline-flex; align-items: center; gap: .3rem;
-    border-radius: 99px; padding: .22rem .7rem;
-    font-size: .68rem; font-weight: 800;
-    margin-top: .45rem; position: relative;
-  }
-  .bmi-cat-badge.normal      { background: var(--teal-l);   color: var(--teal-d); }
-  .bmi-cat-badge.underweight { background: var(--cyan-l);   color: #0e7490; }
-  .bmi-cat-badge.overweight  { background: var(--amber-l);  color: #92400e; }
-  .bmi-cat-badge.obese       { background: var(--rose-l);   color: #be123c; }
+.step-pills { display: flex; flex-wrap: wrap; gap: .42rem; }
+.sp {
+  display: inline-flex; align-items: center; gap: .3rem;
+  font-size: .74rem; font-weight: 700;
+  padding: .28rem .82rem; border-radius: 99px;
+  border: 1.5px solid transparent; transition: transform .15s;
+}
+.sp:hover { transform: translateY(-1px); }
+.sp-done { background: var(--teal-l); color: var(--teal-d); border-color: #99f6e4; }
+.sp-todo { background: var(--s2); color: var(--fa); border-color: var(--bdr); }
+[data-theme="dark"] .sp-done { background: rgba(13,148,136,.13); color: #2dd4bf; border-color: rgba(13,148,136,.28); }
 
-  .bmi-range-block { flex: 1; min-width: 200px; }
-  .bmi-range-label {
-    font-size: .7rem; font-weight: 700; text-transform: uppercase;
-    letter-spacing: .06em; color: var(--d-muted); margin-bottom: .6rem;
-  }
-  .bmi-range-track {
-    height: 10px; border-radius: 99px; overflow: hidden;
-    display: flex; margin-bottom: .5rem;
-  }
-  .bmi-range-seg { flex: 1; }
-  .bmi-range-seg.s-cyan  { background: var(--cyan);  flex: 1.5; border-radius: 99px 0 0 99px; }
-  .bmi-range-seg.s-teal  { background: var(--teal);  flex: 2.6; }
-  .bmi-range-seg.s-amber { background: var(--amber); flex: 2.0; }
-  .bmi-range-seg.s-rose  { background: var(--rose);  flex: 2.9; border-radius: 0 99px 99px 0; }
-  .bmi-range-ticks {
-    display: flex; justify-content: space-between;
-    font-family: 'JetBrains Mono', monospace;
-    font-size: .62rem; color: var(--d-faint); line-height: 1.4;
-  }
+.pct-pill {
+  font-family: 'JetBrains Mono', monospace; font-size: .79rem; font-weight: 600;
+  background: var(--teal-l); color: var(--teal-d);
+  border-radius: 99px; padding: .18rem .72rem;
+}
+[data-theme="dark"] .pct-pill { background: rgba(13,148,136,.14); color: #2dd4bf; }
 
-  .bmi-history { flex: 1; min-width: 180px; }
-  .bmi-history-title {
-    font-size: .7rem; font-weight: 700; text-transform: uppercase;
-    letter-spacing: .06em; color: var(--d-muted); margin-bottom: .6rem;
-  }
-  .bmi-history-row {
-    display: flex; align-items: center; justify-content: space-between;
-    padding: .45rem 0; border-bottom: 1px solid var(--d-border); gap: .5rem;
-  }
-  .bmi-history-row:last-child { border-bottom: none; }
-  .bmi-history-date { color: var(--d-muted); font-size: .72rem; white-space: nowrap; }
-  .bmi-history-val  {
-    font-family: 'JetBrains Mono', monospace;
-    font-weight: 600; color: var(--d-text); font-size: .82rem;
-  }
-  .bmi-history-badge {
-    display: inline-flex; align-items: center;
-    border-radius: 99px; padding: .12rem .55rem;
-    font-size: .62rem; font-weight: 800;
-  }
-  .bmi-history-badge.normal      { background: var(--teal-l);  color: var(--teal-d); }
-  .bmi-history-badge.underweight { background: var(--cyan-l);  color: #0e7490; }
-  .bmi-history-badge.overweight  { background: var(--amber-l); color: #92400e; }
-  .bmi-history-badge.obese       { background: var(--rose-l);  color: #be123c; }
+/* ═══════════════════════════════════════════════════════════
+   STREAK
+═══════════════════════════════════════════════════════════ */
+.streak-inner {
+  height: 100%; min-height: 155px;
+  padding: 1.6rem; display: flex; flex-direction: column;
+  align-items: center; justify-content: center; text-align: center;
+  background: linear-gradient(145deg, #fffbeb, #fef3c7);
+  position: relative; overflow: hidden; border-radius: var(--r);
+}
+[data-theme="dark"] .streak-inner { background: linear-gradient(145deg, #1a1203, #2a1d07) !important; }
 
-  .bmi-empty {
-    display: flex; flex-direction: column; align-items: center;
-    padding: 1.25rem 1rem; text-align: center; flex: 1;
-  }
-  .bmi-empty-icon {
-    width: 56px; height: 56px; border-radius: 18px;
-    background: var(--rose-l); color: #be123c;
-    font-size: 1.5rem; display: flex; align-items: center;
-    justify-content: center; margin-bottom: .8rem;
-  }
-  .bmi-empty p { font-size: .82rem; color: var(--d-muted); margin: 0 0 .85rem; line-height: 1.6; max-width: 240px; }
+.streak-inner::before {
+  content: '🔥'; position: absolute;
+  right: -12px; bottom: -12px;
+  font-size: 7rem; opacity: .07; line-height: 1; transform: rotate(-12deg);
+}
 
-  .btn-rose {
-    display: inline-flex; align-items: center; gap: .4rem;
-    background: var(--rose); color: #fff; border: none; font-family: inherit;
-    border-radius: 10px; padding: .55rem 1.2rem; font-size: .82rem; font-weight: 800;
-    text-decoration: none; cursor: pointer;
-    transition: background .15s, transform .12s;
-    box-shadow: 0 2px 8px rgba(244,63,94,.25);
-  }
-  .btn-rose:hover { background: #e11d48; color: #fff; transform: translateY(-1px); }
+.streak-num {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 3.2rem; font-weight: 600; color: var(--amber); line-height: 1;
+}
+.streak-lbl { font-size: .78rem; font-weight: 700; color: #92400e; margin-top: .28rem; letter-spacing: .04em; }
+[data-theme="dark"] .streak-lbl { color: #fcd34d !important; }
 
-  /* ═══════════════════════════════════════
-     ANIMATIONS
-  ═══════════════════════════════════════ */
-  @keyframes rise {
-    from { opacity: 0; transform: translateY(20px); }
-    to   { opacity: 1; transform: translateY(0); }
-  }
-  .cell { animation: rise .5s cubic-bezier(.16,1,.3,1) both; }
-  .cell--hero       { animation-delay: .03s; }
-  .cell--completion { animation-delay: .09s; }
-  .cell--streak     { animation-delay: .12s; }
-  .cell--stat-a     { animation-delay: .15s; }
-  .cell--stat-b     { animation-delay: .18s; }
-  .cell--stat-c     { animation-delay: .21s; }
-  .cell--stat-d     { animation-delay: .24s; }
-  .cell--profile    { animation-delay: .27s; }
-  .cell--diet       { animation-delay: .30s; }
-  .cell--bmi        { animation-delay: .33s; }
+.streak-dots { display: flex; gap: .35rem; margin-top: .9rem; }
+.sdot {
+  width: 8px; height: 8px; border-radius: 50%; background: var(--bdr);
+  transition: background .3s, box-shadow .3s;
+}
+.sdot.on { background: var(--amber); box-shadow: 0 0 7px rgba(245,158,11,.45); }
+
+/* ═══════════════════════════════════════════════════════════
+   PROFILE CELL
+═══════════════════════════════════════════════════════════ */
+.profile-pad { padding: 1.25rem 1.4rem; }
+
+.p-top { display: flex; align-items: center; gap: 1rem; margin-bottom: 1.1rem; }
+
+.p-av {
+  width: 56px; height: 56px; border-radius: 15px; flex-shrink: 0;
+  background: linear-gradient(135deg, var(--teal), var(--cyan));
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.35rem; font-weight: 800; color: #fff; overflow: hidden;
+  box-shadow: 0 4px 16px rgba(13,148,136,.32);
+}
+.p-av img { width:100%; height:100%; object-fit:cover; border-radius:15px; }
+
+.p-name   { font-size: .98rem; font-weight: 800; color: var(--txt); letter-spacing: -.025em; }
+.p-handle { font-size: .76rem; color: var(--mu); margin-top: .07rem; }
+.p-role {
+  display: inline-flex; align-items: center; gap: .28rem;
+  background: var(--teal-l); color: var(--teal-d);
+  border-radius: 99px; padding: .15rem .62rem;
+  font-size: .67rem; font-weight: 700; margin-top: .3rem;
+}
+[data-theme="dark"] .p-role { background: rgba(13,148,136,.12); color: #2dd4bf; }
+
+.p-rows { display: flex; flex-direction: column; }
+.p-row {
+  display: flex; align-items: center; gap: .75rem;
+  padding: .65rem 0; border-bottom: 1px solid var(--bdr);
+}
+.p-row:last-child { border-bottom: none; padding-bottom: 0; }
+
+.p-ico {
+  width: 30px; height: 30px; border-radius: 9px; flex-shrink: 0;
+  background: var(--s2); border: 1px solid var(--bdr);
+  display: flex; align-items: center; justify-content: center;
+  font-size: .7rem; color: var(--mu);
+}
+.p-key { font-size: .62rem; text-transform: uppercase; letter-spacing: .07em; color: var(--fa); font-weight: 700; }
+.p-val { font-size: .84rem; font-weight: 700; color: var(--txt); }
+
+.p-foot { margin-top: 1.1rem; display: flex; flex-direction: column; gap: .52rem; }
+
+/* ═══════════════════════════════════════════════════════════
+   DIETARY PREFERENCES CELL
+═══════════════════════════════════════════════════════════ */
+.diet-pad { padding: 1.2rem 1.4rem; }
+
+.macro-grid { display: grid; grid-template-columns: 1fr 1fr; gap: .8rem; margin-bottom: 1.1rem; }
+
+.mb-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: .38rem; }
+.mb-name { font-size: .67rem; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; color: var(--mu); }
+.mb-val  { font-family: 'JetBrains Mono', monospace; font-size: .68rem; color: var(--txt); font-weight: 500; }
+.mb-track { height: 6px; background: var(--s3); border-radius: 99px; overflow: hidden; }
+.mb-fill  {
+  height: 100%; border-radius: 99px;
+  transition: width 1.1s cubic-bezier(.16,1,.3,1); width: 0%;
+}
+.mf-cal  { background: linear-gradient(90deg, var(--amber), #fbbf24); }
+.mf-pro  { background: linear-gradient(90deg, var(--teal), var(--cyan)); }
+.mf-car  { background: linear-gradient(90deg, var(--violet), #a78bfa); }
+.mf-fat  { background: linear-gradient(90deg, var(--rose), #fb7185); }
+
+.diet-tags { display: flex; flex-wrap: wrap; gap: .4rem; margin-top: .1rem; }
+.dtag {
+  display: inline-flex; align-items: center; gap: .3rem;
+  padding: .3rem .76rem; border-radius: 99px;
+  font-size: .74rem; font-weight: 700; border: 1.5px solid transparent;
+}
+.dt-lime   { background: var(--lime-l);   color: #3f6212; border-color: #bef264; }
+.dt-cyan   { background: var(--cyan-l);   color: #0e7490; border-color: #a5f3fc; }
+.dt-amber  { background: var(--amber-l);  color: #92400e; border-color: #fde68a; }
+.dt-violet { background: var(--violet-l); color: #5b21b6; border-color: #c4b5fd; }
+.dt-rose   { background: var(--rose-l);   color: #be123c; border-color: #fecdd3; }
+
+[data-theme="dark"] .dt-lime   { background: rgba(132,204,22,.1);  color: #a3e635; border-color: rgba(132,204,22,.25); }
+[data-theme="dark"] .dt-cyan   { background: rgba(6,182,212,.1);   color: #22d3ee; border-color: rgba(6,182,212,.25); }
+[data-theme="dark"] .dt-amber  { background: rgba(245,158,11,.1);  color: #fcd34d; border-color: rgba(245,158,11,.25); }
+[data-theme="dark"] .dt-violet { background: rgba(124,58,237,.1);  color: #c4b5fd; border-color: rgba(124,58,237,.25); }
+[data-theme="dark"] .dt-rose   { background: rgba(244,63,94,.1);   color: #fb7185; border-color: rgba(244,63,94,.25); }
+
+/* ═══════════════════════════════════════════════════════════
+   ROLE UPGRADE TABLE
+═══════════════════════════════════════════════════════════ */
+.upgrade-pad { padding: 1.2rem 1.4rem; }
+
+.req-card {
+  display: flex; justify-content: space-between; align-items: flex-start;
+  gap: 1rem; padding: .9rem 1.1rem; margin-bottom: .55rem;
+  background: var(--s2); border: 1px solid var(--bdr); border-radius: 13px;
+  transition: border-color .15s, background .15s;
+}
+.req-card:last-child { margin-bottom: 0; }
+.req-card:hover { border-color: var(--bdr2); background: var(--s3); }
+
+.req-role { font-size: .88rem; font-weight: 800; color: var(--txt); letter-spacing: -.02em; }
+.req-meta { font-size: .73rem; color: var(--mu); margin-top: .18rem; display: flex; align-items: center; gap: .35rem; }
+.req-note { font-size: .79rem; color: var(--txt2); margin-top: .35rem; line-height: 1.45; }
+
+.status-badge {
+  display: inline-flex; align-items: center; gap: .28rem;
+  padding: .22rem .75rem; border-radius: 99px;
+  font-size: .7rem; font-weight: 800; white-space: nowrap; flex-shrink: 0;
+}
+.sb-pending  { background: var(--amber-l); color: #92400e; border: 1.5px solid #fde68a; }
+.sb-approved { background: var(--teal-l);  color: var(--teal-d); border: 1.5px solid #99f6e4; }
+.sb-rejected { background: var(--rose-l);  color: #be123c; border: 1.5px solid #fecdd3; }
+
+[data-theme="dark"] .sb-pending  { background: rgba(245,158,11,.12); color: #fcd34d; border-color: rgba(245,158,11,.3); }
+[data-theme="dark"] .sb-approved { background: rgba(13,148,136,.12); color: #2dd4bf; border-color: rgba(13,148,136,.3); }
+[data-theme="dark"] .sb-rejected { background: rgba(244,63,94,.1);   color: #fb7185; border-color: rgba(244,63,94,.25); }
+
+/* ═══════════════════════════════════════════════════════════
+   BMI CELL
+═══════════════════════════════════════════════════════════ */
+.bmi-pad { padding: 1.2rem 1.4rem; }
+
+.bmi-body {
+  display: flex; align-items: flex-start;
+  gap: 2rem; flex-wrap: wrap;
+}
+
+/* Score box */
+.bmi-score {
+  width: 118px; height: 118px; border-radius: 20px; flex-shrink: 0;
+  background: var(--s2); border: 1px solid var(--bdr);
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  position: relative; overflow: hidden;
+}
+.bmi-score::before {
+  content: ''; position: absolute; inset: 0;
+  background: linear-gradient(135deg, rgba(244,63,94,.06), rgba(124,58,237,.06));
+}
+.bmi-num {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 2.2rem; font-weight: 600; line-height: 1; color: var(--txt); position: relative;
+}
+.bmi-sub {
+  font-size: .6rem; font-weight: 700; text-transform: uppercase;
+  letter-spacing: .07em; color: var(--mu); margin-top: .22rem; position: relative;
+}
+.bmi-badge {
+  display: inline-flex; align-items: center; gap: .28rem;
+  border-radius: 99px; padding: .2rem .7rem;
+  font-size: .67rem; font-weight: 800; margin-top: .4rem; position: relative;
+}
+.bb-normal      { background: var(--teal-l);   color: var(--teal-d); }
+.bb-underweight { background: var(--cyan-l);   color: #0e7490; }
+.bb-overweight  { background: var(--amber-l);  color: #92400e; }
+.bb-obese       { background: var(--rose-l);   color: #be123c; }
+
+[data-theme="dark"] .bb-normal      { background: rgba(13,148,136,.13); color: #2dd4bf; }
+[data-theme="dark"] .bb-underweight { background: rgba(6,182,212,.11);  color: #22d3ee; }
+[data-theme="dark"] .bb-overweight  { background: rgba(245,158,11,.12); color: #fcd34d; }
+[data-theme="dark"] .bb-obese       { background: rgba(244,63,94,.1);   color: #fb7185; }
+
+/* Range */
+.bmi-range { flex: 1; min-width: 200px; }
+.bmi-range-lbl {
+  font-size: .67rem; font-weight: 700; text-transform: uppercase;
+  letter-spacing: .07em; color: var(--mu); margin-bottom: .58rem;
+}
+.bmi-track {
+  height: 9px; border-radius: 99px; overflow: hidden;
+  display: flex; margin-bottom: .48rem;
+}
+.bs-cy { background: var(--cyan);  flex: 1.5; border-radius: 99px 0 0 99px; }
+.bs-te { background: var(--teal);  flex: 2.6; }
+.bs-am { background: var(--amber); flex: 2.0; }
+.bs-ro { background: var(--rose);  flex: 2.9; border-radius: 0 99px 99px 0; }
+
+.bmi-ticks {
+  display: flex; justify-content: space-between;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: .6rem; color: var(--fa); line-height: 1.4;
+}
+
+/* History */
+.bmi-hist { flex: 1; min-width: 180px; }
+.bmi-hist-lbl {
+  font-size: .67rem; font-weight: 700; text-transform: uppercase;
+  letter-spacing: .07em; color: var(--mu); margin-bottom: .58rem;
+}
+.bmi-row {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: .45rem 0; border-bottom: 1px solid var(--bdr); gap: .5rem;
+}
+.bmi-row:last-child { border-bottom: none; }
+.bmi-date { color: var(--mu); font-size: .72rem; white-space: nowrap; }
+.bmi-val  { font-family: 'JetBrains Mono', monospace; font-weight: 600; color: var(--txt); font-size: .82rem; }
 </style>
 
+{# ── Completion % ── #}
 {% set pct = (((
   (1 if (user.first_name and user.last_name) else 0) +
   (1 if user.email else 0) +
@@ -580,361 +618,375 @@
 <div class="dash">
 <div class="bento">
 
-  <!-- ══ HERO ══ -->
-  <div class="cell cell--hero" style="padding:0;border:none;background:transparent;box-shadow:none;">
-    <div class="hero-cell" style="border-radius:20px;">
-      <svg width="0" height="0" style="position:absolute">
-        <defs>
-          <linearGradient id="ringGrad" x1="0%" y1="0%" x2="100%" y2="0%">
-            <stop offset="0%"   stop-color="#5eead4"/>
-            <stop offset="100%" stop-color="#67e8f9"/>
-          </linearGradient>
-        </defs>
-      </svg>
+  {# SVG gradient defs #}
+  <svg width="0" height="0" style="position:absolute;pointer-events:none;">
+    <defs>
+      <linearGradient id="rgGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+        <stop offset="0%"   stop-color="#38bdf8"/>
+        <stop offset="100%" stop-color="#67e8f9"/>
+      </linearGradient>
+    </defs>
+  </svg>
 
-      <div class="hero-left">
-        <div class="hero-eyebrow">
-          <span class="hero-eyebrow-dot"></span>
-          Dashboard · NutriConnect
+  <!-- ══════════════════════════════════
+       HERO
+  ══════════════════════════════════ -->
+  <div class="cell c-hero" style="padding:0;background:transparent;border:none;box-shadow:none;">
+    <div class="hero-wrap">
+      <div class="hero-line"></div>
+
+      <div>
+        <div class="hero-pill">
+          <span class="hero-dot"></span>
+          NutriConnect · Dashboard
         </div>
         <div class="hero-name">
-          Hello, <span class="hero-name-accent">{{ user.first_name or user.username }}</span> 👋
+          Hello, <span class="hero-accent">{{ user.first_name or user.username }}</span> 👋
         </div>
-        <div class="hero-tagline">Track your nutrition, complete your profile, and stay on top of your health goals.</div>
+        <div class="hero-sub">Track your nutrition, complete your profile, and hit your health goals every day.</div>
       </div>
 
       <div class="hero-right">
-        <!-- Ring gauge -->
-        <div class="ring-gauge">
+        <div class="ring-wrap">
           <svg viewBox="0 0 100 100">
-            <circle class="ring-bg"   cx="50" cy="50" r="45"/>
-            <circle class="ring-fill" cx="50" cy="50" r="45" data-pct="{{ pct }}"/>
+            <circle class="rg-bg"   cx="50" cy="50" r="45"/>
+            <circle class="rg-fill" cx="50" cy="50" r="45" data-pct="{{ pct }}"/>
           </svg>
-          <div class="ring-label">
+          <div class="ring-lbl">
             <span class="ring-pct">{{ pct }}%</span>
-            <span class="ring-sub">Complete</span>
+            <span class="ring-note">Complete</span>
           </div>
         </div>
 
-        <!-- Stats column -->
-        <div class="hero-stats-col">
-          <div class="hsc">
-            <span class="hsc-val c-teal">
+        <div class="hero-stats">
+          <div class="hstat">
+            <div class="hstat-val hv-sky">
               {{ user.dietary_preference.diet_type.replace('-',' ').title() if user.dietary_preference and user.dietary_preference.diet_type else '—' }}
-            </span>
-            <span class="hsc-lbl">Diet Type</span>
+            </div>
+            <div class="hstat-lbl">Diet Type</div>
           </div>
-          <div class="hsc">
-            <span class="hsc-val c-amber">
-              {% if user.dietary_preference and user.dietary_preference.calorie_goal %}{{ user.dietary_preference.calorie_goal }}<span class="hsc-unit">kcal</span>{% else %}—{% endif %}
-            </span>
-            <span class="hsc-lbl">Daily Goal</span>
+          <div class="hstat">
+            <div class="hstat-val hv-amber">
+              {% if user.dietary_preference and user.dietary_preference.calorie_goal %}{{ user.dietary_preference.calorie_goal }} kcal{% else %}—{% endif %}
+            </div>
+            <div class="hstat-lbl">Daily Goal</div>
           </div>
-          <div class="hsc">
-            <span class="hsc-val c-violet">
-              {% if user.dietary_preference and user.dietary_preference.meals_per_day %}{{ user.dietary_preference.meals_per_day }}<span class="hsc-unit">/day</span>{% else %}—{% endif %}
-            </span>
-            <span class="hsc-lbl">Meals / Day</span>
+          <div class="hstat">
+            <div class="hstat-val hv-violet">
+              {% if user.dietary_preference and user.dietary_preference.meals_per_day %}{{ user.dietary_preference.meals_per_day }}/day{% else %}—{% endif %}
+            </div>
+            <div class="hstat-lbl">Meals / Day</div>
           </div>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- ══ COMPLETION ══ -->
-  {% set step_map = {
-    'Name':          (user.first_name and user.last_name),
-    'Email':         user.email,
-    'Photo':         user.profile_picture,
-    'Diet prefs':    user.dietary_preference
-  } %}
-  {% set done_count = step_map.values() | select | list | length %}
+  <!-- ══════════════════════════════════
+       MINI STATS ROW
+  ══════════════════════════════════ -->
+  {% set calorie = user.dietary_preference.calorie_goal    if user.dietary_preference and user.dietary_preference.calorie_goal    else None %}
+  {% set protein = user.dietary_preference.protein_goal    if user.dietary_preference and user.dietary_preference.protein_goal    else None %}
+  {% set meals   = user.dietary_preference.meals_per_day   if user.dietary_preference and user.dietary_preference.meals_per_day   else None %}
+  {% set diet_t  = user.dietary_preference.diet_type       if user.dietary_preference and user.dietary_preference.diet_type       else None %}
 
-  <div class="cell cell--completion">
-    <div class="comp-inner">
-      <div class="comp-header">
-        <div class="comp-title">
-          <div class="comp-icon-wrap"><i class="fas fa-chart-pie"></i></div>
-          Profile Completion
-        </div>
-        <span class="comp-pct-pill">{{ pct }}%</span>
+  <div class="cell c-stat-a">
+    <div class="stripe st-amber"></div>
+    <div class="stat-pad">
+      <div class="stat-top">
+        <div class="stat-ico si-amber"><i class="fas fa-fire-flame-curved"></i></div>
+        <span class="trend-pill tp-neutral"><i class="fas fa-minus fa-xs"></i> Goal</span>
       </div>
-      <div class="seg-track" id="segTrack">
-        {% for i in range(4) %}
-          <div class="seg {% if i < done_count %}lit{% endif %}"></div>
-        {% endfor %}
-      </div>
-      <div class="step-list">
-        {% for label, completed in step_map.items() %}
-          <span class="step-pill {{ 'done' if completed else 'todo' }}">
-            <i class="fas {{ 'fa-check-circle' if completed else 'fa-circle' }}"></i>
-            {{ label }}
-          </span>
-        {% endfor %}
-      </div>
-    </div>
-  </div>
-
-  <!-- ══ STREAK ══ -->
-  <div class="cell cell--streak" style="padding:0;border:none;">
-    <div class="streak-inner" style="border-radius:20px;">
-      <div class="streak-num">7</div>
-      <div class="streak-label">Day Streak 🔥</div>
-      <div class="streak-dots">
-        {% for i in range(7) %}
-          <div class="streak-dot active"></div>
-        {% endfor %}
-      </div>
-    </div>
-  </div>
-
-  <!-- ══ MINI STATS ══ -->
-  {% set calorie  = user.dietary_preference.calorie_goal    if user.dietary_preference and user.dietary_preference.calorie_goal    else None %}
-  {% set protein  = user.dietary_preference.protein_goal    if user.dietary_preference and user.dietary_preference.protein_goal    else None %}
-  {% set meals    = user.dietary_preference.meals_per_day   if user.dietary_preference and user.dietary_preference.meals_per_day   else None %}
-  {% set diet_t   = user.dietary_preference.diet_type       if user.dietary_preference and user.dietary_preference.diet_type       else None %}
-
-  <div class="cell cell--stat-a">
-    <div class="stat-cell">
-      <div class="stat-cell-top">
-        <div class="stat-cell-icon sci-amber"><i class="fas fa-fire"></i></div>
-        <span class="stat-trend neutral"><i class="fas fa-minus"></i> Goal</span>
-      </div>
-      <div class="stat-val">{{ calorie or '—' }}{% if calorie %}<span class="unit">kcal</span>{% endif %}</div>
+      <div class="stat-num">{{ calorie or '—' }}{% if calorie %}<span class="u">kcal</span>{% endif %}</div>
       <div class="stat-lbl">Daily Calories</div>
     </div>
   </div>
 
-  <div class="cell cell--stat-b">
-    <div class="stat-cell">
-      <div class="stat-cell-top">
-        <div class="stat-cell-icon sci-teal"><i class="fas fa-drumstick-bite"></i></div>
-        <span class="stat-trend up"><i class="fas fa-arrow-up"></i> Target</span>
+  <div class="cell c-stat-b">
+    <div class="stripe st-teal"></div>
+    <div class="stat-pad">
+      <div class="stat-top">
+        <div class="stat-ico si-teal"><i class="fas fa-drumstick-bite"></i></div>
+        <span class="trend-pill tp-up"><i class="fas fa-arrow-up fa-xs"></i> Target</span>
       </div>
-      <div class="stat-val">{{ protein or '—' }}{% if protein %}<span class="unit">g</span>{% endif %}</div>
+      <div class="stat-num">{{ protein or '—' }}{% if protein %}<span class="u">g</span>{% endif %}</div>
       <div class="stat-lbl">Protein Goal</div>
     </div>
   </div>
 
-  <div class="cell cell--stat-c">
-    <div class="stat-cell">
-      <div class="stat-cell-top">
-        <div class="stat-cell-icon sci-violet"><i class="fas fa-clock"></i></div>
-        <span class="stat-trend neutral"><i class="fas fa-minus"></i> Set</span>
+  <div class="cell c-stat-c">
+    <div class="stripe st-violet"></div>
+    <div class="stat-pad">
+      <div class="stat-top">
+        <div class="stat-ico si-violet"><i class="fas fa-utensils"></i></div>
+        <span class="trend-pill tp-neutral"><i class="fas fa-minus fa-xs"></i> Set</span>
       </div>
-      <div class="stat-val">{{ meals or '—' }}{% if meals %}<span class="unit">/day</span>{% endif %}</div>
+      <div class="stat-num">{{ meals or '—' }}{% if meals %}<span class="u">/day</span>{% endif %}</div>
       <div class="stat-lbl">Meals Per Day</div>
     </div>
   </div>
 
-  <div class="cell cell--stat-d">
-    <div class="stat-cell">
-      <div class="stat-cell-top">
-        <div class="stat-cell-icon sci-cyan"><i class="fas fa-leaf"></i></div>
-        <span class="stat-trend up"><i class="fas fa-check"></i> Active</span>
+  <div class="cell c-stat-d">
+    <div class="stripe st-brand"></div>
+    <div class="stat-pad">
+      <div class="stat-top">
+        <div class="stat-ico si-cyan"><i class="fas fa-leaf"></i></div>
+        <span class="trend-pill tp-up"><i class="fas fa-check fa-xs"></i> Active</span>
       </div>
-      <div class="stat-val" style="font-size:1.1rem;font-family:'Cabinet Grotesk',sans-serif;letter-spacing:-.03em;">
+      <div class="stat-num" style="font-size:1.08rem;font-family:'Sora',sans-serif;letter-spacing:-.03em;padding-top:.08rem;">
         {{ diet_t.replace('-',' ').title() if diet_t else '—' }}
       </div>
       <div class="stat-lbl">Diet Plan</div>
     </div>
   </div>
 
-  <!-- ══ PROFILE ══ -->
-  <div class="cell cell--profile">
-    <div class="profile-cell">
-      <div class="profile-header">
-        <div class="profile-avatar">
+  <!-- ══════════════════════════════════
+       COMPLETION
+  ══════════════════════════════════ -->
+  {% set step_map = {
+    'Full Name':   (user.first_name and user.last_name),
+    'Email':       user.email,
+    'Photo':       user.profile_picture,
+    'Diet Prefs':  user.dietary_preference
+  } %}
+  {% set done_count = step_map.values() | select | list | length %}
+
+  <div class="cell c-completion">
+    <div class="stripe st-teal"></div>
+    <div class="c-head">
+      <div class="c-head-l">
+        <div class="ico-box ib-teal"><i class="fas fa-chart-pie"></i></div>
+        <div>
+          <div class="c-head-title">Profile Completion</div>
+          <div class="c-head-sub">{{ done_count }} of 4 steps done</div>
+        </div>
+      </div>
+      <span class="pct-pill">{{ pct }}%</span>
+    </div>
+    <div class="comp-body">
+      <div class="seg-track">
+        {% for i in range(4) %}<div class="seg {{ 'lit' if i < done_count else '' }}"></div>{% endfor %}
+      </div>
+      <div class="step-pills">
+        {% for label, done in step_map.items() %}
+          <span class="sp {{ 'sp-done' if done else 'sp-todo' }}">
+            <i class="fas {{ 'fa-circle-check' if done else 'fa-circle' }} fa-xs"></i>{{ label }}
+          </span>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════
+       STREAK
+  ══════════════════════════════════ -->
+  <div class="cell c-streak" style="padding:0;border:none;background:transparent;box-shadow:none;">
+    <div class="streak-inner">
+      <div class="streak-num">7</div>
+      <div class="streak-lbl">Day Streak 🔥</div>
+      <div class="streak-dots">
+        {% for i in range(7) %}<div class="sdot on"></div>{% endfor %}
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════
+       PROFILE
+  ══════════════════════════════════ -->
+  <div class="cell c-profile">
+    <div class="stripe st-teal"></div>
+    <div class="profile-pad">
+      <div class="p-top">
+        <div class="p-av">
           {% if user.profile_picture %}
-            <img src="{{ url_for('static', filename=user.profile_picture) }}" alt="avatar">
+            <img src="{{ url_for('static', filename=user.profile_picture) }}" alt="av">
           {% else %}
             {{ (user.first_name or user.username or 'U')[0].upper() }}
           {% endif %}
         </div>
-        <div class="profile-name-block">
-          <div class="profile-fullname">{{ user.first_name or '' }} {{ user.last_name or '' }}</div>
-          <div class="profile-handle">@{{ user.username }}</div>
-          <div class="profile-role"><i class="fas fa-shield-halved"></i> User</div>
+        <div>
+          <div class="p-name">{{ user.first_name or '' }} {{ user.last_name or '' }}</div>
+          <div class="p-handle">@{{ user.username }}</div>
+          <div class="p-role"><i class="fas fa-shield-halved fa-xs"></i> User</div>
         </div>
       </div>
 
-      <div class="profile-rows">
-        <div class="profile-row">
-          <div class="pr-ico"><i class="fas fa-at"></i></div>
+      <div class="p-rows">
+        <div class="p-row">
+          <div class="p-ico"><i class="fas fa-at"></i></div>
           <div>
-            <div class="pr-lbl">Email</div>
-            <div class="pr-val" style="font-size:.8rem;">{{ user.email }}</div>
+            <div class="p-key">Email</div>
+            <div class="p-val" style="font-size:.8rem; word-break:break-all;">{{ user.email }}</div>
           </div>
         </div>
-        <div class="profile-row">
-          <div class="pr-ico"><i class="fas fa-calendar"></i></div>
+        <div class="p-row">
+          <div class="p-ico"><i class="fas fa-calendar-days"></i></div>
           <div>
-            <div class="pr-lbl">Member Since</div>
-            <div class="pr-val">{{ user.created_at.strftime('%b %d, %Y') }}</div>
+            <div class="p-key">Member Since</div>
+            <div class="p-val">{{ user.created_at.strftime('%b %d, %Y') }}</div>
           </div>
         </div>
       </div>
 
-      <div class="profile-cell-foot">
+      <div class="p-foot">
         <a href="{{ url_for('user_dashboard.view_profile') }}" class="btn-teal">
           <i class="fas fa-eye"></i> View Full Profile
         </a>
-        <a href="{{ url_for('user_dashboard.request_upgrade') }}" class="btn-manage" style="justify-content:center;padding:.65rem 1rem;">
+        <a href="{{ url_for('user_dashboard.request_upgrade') }}" class="btn-ghost" style="justify-content:center;padding:.6rem 1rem;">
           <i class="fas fa-arrow-up-right-dots"></i> Request Role Upgrade
         </a>
       </div>
     </div>
   </div>
 
-  <!-- ══ DIET ══ -->
-  <div class="cell cell--diet">
-    <div class="diet-cell">
-      <div class="diet-cell-header">
-        <div class="section-label">
-          <div class="sl-icon sl-lime"><i class="fas fa-utensils"></i></div>
-          Dietary Preferences
+  <!-- ══════════════════════════════════
+       DIETARY PREFERENCES
+  ══════════════════════════════════ -->
+  <div class="cell c-diet">
+    <div class="stripe st-lime"></div>
+    <div class="c-head">
+      <div class="c-head-l">
+        <div class="ico-box ib-lime"><i class="fas fa-utensils"></i></div>
+        <div>
+          <div class="c-head-title">Dietary Preferences</div>
+          <div class="c-head-sub">Your current nutrition targets</div>
         </div>
-        <a href="{{ url_for('user_dashboard.dietary_preferences') }}" class="btn-manage">
-          <i class="fas fa-cog"></i> Manage
-        </a>
       </div>
+      <a href="{{ url_for('user_dashboard.dietary_preferences') }}" class="btn-ghost">
+        <i class="fas fa-sliders"></i> Manage
+      </a>
+    </div>
 
+    <div class="diet-pad">
       {% if user.dietary_preference %}
         <div class="macro-grid">
-          <div class="macro-bar-item">
-            <div class="mb-header">
-              <span class="mb-name">Calories</span>
-              <span class="mb-val">{{ user.dietary_preference.calorie_goal or '—' }}{% if user.dietary_preference.calorie_goal %} kcal{% endif %}</span>
+          {% for label, val, unit, cls, w in [
+            ('Calories', user.dietary_preference.calorie_goal, 'kcal', 'mf-cal', 72),
+            ('Protein',  user.dietary_preference.protein_goal, 'g',    'mf-pro', 58),
+            ('Carbs',    user.dietary_preference.carbs_goal,   'g',    'mf-car', 44),
+            ('Fat',      user.dietary_preference.fat_goal,     'g',    'mf-fat', 33),
+          ] %}
+          <div>
+            <div class="mb-row">
+              <span class="mb-name">{{ label }}</span>
+              <span class="mb-val">{{ val or '—' }}{% if val %} {{ unit }}{% endif %}</span>
             </div>
-            <div class="mb-track"><div class="mb-fill calories" data-w="75" style="width:0%"></div></div>
+            <div class="mb-track"><div class="mb-fill {{ cls }}" data-w="{{ w }}"></div></div>
           </div>
-          <div class="macro-bar-item">
-            <div class="mb-header">
-              <span class="mb-name">Protein</span>
-              <span class="mb-val">{{ user.dietary_preference.protein_goal or '—' }}{% if user.dietary_preference.protein_goal %}g{% endif %}</span>
-            </div>
-            <div class="mb-track"><div class="mb-fill protein" data-w="60" style="width:0%"></div></div>
-          </div>
-          <div class="macro-bar-item">
-            <div class="mb-header">
-              <span class="mb-name">Carbs</span>
-              <span class="mb-val">{{ user.dietary_preference.carbs_goal or '—' }}{% if user.dietary_preference.carbs_goal %}g{% endif %}</span>
-            </div>
-            <div class="mb-track"><div class="mb-fill carbs" data-w="45" style="width:0%"></div></div>
-          </div>
-          <div class="macro-bar-item">
-            <div class="mb-header">
-              <span class="mb-name">Fat</span>
-              <span class="mb-val">{{ user.dietary_preference.fat_goal or '—' }}{% if user.dietary_preference.fat_goal %}g{% endif %}</span>
-            </div>
-            <div class="mb-track"><div class="mb-fill fat" data-w="35" style="width:0%"></div></div>
-          </div>
+          {% endfor %}
         </div>
 
         <div class="diet-tags">
           {% if user.dietary_preference.diet_type %}
-            <span class="dtag dtag-lime"><i class="fas fa-leaf"></i>{{ user.dietary_preference.diet_type.replace('-',' ').title() }}</span>
+            <span class="dtag dt-lime"><i class="fas fa-leaf fa-xs"></i>{{ user.dietary_preference.diet_type.replace('-',' ').title() }}</span>
           {% endif %}
           {% if user.dietary_preference.meals_per_day %}
-            <span class="dtag dtag-cyan"><i class="fas fa-clock"></i>{{ user.dietary_preference.meals_per_day }} meals/day</span>
+            <span class="dtag dt-cyan"><i class="fas fa-clock fa-xs"></i>{{ user.dietary_preference.meals_per_day }} meals/day</span>
           {% endif %}
-          {% if user.dietary_preference.food_restrictions %}
-            {% for r in user.dietary_preference.food_restrictions[:2] %}
-              <span class="dtag dtag-amber">No {{ r }}</span>
-            {% endfor %}
-          {% endif %}
-          {% if user.dietary_preference.preferred_cuisine %}
-            {% for c in user.dietary_preference.preferred_cuisine[:2] %}
-              <span class="dtag dtag-violet"><i class="fas fa-globe"></i>{{ c }}</span>
-            {% endfor %}
-          {% endif %}
+          {% for r in (user.dietary_preference.food_restrictions or [])[:2] %}
+            <span class="dtag dt-amber">No {{ r }}</span>
+          {% endfor %}
+          {% for c in (user.dietary_preference.preferred_cuisine or [])[:2] %}
+            <span class="dtag dt-violet"><i class="fas fa-globe fa-xs"></i>{{ c }}</span>
+          {% endfor %}
         </div>
-
       {% else %}
-        <div class="diet-empty">
-          <div class="diet-empty-icon"><i class="fas fa-seedling"></i></div>
-          <p>No dietary preferences set. Add yours to personalise your experience.</p>
-          <a href="{{ url_for('user_dashboard.dietary_preferences') }}" class="btn-setup">
+        <div class="empty-state">
+          <div class="empty-state-ico ib-lime" style="width:58px;height:58px;border-radius:18px;font-size:1.5rem;">
+            <i class="fas fa-seedling"></i>
+          </div>
+          <h4>No preferences set</h4>
+          <p>Add your dietary preferences to personalise your nutrition experience.</p>
+          <a href="{{ url_for('user_dashboard.dietary_preferences') }}" class="btn-lime">
             <i class="fas fa-plus"></i> Set Up Preferences
           </a>
         </div>
       {% endif %}
     </div>
   </div>
-  
-  <div class="cell cell--bmi">
-  <div class="bmi-cell">
-    <div class="bmi-cell-header">
-      <div class="section-label">
-        <div class="sl-icon sl-rose"><i class="fas fa-user-shield"></i></div>
-        Role Upgrade Requests
+
+  <!-- ══════════════════════════════════
+       ROLE UPGRADE REQUESTS
+  ══════════════════════════════════ -->
+  <div class="cell c-upgrade">
+    <div class="stripe st-rose"></div>
+    <div class="c-head">
+      <div class="c-head-l">
+        <div class="ico-box ib-rose"><i class="fas fa-user-shield"></i></div>
+        <div>
+          <div class="c-head-title">Role Upgrade Requests</div>
+          <div class="c-head-sub">Your submitted account upgrade requests</div>
+        </div>
       </div>
-      <a href="{{ url_for('user_dashboard.request_upgrade') }}" class="btn-manage">
+      <a href="{{ url_for('user_dashboard.request_upgrade') }}" class="btn-ghost">
         <i class="fas fa-plus"></i> New Request
       </a>
     </div>
 
-    {% if my_requests %}
-      <div style="display:flex;flex-direction:column;gap:.75rem;">
+    <div class="upgrade-pad">
+      {% if my_requests %}
         {% for req in my_requests[:5] %}
-          <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:1rem;padding:.85rem 1rem;border:1px solid var(--d-border);border-radius:14px;background:var(--d-surface-2);">
-            <div>
-              <div style="font-weight:800;color:var(--d-text);">
-                {{ req.requested_role.replace('_', ' ').title() }}
-              </div>
-              <div style="font-size:.8rem;color:var(--d-muted);margin-top:.2rem;">
-                {{ req.created_at.strftime('%d %b %Y') if req.created_at else '—' }}
-              </div>
-              {% if req.note %}
-                <div style="font-size:.82rem;color:var(--d-text-2);margin-top:.35rem;">
-                  {{ req.note }}
-                </div>
-              {% endif %}
+        <div class="req-card">
+          <div>
+            <div class="req-role">{{ req.requested_role.replace('_', ' ').title() }}</div>
+            <div class="req-meta">
+              <i class="fas fa-calendar-days fa-xs"></i>
+              {{ req.created_at.strftime('%d %b %Y') if req.created_at else '—' }}
             </div>
-
-            <div>
-              {% if req.status == 'pending' %}
-                <span class="dtag dtag-amber">Pending</span>
-              {% elif req.status == 'approved' %}
-                <span class="dtag dtag-lime">Approved</span>
-              {% else %}
-                <span class="dtag" style="background:var(--rose-l);color:#be123c;border-color:#fecdd3;">Rejected</span>
-              {% endif %}
-            </div>
+            {% if req.note %}<div class="req-note">{{ req.note }}</div>{% endif %}
           </div>
-          {% endfor %}
-      </div>
-    {% else %}
-      <div class="diet-empty">
-        <div class="diet-empty-icon"><i class="fas fa-user-shield"></i></div>
-        <p>You have not submitted any role upgrade requests yet.</p>
-        <a href="{{ url_for('user_dashboard.request_upgrade') }}" class="btn-setup">
-          <i class="fas fa-plus"></i> Create Request
-        </a>
-      </div>
+          <div style="padding-top:.15rem;">
+            {% if req.status == 'pending' %}
+              <span class="status-badge sb-pending"><i class="fas fa-clock fa-xs"></i> Pending</span>
+            {% elif req.status == 'approved' %}
+              <span class="status-badge sb-approved"><i class="fas fa-check fa-xs"></i> Approved</span>
+            {% else %}
+              <span class="status-badge sb-rejected"><i class="fas fa-xmark fa-xs"></i> Rejected</span>
+            {% endif %}
+          </div>
+        </div>
+        {% endfor %}
+      {% else %}
+        <div class="empty-state">
+          <div class="empty-state-ico ib-rose" style="width:58px;height:58px;border-radius:18px;font-size:1.5rem;">
+            <i class="fas fa-user-shield"></i>
+          </div>
+          <h4>No requests yet</h4>
+          <p>Submit a role upgrade to access provider or admin features.</p>
+          <a href="{{ url_for('user_dashboard.request_upgrade') }}" class="btn-rose">
+            <i class="fas fa-plus"></i> Create Request
+          </a>
+        </div>
       {% endif %}
-      </div>
+    </div>
   </div>
 
-  <!-- ══ BMI ══ -->
-  <div class="cell cell--bmi">
-    <div class="bmi-cell">
-      <div class="bmi-cell-header">
-        <div class="section-label">
-          <div class="sl-icon sl-rose"><i class="fas fa-weight-scale"></i></div>
-          BMI Tracker
+  <!-- ══════════════════════════════════
+       BMI TRACKER
+  ══════════════════════════════════ -->
+  <div class="cell c-bmi">
+    <div class="stripe st-rose"></div>
+    <div class="c-head">
+      <div class="c-head-l">
+        <div class="ico-box ib-rose"><i class="fas fa-weight-scale"></i></div>
+        <div>
+          <div class="c-head-title">BMI Tracker</div>
+          <div class="c-head-sub">Your Body Mass Index history</div>
         </div>
-        <a href="{{ url_for('bmi.bmi') }}" class="btn-manage">
-          <i class="fas fa-plus"></i> Calculate BMI
-        </a>
       </div>
+      <a href="{{ url_for('bmi.bmi') }}" class="btn-ghost">
+        <i class="fas fa-calculator"></i> Calculate BMI
+      </a>
+    </div>
 
+    <div class="bmi-pad">
       {% if latest_bmi %}
-        <div class="bmi-content">
-          <div class="bmi-score-block">
-            <div class="bmi-score-num">{{ latest_bmi.bmi }}</div>
-            <div class="bmi-score-lbl">Your BMI</div>
-            <span class="bmi-cat-badge {{ latest_bmi.category | lower }}">
+        <div class="bmi-body">
+
+          <div class="bmi-score">
+            <div class="bmi-num">{{ latest_bmi.bmi }}</div>
+            <div class="bmi-sub">Your BMI</div>
+            <span class="bmi-badge bb-{{ latest_bmi.category | lower }}">
               {% if latest_bmi.category == 'Normal' %}✅
               {% elif latest_bmi.category == 'Underweight' %}💧
               {% elif latest_bmi.category == 'Overweight' %}⚠️
@@ -943,15 +995,15 @@
             </span>
           </div>
 
-          <div class="bmi-range-block">
-            <div class="bmi-range-label">BMI Scale Reference</div>
-            <div class="bmi-range-track">
-              <div class="bmi-range-seg s-cyan"></div>
-              <div class="bmi-range-seg s-teal"></div>
-              <div class="bmi-range-seg s-amber"></div>
-              <div class="bmi-range-seg s-rose"></div>
+          <div class="bmi-range">
+            <div class="bmi-range-lbl">BMI Scale</div>
+            <div class="bmi-track">
+              <div class="bs-cy"></div>
+              <div class="bs-te"></div>
+              <div class="bs-am"></div>
+              <div class="bs-ro"></div>
             </div>
-            <div class="bmi-range-ticks">
+            <div class="bmi-ticks">
               <span>Under<br>18.5</span>
               <span>Normal<br>18.5–25</span>
               <span>Over<br>25–30</span>
@@ -959,30 +1011,30 @@
             </div>
           </div>
 
-          <div class="bmi-history">
-            <div class="bmi-history-title">Recent Records</div>
+          <div class="bmi-hist">
+            <div class="bmi-hist-lbl">Recent Records</div>
             {% for record in bmi_records %}
-            <div class="bmi-history-row">
-              <span class="bmi-history-date">{{ record.recorded_at.strftime('%d %b %Y') }}</span>
-              <span class="bmi-history-val">{{ record.bmi }}</span>
-              <span class="bmi-history-badge {{ record.category | lower }}">{{ record.category }}</span>
+            <div class="bmi-row">
+              <span class="bmi-date">{{ record.recorded_at.strftime('%d %b %Y') }}</span>
+              <span class="bmi-val">{{ record.bmi }}</span>
+              <span class="bmi-badge bb-{{ record.category | lower }}" style="font-size:.6rem;padding:.1rem .52rem;">{{ record.category }}</span>
             </div>
             {% endfor %}
           </div>
         </div>
 
       {% else %}
-        <div class="bmi-content">
-          <div class="bmi-empty">
-            <div class="bmi-empty-icon"><i class="fas fa-weight-scale"></i></div>
-            <p>No BMI records yet. Calculate your BMI to start tracking your health.</p>
-            <a href="{{ url_for('bmi.bmi') }}" class="btn-rose">
-              <i class="fas fa-calculator"></i> Calculate My BMI
-            </a>
+        <div class="empty-state">
+          <div class="empty-state-ico ib-rose" style="width:58px;height:58px;border-radius:18px;font-size:1.5rem;">
+            <i class="fas fa-weight-scale"></i>
           </div>
+          <h4>No BMI records yet</h4>
+          <p>Calculate your BMI to start tracking your body health metrics over time.</p>
+          <a href="{{ url_for('bmi.bmi') }}" class="btn-rose">
+            <i class="fas fa-calculator"></i> Calculate My BMI
+          </a>
         </div>
       {% endif %}
-
     </div>
   </div>
 
@@ -992,31 +1044,30 @@
 <script>
 document.addEventListener('DOMContentLoaded', () => {
 
-  /* ── Ring gauge ── */
-  const ring = document.querySelector('.ring-fill');
+  /* Ring gauge */
+  const ring = document.querySelector('.rg-fill');
   if (ring) {
     const pct = parseInt(ring.dataset.pct) || 0;
-    const circumference = 283;
-    const offset = circumference - (pct / 100) * circumference;
-    ring.style.strokeDashoffset = circumference;
-    setTimeout(() => { ring.style.strokeDashoffset = offset; }, 120);
+    const C = 283;
+    ring.style.strokeDashoffset = C;
+    setTimeout(() => { ring.style.strokeDashoffset = C - (pct / 100) * C; }, 130);
   }
 
-  /* ── Macro bars ── */
+  /* Macro bars */
   document.querySelectorAll('.mb-fill').forEach(el => {
     const w = el.dataset.w || 0;
-    setTimeout(() => { el.style.width = w + '%'; }, 200);
+    setTimeout(() => { el.style.width = w + '%'; }, 260);
   });
 
-  /* ── Streak dots staggered glow ── */
-  document.querySelectorAll('.streak-dot.active').forEach((dot, i) => {
+  /* Streak dots — staggered pop-in */
+  document.querySelectorAll('.sdot.on').forEach((dot, i) => {
     dot.style.opacity = '0';
     dot.style.transform = 'scale(0)';
     setTimeout(() => {
-      dot.style.transition = 'opacity .3s, transform .3s';
+      dot.style.transition = 'opacity .28s ease, transform .28s cubic-bezier(.16,1,.3,1)';
       dot.style.opacity = '1';
       dot.style.transform = 'scale(1)';
-    }, 400 + i * 80);
+    }, 440 + i * 75);
   });
 
 });

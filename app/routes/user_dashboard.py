@@ -2,7 +2,7 @@ import os
 from flask import Blueprint, render_template, redirect, url_for, flash, request, current_app
 from flask_login import login_required, current_user
 from werkzeug.utils import secure_filename
-from app.models import db, User, DietaryPreference, BMIRecord, RoleUpgradeRequest
+from app.models import db, User, DietaryPreference, BMIRecord, RoleUpgradeRequest, FoodItem
 
 user_dashboard_bp = Blueprint("user_dashboard", __name__)
 
@@ -14,7 +14,7 @@ def index():
         return redirect(url_for("admin.dashboard"))
 
     if current_user.is_food_provider():
-        return render_template("dashboard/food_provider_dashboard.html", user=current_user)
+        return redirect(url_for("food.provider_foods"))
 
     latest_bmi = None
     bmi_records = []
@@ -56,10 +56,16 @@ def index():
         my_requests=my_requests
     )
 
+# ── REPLACE your existing view_profile route with this ──
+
 @user_dashboard_bp.route("/profile")
 @login_required
 def view_profile():
+    if current_user.is_food_provider():
+        return render_template("dashboard/food_provider_profile.html", user=current_user)
     return render_template("dashboard/profile.html", user=current_user)
+
+
 
 
 @user_dashboard_bp.route("/profile/edit", methods=["GET", "POST"])

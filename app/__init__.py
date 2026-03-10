@@ -31,13 +31,14 @@ def create_app(config_name="default"):
     from .routes.user_dashboard import user_dashboard_bp
     from .routes.bmi import bmi_bp
     from .routes.admin import admin_bp
+    from app.routes.food import food_bp
 
     app.register_blueprint(main_bp)
     app.register_blueprint(auth_bp, url_prefix="/auth")
     app.register_blueprint(user_dashboard_bp, url_prefix="/dashboard")
     app.register_blueprint(bmi_bp, url_prefix="/dashboard")
     app.register_blueprint(admin_bp, url_prefix="/admin")
-
+    app.register_blueprint(food_bp, url_prefix="/provider")
     with app.app_context():
         create_roles_if_ready()
         seed_admins_if_ready()

@@ -1,98 +1,539 @@
 {% extends "base.html" %}
-{% block title %}Edit Profile{% endblock %}
+{% block title %}Edit Profile · NutriConnect{% endblock %}
+
+{% block extra_css %}
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+{% endblock %}
 
 {% block content %}
-<div class="row justify-content-center">
-  <div class="col-md-8">
-    <div class="card">
+<style>
+  .ep {
+    --surf:    var(--nc-surface);
+    --s2:      var(--nc-surface-2);
+    --s3:      var(--nc-surface-3);
+    --bdr:     var(--nc-border);
+    --bdr2:    var(--nc-border-2);
+    --txt:     var(--nc-text);
+    --txt2:    var(--nc-text-2);
+    --mu:      var(--nc-text-muted);
+    --fa:      var(--nc-text-faint);
+    --brand:   var(--nc-brand);
+    --brand-d: var(--nc-brand-d);
+    --brand-l: var(--nc-brand-l);
+    --r: 18px;
+    max-width: 820px;
+    margin: 0 auto;
+  }
 
-      <div class="card-header">
-        <h4 class="mb-0">
-          <i class="fas fa-edit"></i> Edit Profile
-        </h4>
+  @keyframes ep-rise {
+    from { opacity:0; transform:translateY(16px); }
+    to   { opacity:1; transform:translateY(0); }
+  }
+
+  .ep-layout {
+    display: grid;
+    grid-template-columns: 240px 1fr;
+    gap: 1.25rem;
+    align-items: start;
+  }
+
+  @media (max-width: 680px) {
+    .ep-layout { grid-template-columns: 1fr; }
+    .ep-sidebar { position: static !important; }
+  }
+
+  /* ══ Sidebar ══ */
+  .ep-sidebar {
+    position: sticky; top: 84px;
+    animation: ep-rise .38s cubic-bezier(.16,1,.3,1) both;
+  }
+
+  .av-card {
+    background: var(--surf);
+    border: 1px solid var(--bdr);
+    border-radius: var(--r);
+    overflow: hidden;
+    box-shadow: var(--nc-card-shadow);
+  }
+
+  .av-banner {
+    height: 86px;
+    background: linear-gradient(135deg, #020d1a 0%, #071e3d 50%, #0c3460 80%, #0ea5e9 100%);
+    position: relative; overflow: hidden;
+  }
+
+  .av-banner::before {
+    content: ''; position: absolute;
+    right: -18px; bottom: -18px;
+    width: 120px; height: 120px; border-radius: 50%;
+    background: radial-gradient(circle, rgba(14,165,233,.5), transparent 70%);
+  }
+
+  .av-banner::after {
+    content: ''; position: absolute; inset: 0;
+    background-image: radial-gradient(rgba(255,255,255,.055) 1px, transparent 1px);
+    background-size: 18px 18px;
+  }
+
+  .av-banner-line {
+    position: absolute; bottom: 0; left: 0; right: 0; height: 3px;
+    background: linear-gradient(90deg, #0ea5e9, #06b6d4, #818cf8);
+    z-index: 1;
+  }
+
+  .av-body {
+    padding: 0 1.25rem 1.25rem;
+    display: flex; flex-direction: column; align-items: center;
+    text-align: center;
+  }
+
+  .av-circle {
+    width: 82px; height: 82px; border-radius: 50%;
+    border: 4px solid var(--surf);
+    background: linear-gradient(135deg, var(--brand), #06b6d4);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.8rem; font-weight: 800; color: #fff;
+    margin: -41px auto .85rem;
+    overflow: hidden; position: relative; z-index: 2;
+    box-shadow: 0 6px 22px rgba(14,165,233,.4), 0 2px 8px rgba(0,0,0,.18);
+    transition: transform .2s;
+  }
+
+  .av-circle:hover { transform: scale(1.04); }
+  .av-circle img   { width:100%; height:100%; object-fit:cover; border-radius:50%; }
+
+  .av-name {
+    font-size: .98rem; font-weight: 800;
+    letter-spacing: -.03em; color: var(--txt); margin-bottom: .1rem;
+  }
+
+  .av-handle { font-size: .75rem; color: var(--mu); font-weight: 500; margin-bottom: .75rem; }
+
+  .av-role {
+    display: inline-flex; align-items: center; gap: .3rem;
+    background: var(--brand-l); color: var(--brand-d);
+    border: 1.5px solid rgba(14,165,233,.22);
+    border-radius: 99px; padding: .18rem .8rem;
+    font-size: .67rem; font-weight: 800; letter-spacing: .05em;
+    text-transform: uppercase; margin-bottom: 1rem;
+  }
+
+  [data-theme="dark"] .av-role {
+    background: rgba(14,165,233,.12);
+    border-color: rgba(14,165,233,.28);
+    color: #38bdf8;
+  }
+
+  .av-meta { width: 100%; }
+
+  .av-meta-row {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: .48rem 0; border-bottom: 1px solid var(--bdr); gap: .4rem;
+  }
+
+  .av-meta-row:last-child { border-bottom: none; }
+
+  .av-meta-key {
+    font-size: .62rem; font-weight: 800; text-transform: uppercase;
+    letter-spacing: .06em; color: var(--fa);
+    display: flex; align-items: center; gap: .28rem; white-space: nowrap;
+  }
+
+  .av-meta-val {
+    font-size: .75rem; font-weight: 600; color: var(--txt2);
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    max-width: 115px; text-align: right;
+  }
+
+  /* ══ Form card ══ */
+  .ep-card {
+    background: var(--nc-card-bg);
+    border: 1px solid var(--nc-card-border);
+    border-radius: var(--r);
+    overflow: hidden;
+    box-shadow: var(--nc-card-shadow);
+    animation: ep-rise .42s cubic-bezier(.16,1,.3,1) .06s both;
+  }
+
+  .ep-stripe {
+    height: 3px;
+    background: linear-gradient(90deg, #0ea5e9, #06b6d4, #818cf8);
+  }
+
+  .ep-head {
+    display: flex; align-items: center; gap: .65rem;
+    padding: 1rem 1.4rem; border-bottom: 1px solid var(--bdr);
+  }
+
+  .ep-head-icon {
+    width: 34px; height: 34px; border-radius: 10px;
+    background: var(--brand-l); color: var(--brand-d);
+    display: flex; align-items: center; justify-content: center;
+    font-size: .8rem; flex-shrink: 0;
+  }
+
+  [data-theme="dark"] .ep-head-icon {
+    background: rgba(14,165,233,.14); color: #38bdf8;
+  }
+
+  .ep-head-title { font-size: .9rem; font-weight: 800; color: var(--txt); letter-spacing: -.02em; }
+  .ep-head-sub   { font-size: .7rem; color: var(--mu); font-weight: 500; margin-top: .04rem; }
+
+  .ep-body { padding: 1.4rem; }
+
+  /* Section labels */
+  .sec-lbl {
+    font-size: .66rem; font-weight: 800; text-transform: uppercase;
+    letter-spacing: .09em; color: var(--fa);
+    display: flex; align-items: center; gap: .4rem;
+    margin-bottom: .85rem;
+  }
+
+  .sec-lbl::before {
+    content: ''; display: block; width: 3px; height: 13px;
+    background: var(--brand); border-radius: 2px;
+  }
+
+  .ro-tag {
+    margin-left: auto;
+    display: inline-flex; align-items: center; gap: .28rem;
+    font-size: .6rem; font-weight: 700; color: var(--fa);
+    background: var(--s2); border: 1px solid var(--bdr);
+    border-radius: 99px; padding: .1rem .52rem;
+  }
+
+  /* Photo upload */
+  .photo-zone {
+    display: flex; align-items: center; gap: 1rem;
+    background: var(--s2); border: 1.5px dashed var(--bdr2);
+    border-radius: 14px; padding: .95rem 1.1rem;
+    margin-bottom: 1.4rem; cursor: pointer;
+    transition: border-color .15s, background .15s;
+    position: relative; overflow: hidden;
+  }
+
+  .photo-zone:hover {
+    border-color: var(--brand);
+    background: var(--brand-l);
+  }
+
+  [data-theme="dark"] .photo-zone:hover {
+    border-color: rgba(14,165,233,.4);
+    background: rgba(14,165,233,.07);
+  }
+
+  .photo-zone input[type="file"] {
+    position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%;
+  }
+
+  .photo-thumb {
+    width: 48px; height: 48px; border-radius: 50%; flex-shrink: 0;
+    background: linear-gradient(135deg, var(--brand), #06b6d4);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.1rem; font-weight: 800; color: #fff;
+    overflow: hidden; border: 2px solid var(--surf);
+    box-shadow: 0 3px 10px rgba(14,165,233,.28);
+    transition: transform .2s;
+  }
+
+  .photo-zone:hover .photo-thumb { transform: scale(1.06); }
+  .photo-thumb img { width:100%; height:100%; object-fit:cover; border-radius:50%; }
+
+  .photo-text { flex: 1; }
+  .photo-text strong { font-size: .83rem; font-weight: 700; color: var(--txt); display: block; margin-bottom: .12rem; }
+  .photo-text small  { font-size: .71rem; color: var(--mu); font-weight: 500; }
+
+  .photo-cta {
+    display: inline-flex; align-items: center; gap: .32rem;
+    background: var(--surf); border: 1.5px solid var(--bdr2);
+    border-radius: 9px; padding: .35rem .8rem;
+    font-size: .75rem; font-weight: 700; color: var(--txt2);
+    pointer-events: none; white-space: nowrap; flex-shrink: 0;
+  }
+
+  /* Inputs */
+  .ep-row { display: grid; grid-template-columns: 1fr 1fr; gap: .85rem; margin-bottom: .85rem; }
+  @media (max-width: 480px) { .ep-row { grid-template-columns: 1fr; } }
+
+  .ep-field { display: flex; flex-direction: column; gap: .36rem; margin-bottom: .85rem; }
+  .ep-field:last-child { margin-bottom: 0; }
+
+  .ep-label {
+    font-size: .7rem; font-weight: 800; text-transform: uppercase;
+    letter-spacing: .06em; color: var(--mu);
+    display: flex; align-items: center; gap: .38rem;
+  }
+
+  .ep-label i { font-size: .62rem; color: var(--fa); }
+
+  .inp-wrap { position: relative; }
+
+  .inp-icon {
+    position: absolute; left: .88rem; top: 50%; transform: translateY(-50%);
+    font-size: .7rem; color: var(--fa); pointer-events: none;
+    transition: color .15s;
+  }
+
+  .inp-wrap:focus-within .inp-icon { color: var(--brand); }
+
+  .ep-input {
+    width: 100%; border: 1.5px solid var(--bdr);
+    border-radius: 11px; padding: .65rem .9rem .65rem 2.15rem;
+    font-size: .9rem; font-weight: 600;
+    color: var(--nc-input-text) !important;
+    background: var(--nc-input-bg) !important;
+    outline: none; font-family: 'Sora', sans-serif;
+    transition: border-color .15s, box-shadow .15s;
+  }
+
+  .ep-input:focus {
+    border-color: var(--brand) !important;
+    background: var(--surf) !important;
+    box-shadow: 0 0 0 3px rgba(14,165,233,.15) !important;
+  }
+
+  .ep-input::placeholder { color: var(--fa) !important; font-weight: 500; }
+
+  .ep-input.ro {
+    color: var(--mu) !important;
+    background: var(--s3) !important;
+    cursor: not-allowed; border-style: dashed;
+  }
+
+  .ep-div { height: 1px; background: var(--bdr); margin: 1.25rem 0; }
+
+  /* Footer */
+  .ep-foot {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: .95rem 1.4rem; border-top: 1px solid var(--bdr);
+    gap: .75rem; flex-wrap: wrap;
+  }
+
+  .ep-foot-note { font-size: .72rem; color: var(--fa); display: flex; align-items: center; gap: .35rem; }
+
+  .ep-actions { display: flex; gap: .6rem; }
+
+  .btn-cancel {
+    display: inline-flex; align-items: center; gap: .4rem;
+    background: var(--s2); color: var(--txt2);
+    border: 1.5px solid var(--bdr); border-radius: 11px;
+    padding: .6rem 1.1rem; font-size: .84rem; font-weight: 700;
+    font-family: 'Sora', sans-serif; text-decoration: none; cursor: pointer;
+    transition: background .15s, border-color .15s, color .15s;
+  }
+
+  .btn-cancel:hover { background: var(--s3); border-color: var(--bdr2); color: var(--txt); }
+
+  .btn-save {
+    display: inline-flex; align-items: center; gap: .4rem;
+    background: var(--nc-brand); color: #fff; border: none;
+    border-radius: 11px; padding: .6rem 1.35rem;
+    font-size: .84rem; font-weight: 700; font-family: 'Sora', sans-serif;
+    cursor: pointer;
+    box-shadow: 0 2px 10px rgba(14,165,233,.3);
+    transition: background .15s, transform .12s, box-shadow .15s;
+  }
+
+  .btn-save:hover {
+    background: var(--nc-brand-d);
+    transform: translateY(-1px);
+    box-shadow: 0 5px 20px rgba(14,165,233,.4);
+  }
+</style>
+
+<div class="ep">
+  <div class="ep-layout">
+
+    <!-- ══ SIDEBAR ══ -->
+    <aside class="ep-sidebar">
+      <div class="av-card">
+        <div class="av-banner"><div class="av-banner-line"></div></div>
+        <div class="av-body">
+
+          <div class="av-circle" id="sideAv">
+            {% if user.profile_picture %}
+              <img src="{{ url_for('static', filename=user.profile_picture) }}" alt="av">
+            {% else %}
+              <span id="sideAvLetter">{{ (user.first_name or user.username or 'U')[0].upper() }}</span>
+            {% endif %}
+          </div>
+
+          <div class="av-name" id="sideAvName">
+            {{ (user.first_name or '') ~ ' ' ~ (user.last_name or '') }}
+          </div>
+          <div class="av-handle">@{{ user.username }}</div>
+
+          <span class="av-role">
+            {% for role in user.roles %}<i class="fas fa-shield-halved"></i> {{ role.name }}{% endfor %}
+          </span>
+
+          <div class="av-meta">
+            <div class="av-meta-row">
+              <div class="av-meta-key"><i class="fas fa-at"></i> Email</div>
+              <div class="av-meta-val" id="sideEmail">{{ user.email }}</div>
+            </div>
+            <div class="av-meta-row">
+              <div class="av-meta-key"><i class="fas fa-user-tag"></i> User</div>
+              <div class="av-meta-val">@{{ user.username }}</div>
+            </div>
+            <div class="av-meta-row">
+              <div class="av-meta-key"><i class="fas fa-calendar"></i> Joined</div>
+              <div class="av-meta-val">{{ user.created_at.strftime('%b %Y') }}</div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </aside>
+
+    <!-- ══ FORM ══ -->
+    <div class="ep-card">
+      <div class="ep-stripe"></div>
+
+      <div class="ep-head">
+        <div class="ep-head-icon"><i class="fas fa-pen-to-square"></i></div>
+        <div>
+          <div class="ep-head-title">Edit Profile</div>
+          <div class="ep-head-sub">Update your personal information below</div>
+        </div>
       </div>
 
-      <div class="card-body">
-        <form method="POST" enctype="multipart/form-data" action="{{ url_for('user_dashboard.edit_profile') }}">
+      <form method="POST" enctype="multipart/form-data"
+            action="{{ url_for('user_dashboard.edit_profile') }}">
+        <div class="ep-body">
 
-          <div class="mb-4 text-center">
-            {% if user.profile_picture %}
-              <img
-                src="{{ url_for('static', filename=user.profile_picture) }}"
-                alt="Profile Picture"
-                class="rounded-circle mb-3"
-                style="width:150px;height:150px;object-fit:cover;"
-              >
-            {% else %}
-              <div
-                class="rounded-circle bg-primary text-white d-inline-flex align-items-center justify-content-center mb-3"
-                style="width:150px;height:150px;font-size:48px;"
-              >
-                {{ (user.first_name or user.username or 'U')[0] }}
+          <!-- Photo -->
+          <div class="sec-lbl">Profile Picture</div>
+
+          <label class="photo-zone" id="photoZone">
+            <input type="file" name="profile_picture" accept="image/*" onchange="handlePhoto(this)">
+            <div class="photo-thumb" id="photoThumb">
+              {% if user.profile_picture %}
+                <img src="{{ url_for('static', filename=user.profile_picture) }}" alt="av">
+              {% else %}
+                <span id="photoLetter">{{ (user.first_name or user.username or 'U')[0].upper() }}</span>
+              {% endif %}
+            </div>
+            <div class="photo-text">
+              <strong>Upload new photo</strong>
+              <small id="photoHint">PNG / JPG / JPEG / GIF · Max 5MB</small>
+            </div>
+            <div class="photo-cta"><i class="fas fa-arrow-up-from-bracket"></i> Browse</div>
+          </label>
+
+          <!-- Name -->
+          <div class="sec-lbl">Personal Details</div>
+
+          <div class="ep-row">
+            <div class="ep-field">
+              <label class="ep-label"><i class="fas fa-signature"></i> First Name</label>
+              <div class="inp-wrap">
+                <i class="fas fa-user inp-icon"></i>
+                <input class="ep-input" type="text" name="first_name"
+                       id="inp-fn" value="{{ user.first_name or '' }}"
+                       placeholder="First name" required
+                       oninput="syncName()">
               </div>
-            {% endif %}
-
-            <div>
-              <label class="form-label">Change Profile Picture</label>
-              <input
-                class="form-control"
-                type="file"
-                name="profile_picture"
-                accept="image/*"
-              >
-              <small class="text-muted">
-                PNG / JPG / JPEG / GIF (Max 5MB)
-              </small>
+            </div>
+            <div class="ep-field">
+              <label class="ep-label"><i class="fas fa-signature"></i> Last Name</label>
+              <div class="inp-wrap">
+                <i class="fas fa-user inp-icon"></i>
+                <input class="ep-input" type="text" name="last_name"
+                       id="inp-ln" value="{{ user.last_name or '' }}"
+                       placeholder="Last name"
+                       oninput="syncName()">
+              </div>
             </div>
           </div>
 
-          <hr>
-
-          <div class="row">
-            <div class="col-md-6 mb-3">
-              <label class="form-label">First Name</label>
-              <input
-                class="form-control"
-                name="first_name"
-                value="{{ user.first_name }}"
-                required
-              >
-            </div>
-
-            <div class="col-md-6 mb-3">
-              <label class="form-label">Last Name</label>
-              <input
-                class="form-control"
-                name="last_name"
-                value="{{ user.last_name }}"
-                required
-              >
+          <!-- Email -->
+          <div class="ep-field">
+            <label class="ep-label"><i class="fas fa-at"></i> Email Address</label>
+            <div class="inp-wrap">
+              <i class="fas fa-envelope inp-icon"></i>
+              <input class="ep-input" type="email" name="email"
+                     id="inp-em" value="{{ user.email }}"
+                     placeholder="your@email.com" required
+                     oninput="syncEmail()">
             </div>
           </div>
 
-          <div class="mb-3">
-            <label class="form-label">Email</label>
-            <input
-              class="form-control"
-              type="email"
-              name="email"
-              value="{{ user.email }}"
-              required
-            >
+          <div class="ep-div"></div>
+
+          <!-- Read-only -->
+          <div class="sec-lbl">
+            Account Info
+            <span class="ro-tag"><i class="fas fa-lock"></i> Read only</span>
           </div>
 
-          <div class="d-flex justify-content-between mt-4">
-            <a href="{{ url_for('user_dashboard.view_profile') }}" class="btn btn-secondary">
-              <i class="fas fa-times"></i> Cancel
+          <div class="ep-row">
+            <div class="ep-field">
+              <label class="ep-label"><i class="fas fa-user-tag"></i> Username</label>
+              <div class="inp-wrap">
+                <i class="fas fa-at inp-icon"></i>
+                <input class="ep-input ro" type="text"
+                       value="@{{ user.username }}" readonly>
+              </div>
+            </div>
+            <div class="ep-field">
+              <label class="ep-label"><i class="fas fa-calendar"></i> Member Since</label>
+              <div class="inp-wrap">
+                <i class="fas fa-clock inp-icon"></i>
+                <input class="ep-input ro" type="text"
+                       value="{{ user.created_at.strftime('%B %d, %Y') }}" readonly>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <div class="ep-foot">
+          <span class="ep-foot-note">
+            <i class="fas fa-circle-info"></i> Changes are saved immediately
+          </span>
+          <div class="ep-actions">
+            <a href="{{ url_for('user_dashboard.view_profile') }}" class="btn-cancel">
+              <i class="fas fa-xmark"></i> Cancel
             </a>
-            <button class="btn btn-primary" type="submit">
-              <i class="fas fa-save"></i> Save Changes
+            <button type="submit" class="btn-save">
+              <i class="fas fa-floppy-disk"></i> Save Changes
             </button>
           </div>
+        </div>
 
-        </form>
-      </div>
+      </form>
     </div>
+
   </div>
 </div>
+
+<script>
+  function syncName() {
+    const fn = document.getElementById('inp-fn').value.trim();
+    const ln = document.getElementById('inp-ln').value.trim();
+    document.getElementById('sideAvName').textContent = [fn, ln].filter(Boolean).join(' ') || 'Your Name';
+    const ch = (fn || '?')[0].toUpperCase();
+    const l1 = document.getElementById('sideAvLetter');
+    const l2 = document.getElementById('photoLetter');
+    if (l1) l1.textContent = ch;
+    if (l2) l2.textContent = ch;
+  }
+
+  function syncEmail() {
+    const el = document.getElementById('sideEmail');
+    if (el) el.textContent = document.getElementById('inp-em').value || '—';
+  }
+
+  function handlePhoto(inp) {
+    if (!inp.files || !inp.files[0]) return;
+    const url = URL.createObjectURL(inp.files[0]);
+    const img = `<img src="${url}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`;
+    document.getElementById('photoThumb').innerHTML = img;
+    document.getElementById('sideAv').innerHTML = img;
+    document.getElementById('photoHint').textContent = inp.files[0].name;
+    document.getElementById('photoZone').style.borderColor = 'var(--brand)';
+    document.getElementById('photoZone').style.background = 'var(--brand-l)';
+  }
+</script>
 {% endblock %}

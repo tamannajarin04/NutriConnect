@@ -1,0 +1,356 @@
+{% extends "base.html" %}
+
+{% block title %}Add Food Item — NutriConnect{% endblock %}
+
+{% block extra_css %}
+<style>
+  .food-form-wrap {
+    max-width: 700px;
+    margin: 0 auto;
+  }
+
+  /* ── Page heading ── */
+  .food-page-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 2rem;
+  }
+
+  .food-page-header__icon {
+    width: 48px; height: 48px;
+    border-radius: 14px;
+    background: var(--nc-brand-l);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.3rem;
+    flex-shrink: 0;
+  }
+
+  .food-page-header h1 {
+    font-size: 1.55rem;
+    font-weight: 800;
+    color: var(--nc-text);
+    margin: 0;
+    letter-spacing: -.02em;
+  }
+
+  .food-page-header p {
+    font-size: .83rem;
+    color: var(--nc-text-muted);
+    margin: .2rem 0 0;
+    font-weight: 400;
+  }
+
+  /* ── Card ── */
+  .nc-form-card {
+    background: var(--nc-card-bg);
+    border: 1px solid var(--nc-card-border);
+    border-radius: 18px;
+    box-shadow: var(--nc-card-shadow);
+    overflow: hidden;
+  }
+
+  /* ── Section header inside card ── */
+  .form-section-head {
+    display: flex;
+    align-items: center;
+    gap: .55rem;
+    padding: .1rem 0 .75rem;
+    margin-bottom: 1rem;
+    border-bottom: 1px solid var(--nc-border);
+  }
+
+  .form-section-head__dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--nc-brand);
+    flex-shrink: 0;
+  }
+
+  .form-section-head span {
+    font-size: .7rem;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--nc-brand);
+  }
+
+  /* ── Custom input styling on top of Bootstrap ── */
+  .nc-input {
+    background: var(--nc-input-bg) !important;
+    border: 1.5px solid var(--nc-input-border) !important;
+    border-radius: 10px !important;
+    color: var(--nc-input-text) !important;
+    font-family: 'Sora', sans-serif !important;
+    font-size: .88rem !important;
+    height: 46px;
+    padding: 0 14px !important;
+    transition: border-color .18s, box-shadow .18s !important;
+  }
+
+  .nc-input:focus {
+    border-color: var(--nc-brand) !important;
+    box-shadow: 0 0 0 3px rgba(14,165,233,.15) !important;
+    outline: none !important;
+  }
+
+  textarea.nc-input {
+    height: 88px !important;
+    padding: 12px 14px !important;
+    resize: vertical;
+    line-height: 1.55;
+  }
+
+  .nc-label {
+    font-size: .8rem;
+    font-weight: 600;
+    color: var(--nc-text-2);
+    margin-bottom: .4rem;
+    display: block;
+  }
+
+  .nc-label .req { color: #ef4444; margin-left: 2px; }
+
+  /* ── Image upload zone ── */
+  .upload-zone {
+    position: relative;
+    border: 2px dashed var(--nc-border-2);
+    border-radius: 12px;
+    background: var(--nc-surface-2);
+    padding: 28px 20px;
+    text-align: center;
+    cursor: pointer;
+    transition: border-color .2s, background .2s;
+  }
+
+  .upload-zone:hover {
+    border-color: var(--nc-brand);
+    background: var(--nc-brand-l);
+  }
+
+  .upload-zone input[type="file"] {
+    position: absolute; inset: 0;
+    opacity: 0; cursor: pointer;
+    width: 100%; height: 100%;
+  }
+
+  .upload-zone__icon {
+    font-size: 1.8rem;
+    color: var(--nc-text-faint);
+    margin-bottom: .5rem;
+  }
+
+  .upload-zone__text {
+    font-size: .84rem;
+    color: var(--nc-text-muted);
+    line-height: 1.5;
+  }
+
+  .upload-zone__text b { color: var(--nc-brand); font-weight: 600; }
+
+  .upload-zone__hint {
+    font-size: .72rem;
+    color: var(--nc-text-faint);
+    margin-top: .4rem;
+  }
+
+  #img-preview {
+    display: none;
+    margin-top: 12px;
+    border-radius: 10px;
+    overflow: hidden;
+    height: 160px;
+  }
+
+  #img-preview img {
+    width: 100%; height: 160px;
+    object-fit: cover; border-radius: 10px;
+  }
+
+  /* ── Nutrition grid ── */
+  .nutrition-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+  }
+
+  /* ── Footer buttons ── */
+  .form-actions {
+    display: flex;
+    gap: .75rem;
+    align-items: center;
+    padding: 1.25rem 1.75rem;
+    border-top: 1px solid var(--nc-border);
+    background: var(--nc-surface-2);
+  }
+
+  .btn-nc-primary {
+    display: inline-flex; align-items: center; gap: .45rem;
+    background: var(--nc-brand);
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    padding: .6rem 1.4rem;
+    font-family: 'Sora', sans-serif;
+    font-size: .88rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background .15s, transform .1s;
+    text-decoration: none;
+  }
+
+  .btn-nc-primary:hover {
+    background: var(--nc-brand-d);
+    color: #fff;
+    transform: translateY(-1px);
+  }
+
+  .btn-nc-ghost {
+    display: inline-flex; align-items: center; gap: .4rem;
+    background: transparent;
+    border: 1.5px solid var(--nc-border-2);
+    border-radius: 10px;
+    padding: .58rem 1.2rem;
+    font-family: 'Sora', sans-serif;
+    font-size: .85rem;
+    font-weight: 600;
+    color: var(--nc-text-muted);
+    text-decoration: none;
+    transition: border-color .15s, color .15s, background .15s;
+  }
+
+  .btn-nc-ghost:hover {
+    border-color: var(--nc-brand);
+    color: var(--nc-brand);
+    background: var(--nc-brand-l);
+  }
+
+  @media (max-width: 576px) {
+    .nutrition-grid { grid-template-columns: 1fr 1fr; }
+    .form-actions   { flex-direction: column; }
+    .btn-nc-primary, .btn-nc-ghost { width: 100%; justify-content: center; }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="food-form-wrap">
+
+  <!-- Page Header -->
+  <div class="food-page-header">
+    <div class="food-page-header__icon">🍽️</div>
+    <div>
+      <h1>Add Food Item</h1>
+      <p>List a new food item with nutritional details and an optional image.</p>
+    </div>
+  </div>
+
+  <!-- Form Card -->
+  <div class="nc-form-card">
+    <form method="POST" enctype="multipart/form-data">
+      <div class="p-4">
+
+        <!-- ── Basic Info ── -->
+        <div class="form-section-head">
+          <div class="form-section-head__dot"></div>
+          <span>Basic Information</span>
+        </div>
+
+        <div class="mb-3">
+          <label class="nc-label">Food Name <span class="req">*</span></label>
+          <input type="text" name="name" class="form-control nc-input"
+                 placeholder="e.g. Grilled Chicken Bowl" required>
+        </div>
+
+        <div class="mb-3">
+          <label class="nc-label">Description</label>
+          <textarea name="description" class="form-control nc-input"
+                    placeholder="A short, appetising description of the food item…"></textarea>
+        </div>
+
+        <div class="mb-4" style="max-width:200px;">
+          <label class="nc-label">Price <span style="color:var(--nc-text-faint);font-weight:400;">($)</span></label>
+          <input type="number" name="price" class="form-control nc-input"
+                 step="0.01" min="0" placeholder="0.00">
+        </div>
+
+        <!-- ── Nutrition ── -->
+        <div class="form-section-head mt-2">
+          <div class="form-section-head__dot"></div>
+          <span>Nutrition Information</span>
+        </div>
+
+        <div class="nutrition-grid mb-4">
+          <div>
+            <label class="nc-label">Calories</label>
+            <input type="number" name="calories" class="form-control nc-input"
+                   step="0.1" min="0" placeholder="kcal">
+          </div>
+          <div>
+            <label class="nc-label">Protein</label>
+            <input type="number" name="protein" class="form-control nc-input"
+                   step="0.1" min="0" placeholder="g">
+          </div>
+          <div>
+            <label class="nc-label">Carbs</label>
+            <input type="number" name="carbs" class="form-control nc-input"
+                   step="0.1" min="0" placeholder="g">
+          </div>
+          <div>
+            <label class="nc-label">Fat</label>
+            <input type="number" name="fat" class="form-control nc-input"
+                   step="0.1" min="0" placeholder="g">
+          </div>
+        </div>
+
+        <!-- ── Image ── -->
+        <div class="form-section-head mt-2">
+          <div class="form-section-head__dot"></div>
+          <span>Food Image</span>
+        </div>
+
+        <div class="upload-zone">
+          <input type="file" name="image" id="imgInput"
+                 accept="image/*" onchange="previewImage(this)">
+          <div class="upload-zone__icon"><i class="fas fa-cloud-arrow-up"></i></div>
+          <div class="upload-zone__text">
+            <b>Click to upload</b> or drag & drop
+          </div>
+          <div class="upload-zone__hint">PNG, JPG, GIF, WEBP — optional</div>
+        </div>
+
+        <div id="img-preview">
+          <img id="preview-img" src="" alt="Preview">
+        </div>
+
+      </div>
+
+      <!-- ── Actions ── -->
+      <div class="form-actions">
+        <button type="submit" class="btn-nc-primary">
+          <i class="fas fa-plus"></i> Add Food Item
+        </button>
+        <a href="{{ url_for('food.provider_foods') }}" class="btn-nc-ghost">
+          <i class="fas fa-xmark"></i> Cancel
+        </a>
+      </div>
+
+    </form>
+  </div>
+
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  function previewImage(input) {
+    const wrap = document.getElementById('img-preview');
+    const img  = document.getElementById('preview-img');
+    if (input.files && input.files[0]) {
+      const reader = new FileReader();
+      reader.onload = e => { img.src = e.target.result; wrap.style.display = 'block'; };
+      reader.readAsDataURL(input.files[0]);
+    }
+  }
+</script>
+{% endblock %}

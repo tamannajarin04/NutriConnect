@@ -1,0 +1,1149 @@
+{% extends "base.html" %}
+{% block title %}Provider Profile · NutriConnect{% endblock %}
+
+{% block extra_css %}
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+{% endblock %}
+
+{% block content %}
+<style>
+  /* ══════════════════════════════════════════
+     PAGE TOKENS — all surface/text/border
+     values read from base.html's --nc-* vars
+  ══════════════════════════════════════════ */
+  .pg {
+    /* Violet accent — unique to this provider page */
+    --o:   #7c3aed;
+    --o-d: #6d28d9;
+    --o-l: #ede9fe;
+    --o-border: rgba(124,58,237,.25);
+
+    /* Helpers that alias nc- tokens */
+    --surf:  var(--nc-surface);
+    --s2:    var(--nc-surface-2);
+    --s3:    var(--nc-surface-3);
+    --bdr:   var(--nc-border);
+    --bdr2:  var(--nc-border-2);
+    --txt:   var(--nc-text);
+    --txt2:  var(--nc-text-2);
+    --mu:    var(--nc-text-muted);
+    --fa:    var(--nc-text-faint);
+    --brand: var(--nc-brand);
+
+    --r: 18px;
+    --card-shadow: var(--nc-card-shadow);
+  }
+
+  @keyframes rise {
+    from { opacity:0; transform:translateY(18px); }
+    to   { opacity:1; transform:translateY(0); }
+  }
+
+  /* ══ Layout ══ */
+  .pg-layout {
+    display: grid;
+    grid-template-columns: 288px 1fr;
+    gap: 1.25rem;
+    align-items: start;
+  }
+
+  @media (max-width: 860px) {
+    .pg-layout { grid-template-columns: 1fr; }
+    .pg-sidebar { position: static !important; }
+  }
+
+  /* ══════════════════════════════════════════
+     SIDEBAR
+  ══════════════════════════════════════════ */
+  .pg-sidebar {
+    position: sticky; top: 84px;
+    display: flex; flex-direction: column; gap: 1rem;
+  }
+
+  /* Avatar card */
+  .av-card {
+    background: var(--surf);
+    border: 1px solid var(--bdr);
+    border-radius: var(--r);
+    overflow: hidden;
+    box-shadow: var(--card-shadow);
+    animation: rise .4s cubic-bezier(.16,1,.3,1) both;
+  }
+
+  .av-banner {
+    height: 96px;
+    background: linear-gradient(135deg, #0d0a1a 0%, #1a1040 45%, #2e1065 80%, #7c3aed 100%);
+    position: relative; overflow: hidden;
+  }
+
+  /* Dot grid texture */
+  .av-banner::after {
+    content: ''; position: absolute; inset: 0;
+    background-image: radial-gradient(rgba(255,255,255,.06) 1px, transparent 1px);
+    background-size: 18px 18px;
+  }
+
+  /* Glow blob */
+  .av-banner::before {
+    content: ''; position: absolute;
+    right: -24px; bottom: -24px;
+    width: 140px; height: 140px; border-radius: 50%;
+    background: radial-gradient(circle, rgba(124,58,237,.55), transparent 70%);
+  }
+
+  /* Diagonal accent line */
+  .av-banner-line {
+    position: absolute; bottom: 0; left: 0; right: 0; height: 3px;
+    background: linear-gradient(90deg, #7c3aed, #a78bfa, #c4b5fd);
+    z-index: 1;
+  }
+
+  .av-body {
+    padding: 0 1.4rem 1.4rem;
+    text-align: center;
+  }
+
+  .av-circle {
+    width: 86px; height: 86px; border-radius: 50%;
+    border: 4px solid var(--surf);
+    background: linear-gradient(135deg, var(--o), #a78bfa);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.9rem; font-weight: 800; color: #fff;
+    margin: -43px auto 1rem;
+    overflow: hidden; position: relative; z-index: 2;
+    box-shadow: 0 6px 24px rgba(124,58,237,.38), 0 2px 8px rgba(0,0,0,.15);
+    transition: transform .2s, box-shadow .2s;
+  }
+
+  .av-circle:hover {
+    transform: scale(1.04);
+    box-shadow: 0 10px 32px rgba(124,58,237,.48);
+  }
+
+  .av-circle img { width:100%; height:100%; object-fit:cover; border-radius:50%; }
+
+  .av-name {
+    font-size: 1.05rem; font-weight: 800;
+    letter-spacing: -.03em; color: var(--txt);
+    margin-bottom: .12rem;
+  }
+
+  .av-handle {
+    font-size: .78rem; color: var(--mu); font-weight: 500;
+    margin-bottom: .75rem;
+  }
+
+  .av-role-badge {
+    display: inline-flex; align-items: center; gap: .35rem;
+    background: var(--o-l); color: var(--o-d);
+    border: 1.5px solid var(--o-border);
+    border-radius: 99px; padding: .22rem .9rem;
+    font-size: .7rem; font-weight: 800; letter-spacing: .04em;
+    text-transform: uppercase; margin-bottom: 1.1rem;
+  }
+
+  [data-theme="dark"] .av-role-badge {
+    background: rgba(124,58,237,.12);
+    border-color: rgba(124,58,237,.3);
+    color: #a78bfa;
+  }
+
+  /* Mini stats 2×2 */
+  .av-stats {
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: .45rem; margin-bottom: 1rem;
+  }
+
+  .av-stat {
+    background: var(--s2); border: 1px solid var(--bdr);
+    border-radius: 12px; padding: .6rem .7rem; text-align: center;
+    transition: border-color .15s, transform .15s;
+  }
+
+  .av-stat:hover { border-color: var(--o-border); transform: translateY(-1px); }
+
+  .av-stat.hi {
+    background: var(--o-l); border-color: var(--o-border);
+  }
+
+  [data-theme="dark"] .av-stat.hi {
+    background: rgba(124,58,237,.1);
+    border-color: rgba(124,58,237,.25);
+  }
+
+  .av-stat-val {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 1.1rem; font-weight: 700; color: var(--txt); line-height: 1;
+  }
+
+  .av-stat.hi .av-stat-val { color: var(--o-d); }
+  [data-theme="dark"] .av-stat.hi .av-stat-val { color: #a78bfa; }
+
+  .av-stat-lbl {
+    font-size: .6rem; font-weight: 700; text-transform: uppercase;
+    letter-spacing: .06em; color: var(--fa); margin-top: .2rem;
+  }
+
+  /* Divider */
+  .av-divider {
+    height: 1px; background: var(--bdr); margin: .85rem 0;
+  }
+
+  /* Completion ring */
+  .comp-wrap {
+    display: flex; flex-direction: column; align-items: center; gap: .3rem;
+    margin-bottom: .9rem;
+  }
+
+  .comp-ring { width: 72px; height: 72px; transform: rotate(-90deg); }
+  .cr-bg   { fill: none; stroke: var(--bdr); stroke-width: 6; }
+  .cr-fill {
+    fill: none; stroke: url(#crGrad);
+    stroke-width: 6; stroke-linecap: round;
+    stroke-dasharray: 200; stroke-dashoffset: 200;
+    transition: stroke-dashoffset 1.2s cubic-bezier(.16,1,.3,1);
+  }
+
+  .comp-pct {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: .72rem; font-weight: 700;
+    color: var(--o); letter-spacing: .04em;
+  }
+
+  /* Checklist */
+  .checklist { display: flex; flex-direction: column; gap: .25rem; width: 100%; }
+
+  .cl-row {
+    display: flex; align-items: center; gap: .55rem;
+    font-size: .78rem; font-weight: 600; color: var(--mu);
+    padding: .32rem .5rem; border-radius: 9px;
+    transition: background .12s;
+  }
+
+  .cl-row:hover { background: var(--s2); }
+
+  .cl-row.done { color: var(--o-d); }
+  [data-theme="dark"] .cl-row.done { color: #a78bfa; }
+
+  .cl-dot {
+    width: 22px; height: 22px; border-radius: 7px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: .6rem; flex-shrink: 0;
+  }
+
+  .cl-dot.done { background: var(--o-l); color: var(--o); }
+  .cl-dot.todo { background: var(--s3); color: var(--fa); }
+
+  [data-theme="dark"] .cl-dot.done {
+    background: rgba(124,58,237,.15); color: #a78bfa;
+  }
+
+  /* Sidebar action buttons */
+  .sidebar-actions {
+    display: flex; flex-direction: column; gap: .5rem;
+    animation: rise .5s cubic-bezier(.16,1,.3,1) .08s both;
+  }
+
+  .btn-primary {
+    display: inline-flex; align-items: center; justify-content: center; gap: .45rem;
+    background: var(--o); color: #fff; border: none;
+    border-radius: 12px; padding: .68rem 1rem;
+    font-family: 'Sora', sans-serif; font-size: .84rem; font-weight: 700;
+    text-decoration: none; cursor: pointer;
+    box-shadow: 0 2px 10px rgba(124,58,237,.32);
+    transition: background .15s, transform .12s, box-shadow .15s;
+  }
+
+  .btn-primary:hover {
+    background: var(--o-d); color: #fff;
+    transform: translateY(-1px);
+    box-shadow: 0 6px 20px rgba(124,58,237,.42);
+  }
+
+  .btn-brand {
+    display: inline-flex; align-items: center; justify-content: center; gap: .45rem;
+    background: var(--nc-brand); color: #fff; border: none;
+    border-radius: 12px; padding: .68rem 1rem;
+    font-family: 'Sora', sans-serif; font-size: .84rem; font-weight: 700;
+    text-decoration: none; cursor: pointer;
+    box-shadow: 0 2px 10px rgba(14,165,233,.28);
+    transition: background .15s, transform .12s;
+  }
+
+  .btn-brand:hover {
+    background: var(--nc-brand-d); color: #fff;
+    transform: translateY(-1px);
+  }
+
+  .btn-ghost {
+    display: inline-flex; align-items: center; justify-content: center; gap: .45rem;
+    background: var(--s2); color: var(--txt2);
+    border: 1px solid var(--bdr); border-radius: 12px;
+    padding: .63rem 1rem;
+    font-family: 'Sora', sans-serif; font-size: .84rem; font-weight: 600;
+    text-decoration: none; cursor: pointer;
+    transition: background .15s, border-color .15s, color .15s;
+  }
+
+  .btn-ghost:hover {
+    background: var(--o-l); border-color: var(--o-border); color: var(--o-d);
+  }
+
+  [data-theme="dark"] .btn-ghost:hover {
+    background: rgba(124,58,237,.1); border-color: rgba(124,58,237,.3); color: #a78bfa;
+  }
+
+  /* ══════════════════════════════════════════
+     MAIN CONTENT — Section Cards
+  ══════════════════════════════════════════ */
+  .pg-main {
+    display: flex; flex-direction: column; gap: 1.1rem;
+  }
+
+  .sc {
+    background: var(--nc-card-bg);
+    border: 1px solid var(--nc-card-border);
+    border-radius: var(--r);
+    overflow: hidden;
+    box-shadow: var(--nc-card-shadow);
+    animation: rise .45s cubic-bezier(.16,1,.3,1) both;
+  }
+
+  .sc:nth-child(1) { animation-delay: .05s; }
+  .sc:nth-child(2) { animation-delay: .10s; }
+  .sc:nth-child(3) { animation-delay: .15s; }
+
+  /* Top stripe */
+  .sc-stripe { height: 3px; }
+  .stripe-orange  { background: linear-gradient(90deg, var(--o), #a78bfa, #c4b5fd); }
+  .stripe-brand   { background: linear-gradient(90deg, var(--nc-brand), #06b6d4); }
+  .stripe-emerald { background: linear-gradient(90deg, #10b981, #84cc16); }
+
+  /* Card header */
+  .sc-head {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 1rem 1.4rem; border-bottom: 1px solid var(--bdr);
+  }
+
+  .sc-head-left { display: flex; align-items: center; gap: .65rem; }
+
+  .sc-icon {
+    width: 34px; height: 34px; border-radius: 10px; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center; font-size: .82rem;
+  }
+
+  .sci-o { background: var(--o-l); color: var(--o-d); }
+  .sci-b { background: var(--nc-brand-l); color: var(--nc-brand-d); }
+  .sci-e { background: #d1fae5; color: #065f46; }
+
+  [data-theme="dark"] .sci-o { background: rgba(124,58,237,.13); color: #a78bfa; }
+  [data-theme="dark"] .sci-b { background: var(--nc-brand-l); color: #38bdf8; }
+  [data-theme="dark"] .sci-e { background: rgba(16,185,129,.12); color: #34d399; }
+
+  .sc-title { font-size: .88rem; font-weight: 800; color: var(--txt); letter-spacing: -.02em; }
+  .sc-sub   { font-size: .7rem;  font-weight: 500; color: var(--mu); margin-top: .05rem; }
+
+  /* ══════════════════════════════════════════
+     PROFILE FIELDS
+  ══════════════════════════════════════════ */
+  .field-table { padding: 0 1.4rem; }
+
+  .frow {
+    display: grid;
+    grid-template-columns: 140px 1fr auto auto;
+    align-items: center; gap: .7rem;
+    padding: .85rem 0;
+    border-bottom: 1px solid var(--bdr);
+    min-height: 54px;
+  }
+
+  .frow:last-child { border-bottom: none; }
+
+  .frow-key {
+    display: flex; align-items: center; gap: .4rem;
+    font-size: .68rem; text-transform: uppercase;
+    letter-spacing: .07em; font-weight: 800; color: var(--fa);
+  }
+
+  .frow-ico {
+    width: 24px; height: 24px; border-radius: 7px;
+    background: var(--s2); border: 1px solid var(--bdr);
+    display: flex; align-items: center; justify-content: center;
+    font-size: .6rem; color: var(--mu); flex-shrink: 0;
+  }
+
+  .frow-val {
+    font-size: .88rem; font-weight: 600; color: var(--txt);
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  }
+
+  .frow-input {
+    display: none;
+    border: 1.5px solid var(--o);
+    border-radius: 9px; padding: .35rem .72rem;
+    font-size: .88rem; font-weight: 600;
+    color: var(--txt); background: var(--o-l);
+    outline: none; font-family: 'Sora', sans-serif;
+    transition: box-shadow .15s; min-width: 0;
+  }
+
+  [data-theme="dark"] .frow-input {
+    background: rgba(124,58,237,.08);
+    color: var(--txt);
+    border-color: rgba(124,58,237,.5);
+  }
+
+  .frow-input:focus { box-shadow: 0 0 0 3px rgba(124,58,237,.18); }
+  .frow-input.show  { display: block; }
+  .frow-val.hide    { display: none; }
+
+  .btn-eico {
+    width: 28px; height: 28px; border-radius: 8px; flex-shrink: 0;
+    background: none; border: none; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    font-size: .72rem; color: var(--fa);
+    transition: background .12s, color .12s;
+  }
+
+  .btn-eico:hover { background: var(--o-l); color: var(--o); }
+  [data-theme="dark"] .btn-eico:hover { background: rgba(124,58,237,.12); color: #a78bfa; }
+
+  .btn-sinline {
+    display: none; background: var(--o); color: #fff; border: none;
+    border-radius: 8px; padding: .28rem .7rem;
+    font-size: .74rem; font-weight: 700; font-family: 'Sora', sans-serif;
+    cursor: pointer; white-space: nowrap; flex-shrink: 0;
+    transition: background .12s;
+  }
+
+  .btn-sinline:hover { background: var(--o-d); }
+  .btn-sinline.show  { display: inline-flex; align-items: center; gap: .3rem; }
+
+  /* Read-only tag */
+  .ro-tag {
+    font-size: .67rem; font-weight: 700; color: var(--fa);
+    background: var(--s2); border-radius: 99px;
+    padding: .18rem .6rem; border: 1px solid var(--bdr);
+    white-space: nowrap;
+  }
+
+  /* ══════════════════════════════════════════
+     PROVIDER OVERVIEW STATS
+  ══════════════════════════════════════════ */
+  .ov-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: .75rem; padding: 1.25rem 1.4rem;
+  }
+
+  @media (max-width: 640px) { .ov-grid { grid-template-columns: 1fr 1fr; } }
+
+  .ov-card {
+    background: var(--s2); border: 1px solid var(--bdr);
+    border-radius: 14px; padding: .9rem 1rem;
+    display: flex; align-items: center; gap: .75rem;
+    transition: transform .18s, border-color .18s, box-shadow .18s;
+  }
+
+  .ov-card:hover {
+    transform: translateY(-2px);
+    border-color: var(--o-border);
+    box-shadow: 0 6px 20px rgba(124,58,237,.1);
+  }
+
+  .ov-icon {
+    width: 38px; height: 38px; border-radius: 11px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: .9rem; flex-shrink: 0;
+  }
+
+  .oi-1 { background: var(--o-l); color: var(--o-d); }
+  .oi-2 { background: #ccfbf1;     color: #0f766e; }
+  .oi-3 { background: #fef3c7;     color: #92400e; }
+  .oi-4 { background: #ede9fe;     color: #5b21b6; }
+
+  [data-theme="dark"] .oi-1 { background: rgba(124,58,237,.13); color: #a78bfa; }
+  [data-theme="dark"] .oi-2 { background: rgba(13,148,136,.13); color: #2dd4bf; }
+  [data-theme="dark"] .oi-3 { background: rgba(245,158,11,.12); color: #fcd34d; }
+  [data-theme="dark"] .oi-4 { background: rgba(124,58,237,.12); color: #c4b5fd; }
+
+  .ov-val {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 1.15rem; font-weight: 700; color: var(--txt); line-height: 1;
+  }
+
+  .ov-lbl {
+    font-size: .63rem; font-weight: 700; text-transform: uppercase;
+    letter-spacing: .06em; color: var(--fa); margin-top: .15rem;
+  }
+
+  /* ══════════════════════════════════════════
+     MINI FOOD GRID
+  ══════════════════════════════════════════ */
+  .food-mini-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+    gap: .85rem; padding: 0 1.4rem 1.4rem;
+  }
+
+  .fmc {
+    background: var(--s2); border: 1px solid var(--bdr);
+    border-radius: 14px; overflow: hidden;
+    transition: transform .18s, border-color .18s, box-shadow .18s;
+  }
+
+  .fmc:hover {
+    transform: translateY(-3px);
+    border-color: var(--o-border);
+    box-shadow: 0 8px 24px rgba(124,58,237,.12);
+  }
+
+  .fmc-img {
+    height: 108px; background: var(--s3);
+    display: flex; align-items: center; justify-content: center;
+    overflow: hidden;
+  }
+
+  .fmc-img img { width: 100%; height: 100%; object-fit: cover; transition: transform .4s; }
+  .fmc:hover .fmc-img img { transform: scale(1.06); }
+  .fmc-img i { font-size: 1.6rem; color: var(--fa); }
+
+  .fmc-body { padding: .6rem .75rem; }
+
+  .fmc-name {
+    font-size: .8rem; font-weight: 700; color: var(--txt);
+    margin: 0 0 .2rem; letter-spacing: -.02em;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+
+  .fmc-meta { display: flex; align-items: center; justify-content: space-between; }
+
+  .fmc-price {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: .8rem; font-weight: 700; color: var(--o);
+  }
+
+  [data-theme="dark"] .fmc-price { color: #a78bfa; }
+
+  .fmc-kcal {
+    font-size: .63rem; font-weight: 700; color: var(--mu);
+    background: var(--s3); border-radius: 99px; padding: .1rem .5rem;
+    border: 1px solid var(--bdr);
+  }
+
+  /* View-all bar */
+  .view-all-bar {
+    padding: 0 1.4rem 1.25rem;
+    display: flex; justify-content: center;
+  }
+
+  .btn-view-all {
+    display: inline-flex; align-items: center; gap: .45rem;
+    background: var(--s2); border: 1.5px solid var(--bdr);
+    border-radius: 12px; padding: .58rem 1.5rem;
+    font-size: .82rem; font-weight: 700; color: var(--txt2);
+    font-family: 'Sora', sans-serif; text-decoration: none;
+    transition: all .15s;
+  }
+
+  .btn-view-all:hover {
+    background: var(--o-l); border-color: var(--o-border); color: var(--o-d);
+  }
+
+  [data-theme="dark"] .btn-view-all:hover {
+    background: rgba(124,58,237,.1); border-color: rgba(124,58,237,.3); color: #a78bfa;
+  }
+
+  /* Empty state */
+  .food-empty {
+    padding: 2.5rem 1.4rem; text-align: center;
+    display: flex; flex-direction: column; align-items: center; gap: .75rem;
+  }
+
+  .food-empty-ico {
+    width: 58px; height: 58px; border-radius: 18px;
+    background: var(--o-l); color: var(--o-d); font-size: 1.4rem;
+    display: flex; align-items: center; justify-content: center;
+  }
+
+  [data-theme="dark"] .food-empty-ico {
+    background: rgba(124,58,237,.12); color: #a78bfa;
+  }
+
+  .food-empty h4 { font-size: .95rem; font-weight: 800; color: var(--txt); margin: 0; }
+  .food-empty p  { font-size: .79rem; color: var(--mu); margin: 0; max-width: 220px; }
+
+  /* ══════════════════════════════════════════
+     MODAL
+  ══════════════════════════════════════════ */
+  .mo {
+    display: none; position: fixed; inset: 0; z-index: 2000;
+    background: rgba(0,0,0,.55); backdrop-filter: blur(6px);
+    align-items: center; justify-content: center;
+  }
+
+  .mo.open { display: flex; }
+
+  .mo-box {
+    background: var(--nc-surface) !important;
+    border: 1px solid var(--nc-border);
+    border-radius: 22px; width: 92%; max-width: 510px;
+    max-height: 92vh; overflow-y: auto;
+    box-shadow: 0 24px 80px rgba(0,0,0,.22);
+    animation: mo-in .26s cubic-bezier(.16,1,.3,1);
+  }
+
+  @keyframes mo-in {
+    from { opacity:0; transform:translateY(28px) scale(.97); }
+    to   { opacity:1; transform:translateY(0) scale(1); }
+  }
+
+  .mo-head {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 1.15rem 1.4rem; border-bottom: 1px solid var(--nc-border);
+  }
+
+  .mo-head-left { display: flex; align-items: center; gap: .6rem; }
+
+  .mo-hico {
+    width: 34px; height: 34px; border-radius: 10px;
+    background: var(--o-l); color: var(--o-d);
+    display: flex; align-items: center; justify-content: center; font-size: .85rem;
+  }
+
+  [data-theme="dark"] .mo-hico { background: rgba(124,58,237,.13); color: #a78bfa; }
+
+  .mo-title { font-size: .92rem; font-weight: 800; color: var(--nc-text); }
+
+  .mo-close {
+    width: 32px; height: 32px; border-radius: 9px;
+    background: none; border: none; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    font-size: .95rem; color: var(--mu);
+    transition: background .12s, color .12s;
+  }
+
+  .mo-close:hover { background: var(--nc-surface-2); color: var(--nc-text); }
+
+  .mo-body { padding: 1.4rem; }
+
+  .mo-av-wrap {
+    display: flex; flex-direction: column; align-items: center;
+    margin-bottom: 1.4rem;
+  }
+
+  .mo-av {
+    width: 76px; height: 76px; border-radius: 50%;
+    background: linear-gradient(135deg, var(--o), #a78bfa);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.7rem; font-weight: 800; color: #fff;
+    border: 3px solid var(--nc-surface); overflow: hidden;
+    box-shadow: 0 4px 16px rgba(124,58,237,.3); margin-bottom: .65rem;
+  }
+
+  .mo-av img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
+
+  .btn-photo {
+    display: inline-flex; align-items: center; gap: .35rem;
+    background: var(--nc-surface-2); color: var(--nc-text-2);
+    border: 1px solid var(--nc-border); border-radius: 10px;
+    padding: .38rem .85rem; font-size: .78rem; font-weight: 600;
+    cursor: pointer; font-family: 'Sora', sans-serif;
+    transition: background .12s;
+  }
+
+  .btn-photo:hover { background: var(--nc-surface-3); }
+
+  .mo-hint { font-size: .7rem; color: var(--fa); margin-top: .3rem; }
+
+  .mo-grid { display: grid; grid-template-columns: 1fr 1fr; gap: .85rem; }
+
+  .mo-field { margin-bottom: .9rem; }
+  .mo-field:last-child { margin-bottom: 0; }
+
+  .mo-label {
+    display: block; font-size: .7rem; font-weight: 800;
+    text-transform: uppercase; letter-spacing: .06em;
+    color: var(--nc-text-muted); margin-bottom: .38rem;
+    font-family: 'Sora', sans-serif;
+  }
+
+  .mo-input {
+    width: 100%; border: 1.5px solid var(--nc-border); border-radius: 11px;
+    padding: .62rem .9rem; font-size: .9rem; font-weight: 600;
+    color: var(--nc-text) !important; background: var(--nc-surface-2) !important;
+    outline: none; font-family: 'Sora', sans-serif;
+    transition: border-color .15s, box-shadow .15s;
+  }
+
+  [data-theme="dark"] .mo-input {
+    background: var(--nc-surface-3) !important;
+    color: var(--nc-text) !important;
+    border-color: var(--nc-border) !important;
+  }
+
+  .mo-input:focus {
+    border-color: var(--o) !important;
+    box-shadow: 0 0 0 3px rgba(124,58,237,.15) !important;
+    background: var(--nc-surface) !important;
+  }
+
+  .mo-input.err { border-color: #f43f5e !important; }
+
+  .mo-err {
+    font-size: .73rem; color: #f43f5e; margin-top: .28rem;
+    display: none; font-weight: 600;
+  }
+
+  .mo-err.show { display: block; }
+
+  .mo-foot {
+    display: flex; justify-content: flex-end; gap: .6rem;
+    padding: 1rem 1.4rem; border-top: 1px solid var(--nc-border);
+  }
+</style>
+
+{# ── Completion steps ── #}
+{% set steps = {
+  'Name filled':     (user.first_name and user.last_name),
+  'Email set':       user.email,
+  'Profile picture': user.profile_picture,
+  'Menu items added': user.foods|length > 0
+} %}
+{% set done_count = steps.values() | select | list | length %}
+{% set pct = ((done_count / (steps | length)) * 100) | int %}
+{% set foods = user.foods if user.foods else [] %}
+{% set cal_foods = foods | selectattr('calories') | list %}
+{% set priced = foods | selectattr('price') | list %}
+
+<div class="pg">
+<div class="pg-layout">
+
+  <!-- ══ SIDEBAR ══ -->
+  <aside class="pg-sidebar">
+
+    <!-- Avatar card -->
+    <div class="av-card">
+      <div class="av-banner">
+        <div class="av-banner-line"></div>
+      </div>
+
+      <div class="av-body">
+        <!-- SVG gradient def for ring -->
+        <svg width="0" height="0" style="position:absolute">
+          <defs>
+            <linearGradient id="crGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stop-color="#7c3aed"/>
+              <stop offset="100%" stop-color="#c4b5fd"/>
+            </linearGradient>
+          </defs>
+        </svg>
+
+        <div class="av-circle">
+          {% if user.profile_picture %}
+            <img src="{{ url_for('static', filename=user.profile_picture) }}" alt="avatar">
+          {% else %}
+            {{ (user.first_name or user.username or 'U')[0].upper() }}
+          {% endif %}
+        </div>
+
+        <div class="av-name">{{ user.first_name or '' }} {{ user.last_name or '' }}</div>
+        <div class="av-handle">@{{ user.username }}</div>
+
+        <div style="display:flex;justify-content:center;">
+          <span class="av-role-badge">
+            <i class="fas fa-utensils"></i> Food Provider
+          </span>
+        </div>
+
+        <div class="av-divider"></div>
+
+        <!-- Mini stats -->
+        <div class="av-stats">
+          <div class="av-stat hi">
+            <div class="av-stat-val">{{ foods|length }}</div>
+            <div class="av-stat-lbl">Items</div>
+          </div>
+          <div class="av-stat">
+            <div class="av-stat-val">{{ foods|selectattr('image')|list|length }}</div>
+            <div class="av-stat-lbl">Photos</div>
+          </div>
+          <div class="av-stat">
+            <div class="av-stat-val">
+              {% if cal_foods %}{{ (cal_foods|map(attribute='calories')|sum / cal_foods|length)|round(0)|int }}{% else %}—{% endif %}
+            </div>
+            <div class="av-stat-lbl">Avg kcal</div>
+          </div>
+          <div class="av-stat">
+            <div class="av-stat-val">
+              {% if priced %}${{ (priced|map(attribute='price')|sum / priced|length)|round(2) }}{% else %}—{% endif %}
+            </div>
+            <div class="av-stat-lbl">Avg $</div>
+          </div>
+        </div>
+
+        <div class="av-divider"></div>
+
+        <!-- Completion ring -->
+        <div class="comp-wrap">
+          <svg class="comp-ring" viewBox="0 0 72 72">
+            <circle class="cr-bg"   cx="36" cy="36" r="30"/>
+            <circle class="cr-fill" cx="36" cy="36" r="30" data-pct="{{ pct }}"/>
+          </svg>
+          <div class="comp-pct">{{ pct }}% complete</div>
+        </div>
+
+        <!-- Checklist -->
+        {% set step_icons = {'Name filled':'fa-signature','Email set':'fa-at','Profile picture':'fa-image','Menu items added':'fa-utensils'} %}
+        <div class="checklist">
+          {% for label, done in steps.items() %}
+          <div class="cl-row {{ 'done' if done else '' }}">
+            <div class="cl-dot {{ 'done' if done else 'todo' }}">
+              <i class="fas {{ 'fa-check' if done else step_icons.get(label,'fa-circle') }}"></i>
+            </div>
+            {{ label }}
+          </div>
+          {% endfor %}
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Action buttons -->
+    <div class="sidebar-actions">
+      <button class="btn-primary" onclick="openModal()">
+        <i class="fas fa-pen-to-square"></i> Edit Profile
+      </button>
+      <a href="{{ url_for('food.add_food') }}" class="btn-brand">
+        <i class="fas fa-plus"></i> Add Food Item
+      </a>
+      <a href="{{ url_for('food.provider_foods') }}" class="btn-ghost">
+        <i class="fas fa-layer-group"></i> Manage My Menu
+      </a>
+    </div>
+
+  </aside>
+
+  <!-- ══ MAIN ══ -->
+  <main class="pg-main">
+
+    <!-- Profile info -->
+    <div class="sc">
+      <div class="sc-stripe stripe-orange"></div>
+      <div class="sc-head">
+        <div class="sc-head-left">
+          <div class="sc-icon sci-o"><i class="fas fa-id-card"></i></div>
+          <div>
+            <div class="sc-title">Profile Information</div>
+            <div class="sc-sub">Click ✏ on any field to edit inline</div>
+          </div>
+        </div>
+      </div>
+      <div class="field-table">
+
+        <div class="frow" id="frow-first_name">
+          <div class="frow-key"><div class="frow-ico"><i class="fas fa-signature"></i></div>First Name</div>
+          <div class="frow-val" id="fval-first_name">{{ user.first_name or '—' }}</div>
+          <input class="frow-input" id="finp-first_name" type="text" value="{{ user.first_name or '' }}" placeholder="First name">
+          <button class="btn-eico" onclick="startEdit('first_name')"><i class="fas fa-pencil"></i></button>
+          <button class="btn-sinline" id="fsave-first_name" onclick="saveField('first_name')"><i class="fas fa-check"></i> Save</button>
+        </div>
+
+        <div class="frow" id="frow-last_name">
+          <div class="frow-key"><div class="frow-ico"><i class="fas fa-signature"></i></div>Last Name</div>
+          <div class="frow-val" id="fval-last_name">{{ user.last_name or '—' }}</div>
+          <input class="frow-input" id="finp-last_name" type="text" value="{{ user.last_name or '' }}" placeholder="Last name">
+          <button class="btn-eico" onclick="startEdit('last_name')"><i class="fas fa-pencil"></i></button>
+          <button class="btn-sinline" id="fsave-last_name" onclick="saveField('last_name')"><i class="fas fa-check"></i> Save</button>
+        </div>
+
+        <div class="frow" id="frow-email">
+          <div class="frow-key"><div class="frow-ico"><i class="fas fa-at"></i></div>Email</div>
+          <div class="frow-val" id="fval-email">{{ user.email }}</div>
+          <input class="frow-input" id="finp-email" type="email" value="{{ user.email }}" placeholder="Email address">
+          <button class="btn-eico" onclick="startEdit('email')"><i class="fas fa-pencil"></i></button>
+          <button class="btn-sinline" id="fsave-email" onclick="saveField('email')"><i class="fas fa-check"></i> Save</button>
+        </div>
+
+        <div class="frow">
+          <div class="frow-key"><div class="frow-ico"><i class="fas fa-user-tag"></i></div>Username</div>
+          <div class="frow-val">@{{ user.username }}</div>
+          <span></span>
+          <span class="ro-tag">Read only</span>
+        </div>
+
+        <div class="frow">
+          <div class="frow-key"><div class="frow-ico"><i class="fas fa-calendar"></i></div>Member Since</div>
+          <div class="frow-val">{{ user.created_at.strftime('%B %d, %Y') }}</div>
+          <span></span><span></span>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Provider overview -->
+    <div class="sc">
+      <div class="sc-stripe stripe-brand"></div>
+      <div class="sc-head">
+        <div class="sc-head-left">
+          <div class="sc-icon sci-b"><i class="fas fa-chart-bar"></i></div>
+          <div>
+            <div class="sc-title">Provider Overview</div>
+            <div class="sc-sub">Your menu performance at a glance</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="ov-grid">
+        <div class="ov-card">
+          <div class="ov-icon oi-1"><i class="fas fa-layer-group"></i></div>
+          <div>
+            <div class="ov-val">{{ foods|length }}</div>
+            <div class="ov-lbl">Total Items</div>
+          </div>
+        </div>
+        <div class="ov-card">
+          <div class="ov-icon oi-2"><i class="fas fa-image"></i></div>
+          <div>
+            <div class="ov-val">{{ foods|selectattr('image')|list|length }}</div>
+            <div class="ov-lbl">With Images</div>
+          </div>
+        </div>
+        <div class="ov-card">
+          <div class="ov-icon oi-3"><i class="fas fa-fire-flame-curved"></i></div>
+          <div>
+            <div class="ov-val">{% if cal_foods %}{{ (cal_foods|map(attribute='calories')|sum / cal_foods|length)|round(0)|int }}{% else %}—{% endif %}</div>
+            <div class="ov-lbl">Avg Calories</div>
+          </div>
+        </div>
+        <div class="ov-card">
+          <div class="ov-icon oi-4"><i class="fas fa-tag"></i></div>
+          <div>
+            <div class="ov-val">{% if priced %}${{ (priced|map(attribute='price')|sum / priced|length)|round(2) }}{% else %}—{% endif %}</div>
+            <div class="ov-lbl">Avg Price</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- My Menu -->
+    <div class="sc">
+      <div class="sc-stripe stripe-emerald"></div>
+      <div class="sc-head">
+        <div class="sc-head-left">
+          <div class="sc-icon sci-e"><i class="fas fa-utensils"></i></div>
+          <div>
+            <div class="sc-title">My Menu</div>
+            <div class="sc-sub">
+              {% if foods %}Showing {{ [foods|length,6]|min }} of {{ foods|length }} item{{ 's' if foods|length != 1 }}{% else %}No food items yet{% endif %}
+            </div>
+          </div>
+        </div>
+        {% if foods %}
+        <a href="{{ url_for('food.provider_foods') }}" class="btn-ghost" style="font-size:.78rem;padding:.38rem .85rem;">
+          <i class="fas fa-arrow-right"></i> Manage All
+        </a>
+        {% endif %}
+      </div>
+
+      {% if foods %}
+        <div class="food-mini-grid">
+          {% for food in foods[:6] %}
+          <div class="fmc">
+            <div class="fmc-img">
+              {% if food.image %}
+                <img src="{{ url_for('static', filename='uploads/' + food.image) }}" alt="{{ food.name }}">
+              {% else %}
+                <i class="fas fa-utensils"></i>
+              {% endif %}
+            </div>
+            <div class="fmc-body">
+              <div class="fmc-name">{{ food.name }}</div>
+              <div class="fmc-meta">
+                <span class="fmc-price">{% if food.price %}${{ "%.2f"|format(food.price) }}{% else %}—{% endif %}</span>
+                {% if food.calories %}<span class="fmc-kcal">{{ food.calories|int }} kcal</span>{% endif %}
+              </div>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+        {% if foods|length > 6 %}
+        <div class="view-all-bar">
+          <a href="{{ url_for('food.provider_foods') }}" class="btn-view-all">
+            <i class="fas fa-grid-2"></i> View all {{ foods|length }} items
+          </a>
+        </div>
+        {% endif %}
+      {% else %}
+        <div class="food-empty">
+          <div class="food-empty-ico"><i class="fas fa-utensils"></i></div>
+          <h4>No food items yet</h4>
+          <p>Add your first item to start building your menu.</p>
+          <a href="{{ url_for('food.add_food') }}" class="btn-primary" style="margin-top:.35rem;font-size:.82rem;padding:.52rem 1.1rem;">
+            <i class="fas fa-plus"></i> Add Food Item
+          </a>
+        </div>
+      {% endif %}
+    </div>
+
+  </main>
+</div>
+</div>
+
+<!-- ══ EDIT MODAL ══ -->
+<div class="mo" id="editModal" onclick="closeMoBackdrop(event)">
+  <div class="mo-box">
+    <div class="mo-head">
+      <div class="mo-head-left">
+        <div class="mo-hico"><i class="fas fa-pen-to-square"></i></div>
+        <div class="mo-title">Edit Profile</div>
+      </div>
+      <button class="mo-close" onclick="closeModal()"><i class="fas fa-xmark"></i></button>
+    </div>
+    <form method="POST" enctype="multipart/form-data"
+          action="{{ url_for('user_dashboard.edit_profile') }}" novalidate>
+      <div class="mo-body">
+        <div class="mo-av-wrap">
+          <div class="mo-av" id="moAv">
+            {% if user.profile_picture %}
+              <img src="{{ url_for('static', filename=user.profile_picture) }}" alt="avatar">
+            {% else %}
+              {{ (user.first_name or user.username or 'U')[0].upper() }}
+            {% endif %}
+          </div>
+          <label class="btn-photo" style="cursor:pointer;">
+            <i class="fas fa-camera"></i> Change Photo
+            <input type="file" name="profile_picture" accept="image/*" style="display:none" onchange="previewPhoto(this)">
+          </label>
+          <div class="mo-hint">PNG / JPG / GIF · max 5 MB</div>
+        </div>
+        <div class="mo-grid">
+          <div class="mo-field">
+            <label class="mo-label">First Name</label>
+            <input class="mo-input" id="mo-fn" name="first_name" value="{{ user.first_name }}">
+            <div class="mo-err" id="mo-fn-err">Required</div>
+          </div>
+          <div class="mo-field">
+            <label class="mo-label">Last Name</label>
+            <input class="mo-input" id="mo-ln" name="last_name" value="{{ user.last_name }}">
+            <div class="mo-err" id="mo-ln-err">Required</div>
+          </div>
+        </div>
+        <div class="mo-field" style="margin-top:.85rem;">
+          <label class="mo-label">Email Address</label>
+          <input class="mo-input" id="mo-em" name="email" type="email" value="{{ user.email }}">
+          <div class="mo-err" id="mo-em-err">Enter a valid email</div>
+        </div>
+      </div>
+      <div class="mo-foot">
+        <button type="button" class="btn-ghost" onclick="closeModal()" style="padding:.52rem .95rem;font-size:.83rem;">Cancel</button>
+        <button type="submit" class="btn-primary" style="padding:.52rem 1.2rem;font-size:.83rem;" onclick="return validateModal()">
+          <i class="fas fa-save"></i> Save Changes
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+  /* ── Completion ring ── */
+  document.addEventListener('DOMContentLoaded', () => {
+    const r = document.querySelector('.cr-fill');
+    if (!r) return;
+    const circ = 2 * Math.PI * 30; /* r=30 → ~188.5 */
+    r.style.strokeDasharray  = circ;
+    r.style.strokeDashoffset = circ;
+    const pct = parseInt(r.dataset.pct) || 0;
+    setTimeout(() => { r.style.strokeDashoffset = circ - (pct / 100) * circ; }, 200);
+  });
+
+  /* ── Modal ── */
+  function openModal()  { document.getElementById('editModal').classList.add('open'); document.body.style.overflow='hidden'; }
+  function closeModal() { document.getElementById('editModal').classList.remove('open'); document.body.style.overflow=''; }
+  function closeMoBackdrop(e) { if (e.target === document.getElementById('editModal')) closeModal(); }
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+
+  function previewPhoto(inp) {
+    if (!inp.files || !inp.files[0]) return;
+    const url = URL.createObjectURL(inp.files[0]);
+    document.getElementById('moAv').innerHTML = `<img src="${url}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`;
+  }
+
+  /* ── Inline edit ── */
+  function startEdit(f) {
+    document.getElementById('fval-' + f).classList.add('hide');
+    document.getElementById('finp-' + f).classList.add('show');
+    document.getElementById('fsave-' + f).classList.add('show');
+    document.getElementById('finp-' + f).focus();
+  }
+
+  function saveField(f) {
+    const inp = document.getElementById('finp-' + f);
+    const val = inp.value.trim();
+    if (!val) { inp.style.borderColor = '#f43f5e'; return; }
+    inp.style.borderColor = '';
+    const fd = new FormData();
+    const get = id => { const el=document.getElementById(id); return el?el.textContent.trim():''; };
+    fd.append('first_name', f==='first_name' ? val : get('fval-first_name'));
+    fd.append('last_name',  f==='last_name'  ? val : get('fval-last_name'));
+    fd.append('email',      f==='email'      ? val : get('fval-email'));
+    fetch('{{ url_for("user_dashboard.edit_profile") }}', {
+      method: 'POST',
+      headers: { 'X-CSRFToken': getCsrf() },
+      body: fd
+    })
+    .then(() => applyInlineSave(f, val))
+    .catch(() => applyInlineSave(f, val));
+  }
+
+  function applyInlineSave(f, val) {
+    const v = document.getElementById('fval-' + f);
+    v.textContent = val; v.classList.remove('hide');
+    document.getElementById('finp-' + f).classList.remove('show');
+    document.getElementById('fsave-' + f).classList.remove('show');
+    showToast('✓ Saved');
+  }
+
+  function getCsrf() {
+    const m = document.cookie.match(/csrf_token=([^;]+)/);
+    return m ? m[1] : '';
+  }
+
+  function showToast(msg) {
+    let t = document.getElementById('pg-toast');
+    if (!t) {
+      t = document.createElement('div');
+      t.id = 'pg-toast';
+      t.style.cssText = [
+        'position:fixed;bottom:5.5rem;right:1.5rem;z-index:9999',
+        'background:#7c3aed;color:#fff;border-radius:12px',
+        'padding:.6rem 1.25rem;font-size:.83rem;font-weight:700',
+        'box-shadow:0 4px 20px rgba(124,58,237,.35)',
+        'transition:opacity .3s,transform .3s;pointer-events:none'
+      ].join(';');
+      document.body.appendChild(t);
+    }
+    t.textContent = msg;
+    t.style.opacity = '1'; t.style.transform = 'translateY(0)';
+    clearTimeout(t._h);
+    t._h = setTimeout(() => {
+      t.style.opacity = '0'; t.style.transform = 'translateY(4px)';
+    }, 2200);
+  }
+
+  /* ── Modal validation ── */
+  function validateModal() {
+    let ok = true;
+    [
+      { el: document.getElementById('mo-fn'), err: document.getElementById('mo-fn-err'), test: v => v.trim() },
+      { el: document.getElementById('mo-ln'), err: document.getElementById('mo-ln-err'), test: v => v.trim() },
+      { el: document.getElementById('mo-em'), err: document.getElementById('mo-em-err'), test: v => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v.trim()) }
+    ].forEach(({ el, err, test }) => {
+      if (!test(el.value)) { el.classList.add('err'); err.classList.add('show'); ok = false; }
+      else { el.classList.remove('err'); err.classList.remove('show'); }
+    });
+    return ok;
+  }
+</script>
+
+{% endblock %}
