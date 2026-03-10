@@ -1,39 +1,707 @@
 {% extends "base.html" %}
+{% block title %}Role Requests · NutriConnect{% endblock %}
+
+{% block extra_css %}
+<link href="https://fonts.googleapis.com/css2?family=Cabinet+Grotesk:wght@400;500;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  main.container { margin-top: 0 !important; padding-top: 0 !important; }
+  /* Force stat cards dark regardless of Bootstrap theme overrides */
+  .rr .sc,
+  .rr .sc-amb,
+  .rr .sc-teal,
+  .rr .sc-rose,
+  .rr .sc-ind { background: #0d1220 !important; border-color: rgba(255,255,255,.09) !important; }
+  .rr .sc-amb  { background: radial-gradient(ellipse 90% 70% at 110% 110%, rgba(245,158,11,.08) 0%, #0d1220 55%) !important; border-left-color: rgba(245,158,11,.28) !important; }
+  .rr .sc-teal { background: radial-gradient(ellipse 90% 70% at 110% 110%, rgba(13,148,136,.09) 0%, #0d1220 55%) !important; border-left-color: rgba(13,148,136,.28) !important; }
+  .rr .sc-rose { background: radial-gradient(ellipse 90% 70% at 110% 110%, rgba(244,63,94,.08)  0%, #0d1220 55%) !important; border-left-color: rgba(244,63,94,.28) !important;  }
+  .rr .sc-ind  { background: radial-gradient(ellipse 90% 70% at 110% 110%, rgba(99,102,241,.09) 0%, #0d1220 55%) !important; border-left-color: rgba(99,102,241,.3) !important;  }
+  /* Numbers & labels always visible on dark */
+  .rr .sc-num { color: inherit !important; }
+  .rr .sc-lbl { color: rgba(255,255,255,.38) !important; }
+  .rr .sc-amb .sc-num  { color: #fbbf24 !important; }
+  .rr .sc-teal .sc-num { color: #34d399 !important; }
+  .rr .sc-rose .sc-num { color: #f87171 !important; }
+  .rr .sc-ind  .sc-num { color: #818cf8 !important; }
+</style>
+{% endblock %}
 
 {% block content %}
+<style>
+/* ══════════════════════════════════════════════════════
+   ROLE REQUESTS PAGE — matches admin dashboard tokens
+   Inter for body text → maximum legibility at all sizes
+══════════════════════════════════════════════════════ */
 
-<h2>Role Upgrade Requests</h2>
+/* ── Light mode base ── */
+.rr {
+  font-family: 'Cabinet Grotesk', sans-serif;
 
-<table class="table">
+  --surf:    var(--nc-card-bg,    #ffffff);
+  --surf-2:  var(--nc-surface-2,  #f7f9fc);
+  --surf-3:  var(--nc-surface-3,  #edf0f7);
+  --border:  var(--nc-card-border,#e2e8f0);
+  --text:    #0d1117;
+  --text-2:  #2d3748;
+  --muted:   #64748b;
+  --faint:   #94a3b8;
 
-<tr>
-<th>User</th>
-<th>Requested Role</th>
-<th>Action</th>
-</tr>
+  --amber:   #f59e0b;  --amber-l:  #fef3c7;  --amber-b: #fde68a;
+  --teal:    #0d9488;  --teal-d:   #0f766e;  --teal-l:  #ccfbf1;
+  --rose:    #f43f5e;  --rose-l:   #ffe4e6;  --rose-b:  #fecdd3;
+  --violet:  #7c3aed;  --violet-l: #ede9fe;  --violet-b:#c4b5fd;
+  --ind:     #6366f1;  --ind-l:    #e0e7ff;  --ind-b:   #c7d2fe;
+  --grn:     #16a34a;  --grn-l:    #dcfce7;  --grn-b:   #bbf7d0;
 
-{% for r in requests %}
+  --r: 16px;
+}
 
-<tr>
+/* ── Dark mode token overrides — force dark surfaces ── */
+[data-theme="dark"] .rr {
+  --surf:   #161921 !important;
+  --surf-2: #1c202c !important;
+  --surf-3: #222736 !important;
+  --border: rgba(255,255,255,.08) !important;
+  --text:   #f0f4ff !important;
+  --text-2: #b8c4e0 !important;
+  --muted:  #6b7a99 !important;
+  --faint:  #3d4d6e !important;
 
-<td>{{ r.user.username }}</td>
+  /* Vivid status colors in dark — same hue, lighter tint */
+  --amber-l:  rgba(251,191,36,.14);  --amber-b: rgba(251,191,36,.28);
+  --teal-l:   rgba(52,211,153,.12);  
+  --rose-l:   rgba(248,113,113,.12); --rose-b:  rgba(248,113,113,.25);
+  --ind-l:    rgba(129,140,248,.14); --ind-b:   rgba(129,140,248,.28);
+  --grn-l:    rgba(34,197,94,.12);   --grn-b:   rgba(34,197,94,.25);
+  --violet-l: rgba(167,139,250,.12); --violet-b:rgba(167,139,250,.25);
+}
 
-<td>{{ r.requested_role }}</td>
+/* Dark mode icon colours — keep them vivid */
+[data-theme="dark"] .si-amb { color: #fbbf24 !important; }
+[data-theme="dark"] .si-teal{ color: #34d399 !important; }
+[data-theme="dark"] .si-rose{ color: #f87171 !important; }
+[data-theme="dark"] .si-ind { color: #818cf8 !important; }
+[data-theme="dark"] .sb-amb { color: #fbbf24 !important; }
+[data-theme="dark"] .sb-teal{ color: #34d399 !important; }
+[data-theme="dark"] .sb-rose{ color: #f87171 !important; }
+[data-theme="dark"] .sb-ind { color: #818cf8 !important; }
+[data-theme="dark"] .btn-approve { background: rgba(34,197,94,.14)  !important; color: #4ade80 !important; border-color: rgba(34,197,94,.3)  !important; }
+[data-theme="dark"] .btn-reject  { background: rgba(248,113,113,.12)!important; color: #f87171 !important; border-color: rgba(248,113,113,.25)!important; }
+[data-theme="dark"] .btn-back    { background: var(--surf-2) !important; border-color: var(--border) !important; color: var(--text-2) !important; }
+[data-theme="dark"] .btn-back:hover { background: var(--surf-3) !important; color: var(--text) !important; }
+[data-theme="dark"] .btn-note    { background: var(--surf-2) !important; border-color: var(--border) !important; color: var(--muted) !important; }
+[data-theme="dark"] .count-badge { background: var(--surf-2) !important; border-color: var(--border) !important; color: var(--muted) !important; }
+[data-theme="dark"] .count-badge.active { background: rgba(251,191,36,.14) !important; color: #fbbf24 !important; border-color: rgba(251,191,36,.3) !important; }
+[data-theme="dark"] .rr-tbl thead th { background: var(--surf-2) !important; color: var(--muted) !important; border-bottom-color: var(--border) !important; }
+[data-theme="dark"] .rr-tbl tbody tr { border-color: var(--border) !important; }
+[data-theme="dark"] .rr-tbl tbody tr:hover { background: var(--surf-2) !important; }
+[data-theme="dark"] .rt-food  { background: rgba(251,191,36,.12) !important; color: #fbbf24 !important; border-color: rgba(251,191,36,.25) !important; }
+[data-theme="dark"] .rt-admin { background: rgba(248,113,113,.12)!important; color: #f87171 !important; border-color: rgba(248,113,113,.25)!important; }
+[data-theme="dark"] .rt-other { background: var(--surf-2) !important; color: var(--muted) !important; border-color: var(--border) !important; }
+[data-theme="dark"] .st-pend  { background: rgba(251,191,36,.12) !important; color: #fbbf24 !important; border-color: rgba(251,191,36,.25) !important; }
+[data-theme="dark"] .st-appr  { background: rgba(52,211,153,.12)  !important; color: #34d399 !important; border-color: rgba(52,211,153,.25) !important; }
+[data-theme="dark"] .st-rejt  { background: rgba(248,113,113,.12) !important; color: #f87171 !important; border-color: rgba(248,113,113,.25) !important; }
+[data-theme="dark"] .modal-content { background: var(--surf) !important; border-color: var(--border) !important; }
+[data-theme="dark"] .modal-header,
+[data-theme="dark"] .modal-footer  { border-color: var(--border) !important; }
+[data-theme="dark"] .modal-body .form-control { background: var(--surf-2) !important; border-color: var(--border) !important; color: var(--text) !important; }
+[data-theme="dark"] .block-hd { border-color: var(--border) !important; }
+[data-theme="dark"] .sc::after { background: linear-gradient(90deg, transparent 10%, rgba(255,255,255,.04) 50%, transparent 90%); }
 
-<td>
+/* ── PAGE HEADER ── */
+.rr-header {
+  display: flex; align-items: flex-start;
+  justify-content: space-between; flex-wrap: wrap;
+  gap: 1rem; margin-bottom: 1.5rem;
+  padding-top: .25rem;
+}
+.rr-title {
+  font-size: 1.65rem; font-weight: 900;
+  color: var(--text); letter-spacing: -.04em; line-height: 1.1;
+}
+.rr-sub {
+  font-size: .84rem; color: var(--muted);
+  margin-top: .25rem; font-weight: 500; letter-spacing: -.01em;
+}
 
-<a href="{{ url_for('admin.approve_request', req_id=r.id) }}"
-class="btn btn-success btn-sm">Approve</a>
+.btn-back {
+  display: inline-flex; align-items: center; gap: .45rem;
+  padding: .62rem 1.25rem; border-radius: 10px;
+  background: var(--surf); border: 1px solid var(--border);
+  color: var(--text-2); font-family: inherit;
+  font-size: .82rem; font-weight: 700; letter-spacing: -.01em;
+  text-decoration: none; transition: all .18s; flex-shrink: 0;
+}
+.btn-back:hover { background: var(--surf-3); color: var(--text); }
 
-<a href="{{ url_for('admin.reject_request', req_id=r.id) }}"
-class="btn btn-danger btn-sm">Reject</a>
+/* ── STAT CARDS — dark surface, matches blocks below ── */
+.stat-row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: .75rem; margin-bottom: 1.5rem;
+}
+@media (max-width: 900px)  { .stat-row { grid-template-columns: repeat(2,1fr); } }
+@media (max-width: 500px)  { .stat-row { grid-template-columns: 1fr; } }
 
-</td>
+.sc {
+  border-radius: var(--r); padding: 1.35rem 1.5rem;
+  display: flex; flex-direction: column; gap: .75rem;
+  transition: transform .18s, border-color .2s, box-shadow .18s;
+  position: relative; overflow: hidden;
+  background: #0d1220 !important;
+  border: 1px solid rgba(255,255,255,.09) !important;
+}
+.sc:hover {
+  transform: translateY(-2px);
+  border-color: rgba(255,255,255,.18) !important;
+  box-shadow: 0 12px 36px rgba(0,0,0,.35);
+}
 
-</tr>
+/* Colored top stripe accent */
+.sc::before {
+  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+  border-radius: var(--r) var(--r) 0 0;
+}
+.sc-amb::before { background: linear-gradient(90deg, #f59e0b 0%, transparent 70%); }
+.sc-teal::before { background: linear-gradient(90deg, #0d9488 0%, transparent 70%); }
+.sc-rose::before { background: linear-gradient(90deg, #f43f5e 0%, transparent 70%); }
+.sc-ind::before  { background: linear-gradient(90deg, #6366f1 0%, transparent 70%); }
 
-{% endfor %}
+/* Faint corner glow matching card color */
+.sc-amb  { background: radial-gradient(ellipse 90% 70% at 110% 110%, rgba(245,158,11,.08) 0%, #0d1220 55%) !important; border-left: 1px solid rgba(245,158,11,.25) !important; }
+.sc-teal { background: radial-gradient(ellipse 90% 70% at 110% 110%, rgba(13,148,136,.09) 0%, #0d1220 55%) !important; border-left: 1px solid rgba(13,148,136,.25) !important; }
+.sc-rose { background: radial-gradient(ellipse 90% 70% at 110% 110%, rgba(244,63,94,.08)  0%, #0d1220 55%) !important; border-left: 1px solid rgba(244,63,94,.25) !important;  }
+.sc-ind  { background: radial-gradient(ellipse 90% 70% at 110% 110%, rgba(99,102,241,.09) 0%, #0d1220 55%) !important; border-left: 1px solid rgba(99,102,241,.28) !important; }
 
-</table>
+.sc-top { display: flex; align-items: center; justify-content: space-between; }
 
+/* Icon box */
+.sc-ico {
+  width: 36px; height: 36px; border-radius: 9px;
+  display: flex; align-items: center; justify-content: center; font-size: .82rem;
+}
+.si-amb  { background: rgba(245,158,11,.15); color: #fbbf24; border: 1px solid rgba(245,158,11,.28); }
+.si-teal { background: rgba(13,148,136,.15); color: #34d399; border: 1px solid rgba(52,211,153,.25); }
+.si-rose { background: rgba(244,63,94,.13);  color: #f87171; border: 1px solid rgba(248,113,113,.25); }
+.si-ind  { background: rgba(99,102,241,.15); color: #818cf8; border: 1px solid rgba(129,140,248,.28); }
+
+/* Status badge */
+.sc-badge {
+  font-size: .6rem; font-weight: 700; border-radius: 5px;
+  padding: .15rem .52rem; letter-spacing: .05em; text-transform: uppercase;
+}
+.sb-amb  { background: rgba(245,158,11,.14);  color: #fbbf24; border: 1px solid rgba(245,158,11,.28);  }
+.sb-teal { background: rgba(52,211,153,.12);  color: #34d399; border: 1px solid rgba(52,211,153,.25);  }
+.sb-rose { background: rgba(248,113,113,.12); color: #f87171; border: 1px solid rgba(248,113,113,.25); }
+.sb-ind  { background: rgba(129,140,248,.13); color: #818cf8; border: 1px solid rgba(129,140,248,.28); }
+
+/* Large vivid number — colored per type */
+.sc-num {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 2.7rem; font-weight: 600;
+  line-height: 1; letter-spacing: -.03em;
+}
+.sc-amb .sc-num  { color: #fbbf24; }
+.sc-teal .sc-num { color: #34d399; }
+.sc-rose .sc-num { color: #f87171; }
+.sc-ind .sc-num  { color: #818cf8; }
+
+/* Label — clearly visible against dark */
+.sc-lbl {
+  font-size: .68rem; font-weight: 700;
+  color: rgba(255,255,255,.38);
+  text-transform: uppercase; letter-spacing: .12em;
+}
+
+/* ── SECTION BLOCKS ── */
+.block {
+  background: var(--surf); border: 1px solid var(--border);
+  border-radius: var(--r); overflow: hidden; margin-bottom: 1rem;
+  transition: box-shadow .18s;
+}
+.block:last-child { margin-bottom: 0; }
+
+.block-hd {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 1.1rem 1.5rem; border-bottom: 1px solid var(--border);
+  flex-wrap: wrap; gap: .6rem;
+}
+.block-title {
+  display: flex; align-items: center; gap: .5rem;
+  font-size: .85rem; font-weight: 800; color: var(--text);
+}
+.bico {
+  width: 28px; height: 28px; border-radius: 8px;
+  display: flex; align-items: center; justify-content: center; font-size: .72rem;
+}
+.bi-amb  { background: var(--amber-l); color: #d97706; }
+.bi-teal { background: var(--teal-l);  color: var(--teal); }
+
+.count-badge {
+  font-size: .66rem; font-weight: 700; border-radius: 6px;
+  padding: .18rem .55rem; letter-spacing: .03em;
+  background: var(--surf-2); color: var(--muted); border: 1px solid var(--border);
+}
+.count-badge.active { background: var(--amber-l); color: #92400e; border-color: var(--amber-b); }
+
+/* ── TABLE ── */
+.tbl-wrap { overflow-x: auto; }
+table.rr-tbl {
+  width: 100%; border-collapse: collapse;
+  font-size: .82rem;
+}
+.rr-tbl thead th {
+  padding: .7rem 1rem; text-align: left;
+  font-size: .65rem; font-weight: 700; letter-spacing: .1em;
+  text-transform: uppercase; color: var(--muted);
+  background: var(--surf-2); border-bottom: 1px solid var(--border);
+  white-space: nowrap;
+}
+.rr-tbl thead th:first-child { border-radius: 0; padding-left: 1.5rem; }
+.rr-tbl thead th:last-child  { text-align: right; padding-right: 1.5rem; }
+
+.rr-tbl tbody tr {
+  border-bottom: 1px solid var(--border);
+  transition: background .12s;
+}
+.rr-tbl tbody tr:last-child { border-bottom: none; }
+.rr-tbl tbody tr:hover { background: var(--surf-2); }
+
+.rr-tbl tbody td {
+  padding: .85rem 1rem; vertical-align: middle; color: var(--text-2);
+}
+.rr-tbl tbody td:first-child { padding-left: 1.5rem; }
+.rr-tbl tbody td:last-child  { padding-right: 1.5rem; }
+
+/* User cell */
+.u-cell { display: flex; align-items: center; gap: .7rem; }
+.u-av {
+  width: 32px; height: 32px; border-radius: 9px; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-size: .72rem; font-weight: 800; color: #fff;
+}
+.u-name { font-size: .84rem; font-weight: 700; color: var(--text); }
+.u-id   { font-size: .68rem; color: var(--faint); font-family: 'JetBrains Mono', monospace; }
+
+/* Role tag */
+.role-tag {
+  display: inline-flex; align-items: center; gap: .28rem;
+  padding: .22rem .65rem; border-radius: 99px;
+  font-size: .7rem; font-weight: 700; border: 1.5px solid transparent;
+}
+.rt-food  { background: var(--amber-l);  color: #92400e; border-color: var(--amber-b); }
+.rt-admin { background: var(--rose-l);   color: #be123c; border-color: var(--rose-b); }
+.rt-other { background: var(--surf-2);   color: var(--muted); border-color: var(--border); }
+
+/* Status tag */
+.st-tag {
+  display: inline-flex; align-items: center; gap: .25rem;
+  padding: .2rem .6rem; border-radius: 99px;
+  font-size: .68rem; font-weight: 700; border: 1.5px solid transparent;
+}
+.st-pend { background: var(--amber-l); color: #92400e; border-color: var(--amber-b); }
+.st-appr { background: var(--teal-l);  color: var(--teal-d); border-color: #99f6e4; }
+.st-rejt { background: var(--rose-l);  color: #be123c; border-color: var(--rose-b); }
+
+/* Note text */
+.note-txt { font-size: .77rem; color: var(--muted); max-width: 200px; }
+
+/* Date cell */
+.date-main { font-size: .8rem; color: var(--text-2); font-weight: 600; }
+.date-sub  { font-size: .68rem; color: var(--faint); font-family: 'JetBrains Mono', monospace; }
+
+/* Action buttons */
+.act-group { display: flex; align-items: center; gap: .4rem; justify-content: flex-end; flex-wrap: nowrap; }
+
+.btn-note {
+  display: inline-flex; align-items: center; gap: .3rem;
+  padding: .38rem .75rem; border-radius: 8px;
+  background: var(--surf-2); color: var(--muted);
+  border: 1px solid var(--border); font-family: inherit;
+  font-size: .74rem; font-weight: 700; cursor: pointer; transition: all .15s;
+}
+.btn-note:hover { background: var(--surf-3); color: var(--text); }
+
+.btn-approve {
+  display: inline-flex; align-items: center; gap: .3rem;
+  padding: .38rem .8rem; border-radius: 8px;
+  background: #dcfce7; color: #15803d;
+  border: 1.5px solid #bbf7d0; font-family: inherit;
+  font-size: .74rem; font-weight: 700; cursor: pointer; transition: all .15s;
+}
+.btn-approve:hover { background: #bbf7d0; color: #166534; transform: translateY(-1px); }
+
+.btn-reject {
+  display: inline-flex; align-items: center; gap: .3rem;
+  padding: .38rem .8rem; border-radius: 8px;
+  background: var(--rose-l); color: #be123c;
+  border: 1.5px solid var(--rose-b); font-family: inherit;
+  font-size: .74rem; font-weight: 700; cursor: pointer; transition: all .15s;
+}
+.btn-reject:hover { background: var(--rose-b); color: #9f1239; transform: translateY(-1px); }
+
+/* Empty state */
+.empty-state {
+  display: flex; flex-direction: column; align-items: center;
+  padding: 3rem 1rem; text-align: center; gap: .6rem;
+}
+.empty-ico {
+  width: 52px; height: 52px; border-radius: 16px; font-size: 1.3rem;
+  display: flex; align-items: center; justify-content: center;
+  background: var(--teal-l); color: var(--teal);
+}
+.empty-state h6 { font-size: .9rem; font-weight: 800; color: var(--text); margin: 0; }
+.empty-state p  { font-size: .79rem; color: var(--muted); margin: 0; max-width: 220px; line-height: 1.6; }
+
+/* ── MODAL overrides ── */
+.modal-content {
+  font-family: 'Cabinet Grotesk', sans-serif;
+  border-radius: 16px; border: 1px solid var(--border);
+  box-shadow: 0 20px 60px rgba(0,0,0,.15);
+}
+.modal-header {
+  border-bottom: 1px solid var(--border);
+  padding: 1.1rem 1.4rem;
+}
+.modal-title { font-size: .95rem; font-weight: 800; color: var(--text); }
+.modal-body { padding: 1.2rem 1.4rem; }
+.modal-footer { border-top: 1px solid var(--border); padding: .9rem 1.4rem; }
+.modal-body .form-control {
+  border-radius: 9px; border: 1px solid var(--border);
+  font-family: inherit; font-size: .84rem; padding: .6rem .85rem;
+  background: var(--surf-2);
+}
+.modal-body .form-control:focus { border-color: var(--ind); box-shadow: 0 0 0 3px rgba(99,102,241,.12); }
+
+.btn-modal-cancel {
+  display: inline-flex; align-items: center;
+  padding: .5rem 1rem; border-radius: 8px;
+  background: var(--surf-2); color: var(--muted);
+  border: 1px solid var(--border); font-family: inherit;
+  font-size: .8rem; font-weight: 700; cursor: pointer; transition: all .15s;
+}
+.btn-modal-cancel:hover { background: var(--surf-3); color: var(--text); }
+.btn-modal-save {
+  display: inline-flex; align-items: center;
+  padding: .5rem 1.1rem; border-radius: 8px;
+  background: var(--ind); color: #fff;
+  border: none; font-family: inherit;
+  font-size: .8rem; font-weight: 700; cursor: pointer; transition: all .15s;
+  box-shadow: 0 2px 10px rgba(99,102,241,.3);
+}
+.btn-modal-save:hover { background: #4f46e5; }
+
+/* ── Animations ── */
+@keyframes rise {
+  from { opacity: 0; transform: translateY(14px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.sc   { animation: rise .42s cubic-bezier(.16,1,.3,1) both; }
+.sc:nth-child(1){ animation-delay:.04s; }
+.sc:nth-child(2){ animation-delay:.08s; }
+.sc:nth-child(3){ animation-delay:.12s; }
+.sc:nth-child(4){ animation-delay:.16s; }
+.block { animation: rise .48s cubic-bezier(.16,1,.3,1) .18s both; }
+
+/* ── Explicit dark mode element overrides ── */
+/* sc cards are now always dark — no override needed */
+[data-theme="dark"] .block { background: #161921 !important; border-color: rgba(255,255,255,.08) !important; }
+[data-theme="dark"] .rr-title  { color: #f0f4ff !important; }
+[data-theme="dark"] .rr-sub    { color: #6b7a99 !important; }
+[data-theme="dark"] .block-title { color: #f0f4ff !important; }
+[data-theme="dark"] .block-hd  { border-color: rgba(255,255,255,.08) !important; background: #1c202c !important; }
+[data-theme="dark"] .rr-tbl thead th { background: #1c202c !important; color: #6b7a99 !important; border-bottom-color: rgba(255,255,255,.08) !important; }
+[data-theme="dark"] .rr-tbl tbody tr { border-color: rgba(255,255,255,.07) !important; }
+[data-theme="dark"] .rr-tbl tbody tr:hover { background: #1c202c !important; }
+[data-theme="dark"] .rr-tbl tbody td { color: #b8c4e0 !important; }
+[data-theme="dark"] .u-name  { color: #f0f4ff !important; }
+[data-theme="dark"] .u-id    { color: #3d4d6e !important; }
+[data-theme="dark"] .note-txt{ color: #6b7a99 !important; }
+[data-theme="dark"] .date-main { color: #b8c4e0 !important; }
+[data-theme="dark"] .date-sub  { color: #3d4d6e !important; }
+[data-theme="dark"] .empty-state h6 { color: #f0f4ff !important; }
+[data-theme="dark"] .empty-state p  { color: #6b7a99 !important; }
+</style>
+
+{% set ts = (total_count or 1) %}
+
+<div class="rr">
+
+  <!-- ── PAGE HEADER ── -->
+  <div class="rr-header">
+    <div>
+      <div class="rr-title">Role Upgrade Requests</div>
+      <div class="rr-sub">Review, approve or reject role upgrade requests from users</div>
+    </div>
+    <a href="{{ url_for('admin.dashboard') }}" class="btn-back">
+      <i class="fas fa-arrow-left" style="font-size:.65rem;"></i> Back to Dashboard
+    </a>
+  </div>
+
+  <!-- ── STAT CARDS ── -->
+  <div class="stat-row">
+    <div class="sc sc-amb">
+      <div class="sc-top">
+        <div class="sc-ico si-amb"><i class="fas fa-hourglass-half"></i></div>
+        <span class="sc-badge sb-amb">{% if (pending_count or 0) > 0 %}Needs review{% else %}Clear{% endif %}</span>
+      </div>
+      <div>
+        <div class="sc-num">{{ pending_count or 0 }}</div>
+        <div class="sc-lbl">Pending</div>
+      </div>
+    </div>
+
+    <div class="sc sc-teal">
+      <div class="sc-top">
+        <div class="sc-ico si-teal"><i class="fas fa-circle-check"></i></div>
+        <span class="sc-badge sb-teal">{{ (((approved_count or 0) / ts) * 100)|int }}% rate</span>
+      </div>
+      <div>
+        <div class="sc-num">{{ approved_count or 0 }}</div>
+        <div class="sc-lbl">Approved</div>
+      </div>
+    </div>
+
+    <div class="sc sc-rose">
+      <div class="sc-top">
+        <div class="sc-ico si-rose"><i class="fas fa-circle-xmark"></i></div>
+        <span class="sc-badge sb-rose">{{ (((rejected_count or 0) / ts) * 100)|int }}% rate</span>
+      </div>
+      <div>
+        <div class="sc-num">{{ rejected_count or 0 }}</div>
+        <div class="sc-lbl">Rejected</div>
+      </div>
+    </div>
+
+    <div class="sc sc-ind">
+      <div class="sc-top">
+        <div class="sc-ico si-ind"><i class="fas fa-layer-group"></i></div>
+        <span class="sc-badge sb-ind">All time</span>
+      </div>
+      <div>
+        <div class="sc-num">{{ total_count or 0 }}</div>
+        <div class="sc-lbl">Total</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── PENDING REQUESTS ── -->
+  <div class="block">
+    <div class="block-hd">
+      <div class="block-title">
+        <div class="bico bi-amb"><i class="fas fa-hourglass-half"></i></div>
+        Pending Requests
+      </div>
+      <span class="count-badge {% if pending_requests and pending_requests|length > 0 %}active{% endif %}">
+        {{ pending_requests|length if pending_requests else 0 }} request{{ 's' if (pending_requests|length if pending_requests else 0) != 1 }}
+      </span>
+    </div>
+
+    {% if pending_requests and pending_requests|length > 0 %}
+    <div class="tbl-wrap">
+      <table class="rr-tbl">
+        <thead>
+          <tr>
+            <th>User</th>
+            <th>Email</th>
+            <th>Requested Role</th>
+            <th>User Note</th>
+            <th>Submitted</th>
+            <th style="text-align:right;">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% set av_colors = [
+            'linear-gradient(135deg,#6366f1,#818cf8)',
+            'linear-gradient(135deg,#0d9488,#06b6d4)',
+            'linear-gradient(135deg,#f59e0b,#f97316)',
+            'linear-gradient(135deg,#f43f5e,#f97316)',
+            'linear-gradient(135deg,#7c3aed,#a78bfa)'
+          ] %}
+          {% for r in pending_requests %}
+          <tr>
+            <td>
+              <div class="u-cell">
+                <div class="u-av" style="background:{{ av_colors[loop.index0 % 5] }};">
+                  {{ r.user.username[0].upper() }}
+                </div>
+                <div>
+                  <div class="u-name">{{ r.user.username }}</div>
+                  <div class="u-id">#{{ r.user.id }}</div>
+                </div>
+              </div>
+            </td>
+            <td style="font-size:.8rem;">{{ r.user.email }}</td>
+            <td>
+              {% if r.requested_role == 'admin' %}
+                <span class="role-tag rt-admin"><i class="fas fa-shield-halved" style="font-size:.6rem;"></i> Admin</span>
+              {% elif r.requested_role == 'food_provider' %}
+                <span class="role-tag rt-food"><i class="fas fa-store" style="font-size:.6rem;"></i> Food Provider</span>
+              {% else %}
+                <span class="role-tag rt-other">{{ r.requested_role }}</span>
+              {% endif %}
+            </td>
+            <td>
+              <div class="note-txt">{{ r.note or '—' }}</div>
+            </td>
+            <td>
+              <div class="date-main">{{ r.created_at.strftime('%b %d, %Y') if r.created_at else '—' }}</div>
+              <div class="date-sub">{{ r.created_at.strftime('%H:%M') if r.created_at else '' }}</div>
+            </td>
+            <td>
+              <div class="act-group">
+                <!-- Note button -->
+                <button class="btn-note" data-bs-toggle="modal" data-bs-target="#noteModal{{ r.id }}">
+                  <i class="fas fa-comment-dots" style="font-size:.68rem;"></i> Note
+                </button>
+
+                <!-- Approve -->
+                <form method="POST" action="{{ url_for('admin.approve_request', req_id=r.id) }}" style="margin:0;">
+                  <input type="hidden" name="admin_comment" id="approveNote{{ r.id }}">
+                  <button type="submit" class="btn-approve">
+                    <i class="fas fa-check" style="font-size:.65rem;"></i> Approve
+                  </button>
+                </form>
+
+                <!-- Reject -->
+                <form method="POST" action="{{ url_for('admin.reject_request', req_id=r.id) }}" style="margin:0;">
+                  <input type="hidden" name="admin_comment" id="rejectNote{{ r.id }}">
+                  <button type="submit" class="btn-reject">
+                    <i class="fas fa-times" style="font-size:.65rem;"></i> Reject
+                  </button>
+                </form>
+              </div>
+
+              <!-- Note Modal -->
+              <div class="modal fade" id="noteModal{{ r.id }}" tabindex="-1" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered">
+                  <div class="modal-content">
+                    <div class="modal-header">
+                      <h5 class="modal-title"><i class="fas fa-comment-dots" style="color:#6366f1;margin-right:.4rem;"></i> Admin Note</h5>
+                      <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                      <input type="text" class="form-control" id="noteInput{{ r.id }}" placeholder="Add a reason or comment (optional)…">
+                      <div style="font-size:.74rem;color:var(--muted);margin-top:.6rem;">
+                        This note will be attached to the request as an admin comment.
+                      </div>
+                    </div>
+                    <div class="modal-footer">
+                      <button type="button" class="btn-modal-cancel" data-bs-dismiss="modal">Cancel</button>
+                      <button type="button" class="btn-modal-save"
+                        onclick="
+                          const v = document.getElementById('noteInput{{ r.id }}').value;
+                          document.getElementById('approveNote{{ r.id }}').value = v;
+                          document.getElementById('rejectNote{{ r.id }}').value = v;
+                          bootstrap.Modal.getInstance(document.getElementById('noteModal{{ r.id }}')).hide();
+                        ">
+                        <i class="fas fa-check" style="font-size:.65rem;"></i> Save Note
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+      <div class="empty-state">
+        <div class="empty-ico"><i class="fas fa-inbox"></i></div>
+        <h6>All caught up!</h6>
+        <p>No pending role requests right now. New requests will appear here.</p>
+      </div>
+    {% endif %}
+  </div>
+
+  <!-- ── HISTORY ── -->
+  <div class="block">
+    <div class="block-hd">
+      <div class="block-title">
+        <div class="bico bi-teal"><i class="fas fa-clock-rotate-left"></i></div>
+        Request History
+      </div>
+      <span class="count-badge">
+        {{ all_requests|length if all_requests else 0 }} total
+      </span>
+    </div>
+
+    {% if all_requests and all_requests|length > 0 %}
+    <div class="tbl-wrap">
+      <table class="rr-tbl">
+        <thead>
+          <tr>
+            <th>User</th>
+            <th>Requested Role</th>
+            <th>Status</th>
+            <th>Admin Comment</th>
+            <th>Date</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% set av_colors = [
+            'linear-gradient(135deg,#6366f1,#818cf8)',
+            'linear-gradient(135deg,#0d9488,#06b6d4)',
+            'linear-gradient(135deg,#f59e0b,#f97316)',
+            'linear-gradient(135deg,#f43f5e,#f97316)',
+            'linear-gradient(135deg,#7c3aed,#a78bfa)'
+          ] %}
+          {% for r in all_requests %}
+          <tr>
+            <td>
+              <div class="u-cell">
+                <div class="u-av" style="background:{{ av_colors[loop.index0 % 5] }};">
+                  {{ r.user.username[0].upper() }}
+                </div>
+                <div class="u-name">{{ r.user.username }}</div>
+              </div>
+            </td>
+            <td>
+              {% if r.requested_role == 'food_provider' %}
+                <span class="role-tag rt-food"><i class="fas fa-store" style="font-size:.6rem;"></i> Food Provider</span>
+              {% elif r.requested_role == 'admin' %}
+                <span class="role-tag rt-admin"><i class="fas fa-shield-halved" style="font-size:.6rem;"></i> Admin</span>
+              {% else %}
+                <span class="role-tag rt-other">{{ r.requested_role }}</span>
+              {% endif %}
+            </td>
+            <td>
+              {% if r.status == 'pending' %}
+                <span class="st-tag st-pend"><i class="fas fa-hourglass-half" style="font-size:.55rem;"></i> Pending</span>
+              {% elif r.status == 'approved' %}
+                <span class="st-tag st-appr"><i class="fas fa-check" style="font-size:.55rem;"></i> Approved</span>
+              {% else %}
+                <span class="st-tag st-rejt"><i class="fas fa-times" style="font-size:.55rem;"></i> Rejected</span>
+              {% endif %}
+            </td>
+            <td>
+              <div class="note-txt">
+                {% if r.admin_comment %}
+                  {{ r.admin_comment[:60] ~ ('…' if r.admin_comment|length > 60 else '') }}
+                {% else %}
+                  <span style="color:var(--faint);">—</span>
+                {% endif %}
+              </div>
+            </td>
+            <td>
+              <div class="date-main">{{ r.created_at.strftime('%b %d, %Y') if r.created_at else '—' }}</div>
+              <div class="date-sub">{{ r.created_at.strftime('%H:%M') if r.created_at else '' }}</div>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+      <div class="empty-state">
+        <div class="empty-ico" style="background:var(--ind-l);color:var(--ind);"><i class="fas fa-clock-rotate-left"></i></div>
+        <h6>No history yet</h6>
+        <p>Processed requests will appear here once you start approving or rejecting.</p>
+      </div>
+    {% endif %}
+  </div>
+
+</div><!-- /rr -->
 {% endblock %}

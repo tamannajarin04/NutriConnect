@@ -1,69 +1,463 @@
 {% extends "base.html" %}
-{% block title %}Admin Dashboard{% endblock %}
+{% block title %}Admin · NutriConnect{% endblock %}
+
+{% block extra_css %}
+<link href="https://fonts.googleapis.com/css2?family=Cabinet+Grotesk:wght@400;500;700;800;900&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  main.container { margin-top: 0 !important; padding-top: 0 !important; }
+</style>
+{% endblock %}
 
 {% block content %}
-<div class="d-flex justify-content-between align-items-start flex-wrap gap-2">
-  <div>
-    <h2 class="mb-1">Welcome, {{ user.first_name or user.username }}!</h2>
-    <p class="lead mb-0">
-      Your Role: <span class="badge bg-danger">Admin</span>
-    </p>
+<style>
+.v2 {
+  font-family: 'Cabinet Grotesk', sans-serif;
+  --surf:   var(--nc-card-bg,    #ffffff);
+  --surf-2: var(--nc-surface-2,  #f7f9fc);
+  --surf-3: var(--nc-surface-3,  #e8edf5);
+  --border: var(--nc-card-border,#e2e8f0);
+  --text:   var(--nc-text,       #0d1117);
+  --text-2: var(--nc-text-2,     #374151);
+  --muted:  var(--nc-text-muted, #6b7280);
+  --faint:  var(--nc-text-faint, #9ca3af);
+  --rose:   #f43f5e;  --rose-l:  #ffe4e6; --rose-b: #fecdd3;
+  --amber:  #f59e0b;  --amber-l: #fef3c7; --amber-b:#fde68a;
+  --teal:   #0d9488;  --teal-d:  #0f766e; --teal-l: #ccfbf1;
+  --violet: #7c3aed;  --violet-l:#ede9fe; --violet-b:#c4b5fd;
+  --cyan:   #06b6d4;  --cyan-l:  #cffafe;
+  --lime:   #84cc16;  --lime-l:  #ecfccb;
+  --grn:    #22c55e;  --grn-l:   #dcfce7; --grn-b:  #bbf7d0;
+  --r: 16px;
+}
+
+.v2-shell {
+  background: var(--surf-2);
+  border-radius: 20px;
+  margin-top: -3rem; margin-left: -12px; margin-right: -12px;
+  overflow: hidden; min-height: 90vh;
+}
+
+/* HERO */
+.v2-hero {
+  padding: 2.5rem 2.75rem;
+  background: #0d1220;
+  position: relative; overflow: hidden;
+  display: flex; align-items: center;
+  justify-content: space-between; flex-wrap: wrap; gap: 2rem;
+}
+.v2-hero::before {
+  content:''; position:absolute; inset:0; z-index:0;
+  background:
+    radial-gradient(ellipse 55% 120% at 0% 50%, rgba(99,102,241,.18) 0%, transparent 60%),
+    radial-gradient(ellipse 40% 80% at 100% 0%, rgba(52,211,153,.10) 0%, transparent 60%);
+}
+.v2-hero::after {
+  content:''; position:absolute; inset:0; z-index:0;
+  background-image: radial-gradient(circle, rgba(255,255,255,.055) 1px, transparent 1px);
+  background-size: 28px 28px;
+}
+.v2-hero > * { position:relative; z-index:1; }
+
+.v2-eyebrow {
+  display:inline-flex; align-items:center; gap:.5rem;
+  font-size:.65rem; font-weight:600; letter-spacing:.18em;
+  text-transform:uppercase; color:#818cf8; margin-bottom:.85rem;
+}
+.v2-pulse {
+  width:6px; height:6px; border-radius:50%; background:#818cf8;
+  animation:v2p 2.4s ease-out infinite; box-shadow:0 0 0 0 rgba(129,140,248,.5);
+}
+@keyframes v2p {
+  0%  { box-shadow:0 0 0 0   rgba(129,140,248,.5); }
+  70% { box-shadow:0 0 0 8px rgba(129,140,248,0); }
+  100%{ box-shadow:0 0 0 0   rgba(129,140,248,0); }
+}
+.v2-title { font-size:clamp(1.7rem,2.8vw,2.4rem); font-weight:800; line-height:1.06; letter-spacing:-.04em; color:#f4f6fb; margin-bottom:.5rem; }
+.v2-title .hi { color:#9ba5be; font-weight:400; }
+.v2-title .nm { background:linear-gradient(120deg,#c7d2fe,#818cf8); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
+.v2-sub { font-size:.875rem; color:#7a8aac; max-width:380px; line-height:1.7; }
+
+.v2-kpis { display:flex; background:rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.08); border-radius:12px; overflow:hidden; }
+.v2-kpi { display:flex; flex-direction:column; align-items:center; gap:.25rem; padding:1rem 1.5rem; border-right:1px solid rgba(255,255,255,.07); transition:background .18s; }
+.v2-kpi:last-child { border-right:none; }
+.v2-kpi:hover { background:rgba(255,255,255,.04); }
+.v2-kpi-n { font-family:'JetBrains Mono',monospace; font-size:1.65rem; font-weight:500; line-height:1; }
+.v2-kpi-n.ind { color:#818cf8; } .v2-kpi-n.grn { color:#34d399; }
+.v2-kpi-n.amb { color:#fbbf24; } .v2-kpi-n.red { color:#f87171; }
+.v2-kpi-l { font-size:.6rem; font-weight:600; letter-spacing:.12em; text-transform:uppercase; color:#3d4d6e; }
+
+.v2-btns { display:flex; flex-direction:column; gap:.6rem; min-width:185px; }
+.v2-btn-p {
+  display:flex; align-items:center; justify-content:center; gap:.5rem;
+  padding:.78rem 1.3rem; border-radius:10px; background:#6366f1; color:#fff;
+  font-family:inherit; font-size:.82rem; font-weight:700; text-decoration:none;
+  border:none; box-shadow:0 4px 16px rgba(99,102,241,.38); transition:all .2s;
+}
+.v2-btn-p:hover { background:#818cf8; color:#fff; transform:translateY(-1px); }
+.v2-btn-p .bp { background:rgba(255,255,255,.2); border-radius:99px; padding:.04rem .42rem; font-size:.68rem; font-weight:800; }
+.v2-btn-g {
+  display:flex; align-items:center; justify-content:center; gap:.5rem;
+  padding:.76rem 1.3rem; border-radius:10px; background:transparent; color:#9ba5be;
+  font-family:inherit; font-size:.82rem; font-weight:600; text-decoration:none;
+  border:1px solid rgba(255,255,255,.12); transition:all .2s;
+}
+.v2-btn-g:hover { border-color:#818cf8; color:#818cf8; background:rgba(129,140,248,.1); }
+
+/* STAT BAR */
+.v2-statbar {
+  display:grid; grid-template-columns:repeat(4,1fr);
+  border-bottom:1px solid var(--border); background:var(--surf);
+}
+.v2-stat {
+  display:flex; align-items:center; gap:.9rem;
+  padding:1.15rem 1.5rem; border-right:1px solid var(--border); transition:background .18s;
+}
+.v2-stat:last-child { border-right:none; }
+.v2-stat:hover { background:var(--surf-2); }
+.v2-stat-ico { width:38px; height:38px; border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:.85rem; flex-shrink:0; }
+.vsi-v { background:var(--violet-l); color:var(--violet); }
+.vsi-g { background:var(--grn-l);    color:#16a34a; }
+.vsi-a { background:var(--amber-l);  color:#d97706; }
+.vsi-r { background:var(--rose-l);   color:#be123c; }
+.v2-stat-num { font-family:'JetBrains Mono',monospace; font-size:1.65rem; font-weight:600; color:var(--text); line-height:1; letter-spacing:-.02em; }
+.v2-stat-lbl { font-size:.65rem; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:.09em; margin-top:.1rem; }
+.v2-stat-sub { font-size:.69rem; font-weight:600; margin-top:.05rem; }
+@media(max-width:900px){ .v2-statbar{grid-template-columns:repeat(2,1fr);} }
+@media(max-width:500px){ .v2-statbar{grid-template-columns:1fr;} }
+
+/* 3-COL CONTENT */
+.v2-content { display:grid; grid-template-columns:1fr 1fr 280px; }
+@media(max-width:1100px){ .v2-content{grid-template-columns:1fr 1fr;} .v2-right{display:none;} }
+@media(max-width:700px){ .v2-content{grid-template-columns:1fr;} }
+
+.v2-sec { padding:1.6rem 1.75rem; border-right:1px solid var(--border); border-bottom:1px solid var(--border); background:var(--surf); }
+.v2-sec:last-child { border-right:none; }
+
+.v2-sh { display:flex; align-items:center; justify-content:space-between; margin-bottom:1.2rem; flex-wrap:wrap; gap:.5rem; }
+.v2-sh-t { display:flex; align-items:center; gap:.45rem; font-size:.68rem; font-weight:800; color:var(--muted); text-transform:uppercase; letter-spacing:.12em; }
+.v2-sh-dot { width:5px; height:5px; border-radius:50%; flex-shrink:0; }
+.v2-lnk {
+  font-size:.71rem; font-weight:600; color:var(--faint); text-decoration:none;
+  border:1px solid var(--border); border-radius:7px; padding:.26rem .68rem;
+  display:inline-flex; align-items:center; gap:.3rem; transition:all .18s;
+}
+.v2-lnk:hover { color:var(--violet); border-color:var(--violet-b); background:var(--violet-l); }
+
+/* REQUEST ROWS */
+.v2-req {
+  display:flex; align-items:center; gap:.8rem; padding:.78rem .9rem;
+  border:1px solid var(--border); border-radius:12px; background:var(--surf-2);
+  margin-bottom:.42rem; transition:all .18s;
+}
+.v2-req:last-of-type { margin-bottom:0; }
+.v2-req:hover { background:var(--surf-3); border-color:var(--violet-b); transform:translateX(2px); }
+.v2-req-av { width:34px; height:34px; border-radius:9px; display:flex; align-items:center; justify-content:center; font-size:.68rem; font-weight:800; color:#fff; flex-shrink:0; }
+.v2-req-name { font-size:.83rem; font-weight:800; color:var(--text); letter-spacing:-.01em; }
+.v2-req-sub  { font-size:.69rem; color:var(--muted); margin-top:.08rem; }
+.v2-req-tag  { font-size:.62rem; font-weight:700; border-radius:99px; padding:.2rem .6rem; border:1.5px solid transparent; flex-shrink:0; }
+.rt-a { background:var(--amber-l); color:#92400e; border-color:var(--amber-b); }
+
+.v2-cta {
+  display:flex; align-items:center; justify-content:center; gap:.45rem;
+  margin-top:.75rem; padding:.72rem; border-radius:10px;
+  border:1px solid var(--violet-b); background:var(--violet-l);
+  color:#5b21b6; font-family:inherit; font-size:.79rem; font-weight:800;
+  text-decoration:none; transition:all .18s;
+}
+.v2-cta:hover { background:var(--violet-b); color:#4c1d95; transform:translateY(-1px); }
+
+.v2-empty { display:flex; flex-direction:column; align-items:center; padding:2.5rem 1rem; text-align:center; gap:.55rem; }
+.v2-empty-ico { width:46px; height:46px; border-radius:13px; font-size:1.2rem; display:flex; align-items:center; justify-content:center; background:var(--grn-l); color:#16a34a; border:1px solid var(--grn-b); }
+.v2-empty h6 { font-size:.88rem; font-weight:800; color:var(--text); margin:0; }
+.v2-empty p  { font-size:.76rem; color:var(--muted); margin:0; line-height:1.6; max-width:200px; }
+
+/* PIPELINE */
+.v2-pipe-bar { display:flex; height:5px; border-radius:99px; overflow:hidden; gap:2px; background:var(--surf-3); margin-bottom:.75rem; }
+.v2-pipe-seg { border-radius:99px; }
+.v2-pipe-leg { display:flex; flex-wrap:wrap; gap:1rem; margin-bottom:1.3rem; }
+.v2-pleg { display:flex; align-items:center; gap:.38rem; font-size:.71rem; color:var(--muted); }
+.v2-pleg-sw { width:16px; height:3px; border-radius:99px; }
+.v2-pleg strong { color:var(--text); font-weight:700; }
+
+.v2-metric {
+  display:flex; align-items:center; justify-content:space-between;
+  padding:.78rem .88rem; background:var(--surf-2); border:1px solid var(--border);
+  border-radius:10px; margin-bottom:.42rem; transition:all .18s;
+}
+.v2-metric:last-child { margin-bottom:0; }
+.v2-metric:hover { background:var(--surf-3); }
+.v2-metric-left { display:flex; align-items:center; gap:.65rem; }
+.v2-metric-ico { width:30px; height:30px; border-radius:8px; display:flex; align-items:center; justify-content:center; font-size:.68rem; }
+.v2-metric-lbl { font-size:.8rem; font-weight:700; color:var(--text); }
+.v2-metric-sub { font-size:.67rem; color:var(--muted); margin-top:.06rem; }
+.v2-metric-val { font-family:'JetBrains Mono',monospace; font-size:1.45rem; font-weight:500; line-height:1; }
+
+/* RIGHT COL */
+.v2-right { border-right:none !important; display:flex; flex-direction:column; }
+.v2-profile { padding:1.5rem; border-bottom:1px solid var(--border); background:var(--surf); }
+.v2-pav-row { display:flex; align-items:center; gap:.8rem; margin-bottom:1rem; }
+.v2-pav {
+  width:48px; height:48px; border-radius:13px;
+  background:linear-gradient(135deg,#6366f1,#818cf8);
+  display:flex; align-items:center; justify-content:center;
+  font-size:1.2rem; font-weight:800; color:#fff;
+  box-shadow:0 4px 16px rgba(99,102,241,.3); overflow:hidden; flex-shrink:0;
+}
+.v2-pav img { width:100%; height:100%; object-fit:cover; }
+.v2-pname { font-size:.95rem; font-weight:800; color:var(--text); letter-spacing:-.02em; }
+.v2-phandle { font-size:.71rem; color:var(--muted); margin-top:.06rem; }
+.v2-pbadge {
+  display:inline-flex; align-items:center; gap:.3rem;
+  background:var(--violet-l); color:var(--violet); border:1px solid var(--violet-b);
+  border-radius:5px; padding:.13rem .55rem; font-size:.6rem; font-weight:700;
+  margin-top:.3rem; text-transform:uppercase; letter-spacing:.07em;
+}
+.v2-prows { display:flex; flex-direction:column; gap:.4rem; }
+.v2-prow { display:flex; align-items:center; gap:.65rem; padding:.6rem .75rem; border-radius:9px; background:var(--surf-2); border:1px solid var(--border); }
+.v2-prow-ico { width:26px; height:26px; border-radius:7px; background:var(--surf-3); border:1px solid var(--border); display:flex; align-items:center; justify-content:center; font-size:.62rem; color:var(--muted); flex-shrink:0; }
+.v2-prow-lbl { font-size:.59rem; font-weight:700; letter-spacing:.09em; text-transform:uppercase; color:var(--muted); }
+.v2-prow-val { font-size:.78rem; font-weight:600; color:var(--text); margin-top:.04rem; }
+.v2-pedit {
+  display:flex; align-items:center; justify-content:center; gap:.4rem;
+  margin-top:.85rem; padding:.65rem; border-radius:9px;
+  border:1px solid var(--border); background:transparent;
+  font-family:inherit; font-size:.76rem; font-weight:600; color:var(--muted);
+  text-decoration:none; transition:all .18s;
+}
+.v2-pedit:hover { border-color:var(--violet-b); color:var(--violet); background:var(--violet-l); }
+
+.v2-mods { padding:1.4rem 1.5rem; flex:1; background:var(--surf); }
+.v2-mod {
+  display:flex; align-items:center; gap:.75rem; padding:.7rem .8rem;
+  border-radius:9px; border:1px solid var(--border); background:var(--surf-2);
+  margin-bottom:.4rem; text-decoration:none; transition:all .18s;
+}
+.v2-mod:last-child { margin-bottom:0; }
+.v2-mod:not([style*='cursor:not-allowed']):hover { border-color:var(--violet-b); background:var(--violet-l); transform:translateX(2px); }
+.v2-mod-ico { width:30px; height:30px; border-radius:8px; display:flex; align-items:center; justify-content:center; font-size:.7rem; flex-shrink:0; }
+.v2-mod-name { font-size:.8rem; font-weight:700; color:var(--text); flex:1; }
+.v2-mod-sub  { font-size:.67rem; color:var(--muted); }
+.v2-soon { font-size:.56rem; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--faint); border:1px solid var(--border); border-radius:4px; padding:.1rem .42rem; flex-shrink:0; }
+.v2-mod-cnt { background:var(--amber-l); color:#92400e; border:1px solid var(--amber-b); border-radius:5px; padding:.1rem .45rem; font-size:.62rem; font-weight:800; }
+
+/* ANIMATIONS */
+@keyframes v2in { from{opacity:0;transform:translateY(14px)} to{opacity:1;transform:translateY(0)} }
+.v2-hero    { animation:v2in .55s cubic-bezier(.16,1,.3,1) .03s both; }
+.v2-statbar { animation:v2in .55s cubic-bezier(.16,1,.3,1) .10s both; }
+.v2-content { animation:v2in .55s cubic-bezier(.16,1,.3,1) .16s both; }
+
+/* DARK MODE */
+[data-theme="dark"] .v2-shell   { background:#0b0e18; }
+[data-theme="dark"] .v2-statbar,
+[data-theme="dark"] .v2-sec,
+[data-theme="dark"] .v2-profile,
+[data-theme="dark"] .v2-mods    { background:#111520; border-color:rgba(255,255,255,.07) !important; }
+[data-theme="dark"] .v2-stat    { border-color:rgba(255,255,255,.07); }
+[data-theme="dark"] .v2-stat:hover { background:#161b2a; }
+[data-theme="dark"] .v2-stat-num,
+[data-theme="dark"] .v2-req-name,
+[data-theme="dark"] .v2-pname,
+[data-theme="dark"] .v2-metric-lbl,
+[data-theme="dark"] .v2-mod-name,
+[data-theme="dark"] .v2-empty h6 { color:#f0f4ff; }
+[data-theme="dark"] .v2-stat-lbl,
+[data-theme="dark"] .v2-req-sub,
+[data-theme="dark"] .v2-phandle,
+[data-theme="dark"] .v2-metric-sub,
+[data-theme="dark"] .v2-mod-sub,
+[data-theme="dark"] .v2-empty p  { color:#5a6890; }
+[data-theme="dark"] .v2-req,
+[data-theme="dark"] .v2-metric,
+[data-theme="dark"] .v2-prow,
+[data-theme="dark"] .v2-mod      { background:#161b2a; border-color:rgba(255,255,255,.07); }
+[data-theme="dark"] .v2-req:hover,
+[data-theme="dark"] .v2-metric:hover { background:#1c2235; }
+[data-theme="dark"] .v2-sh-t  { color:#3d4d6e; }
+[data-theme="dark"] .v2-lnk   { border-color:rgba(255,255,255,.08); color:#3d4d6e; }
+[data-theme="dark"] .v2-lnk:hover { color:#818cf8; border-color:rgba(129,140,248,.3); background:rgba(129,140,248,.1); }
+[data-theme="dark"] .v2-prow-ico { background:#1c2235; border-color:rgba(255,255,255,.07); color:#5a6890; }
+[data-theme="dark"] .v2-prow-lbl { color:#3d4d6e; }
+[data-theme="dark"] .v2-prow-val { color:#f0f4ff; }
+[data-theme="dark"] .v2-pedit    { border-color:rgba(255,255,255,.07); color:#5a6890; }
+[data-theme="dark"] .v2-pedit:hover { border-color:rgba(129,140,248,.35); color:#818cf8; background:rgba(129,140,248,.1); }
+[data-theme="dark"] .v2-cta  { background:rgba(129,140,248,.12); border-color:rgba(129,140,248,.25); color:#818cf8; }
+[data-theme="dark"] .v2-cta:hover { background:rgba(129,140,248,.2); }
+[data-theme="dark"] .vsi-v { background:rgba(124,58,237,.15);  color:#a78bfa; }
+[data-theme="dark"] .vsi-g { background:rgba(34,197,94,.12);   color:#4ade80; }
+[data-theme="dark"] .vsi-a { background:rgba(251,191,36,.12);  color:#fbbf24; }
+[data-theme="dark"] .vsi-r { background:rgba(248,113,113,.12); color:#f87171; }
+[data-theme="dark"] .v2-pipe-bar  { background:#1c2235; }
+[data-theme="dark"] .v2-pleg      { color:#5a6890; }
+[data-theme="dark"] .v2-pleg strong { color:#f0f4ff; }
+[data-theme="dark"] .v2-pbadge { background:rgba(129,140,248,.14); color:#818cf8; border-color:rgba(129,140,248,.25); }
+[data-theme="dark"] .v2-mod-cnt { background:rgba(251,191,36,.14); color:#fbbf24; border-color:rgba(251,191,36,.28); }
+[data-theme="dark"] .v2-soon   { color:#2d3a55; border-color:rgba(255,255,255,.07); }
+[data-theme="dark"] .v2-stat-sub { color:#5a6890; }
+[data-theme="dark"] .rt-a { background:rgba(245,158,11,.12); color:#fbbf24; border-color:rgba(245,158,11,.28); }
+</style>
+
+{% set ts = total_count if total_count > 0 else 1 %}
+<div class="v2">
+<div class="v2-shell">
+
+  <!-- HERO -->
+  <div class="v2-hero">
+    <div>
+      <div class="v2-eyebrow"><span class="v2-pulse"></span> Admin Command Center</div>
+      <h1 class="v2-title"><span class="hi">Welcome back,</span><br><span class="nm">{{ user.first_name or user.username }}</span></h1>
+      <p class="v2-sub">Full control over NutriConnect. Review requests, manage access and monitor platform activity.</p>
+    </div>
+    <div class="v2-kpis">
+      <div class="v2-kpi"><span class="v2-kpi-n ind">{{ total_count }}</span><span class="v2-kpi-l">Total</span></div>
+      <div class="v2-kpi"><span class="v2-kpi-n grn">{{ approved_count }}</span><span class="v2-kpi-l">Approved</span></div>
+      <div class="v2-kpi"><span class="v2-kpi-n amb">{{ pending_count }}</span><span class="v2-kpi-l">Pending</span></div>
+      <div class="v2-kpi"><span class="v2-kpi-n red">{{ rejected_count }}</span><span class="v2-kpi-l">Rejected</span></div>
+    </div>
+    <div class="v2-btns">
+      <a href="{{ url_for('admin.role_requests') }}" class="v2-btn-p">
+        <i class="fas fa-clipboard-check"></i> Review Requests
+        {% if pending_count > 0 %}<span class="bp">{{ pending_count }}</span>{% endif %}
+      </a>
+      <a href="{{ url_for('user_dashboard.view_profile') }}" class="v2-btn-g">
+        <i class="fas fa-user-shield"></i> My Profile
+      </a>
+    </div>
   </div>
 
-  <div class="d-flex gap-2">
-    <a href="{{ url_for('admin.role_requests') }}" class="btn btn-primary">
-      <i class="fas fa-clipboard-check"></i> Role Requests
-    </a>
+  <!-- STAT BAR -->
+  <div class="v2-statbar">
+    <div class="v2-stat">
+      <div class="v2-stat-ico vsi-v"><i class="fas fa-layer-group"></i></div>
+      <div><div class="v2-stat-num">{{ total_count }}</div><div class="v2-stat-lbl">Total Requests</div><div class="v2-stat-sub" style="color:var(--violet);">All time</div></div>
+    </div>
+    <div class="v2-stat">
+      <div class="v2-stat-ico vsi-g"><i class="fas fa-circle-check"></i></div>
+      <div><div class="v2-stat-num">{{ approved_count }}</div><div class="v2-stat-lbl">Approved</div><div class="v2-stat-sub" style="color:#16a34a;">{{ ((approved_count/ts)*100)|int }}% rate</div></div>
+    </div>
+    <div class="v2-stat">
+      <div class="v2-stat-ico vsi-a"><i class="fas fa-hourglass-half"></i></div>
+      <div><div class="v2-stat-num">{{ pending_count }}</div><div class="v2-stat-lbl">Pending</div><div class="v2-stat-sub" style="color:#d97706;">{% if pending_count > 0 %}Needs review{% else %}Queue clear{% endif %}</div></div>
+    </div>
+    <div class="v2-stat">
+      <div class="v2-stat-ico vsi-r"><i class="fas fa-circle-xmark"></i></div>
+      <div><div class="v2-stat-num">{{ rejected_count }}</div><div class="v2-stat-lbl">Rejected</div><div class="v2-stat-sub" style="color:#be123c;">{{ ((rejected_count/ts)*100)|int }}% rate</div></div>
+    </div>
+  </div>
+
+  <!-- 3-COL CONTENT -->
+  <div class="v2-content">
+
+    <!-- COL 1: Requests -->
+    <div class="v2-sec">
+      <div class="v2-sh">
+        <div class="v2-sh-t"><span class="v2-sh-dot" style="background:var(--amber);box-shadow:0 0 6px rgba(245,158,11,.4);"></span>Pending Requests</div>
+        <a href="{{ url_for('admin.role_requests') }}" class="v2-lnk">All <i class="fas fa-arrow-right" style="font-size:.55rem;"></i></a>
+      </div>
+      {% if pending_count > 0 %}
+        {% set avs=['linear-gradient(135deg,#6366f1,#818cf8)','linear-gradient(135deg,#0d9488,#34d399)','linear-gradient(135deg,#f59e0b,#fbbf24)','linear-gradient(135deg,#f43f5e,#fb7185)','linear-gradient(135deg,#7c3aed,#a78bfa)'] %}
+        {% for i in range([pending_count,5]|min) %}
+        <div class="v2-req">
+          <div class="v2-req-av" style="background:{{ avs[loop.index0%5] }};"><i class="fas fa-user" style="font-size:.6rem;"></i></div>
+          <div class="v2-req-info"><div class="v2-req-name">Request #{{ loop.index }}</div><div class="v2-req-sub">Role upgrade · Awaiting review</div></div>
+          <span class="v2-req-tag rt-a">Pending</span>
+        </div>
+        {% endfor %}
+        {% if pending_count > 5 %}<p style="font-size:.72rem;color:var(--muted);text-align:center;padding:.5rem 0 0;margin:0;">+{{ pending_count-5 }} more</p>{% endif %}
+        <a href="{{ url_for('admin.role_requests') }}" class="v2-cta"><i class="fas fa-clipboard-check"></i> Review All {{ pending_count }} Request{{ 's' if pending_count!=1 }}</a>
+      {% else %}
+        <div class="v2-empty"><div class="v2-empty-ico"><i class="fas fa-check-double"></i></div><h6>All clear</h6><p>No pending requests. Everything reviewed.</p></div>
+      {% endif %}
+    </div>
+
+    <!-- COL 2: Pipeline -->
+    <div class="v2-sec">
+      <div class="v2-sh"><div class="v2-sh-t"><span class="v2-sh-dot" style="background:var(--violet);"></span>Request Pipeline</div></div>
+      <div class="v2-pipe-bar">
+        {% if approved_count>0 %}<div class="v2-pipe-seg" style="flex:{{approved_count}};background:var(--teal);"></div>{% endif %}
+        {% if pending_count>0  %}<div class="v2-pipe-seg" style="flex:{{pending_count}};background:var(--amber);"></div>{% endif %}
+        {% if rejected_count>0 %}<div class="v2-pipe-seg" style="flex:{{rejected_count}};background:var(--rose);"></div>{% endif %}
+        {% if total_count==0   %}<div class="v2-pipe-seg" style="flex:1;background:var(--surf-3);border-radius:99px;"></div>{% endif %}
+      </div>
+      <div class="v2-pipe-leg">
+        <div class="v2-pleg"><div class="v2-pleg-sw" style="background:var(--teal);"></div>Approved &nbsp;<strong>{{ approved_count }}</strong></div>
+        <div class="v2-pleg"><div class="v2-pleg-sw" style="background:var(--amber);"></div>Pending &nbsp;<strong>{{ pending_count }}</strong></div>
+        <div class="v2-pleg"><div class="v2-pleg-sw" style="background:var(--rose);"></div>Rejected &nbsp;<strong>{{ rejected_count }}</strong></div>
+      </div>
+      <div class="v2-metric">
+        <div class="v2-metric-left">
+          <div class="v2-metric-ico" style="background:var(--grn-l);color:#16a34a;border:1px solid var(--grn-b);"><i class="fas fa-check"></i></div>
+          <div><div class="v2-metric-lbl">Approved</div><div class="v2-metric-sub">{{ ((approved_count/ts)*100)|int }}% approval rate</div></div>
+        </div>
+        <div class="v2-metric-val" style="color:#16a34a;">{{ approved_count }}</div>
+      </div>
+      <div class="v2-metric">
+        <div class="v2-metric-left">
+          <div class="v2-metric-ico" style="background:var(--amber-l);color:#d97706;border:1px solid var(--amber-b);"><i class="fas fa-hourglass-half"></i></div>
+          <div><div class="v2-metric-lbl">Pending</div><div class="v2-metric-sub">{% if pending_count>0 %}Requires action{% else %}Queue empty{% endif %}</div></div>
+        </div>
+        <div class="v2-metric-val" style="color:#d97706;">{{ pending_count }}</div>
+      </div>
+      <div class="v2-metric">
+        <div class="v2-metric-left">
+          <div class="v2-metric-ico" style="background:var(--rose-l);color:#be123c;border:1px solid var(--rose-b);"><i class="fas fa-times"></i></div>
+          <div><div class="v2-metric-lbl">Rejected</div><div class="v2-metric-sub">{{ ((rejected_count/ts)*100)|int }}% rejection rate</div></div>
+        </div>
+        <div class="v2-metric-val" style="color:#be123c;">{{ rejected_count }}</div>
+      </div>
+    </div>
+
+    <!-- COL 3: Profile + Modules -->
+    <div class="v2-sec v2-right" style="padding:0;border-right:none;">
+      <div class="v2-profile">
+        <div class="v2-sh" style="margin-bottom:1rem;"><div class="v2-sh-t"><span class="v2-sh-dot" style="background:#818cf8;"></span>Admin Profile</div></div>
+        <div class="v2-pav-row">
+          <div class="v2-pav">
+            {% if user.profile_picture %}<img src="{{ url_for('static',filename=user.profile_picture) }}" alt="">
+            {% else %}{{ (user.first_name or user.username or 'A')[0].upper() }}{% endif %}
+          </div>
+          <div>
+            <div class="v2-pname">{{ user.first_name or '' }} {{ user.last_name or '' }}</div>
+            <div class="v2-phandle">@{{ user.username }}</div>
+            <div class="v2-pbadge"><i class="fas fa-shield-halved"></i>&nbsp;Administrator</div>
+          </div>
+        </div>
+        <div class="v2-prows">
+          <div class="v2-prow"><div class="v2-prow-ico"><i class="fas fa-at"></i></div><div><div class="v2-prow-lbl">Email</div><div class="v2-prow-val" style="font-size:.73rem;">{{ user.email }}</div></div></div>
+          <div class="v2-prow"><div class="v2-prow-ico"><i class="fas fa-calendar"></i></div><div><div class="v2-prow-lbl">Since</div><div class="v2-prow-val">{{ user.created_at.strftime('%b %d, %Y') }}</div></div></div>
+        </div>
+        <a href="{{ url_for('user_dashboard.edit_profile') }}" class="v2-pedit"><i class="fas fa-pen-to-square" style="font-size:.65rem;"></i> Edit Profile</a>
+      </div>
+      <div class="v2-mods">
+        <div class="v2-sh" style="margin-bottom:1rem;"><div class="v2-sh-t"><span class="v2-sh-dot" style="background:var(--cyan);"></span>Modules</div></div>
+        <a href="{{ url_for('admin.role_requests') }}" class="v2-mod" style="color:inherit;text-decoration:none;">
+          <div class="v2-mod-ico" style="background:var(--amber-l);color:#d97706;border:1px solid var(--amber-b);"><i class="fas fa-clipboard-check"></i></div>
+          <div><div class="v2-mod-name">Role Requests</div><div class="v2-mod-sub">Approve upgrades</div></div>
+          {% if pending_count>0 %}<span class="v2-mod-cnt">{{ pending_count }}</span>{% endif %}
+        </a>
+        <div class="v2-mod" style="opacity:.4;cursor:not-allowed;">
+          <div class="v2-mod-ico" style="background:var(--cyan-l);color:#0e7490;border:1px solid #a5f3fc;"><i class="fas fa-users-cog"></i></div>
+          <div><div class="v2-mod-name">User Mgmt</div><div class="v2-mod-sub">Block, reset roles</div></div>
+          <span class="v2-soon">Soon</span>
+        </div>
+        <div class="v2-mod" style="opacity:.4;cursor:not-allowed;">
+          <div class="v2-mod-ico" style="background:var(--lime-l);color:#4d7c0f;border:1px solid #bef264;"><i class="fas fa-store"></i></div>
+          <div><div class="v2-mod-name">Providers</div><div class="v2-mod-sub">Verify & moderate</div></div>
+          <span class="v2-soon">Soon</span>
+        </div>
+        <div class="v2-mod" style="opacity:.4;cursor:not-allowed;">
+          <div class="v2-mod-ico" style="background:var(--violet-l);color:var(--violet);border:1px solid var(--violet-b);"><i class="fas fa-chart-line"></i></div>
+          <div><div class="v2-mod-name">Analytics</div><div class="v2-mod-sub">Platform reports</div></div>
+          <span class="v2-soon">Soon</span>
+        </div>
+        <div class="v2-mod" style="opacity:.4;cursor:not-allowed;">
+          <div class="v2-mod-ico" style="background:var(--rose-l);color:#be123c;border:1px solid var(--rose-b);"><i class="fas fa-cogs"></i></div>
+          <div><div class="v2-mod-name">Settings</div><div class="v2-mod-sub">Security & config</div></div>
+          <span class="v2-soon">Soon</span>
+        </div>
+      </div>
+    </div>
+
   </div>
 </div>
-
-<hr class="my-4">
-
-<!-- Placeholder area for future admin modules -->
-<div class="row g-3">
-  <div class="col-md-6">
-    <div class="card shadow-sm h-100">
-      <div class="card-header bg-light">
-        <h6 class="mb-0"><i class="fas fa-users-cog"></i> User Management</h6>
-      </div>
-      <div class="card-body text-muted">
-        Add user management features here later (block/unblock, reset roles, view reports, etc.).
-      </div>
-    </div>
-  </div>
-
-  <div class="col-md-6">
-    <div class="card shadow-sm h-100">
-      <div class="card-header bg-light">
-        <h6 class="mb-0"><i class="fas fa-store"></i> Food Provider Management</h6>
-      </div>
-      <div class="card-body text-muted">
-        Add provider verification, menu moderation, compliance checks, etc.
-      </div>
-    </div>
-  </div>
-
-  <div class="col-md-6">
-    <div class="card shadow-sm h-100">
-      <div class="card-header bg-light">
-        <h6 class="mb-0"><i class="fas fa-cogs"></i> System Settings</h6>
-      </div>
-      <div class="card-body text-muted">
-        Add settings, security controls, maintenance tools, etc.
-      </div>
-    </div>
-  </div>
-
-  <div class="col-md-6">
-    <div class="card shadow-sm h-100">
-      <div class="card-header bg-light">
-        <h6 class="mb-0"><i class="fas fa-chart-line"></i> Analytics / Reports</h6>
-      </div>
-      <div class="card-body text-muted">
-        Add admin analytics dashboards here later.
-      </div>
-    </div>
-  </div>
 </div>
-
 {% endblock %}
