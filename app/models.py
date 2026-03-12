@@ -181,8 +181,10 @@ class FoodItem(db.Model):
 
     name = db.Column(db.String(120), nullable=False)
     description = db.Column(db.Text)
-
     price = db.Column(db.Float)
+
+        # ADD THIS ↓
+    diet_type = db.Column(db.String(50))
 
     # Nutrition info
     calories = db.Column(db.Float)

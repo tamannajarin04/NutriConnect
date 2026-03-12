@@ -1,0 +1,98 @@
+{% if foods %}
+  {% for food in foods %}
+  <div class="food-card">
+
+    <!-- Image -->
+    <div class="fc-img">
+      {% if food.image %}
+        <img src="{{ url_for('static', filename='uploads/' ~ food.image) }}"
+             alt="{{ food.name }}" loading="lazy">
+      {% else %}
+        <div class="fc-img-placeholder">
+          <i class="fas fa-utensils"></i>
+          <span>No photo</span>
+        </div>
+      {% endif %}
+
+      {% if food.price %}
+        <span class="fc-price">${{ "%.2f"|format(food.price) }}</span>
+      {% endif %}
+
+      {% if food.is_available is defined %}
+        <span class="fc-avail {{ 'on' if food.is_available else 'off' }}">
+          {{ 'Available' if food.is_available else 'Out of Stock' }}
+        </span>
+      {% endif %}
+
+      {% if food.category %}
+        <span class="fc-cat">{{ food.category }}</span>
+      {% endif %}
+    </div>
+
+    <!-- Body -->
+    <div class="fc-body">
+
+      <div class="fc-name">{{ food.name }}</div>
+
+      {% if food.description %}
+        <div class="fc-desc">
+          {{ food.description[:90] }}{% if food.description|length > 90 %}…{% endif %}
+        </div>
+      {% endif %}
+
+      {% if food.diet_type %}
+        <span class="fc-diet">
+          <i class="fas fa-leaf fa-xs"></i>
+          {{ food.diet_type.replace('-', ' ').title() }}
+        </span>
+      {% endif %}
+
+      <!-- Nutrition boxes (same style as approved dashboard) -->
+      <div class="fc-nutr">
+        {% if food.calories %}
+          <div class="nb kcal">
+            <b>{{ food.calories|int }}</b>
+            <span>kcal</span>
+          </div>
+        {% endif %}
+        {% if food.protein %}
+          <div class="nb prot">
+            <b>{{ food.protein|int }}g</b>
+            <span>prot</span>
+          </div>
+        {% endif %}
+        {% if food.carbs %}
+          <div class="nb carb">
+            <b>{{ food.carbs|int }}g</b>
+            <span>carb</span>
+          </div>
+        {% endif %}
+        {% if food.fat %}
+          <div class="nb fat">
+            <b>{{ food.fat|int }}g</b>
+            <span>fat</span>
+          </div>
+        {% endif %}
+      </div>
+
+      <!-- Provider -->
+      <div class="fc-prov">
+        <div class="fc-pav">
+          {{ (food.provider.first_name or food.provider.username)[0]|upper }}
+        </div>
+        <span>{{ food.provider.first_name or food.provider.username }}</span>
+      </div>
+
+    </div>
+  </div>
+  {% endfor %}
+
+{% else %}
+  <div class="fs-empty">
+    <div class="fs-empty__icon">
+      <i class="fas fa-magnifying-glass"></i>
+    </div>
+    <h4>No food items found</h4>
+    <p>Try a different keyword or adjust your filters.</p>
+  </div>
+{% endif %}

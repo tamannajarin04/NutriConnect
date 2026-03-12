@@ -31,14 +31,16 @@ def create_app(config_name="default"):
     from .routes.user_dashboard import user_dashboard_bp
     from .routes.bmi import bmi_bp
     from .routes.admin import admin_bp
-    from app.routes.food import food_bp
+    from app.routes.food import food_bp, food_search_bp       # ← updated
 
     app.register_blueprint(main_bp)
-    app.register_blueprint(auth_bp, url_prefix="/auth")
-    app.register_blueprint(user_dashboard_bp, url_prefix="/dashboard")
-    app.register_blueprint(bmi_bp, url_prefix="/dashboard")
-    app.register_blueprint(admin_bp, url_prefix="/admin")
-    app.register_blueprint(food_bp, url_prefix="/provider")
+    app.register_blueprint(auth_bp,            url_prefix="/auth")
+    app.register_blueprint(user_dashboard_bp,  url_prefix="/dashboard")
+    app.register_blueprint(bmi_bp,             url_prefix="/dashboard")
+    app.register_blueprint(admin_bp,           url_prefix="/admin")
+    app.register_blueprint(food_bp,            url_prefix="/provider")  # unchanged ✅
+    app.register_blueprint(food_search_bp,     url_prefix="/food")      # new ✅
+
     with app.app_context():
         create_roles_if_ready()
         seed_admins_if_ready()
@@ -56,9 +58,9 @@ def create_roles_if_ready():
         return
 
     roles_data = [
-        {"name": "user", "description": "Regular user"},
+        {"name": "user",          "description": "Regular user"},
         {"name": "food_provider", "description": "Food Provider"},
-        {"name": "admin", "description": "Administrator"},
+        {"name": "admin",         "description": "Administrator"},
     ]
 
     changed = False
@@ -84,9 +86,9 @@ def seed_admins_if_ready():
     if os.environ.get("SEED_ADMINS", "0") != "1":
         return
 
-    email = (os.environ.get("ADMIN1_EMAIL") or "").strip().lower()
+    email    = (os.environ.get("ADMIN1_EMAIL")    or "").strip().lower()
     username = (os.environ.get("ADMIN1_USERNAME") or "Admin").strip()
-    password = os.environ.get("ADMIN1_PASSWORD") or "Admin@12345"
+    password =  os.environ.get("ADMIN1_PASSWORD") or "Admin@12345"
 
     if not email:
         return

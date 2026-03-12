@@ -2,449 +2,434 @@
 {% block title %}My Food Items · NutriConnect{% endblock %}
 
 {% block extra_css %}
-<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Cabinet+Grotesk:wght@400;500;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
 {% endblock %}
 
 {% block content %}
 <style>
-  /* ── Page-scoped tokens that read from base.html's nc- variables ── */
-  .fp {
-    --teal:    #0d9488;
-    --teal-d:  #0f766e;
-    --teal-l:  #ccfbf1;
-    --cyan:    #06b6d4;
-    --amber:   #f59e0b;
-    --amber-l: #fef3c7;
-    --rose:    #f43f5e;
-    --rose-l:  #ffe4e6;
-    --violet:  #7c3aed;
-    --violet-l:#ede9fe;
-    --emerald: #10b981;
-
-    /* inherit from base */
-    --surf:   var(--nc-surface);
-    --surf-2: var(--nc-surface-2);
-    --surf-3: var(--nc-surface-3);
-    --bdr:    var(--nc-border);
-    --bdr-2:  var(--nc-border-2);
-    --txt:    var(--nc-text);
-    --txt-2:  var(--nc-text-2);
-    --muted:  var(--nc-text-muted);
-    --faint:  var(--nc-text-faint);
-    --brand:  var(--nc-brand);
-    --r: 16px;
+  body, button, input, select, textarea {
+    font-family: 'Cabinet Grotesk', sans-serif !important;
   }
 
-  /* ── Banner ── */
+  .fp {
+    /* All from base.html tokens */
+    --surf:  var(--nc-surface);
+    --s2:    var(--nc-surface-2);
+    --s3:    var(--nc-surface-3);
+    --bdr:   var(--nc-border);
+    --bdr2:  var(--nc-border-2);
+    --txt:   var(--nc-text);
+    --txt2:  var(--nc-text-2);
+    --mu:    var(--nc-text-muted);
+    --fa:    var(--nc-text-faint);
+    --brand: var(--nc-brand);
+    --brand-d: var(--nc-brand-d);
+    --brand-l: var(--nc-brand-l);
+
+    /* Accents */
+    --emerald:   #34d399;
+    --emerald-d: #10b981;
+    --emerald-l: rgba(52,211,153,.12);
+    --amber:     #fbbf24;
+    --amber-l:   rgba(251,191,36,.12);
+    --rose:      #fb7185;
+    --rose-l:    rgba(251,113,133,.12);
+    --violet:    #a78bfa;
+
+    --r: 14px;
+    --r-lg: 18px;
+  }
+
+  @keyframes up { from{opacity:0;transform:translateY(14px)} to{opacity:1;transform:none} }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
+
+  /* ══ BANNER ══ */
   .fp-banner {
-    background: linear-gradient(135deg, #071c2e 0%, #0a2540 50%, #0d1f3a 100%);
-    border-radius: 20px;
-    padding: 2rem 2.25rem;
+    background:
+      radial-gradient(ellipse 60% 140% at -5% 50%,  rgba(14,165,233,.38) 0%, transparent 52%),
+      radial-gradient(ellipse 35% 80%  at 105% 10%,  rgba(52,211,153,.18) 0%, transparent 50%),
+      radial-gradient(ellipse 45% 60%  at 60%  110%, rgba(56,189,248,.12) 0%, transparent 48%),
+      radial-gradient(ellipse 25% 40%  at 85%  80%,  rgba(167,139,250,.1) 0%, transparent 50%),
+      linear-gradient(145deg, #060f1e 0%, #091828 35%, #0b1f38 65%, #070e1c 100%);
+    border-radius: var(--r-lg);
+    border: 1px solid rgba(56,189,248,.15);
+    padding: 2.25rem 2.5rem;
     margin-bottom: 1.5rem;
     position: relative; overflow: hidden; isolation: isolate;
-    border: 1px solid rgba(14,165,233,.15);
+    box-shadow:
+      0 0 0 1px rgba(56,189,248,.05) inset,
+      0 1px 0 rgba(255,255,255,.06) inset,
+      0 12px 48px rgba(0,0,0,.45),
+      0 4px 16px rgba(14,165,233,.08);
+    animation: up .38s cubic-bezier(.16,1,.3,1) both;
   }
 
+  /* dot-grid */
   .fp-banner::before {
-    content: ''; position: absolute; inset: 0; z-index: -2;
-    background:
-      radial-gradient(ellipse 55% 90% at -5% 50%,  rgba(14,165,233,.35) 0%, transparent 60%),
-      radial-gradient(ellipse 45% 70% at 110% 15%, rgba(245,158,11,.22)  0%, transparent 55%),
-      radial-gradient(ellipse 35% 55% at 55% 110%, rgba(6,182,212,.2)    0%, transparent 50%);
+    content: ''; position: absolute; inset: 0; z-index: 0;
+    background-image: radial-gradient(circle, rgba(255,255,255,.05) 1px, transparent 1px);
+    background-size: 26px 26px;
+    mask-image: radial-gradient(ellipse 100% 100% at 50% 50%, black 30%, transparent 100%);
+    pointer-events: none;
   }
 
+  /* diagonal shimmer streak */
   .fp-banner::after {
-    content: ''; position: absolute; inset: 0; z-index: -1;
-    background-image: radial-gradient(circle, rgba(255,255,255,.055) 1px, transparent 1px);
-    background-size: 26px 26px;
+    content: ''; position: absolute;
+    top: -60%; left: -10%; width: 55%; height: 220%;
+    background: linear-gradient(105deg, transparent 40%, rgba(56,189,248,.04) 50%, transparent 60%);
+    transform: rotate(0deg);
+    z-index: 0; pointer-events: none;
+  }
+
+  /* bottom glow line */
+  .fp-banner-scan {
+    position: absolute; bottom: 0; left: 0; right: 0; height: 1px;
+    background: linear-gradient(90deg,
+      transparent 0%,
+      rgba(56,189,248,.0) 10%,
+      rgba(56,189,248,.7) 35%,
+      rgba(52,211,153,.5) 55%,
+      rgba(56,189,248,.6) 70%,
+      rgba(56,189,248,.0) 90%,
+      transparent 100%);
+    z-index: 4;
+    filter: blur(.4px);
+  }
+
+  /* top inner highlight */
+  .fp-banner-top {
+    position: absolute; top: 0; left: 0; right: 0; height: 1px;
+    background: linear-gradient(90deg, transparent 10%, rgba(255,255,255,.12) 40%, rgba(255,255,255,.12) 60%, transparent 90%);
+    z-index: 4;
   }
 
   .fp-banner-inner {
+    position: relative; z-index: 3;
     display: flex; align-items: center; justify-content: space-between;
-    flex-wrap: wrap; gap: 1.25rem;
+    gap: 2rem; flex-wrap: wrap;
   }
 
-  .fp-banner-eyebrow {
+  .fp-eyebrow {
     display: inline-flex; align-items: center; gap: .4rem;
-    background: rgba(255,255,255,.1); border: 1px solid rgba(255,255,255,.18);
-    border-radius: 99px; padding: .22rem .85rem;
-    font-size: .68rem; font-weight: 700; letter-spacing: .09em;
-    text-transform: uppercase; color: rgba(255,255,255,.75); margin-bottom: .55rem;
+    background: rgba(56,189,248,.1);
+    border: 1px solid rgba(56,189,248,.22);
+    border-radius: 99px; padding: .22rem .9rem;
+    font-size: .62rem; font-weight: 800; letter-spacing: .1em;
+    text-transform: uppercase; color: rgba(255,255,255,.7); margin-bottom: .55rem;
+    box-shadow: 0 0 12px rgba(56,189,248,.08);
+  }
+  .fp-eyebrow-dot {
+    width: 5px; height: 5px; border-radius: 50%;
+    background: #38bdf8; box-shadow: 0 0 8px #38bdf8, 0 0 16px rgba(56,189,248,.5);
+    animation: pulse 2s ease-in-out infinite;
   }
 
   .fp-banner-title {
-    font-size: 1.7rem; font-weight: 800; color: #fff;
-    letter-spacing: -.04em; line-height: 1.1; margin: 0 0 .28rem;
+    font-size: 1.75rem; font-weight: 900; color: #fff;
+    letter-spacing: -.045em; line-height: 1.1; margin: 0 0 .3rem;
+    text-shadow: 0 2px 20px rgba(14,165,233,.2);
   }
-
-  .fp-banner-title span {
-    background: linear-gradient(135deg, #38bdf8, #7dd3fc);
+  .fp-banner-title .hl {
+    background: linear-gradient(135deg, #38bdf8 0%, #7dd3fc 40%, #34d399 100%);
     -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    filter: drop-shadow(0 0 12px rgba(56,189,248,.35));
+  }
+  .fp-banner-sub {
+    color: rgba(255,255,255,.38); font-size: .8rem; margin: 0;
+    letter-spacing: .01em;
   }
 
-  .fp-banner-sub { color: rgba(255,255,255,.45); font-size: .82rem; font-weight: 400; margin: 0; }
-
-  /* ── Add button — uses nc-brand sky blue like the rest of the site ── */
-  .fp-btn-add {
-    display: inline-flex; align-items: center; gap: .45rem;
-    background: var(--nc-brand); color: #fff; border: none;
-    border-radius: 11px; padding: .65rem 1.35rem;
-    font-family: 'Sora', sans-serif; font-size: .85rem; font-weight: 700;
-    text-decoration: none; white-space: nowrap; cursor: pointer;
-    box-shadow: 0 2px 12px rgba(14,165,233,.35);
-    transition: background .15s, transform .12s, box-shadow .15s;
-    flex-shrink: 0;
-  }
-
-  .fp-btn-add:hover {
-    background: var(--nc-brand-d); color: #fff;
-    transform: translateY(-2px);
-    box-shadow: 0 6px 22px rgba(14,165,233,.45);
-  }
-
-  /* ── Stats row ── */
-  .fp-stats {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-    gap: .85rem;
-    margin-bottom: 1.5rem;
-  }
-
-  .fp-stat {
-    background: var(--surf);
-    border: 1px solid var(--bdr);
+  /* Stats glass panel */
+  .fp-banner-stats {
+    display: flex; align-items: stretch;
+    background: rgba(255,255,255,.04);
+    border: 1px solid rgba(255,255,255,.1);
     border-radius: var(--r);
-    padding: .95rem 1.1rem;
-    display: flex; align-items: center; gap: .85rem;
-    box-shadow: var(--nc-card-shadow);
-    animation: fp-rise .4s cubic-bezier(.16,1,.3,1) both;
+    overflow: hidden;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    flex-shrink: 0;
+    box-shadow: 0 4px 24px rgba(0,0,0,.2), 0 1px 0 rgba(255,255,255,.06) inset;
   }
-
-  .fp-stat:nth-child(1){animation-delay:.04s}
-  .fp-stat:nth-child(2){animation-delay:.08s}
-  .fp-stat:nth-child(3){animation-delay:.12s}
-
-  @keyframes fp-rise {
-    from { opacity:0; transform:translateY(14px); }
-    to   { opacity:1; transform:translateY(0); }
+  .fp-bs {
+    padding: .9rem 1.5rem; text-align: center;
+    border-right: 1px solid rgba(255,255,255,.07);
+    display: flex; flex-direction: column; gap: .22rem;
+    position: relative;
+    transition: background .2s;
   }
-
-  .fp-stat-icon {
-    width: 36px; height: 36px; border-radius: 10px; flex-shrink: 0;
-    display: flex; align-items: center; justify-content: center; font-size: .85rem;
+  .fp-bs::before {
+    content: ''; position: absolute; top: 0; left: 20%; right: 20%; height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(56,189,248,.3), transparent);
   }
-
-  .fsi-sky    { background: var(--nc-brand-l); color: var(--nc-brand); }
-  .fsi-amber  { background: var(--amber-l); color: #d97706; }
-  .fsi-violet { background: var(--violet-l); color: var(--violet); }
-
-  [data-theme="dark"] .fsi-sky    { background: rgba(14,165,233,.15); color: #38bdf8; }
-  [data-theme="dark"] .fsi-amber  { background: rgba(245,158,11,.13); color: #fbbf24; }
-  [data-theme="dark"] .fsi-violet { background: rgba(124,58,237,.13); color: #a78bfa; }
-
-  .fp-stat-lbl {
-    font-size: .67rem; font-weight: 700; text-transform: uppercase;
-    letter-spacing: .07em; color: var(--muted); line-height: 1;
-  }
-
-  .fp-stat-val {
+  .fp-bs:hover { background: rgba(255,255,255,.04); }
+  .fp-bs:last-child { border-right: none; }
+  .fp-bs-val {
     font-family: 'JetBrains Mono', monospace;
-    font-size: 1.3rem; font-weight: 600; color: var(--txt); line-height: 1.15;
+    font-size: 1.5rem; font-weight: 700; color: #fff; line-height: 1;
+    text-shadow: 0 0 20px currentColor;
+  }
+  .fp-bs-val.c-brand   { color: #38bdf8; }
+  .fp-bs-val.c-emerald { color: #34d399; }
+  .fp-bs-val.c-amber   { color: #fbbf24; }
+  .fp-bs-lbl {
+    font-size: .56rem; font-weight: 800; text-transform: uppercase;
+    letter-spacing: .12em; color: rgba(255,255,255,.28);
   }
 
-  /* ── Grid ── */
+  /* ══ TOOLBAR ══ */
+  .fp-toolbar {
+    display: flex; align-items: center; justify-content: space-between;
+    flex-wrap: wrap; gap: .75rem; margin-bottom: 1.25rem;
+  }
+  .fp-count {
+    display: flex; align-items: center; gap: .5rem;
+    font-size: .82rem; font-weight: 600; color: var(--mu);
+  }
+  .fp-count-dot {
+    width: 7px; height: 7px; border-radius: 50%;
+    background: var(--brand);
+    box-shadow: 0 0 8px rgba(14,165,233,.5);
+  }
+  .fp-count strong { color: var(--txt); font-weight: 800; }
+
+  .btn-add {
+    display: inline-flex; align-items: center; gap: .42rem;
+    background: linear-gradient(135deg, var(--brand-d), var(--brand));
+    color: #fff; border: none; border-radius: var(--r);
+    padding: .62rem 1.25rem; font-size: .83rem; font-weight: 800;
+    text-decoration: none; cursor: pointer; font-family: inherit;
+    box-shadow: 0 2px 12px rgba(14,165,233,.3), 0 0 0 1px rgba(14,165,233,.15);
+    transition: filter .15s, transform .12s, box-shadow .2s;
+  }
+  .btn-add:hover {
+    filter: brightness(1.1); color: #fff; transform: translateY(-1px);
+    box-shadow: 0 6px 20px rgba(14,165,233,.42), 0 0 0 1px rgba(14,165,233,.25);
+  }
+
+  /* ══ GRID ══ */
   .fp-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
     gap: 1.1rem;
   }
 
-  /* ── Card ── */
+  /* ══ CARD ══ */
   .fp-card {
-    background: var(--nc-card-bg);
-    border: 1px solid var(--nc-card-border);
-    border-radius: var(--r);
+    background: var(--surf);
+    border: 1px solid var(--bdr);
+    border-radius: var(--r-lg);
     overflow: hidden;
     display: flex; flex-direction: column;
     box-shadow: var(--nc-card-shadow);
-    transition: transform .2s, box-shadow .2s, border-color .2s;
-    animation: fp-rise .45s cubic-bezier(.16,1,.3,1) both;
+    transition: transform .22s cubic-bezier(.16,1,.3,1), box-shadow .22s, border-color .22s;
+    animation: up .42s cubic-bezier(.16,1,.3,1) both;
   }
-
-  .fp-card:nth-child(1){animation-delay:.05s}
-  .fp-card:nth-child(2){animation-delay:.09s}
-  .fp-card:nth-child(3){animation-delay:.13s}
-  .fp-card:nth-child(4){animation-delay:.17s}
-  .fp-card:nth-child(5){animation-delay:.21s}
-  .fp-card:nth-child(6){animation-delay:.25s}
-
+  .fp-card:nth-child(1){animation-delay:.05s} .fp-card:nth-child(2){animation-delay:.09s}
+  .fp-card:nth-child(3){animation-delay:.13s} .fp-card:nth-child(4){animation-delay:.17s}
+  .fp-card:nth-child(5){animation-delay:.21s} .fp-card:nth-child(6){animation-delay:.25s}
   .fp-card:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 12px 40px rgba(0,0,0,.12);
-    border-color: var(--nc-brand);
+    transform: translateY(-4px);
+    border-color: var(--bdr2);
+    box-shadow: 0 12px 40px rgba(0,0,0,.15), 0 0 0 1px rgba(14,165,233,.12);
   }
 
-  [data-theme="dark"] .fp-card:hover {
-    box-shadow: 0 12px 40px rgba(0,0,0,.45);
-    border-color: var(--nc-brand-d);
-  }
+  /* top stripe */
+  .fp-card-bar { height: 3px; background: linear-gradient(90deg, var(--brand-d), var(--brand), #67e8f9); }
 
-  /* Top stripe */
-  .fp-card-stripe {
-    height: 3px;
-    background: linear-gradient(90deg, var(--nc-brand), #06b6d4);
-  }
-
-  /* Image */
+  /* image */
   .fp-card-img {
-    height: 172px; background: var(--surf-2);
+    height: 185px; background: var(--s3);
     position: relative; overflow: hidden;
   }
-
   .fp-card-img img {
     width: 100%; height: 100%; object-fit: cover;
     transition: transform .45s cubic-bezier(.16,1,.3,1);
   }
-
-  .fp-card:hover .fp-card-img img { transform: scale(1.05); }
+  .fp-card:hover .fp-card-img img { transform: scale(1.06); }
 
   .fp-no-img {
     width: 100%; height: 100%;
     display: flex; flex-direction: column; align-items: center; justify-content: center;
-    gap: 7px; font-size: 2rem; color: var(--muted);
-    background: linear-gradient(135deg, var(--surf-2), var(--surf-3));
+    gap: .5rem; background: var(--s3);
   }
+  .fp-no-img i    { font-size: 2rem; color: var(--fa); }
+  .fp-no-img span { font-size: .58rem; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; color: var(--fa); }
 
-  .fp-no-img small {
-    font-size: .67rem; font-weight: 600; text-transform: uppercase;
-    letter-spacing: .07em; color: var(--faint);
-  }
-
-  /* Price badge */
+  /* price badge */
   .fp-price {
-    position: absolute; top: 10px; right: 10px;
-    background: var(--nc-card-bg);
-    border: 1px solid var(--bdr-2);
-    color: var(--nc-brand);
-    font-family: 'JetBrains Mono', monospace;
-    font-size: .85rem; font-weight: 600;
-    padding: 3px 11px; border-radius: 99px;
-    backdrop-filter: blur(6px);
-    box-shadow: 0 2px 8px rgba(0,0,0,.1);
+    position: absolute; bottom: 10px; left: 10px;
+    background: rgba(0,0,0,.72); backdrop-filter: blur(10px);
+    border: 1px solid rgba(255,255,255,.14);
+    color: #fff; font-family: 'JetBrains Mono', monospace;
+    font-size: .85rem; font-weight: 700;
+    border-radius: 99px; padding: .22rem .8rem;
+    transition: background .2s, border-color .2s;
   }
+  .fp-card:hover .fp-price { background: var(--brand-d); border-color: transparent; }
 
-  [data-theme="dark"] .fp-price {
-    background: rgba(22,27,34,.85);
-    color: #38bdf8;
-    border-color: rgba(56,189,248,.25);
-  }
-
-  /* Body */
+  /* body */
   .fp-card-body {
-    padding: 1rem 1.15rem .85rem;
-    flex: 1; display: flex; flex-direction: column; gap: .55rem;
+    padding: 1rem 1.2rem .8rem;
+    flex: 1; display: flex; flex-direction: column; gap: .45rem;
   }
-
   .fp-card-name {
-    font-size: 1rem; font-weight: 700; color: var(--txt);
-    letter-spacing: -.02em; line-height: 1.25; margin: 0;
+    font-size: .98rem; font-weight: 900; color: var(--txt);
+    letter-spacing: -.025em; line-height: 1.25; margin: 0;
   }
-
   .fp-card-desc {
-    font-size: .78rem; color: var(--muted); line-height: 1.55; margin: 0;
-    display: -webkit-box;
-    -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+    font-size: .77rem; color: var(--mu); line-height: 1.58; margin: 0;
+    display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
   }
 
-  /* Nutrition chips */
-  .fp-chips { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 2px; }
-
-  .fp-chip {
-    display: inline-flex; align-items: center; gap: 4px;
-    border-radius: 99px; padding: 3px 10px;
-    font-size: .72rem; font-weight: 600;
-    background: var(--surf-2); border: 1px solid var(--bdr);
-    color: var(--txt-2);
+  /* diet tag */
+  .fp-diet {
+    display: inline-flex; align-items: center; gap: .28rem;
+    background: var(--emerald-l); color: var(--emerald);
+    border: 1px solid rgba(52,211,153,.2);
+    border-radius: 99px; padding: .16rem .65rem;
+    font-size: .65rem; font-weight: 700;
   }
 
-  .fp-chip b { font-family: 'JetBrains Mono', monospace; font-size: .74rem; }
+  /* nutrition pills */
+  .fp-nutr { display: flex; flex-wrap: wrap; gap: .28rem; margin-top: auto; padding-top: .55rem; }
+  .fp-nb {
+    display: inline-flex; align-items: center; gap: .25rem;
+    background: var(--s2); border: 1px solid var(--bdr);
+    border-radius: 99px; padding: .2rem .65rem;
+    font-size: .7rem; font-weight: 600; color: var(--txt2);
+    transition: border-color .15s;
+  }
+  .fp-card:hover .fp-nb { border-color: var(--bdr2); }
+  .fp-nb b { font-family: 'JetBrains Mono', monospace; font-size: .72rem; }
+  .nb-cal b { color: #fb923c; }
+  .nb-pro b { color: var(--emerald); }
+  .nb-car b { color: var(--violet); }
+  .nb-fat b { color: #f472b6; }
 
-  /* colored chip variants */
-  .fp-chip.c-cal  { background: #fef2f2; border-color: #fecaca; color: #b91c1c; }
-  .fp-chip.c-cal b{ color: #b91c1c; }
-  .fp-chip.c-pro  { background: var(--teal-l); border-color: #99f6e4; color: var(--teal-d); }
-  .fp-chip.c-pro b{ color: var(--teal-d); }
-  .fp-chip.c-car  { background: var(--amber-l); border-color: #fde68a; color: #92400e; }
-  .fp-chip.c-car b{ color: #92400e; }
-  .fp-chip.c-fat  { background: var(--violet-l); border-color: #ddd6fe; color: #5b21b6; }
-  .fp-chip.c-fat b{ color: #5b21b6; }
-
-  [data-theme="dark"] .fp-chip.c-cal  { background: rgba(239,68,68,.1);  border-color: rgba(239,68,68,.25);  color: #fca5a5; }
-  [data-theme="dark"] .fp-chip.c-cal b{ color: #fca5a5; }
-  [data-theme="dark"] .fp-chip.c-pro  { background: rgba(13,148,136,.1); border-color: rgba(13,148,136,.25); color: #5eead4; }
-  [data-theme="dark"] .fp-chip.c-pro b{ color: #5eead4; }
-  [data-theme="dark"] .fp-chip.c-car  { background: rgba(245,158,11,.1); border-color: rgba(245,158,11,.25); color: #fcd34d; }
-  [data-theme="dark"] .fp-chip.c-car b{ color: #fcd34d; }
-  [data-theme="dark"] .fp-chip.c-fat  { background: rgba(124,58,237,.1); border-color: rgba(124,58,237,.25); color: #c4b5fd; }
-  [data-theme="dark"] .fp-chip.c-fat b{ color: #c4b5fd; }
-
-  /* Footer */
+  /* footer */
   .fp-card-foot {
-    padding: .7rem 1.15rem .9rem;
-    display: flex; gap: .55rem;
+    padding: .65rem 1.2rem .85rem;
+    display: flex; gap: .5rem;
     border-top: 1px solid var(--bdr);
+    background: var(--s2);
   }
-
   .fp-btn-edit {
-    flex: 1; display: inline-flex; align-items: center; justify-content: center; gap: 5px;
-    background: var(--surf-2); border: 1px solid var(--bdr);
-    color: var(--txt-2); border-radius: 9px; padding: .55rem 0;
-    font-family: 'Sora', sans-serif; font-size: .78rem; font-weight: 600;
-    text-decoration: none; cursor: pointer;
-    transition: background .15s, border-color .15s, color .15s;
+    flex: 1; display: inline-flex; align-items: center; justify-content: center; gap: .38rem;
+    background: var(--surf); border: 1px solid var(--bdr);
+    color: var(--txt2); border-radius: var(--r);
+    padding: .54rem 0; font-size: .78rem; font-weight: 700;
+    text-decoration: none; cursor: pointer; font-family: inherit;
+    transition: background .14s, border-color .14s, color .14s;
   }
-
-  .fp-btn-edit:hover {
-    background: var(--nc-brand-l); border-color: var(--nc-brand);
-    color: var(--nc-brand-d);
-  }
-
-  [data-theme="dark"] .fp-btn-edit:hover {
-    background: rgba(14,165,233,.12); border-color: var(--nc-brand-d);
-    color: #38bdf8;
-  }
+  .fp-btn-edit:hover { background: var(--brand-l); border-color: rgba(14,165,233,.25); color: var(--brand); }
 
   .fp-btn-del {
-    flex: 1; display: inline-flex; align-items: center; justify-content: center; gap: 5px;
-    background: #fef2f2; border: 1px solid #fecaca;
-    color: #b91c1c; border-radius: 9px; padding: .55rem 0;
-    font-family: 'Sora', sans-serif; font-size: .78rem; font-weight: 600;
-    cursor: pointer;
-    transition: background .15s, border-color .15s;
+    flex: 1; display: inline-flex; align-items: center; justify-content: center; gap: .38rem;
+    background: var(--surf); border: 1px solid var(--bdr);
+    color: var(--mu); border-radius: var(--r);
+    padding: .54rem 0; font-size: .78rem; font-weight: 700;
+    cursor: pointer; font-family: inherit;
+    transition: background .14s, border-color .14s, color .14s;
   }
+  .fp-btn-del:hover { background: var(--rose-l); border-color: rgba(251,113,133,.3); color: var(--rose); }
 
-  .fp-btn-del:hover { background: #fee2e2; border-color: #fca5a5; }
-
-  [data-theme="dark"] .fp-btn-del {
-    background: rgba(239,68,68,.08); border-color: rgba(239,68,68,.2); color: #fca5a5;
-  }
-
-  [data-theme="dark"] .fp-btn-del:hover {
-    background: rgba(239,68,68,.15); border-color: rgba(239,68,68,.35);
-  }
-
-  /* ── Empty state ── */
+  /* ══ EMPTY ══ */
   .fp-empty {
     grid-column: 1/-1;
-    background: var(--surf); border: 1px dashed var(--bdr-2);
-    border-radius: 20px; padding: 4rem 2rem;
-    display: flex; flex-direction: column; align-items: center; justify-content: center;
-    text-align: center; gap: .9rem;
+    background: var(--s2);
+    border: 1.5px dashed var(--bdr2);
+    border-radius: var(--r-lg); padding: 4rem 2rem;
+    display: flex; flex-direction: column; align-items: center;
+    text-align: center; gap: .8rem;
   }
-
-  .fp-empty-icon {
-    width: 72px; height: 72px; border-radius: 20px;
-    background: var(--surf-2); border: 1px solid var(--bdr);
-    display: flex; align-items: center; justify-content: center; font-size: 2rem;
-    margin-bottom: .25rem;
+  .fp-empty-ico {
+    width: 56px; height: 56px; border-radius: 15px;
+    background: var(--brand-l); color: var(--brand);
+    font-size: 1.4rem; display: flex; align-items: center; justify-content: center;
+    border: 1px solid rgba(14,165,233,.2); margin-bottom: .2rem;
   }
-
-  .fp-empty h3 {
-    font-size: 1.2rem; font-weight: 700; color: var(--txt);
-    letter-spacing: -.02em; margin: 0;
-  }
-
-  .fp-empty p { font-size: .83rem; color: var(--muted); margin: 0; max-width: 260px; }
-
-  /* ── Section label above grid ── */
-  .fp-section-head {
-    display: flex; align-items: center; justify-content: space-between;
-    margin-bottom: .85rem; flex-wrap: wrap; gap: .5rem;
-  }
-
-  .fp-section-label {
-    font-size: .68rem; font-weight: 700; text-transform: uppercase;
-    letter-spacing: .09em; color: var(--muted);
-    display: flex; align-items: center; gap: .45rem;
-  }
-
-  .fp-section-label::before {
-    content: ''; display: block; width: 3px; height: 14px;
-    background: var(--nc-brand); border-radius: 2px;
-  }
-
-  @media (max-width: 576px) {
-    .fp-banner { padding: 1.5rem 1.25rem; }
-    .fp-banner-title { font-size: 1.4rem; }
-  }
+  .fp-empty h3 { font-size: 1rem; font-weight: 900; color: var(--txt); margin: 0; letter-spacing: -.02em; }
+  .fp-empty p  { font-size: .8rem; color: var(--mu); margin: 0; max-width: 240px; line-height: 1.65; }
 </style>
+
+{% set foods = foods if foods else [] %}
+{% set cf = foods | selectattr('calories') | list %}
+{% set pf = foods | selectattr('price')    | list %}
 
 <div class="fp">
 
-  <!-- ── Banner ── -->
-  <div class="fp-banner" style="animation: fp-rise .35s cubic-bezier(.16,1,.3,1) both;">
+  <!-- ══ BANNER — stats live here only ══ -->
+  <div class="fp-banner">
+    <div class="fp-banner-scan"></div>
+    <div class="fp-banner-top"></div>
     <div class="fp-banner-inner">
+
       <div>
-        <div class="fp-banner-eyebrow">🍽️ Provider Panel</div>
-        <div class="fp-banner-title">My <span>Food Items</span></div>
+        <div class="fp-eyebrow">
+          <span class="fp-eyebrow-dot"></span>
+          NutriConnect · Provider Panel
+        </div>
+        <div class="fp-banner-title">My <span class="hl">Food Items</span></div>
         <p class="fp-banner-sub">Manage your listings — add, edit, or remove items anytime.</p>
       </div>
-      <a href="{{ url_for('food.add_food') }}" class="fp-btn-add">
-        <i class="fas fa-plus"></i> Add New Food
-      </a>
-    </div>
-  </div>
 
-  <!-- ── Stats ── -->
-  {% if foods %}
-  <div class="fp-stats">
-    <div class="fp-stat">
-      <div class="fp-stat-icon fsi-sky"><i class="fas fa-utensils"></i></div>
-      <div>
-        <div class="fp-stat-lbl">Total Items</div>
-        <div class="fp-stat-val">{{ foods|length }}</div>
-      </div>
-    </div>
-    <div class="fp-stat">
-      <div class="fp-stat-icon fsi-amber"><i class="fas fa-image"></i></div>
-      <div>
-        <div class="fp-stat-lbl">With Images</div>
-        <div class="fp-stat-val">{{ foods | selectattr('image') | list | length }}</div>
-      </div>
-    </div>
-    <div class="fp-stat">
-      <div class="fp-stat-icon fsi-violet"><i class="fas fa-bolt"></i></div>
-      <div>
-        <div class="fp-stat-lbl">Avg Calories</div>
-        <div class="fp-stat-val">
-          {% set cf = foods | selectattr('calories') | list %}
-          {% if cf %}{{ (cf | map(attribute='calories') | sum / cf|length) | round(0) | int }}{% else %}—{% endif %}
+      <div class="fp-banner-stats">
+        <div class="fp-bs">
+          <div class="fp-bs-val c-brand">{{ foods|length }}</div>
+          <div class="fp-bs-lbl">Total Items</div>
         </div>
+        <div class="fp-bs">
+          <div class="fp-bs-val c-emerald">{{ foods|selectattr('image')|list|length }}</div>
+          <div class="fp-bs-lbl">With Photos</div>
+        </div>
+        <div class="fp-bs">
+          <div class="fp-bs-val c-amber">{% if cf %}{{ (cf|map(attribute='calories')|sum / cf|length)|round(0)|int }}{% else %}—{% endif %}</div>
+          <div class="fp-bs-lbl">Avg Calories</div>
+        </div>
+        {% if pf %}
+        <div class="fp-bs">
+          <div class="fp-bs-val" style="color:#a78bfa;">${{ (pf|map(attribute='price')|sum / pf|length)|round(2) }}</div>
+          <div class="fp-bs-lbl">Avg Price</div>
+        </div>
+        {% endif %}
       </div>
+
     </div>
   </div>
-  {% endif %}
 
-  <!-- ── Section heading ── -->
-  {% if foods %}
-  <div class="fp-section-head">
-    <div class="fp-section-label">All Listings</div>
+  <!-- ══ TOOLBAR ══ -->
+  <div class="fp-toolbar">
+    <div class="fp-count">
+      <span class="fp-count-dot"></span>
+      {% if foods %}
+        <strong>{{ foods|length }}</strong> item{{ 's' if foods|length != 1 }} listed
+      {% else %}
+        No items yet
+      {% endif %}
+    </div>
+    <a href="{{ url_for('food.add_food') }}" class="btn-add">
+      <i class="fas fa-plus"></i> Add New Food
+    </a>
   </div>
-  {% endif %}
 
-  <!-- ── Grid ── -->
+  <!-- ══ GRID ══ -->
   <div class="fp-grid">
 
     {% if foods %}
       {% for food in foods %}
       <div class="fp-card">
-        <div class="fp-card-stripe"></div>
+        <div class="fp-card-bar"></div>
 
         <div class="fp-card-img">
           {% if food.image %}
             <img src="{{ url_for('static', filename='uploads/' + food.image) }}" alt="{{ food.name }}">
           {% else %}
-            <div class="fp-no-img">🥗<small>No Image</small></div>
+            <div class="fp-no-img">
+              <i class="fas fa-utensils"></i>
+              <span>No Image</span>
+            </div>
           {% endif %}
           {% if food.price %}
             <div class="fp-price">${{ "%.2f"|format(food.price) }}</div>
@@ -453,16 +438,28 @@
 
         <div class="fp-card-body">
           <h3 class="fp-card-name">{{ food.name }}</h3>
+
           {% if food.description %}
             <p class="fp-card-desc">{{ food.description }}</p>
           {% endif %}
 
-          <div class="fp-chips">
-            {% if food.calories %}<div class="fp-chip c-cal">🔥 <b>{{ food.calories|int }}</b> kcal</div>{% endif %}
-            {% if food.protein  %}<div class="fp-chip c-pro">💪 <b>{{ food.protein }}g</b> prot</div>{% endif %}
-            {% if food.carbs    %}<div class="fp-chip c-car">🌾 <b>{{ food.carbs }}g</b> carbs</div>{% endif %}
-            {% if food.fat      %}<div class="fp-chip c-fat">🧈 <b>{{ food.fat }}g</b> fat</div>{% endif %}
+          {% if food.diet_type %}
+            <div>
+              <span class="fp-diet">
+                <i class="fas fa-leaf" style="font-size:.55rem"></i>
+                {{ food.diet_type.replace('-',' ').title() }}
+              </span>
+            </div>
+          {% endif %}
+
+          {% if food.calories or food.protein or food.carbs or food.fat %}
+          <div class="fp-nutr">
+            {% if food.calories %}<div class="fp-nb nb-cal"><b>{{ food.calories|int }}</b>&nbsp;kcal</div>{% endif %}
+            {% if food.protein  %}<div class="fp-nb nb-pro"><b>{{ food.protein }}g</b>&nbsp;prot</div>{% endif %}
+            {% if food.carbs    %}<div class="fp-nb nb-car"><b>{{ food.carbs }}g</b>&nbsp;carbs</div>{% endif %}
+            {% if food.fat      %}<div class="fp-nb nb-fat"><b>{{ food.fat }}g</b>&nbsp;fat</div>{% endif %}
           </div>
+          {% endif %}
         </div>
 
         <div class="fp-card-foot">
@@ -482,10 +479,10 @@
 
     {% else %}
       <div class="fp-empty">
-        <div class="fp-empty-icon">🍽️</div>
+        <div class="fp-empty-ico"><i class="fas fa-utensils"></i></div>
         <h3>No food items yet</h3>
         <p>Start building your menu by adding your first food item.</p>
-        <a href="{{ url_for('food.add_food') }}" class="fp-btn-add" style="margin-top:.25rem;">
+        <a href="{{ url_for('food.add_food') }}" class="btn-add" style="margin-top:.5rem;">
           <i class="fas fa-plus"></i> Add your first item
         </a>
       </div>
