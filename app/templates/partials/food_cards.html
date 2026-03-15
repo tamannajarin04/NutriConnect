@@ -1,6 +1,17 @@
 {% if foods %}
   {% for food in foods %}
-  <div class="food-card">
+  <div class="food-card"
+       data-id="{{ food.id }}"
+       data-name="{{ food.name }}"
+       data-desc="{{ food.description or '' }}"
+       data-img="{{ food.image or '' }}"
+       data-price="{{ '%.2f'|format(food.price) if food.price else '' }}"
+       data-diet="{{ food.diet_type.replace('-', ' ').title() if food.diet_type else '' }}"
+       data-cal="{{ food.calories|int if food.calories else '' }}"
+       data-prot="{{ food.protein|int if food.protein else '' }}"
+       data-carb="{{ food.carbs|int if food.carbs else '' }}"
+       data-fat="{{ food.fat|int if food.fat else '' }}"
+       data-provider="{{ food.provider.first_name or food.provider.username }}">
 
     <!-- Image -->
     <div class="fc-img">
@@ -47,7 +58,7 @@
         </span>
       {% endif %}
 
-      <!-- Nutrition boxes (same style as approved dashboard) -->
+      <!-- Nutrition boxes -->
       <div class="fc-nutr">
         {% if food.calories %}
           <div class="nb kcal">
@@ -81,6 +92,9 @@
           {{ (food.provider.first_name or food.provider.username)[0]|upper }}
         </div>
         <span>{{ food.provider.first_name or food.provider.username }}</span>
+        <span style="margin-left:auto;font-size:.65rem;opacity:.5;">
+          <i class="fas fa-arrow-up-right-from-square" style="font-size:.55rem"></i> View
+        </span>
       </div>
 
     </div>

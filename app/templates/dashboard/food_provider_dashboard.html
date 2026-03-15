@@ -178,6 +178,23 @@
     letter-spacing: .12em; color: rgba(255,255,255,.28);
   }
 
+  .btn-insights {
+    display: inline-flex; align-items: center; gap: .42rem;
+    background: var(--s2); color: var(--txt2);
+    border: 1px solid var(--bdr); border-radius: var(--r);
+    padding: .62rem 1.1rem; font-size: .83rem; font-weight: 700;
+    cursor: pointer; font-family: inherit;
+    transition: background .14s, border-color .14s, color .14s;
+  }
+  .btn-insights:hover { background: var(--violet-l); border-color: rgba(167,139,250,.3); color: var(--violet); }
+  .btn-insights-badge {
+    background: rgba(167,139,250,.15); color: var(--violet);
+    border: 1px solid rgba(167,139,250,.25);
+    border-radius: 99px; padding: .05rem .42rem;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: .68rem; font-weight: 700;
+  }
+
   /* ══ TOOLBAR ══ */
   .fp-toolbar {
     display: flex; align-items: center; justify-content: space-between;
@@ -409,9 +426,17 @@
         No items yet
       {% endif %}
     </div>
-    <a href="{{ url_for('food.add_food') }}" class="btn-add">
-      <i class="fas fa-plus"></i> Add New Food
-    </a>
+    <div style="display:flex;align-items:center;gap:.6rem;">
+      {% if foods %}
+      <button class="btn-insights" onclick="openInsights()">
+        <i class="fas fa-chart-bar"></i> Insights
+        <span class="btn-insights-badge">{{ total_views }}</span>
+      </button>
+      {% endif %}
+      <a href="{{ url_for('food.add_food') }}" class="btn-add">
+        <i class="fas fa-plus"></i> Add New Food
+      </a>
+    </div>
   </div>
 
   <!-- ══ GRID ══ -->
@@ -490,4 +515,341 @@
 
   </div>
 </div>
+
+
+<!-- ══ INSIGHTS FLOATING PAGE ══ -->
+<style>
+  /* backdrop */
+  .ins-backdrop {
+    position: fixed; inset: 0; z-index: 8500;
+    background: rgba(0,0,0,.65); backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    opacity: 0; pointer-events: none;
+    transition: opacity .28s;
+    display: flex; align-items: center; justify-content: center;
+    padding: 1.5rem;
+  }
+  .ins-backdrop.open { opacity: 1; pointer-events: auto; }
+
+  /* floating page */
+  .ins-page {
+    background: var(--nc-surface);
+    border: 1px solid var(--nc-border);
+    border-radius: 24px;
+    width: 100%; max-width: 680px;
+    max-height: 88vh;
+    display: flex; flex-direction: column;
+    box-shadow: 0 32px 80px rgba(0,0,0,.5), 0 0 0 1px rgba(255,255,255,.04) inset;
+    transform: scale(.93) translateY(20px);
+    opacity: 0;
+    transition: transform .32s cubic-bezier(.16,1,.3,1), opacity .28s;
+    overflow: hidden;
+  }
+  .ins-backdrop.open .ins-page {
+    transform: scale(1) translateY(0);
+    opacity: 1;
+  }
+
+  /* ── header hero ── */
+  .ins-hd {
+    flex-shrink: 0;
+    background:
+      radial-gradient(ellipse 90% 160% at 0% 60%,  rgba(124,58,237,.5)  0%, transparent 52%),
+      radial-gradient(ellipse 60% 100% at 100% 0%,  rgba(56,189,248,.2)  0%, transparent 50%),
+      radial-gradient(ellipse 45% 70%  at 55% 110%, rgba(52,211,153,.12) 0%, transparent 48%),
+      linear-gradient(145deg, #060f1e 0%, #0c1635 55%, #070e1c 100%);
+    position: relative; overflow: hidden;
+    padding: 1.5rem 1.75rem 0;
+  }
+  .ins-hd::before {
+    content: ''; position: absolute; inset: 0;
+    background-image: radial-gradient(rgba(255,255,255,.045) 1px, transparent 1px);
+    background-size: 22px 22px; pointer-events: none;
+  }
+  /* diagonal shimmer */
+  .ins-hd::after {
+    content: ''; position: absolute; inset: 0;
+    background: linear-gradient(115deg, transparent 30%, rgba(255,255,255,.03) 48%, rgba(255,255,255,.06) 52%, rgba(255,255,255,.03) 56%, transparent 74%);
+    pointer-events: none;
+  }
+  .ins-hd-inner {
+    position: relative; z-index: 2;
+    display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem;
+    margin-bottom: 1.25rem;
+  }
+  .ins-hd-left { display: flex; align-items: center; gap: .85rem; }
+  .ins-hd-ico {
+    width: 44px; height: 44px; border-radius: 13px; flex-shrink: 0;
+    background: rgba(167,139,250,.2); color: #c4b5fd;
+    border: 1px solid rgba(167,139,250,.3);
+    display: flex; align-items: center; justify-content: center; font-size: 1.05rem;
+  }
+  .ins-hd-title { font-size: 1.15rem; font-weight: 900; color: #fff; letter-spacing: -.035em; margin-bottom: .06rem; }
+  .ins-hd-sub   { font-size: .72rem; color: rgba(255,255,255,.38); }
+  .ins-hd-close {
+    width: 32px; height: 32px; border-radius: 9px; flex-shrink: 0;
+    background: rgba(255,255,255,.07); border: 1px solid rgba(255,255,255,.1);
+    color: rgba(255,255,255,.55); cursor: pointer; font-size: .82rem;
+    display: flex; align-items: center; justify-content: center;
+    transition: background .14s, color .14s;
+  }
+  .ins-hd-close:hover { background: rgba(251,113,133,.18); color: #fb7185; border-color: rgba(251,113,133,.3); }
+
+  /* stat cards row */
+  .ins-stats {
+    position: relative; z-index: 2;
+    display: grid; grid-template-columns: repeat(4, 1fr);
+    gap: .65rem; margin-bottom: 1.4rem;
+  }
+  .ins-sc {
+    background: rgba(255,255,255,.06);
+    border: 1px solid rgba(255,255,255,.1);
+    border-radius: 14px; padding: .9rem .75rem;
+    text-align: center; transition: background .15s;
+    position: relative; overflow: hidden;
+  }
+  .ins-sc::before {
+    content: ''; position: absolute; top: 0; left: 15%; right: 15%; height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,.15), transparent);
+  }
+  .ins-sc:hover { background: rgba(255,255,255,.1); }
+  .ins-sc-val {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 1.3rem; font-weight: 700; line-height: 1; color: #fff;
+    margin-bottom: .22rem;
+  }
+  .ins-sc-val.vi { color: #c4b5fd; text-shadow: 0 0 14px rgba(196,181,253,.4); }
+  .ins-sc-val.am { color: #fbbf24; text-shadow: 0 0 14px rgba(251,191,36,.35); }
+  .ins-sc-val.cy { color: #38bdf8; text-shadow: 0 0 14px rgba(56,189,248,.35); }
+  .ins-sc-val.em { color: #34d399; text-shadow: 0 0 14px rgba(52,211,153,.35); }
+  .ins-sc-lbl {
+    font-size: .54rem; font-weight: 800; text-transform: uppercase;
+    letter-spacing: .1em; color: rgba(255,255,255,.3);
+  }
+
+  /* scan line at bottom of header */
+  .ins-hd-scan {
+    position: absolute; bottom: 0; left: 0; right: 0; height: 1px; z-index: 2;
+    background: linear-gradient(90deg, transparent 5%, rgba(167,139,250,.6) 35%, rgba(56,189,248,.5) 65%, transparent 95%);
+  }
+
+  /* ── body ── */
+  .ins-body {
+    flex: 1; overflow-y: auto; padding: 1.25rem 1.75rem 1.5rem;
+    display: flex; flex-direction: column; gap: .85rem;
+  }
+  .ins-body::-webkit-scrollbar { width: 4px; }
+  .ins-body::-webkit-scrollbar-thumb { background: var(--nc-border-2); border-radius: 99px; }
+
+  .ins-sec-lbl {
+    display: flex; align-items: center; gap: .45rem;
+    font-size: .6rem; font-weight: 900; text-transform: uppercase;
+    letter-spacing: .1em; color: var(--nc-text-faint);
+  }
+  .ins-sec-lbl::after { content:''; flex:1; height:1px; background: var(--nc-border); }
+
+  /* ranked list */
+  .ins-list {
+    border: 1px solid var(--nc-border);
+    border-radius: 16px; overflow: hidden;
+  }
+  .ins-row {
+    display: grid;
+    grid-template-columns: 30px 54px 1fr auto;
+    align-items: center; gap: .85rem;
+    padding: .9rem 1.1rem;
+    border-bottom: 1px solid var(--nc-border);
+    transition: background .12s;
+  }
+  .ins-row:last-child { border-bottom: none; }
+  .ins-row:hover { background: var(--nc-surface-2); }
+
+  .ins-rank {
+    width: 30px; height: 30px; border-radius: 8px; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center; font-size: .88rem;
+  }
+  .ins-rank.r1 { background: rgba(251,191,36,.12); border: 1px solid rgba(251,191,36,.22); }
+  .ins-rank.r2 { background: rgba(148,163,184,.08); border: 1px solid rgba(148,163,184,.18); }
+  .ins-rank.r3 { background: rgba(180,100,50,.1);   border: 1px solid rgba(180,100,50,.2); }
+  .ins-rank.rn {
+    background: var(--nc-surface-2); border: 1px solid var(--nc-border);
+    font-family: 'JetBrains Mono', monospace; font-size: .68rem;
+    font-weight: 700; color: var(--nc-text-faint);
+  }
+
+  .ins-thumb {
+    width: 54px; height: 54px; border-radius: 11px;
+    object-fit: cover; border: 1px solid var(--nc-border); flex-shrink: 0;
+  }
+  .ins-thumb-ph {
+    width: 54px; height: 54px; border-radius: 11px; flex-shrink: 0;
+    background: var(--nc-surface-3); border: 1px solid var(--nc-border);
+    display: flex; align-items: center; justify-content: center;
+    color: var(--nc-text-faint); font-size: 1rem;
+  }
+
+  .ins-info { min-width: 0; }
+  .ins-name {
+    font-size: .88rem; font-weight: 800; color: var(--nc-text);
+    letter-spacing: -.025em; margin-bottom: .3rem;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .ins-chips { display: flex; gap: .28rem; flex-wrap: wrap; }
+  .ins-chip {
+    font-size: .58rem; font-weight: 800; text-transform: uppercase;
+    letter-spacing: .04em; padding: .12rem .48rem; border-radius: 5px;
+  }
+  .ic-diet  { background: rgba(52,211,153,.1);  color: #34d399; }
+  .ic-cal   { background: rgba(251,191,36,.1);  color: #fbbf24; }
+  .ic-price { background: rgba(56,189,248,.1);  color: #38bdf8; }
+
+  /* right side */
+  .ins-right {
+    display: flex; flex-direction: column; align-items: flex-end;
+    gap: .32rem; flex-shrink: 0; min-width: 70px;
+  }
+  .ins-views-num {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 1.1rem; font-weight: 700; color: #a78bfa; line-height: 1;
+  }
+  .ins-views-sub {
+    font-size: .55rem; font-weight: 700; color: var(--nc-text-faint);
+    text-transform: uppercase; letter-spacing: .06em;
+  }
+  .ins-bar { width: 70px; height: 5px; background: var(--nc-surface-3); border-radius: 99px; overflow: hidden; }
+  .ins-bar-fill { height: 100%; border-radius: 99px; width: 0; transition: width 1s cubic-bezier(.16,1,.3,1); }
+  .ibf-1 { background: linear-gradient(90deg, #f59e0b, #fbbf24); }
+  .ibf-2 { background: linear-gradient(90deg, #475569, #94a3b8); }
+  .ibf-3 { background: linear-gradient(90deg, #78350f, #c77b3b); }
+  .ibf-n { background: linear-gradient(90deg, #7c3aed, #a78bfa); }
+
+  /* empty */
+  .ins-empty {
+    display: flex; flex-direction: column; align-items: center;
+    text-align: center; gap: .65rem; padding: 2.5rem 1rem;
+  }
+  .ins-empty-ico {
+    width: 52px; height: 52px; border-radius: 14px;
+    background: rgba(167,139,250,.1); color: #a78bfa;
+    border: 1px solid rgba(167,139,250,.18);
+    display: flex; align-items: center; justify-content: center; font-size: 1.25rem;
+  }
+  .ins-empty p { font-size: .8rem; color: var(--nc-text-muted); margin: 0; max-width: 240px; line-height: 1.7; }
+</style>
+
+{% if foods %}
+<!-- Backdrop (click outside closes) -->
+<div class="ins-backdrop" id="insBackdrop" onclick="handleBackdropClick(event)">
+
+  <!-- Floating Page -->
+  <div class="ins-page" id="insPage">
+
+    <!-- Hero Header -->
+    <div class="ins-hd">
+      <div class="ins-hd-scan"></div>
+      <div class="ins-hd-inner">
+        <div class="ins-hd-left">
+          <div class="ins-hd-ico"><i class="fas fa-chart-bar"></i></div>
+          <div>
+            <div class="ins-hd-title">Popularity Insights</div>
+            <div class="ins-hd-sub">Based on user clicks on food cards</div>
+          </div>
+        </div>
+        <button class="ins-hd-close" onclick="closeInsights()"><i class="fas fa-xmark"></i></button>
+      </div>
+
+      {% set top_views  = insights[0].views if insights else 0 %}
+      {% set viewed_cnt = insights | selectattr('views', 'gt', 0) | list | length %}
+      {% set avg_views  = (total_views / foods|length)|round(1) if foods|length > 0 and total_views > 0 else 0 %}
+
+      <div class="ins-stats">
+        <div class="ins-sc">
+          <div class="ins-sc-val vi">{{ total_views }}</div>
+          <div class="ins-sc-lbl">Total Views</div>
+        </div>
+        <div class="ins-sc">
+          <div class="ins-sc-val am">{{ top_views }}</div>
+          <div class="ins-sc-lbl">Best Item</div>
+        </div>
+        <div class="ins-sc">
+          <div class="ins-sc-val cy">{{ viewed_cnt }}/{{ foods|length }}</div>
+          <div class="ins-sc-lbl">Viewed</div>
+        </div>
+        <div class="ins-sc">
+          <div class="ins-sc-val em">{{ avg_views }}</div>
+          <div class="ins-sc-lbl">Avg / Item</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Body -->
+    <div class="ins-body">
+      <div class="ins-sec-lbl"><i class="fas fa-fire" style="color:#fb7185"></i> Ranking</div>
+
+      {% if total_views == 0 %}
+      <div class="ins-empty">
+        <div class="ins-empty-ico"><i class="fas fa-chart-bar"></i></div>
+        <p>No views yet. Views are counted when users click a food card on the search page.</p>
+      </div>
+
+      {% else %}
+      {% set max_views = insights[0].views if insights[0].views > 0 else 1 %}
+      <div class="ins-list">
+        {% for item in insights %}
+        {% set pct = ((item.views / max_views) * 100)|round(0)|int %}
+        {% set bar_cls = 'ibf-1' if loop.index==1 else 'ibf-2' if loop.index==2 else 'ibf-3' if loop.index==3 else 'ibf-n' %}
+        <div class="ins-row">
+          <div class="ins-rank {{ 'r1' if loop.index==1 else 'r2' if loop.index==2 else 'r3' if loop.index==3 else 'rn' }}">
+            {% if loop.index==1 %}🥇{% elif loop.index==2 %}🥈{% elif loop.index==3 %}🥉{% else %}{{ loop.index }}{% endif %}
+          </div>
+          {% if item.food.image %}
+            <img class="ins-thumb" src="{{ url_for('static', filename='uploads/'+item.food.image) }}" alt="{{ item.food.name }}">
+          {% else %}
+            <div class="ins-thumb-ph"><i class="fas fa-utensils"></i></div>
+          {% endif %}
+          <div class="ins-info">
+            <div class="ins-name">{{ item.food.name }}</div>
+            <div class="ins-chips">
+              {% if item.food.diet_type %}<span class="ins-chip ic-diet">{{ item.food.diet_type.replace('-',' ').title() }}</span>{% endif %}
+              {% if item.food.calories  %}<span class="ins-chip ic-cal">{{ item.food.calories|int }} kcal</span>{% endif %}
+              {% if item.food.price     %}<span class="ins-chip ic-price">${{ "%.2f"|format(item.food.price) }}</span>{% endif %}
+            </div>
+          </div>
+          <div class="ins-right">
+            <div class="ins-views-num">{{ item.views }}</div>
+            <div class="ins-views-sub">views</div>
+            <div class="ins-bar">
+              <div class="ins-bar-fill {{ bar_cls }}" data-w="{{ pct }}"></div>
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+      {% endif %}
+
+    </div>
+  </div>
+</div>
+
+<script>
+function openInsights() {
+  document.getElementById('insBackdrop').classList.add('open');
+  document.body.style.overflow = 'hidden';
+  setTimeout(() => {
+    document.querySelectorAll('.ins-bar-fill[data-w]').forEach(el => {
+      el.style.width = el.dataset.w + '%';
+    });
+  }, 380);
+}
+function closeInsights() {
+  document.getElementById('insBackdrop').classList.remove('open');
+  document.body.style.overflow = '';
+}
+function handleBackdropClick(e) {
+  if (e.target === document.getElementById('insBackdrop')) closeInsights();
+}
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeInsights(); });
+</script>
+{% endif %}
+
 {% endblock %}
