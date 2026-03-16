@@ -1,0 +1,930 @@
+{% extends "base.html" %}
+{% block title %}Edit — {{ food.name }} · NutriConnect{% endblock %}
+
+{% block extra_css %}
+<style>
+  .ef {
+    --ef-r:      20px;
+    --ef-r-sm:   12px;
+    --ef-gap:    1.35rem;
+    --ef-amber:  #f59e0b;
+    --ef-amb-d:  #d97706;
+    --ef-amb-l:  #fffbeb;
+    max-width: 920px;
+    margin: 0 auto;
+    font-family: 'Sora', sans-serif;
+  }
+  [data-theme="dark"] .ef { --ef-amb-l: rgba(245,158,11,.07); }
+
+  @keyframes ef-up {
+    from { opacity:0; transform:translateY(18px); }
+    to   { opacity:1; transform:translateY(0); }
+  }
+  .ea1{animation:ef-up .5s cubic-bezier(.16,1,.3,1)      both;}
+  .ea2{animation:ef-up .5s cubic-bezier(.16,1,.3,1) .07s both;}
+  .ea3{animation:ef-up .5s cubic-bezier(.16,1,.3,1) .13s both;}
+  .ea4{animation:ef-up .5s cubic-bezier(.16,1,.3,1) .19s both;}
+  .ea5{animation:ef-up .5s cubic-bezier(.16,1,.3,1) .25s both;}
+
+  .ef-crumb {
+    display:flex; align-items:center; gap:.5rem;
+    font-size:.73rem; font-weight:600;
+    color:var(--nc-text-faint); margin-bottom:1.5rem;
+  }
+  .ef-crumb a { color:var(--nc-text-muted); text-decoration:none; transition:color .15s; }
+  .ef-crumb a:hover { color:var(--nc-brand); }
+  .ef-crumb i { font-size:.5rem; color:var(--nc-border-2); }
+
+  .ef-hero {
+    position:relative; overflow:hidden;
+    background:linear-gradient(135deg, #0a1628 0%, #0c2340 50%, #0a1f3a 100%);
+    border-radius:var(--ef-r);
+    padding:2rem 2.25rem;
+    margin-bottom:var(--ef-gap);
+    display:flex; align-items:center; gap:1.5rem;
+    border:1px solid rgba(14,165,233,.15);
+  }
+  .ef-hero::before {
+    content:''; position:absolute; inset:0; pointer-events:none;
+    background:
+      radial-gradient(ellipse 60% 80% at 90% 50%, rgba(14,165,233,.12), transparent 70%),
+      radial-gradient(ellipse 30% 60% at 10% 80%, rgba(6,182,212,.08), transparent 70%);
+  }
+  .ef-hero::after {
+    content:''; position:absolute; inset:0; pointer-events:none;
+    background-image:
+      linear-gradient(rgba(255,255,255,.025) 1px,transparent 1px),
+      linear-gradient(90deg,rgba(255,255,255,.025) 1px,transparent 1px);
+    background-size:28px 28px;
+  }
+  .ef-hero__ico {
+    position:relative; z-index:1; flex-shrink:0;
+    width:58px; height:58px; border-radius:18px;
+    background:linear-gradient(135deg,rgba(14,165,233,.3),rgba(6,182,212,.2));
+    border:1px solid rgba(14,165,233,.35);
+    display:flex; align-items:center; justify-content:center; font-size:1.55rem;
+    box-shadow:0 0 0 6px rgba(14,165,233,.06),inset 0 1px 0 rgba(255,255,255,.1);
+    backdrop-filter:blur(8px);
+  }
+  .ef-hero__body { position:relative; z-index:1; flex:1; min-width:0; }
+  .ef-hero__eye {
+    font-size:.65rem; font-weight:800; text-transform:uppercase; letter-spacing:.12em;
+    color:rgba(56,189,248,.8); margin-bottom:.3rem;
+    display:flex; align-items:center; gap:.4rem;
+  }
+  .ef-hero__eye::before {
+    content:''; width:16px; height:1.5px;
+    background:rgba(56,189,248,.4); border-radius:99px;
+  }
+  .ef-hero__title {
+    font-size:1.55rem; font-weight:800; letter-spacing:-.04em;
+    color:#fff; margin:0 0 .25rem; line-height:1.15;
+    overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+  }
+  .ef-hero__title span {
+    background:linear-gradient(135deg,#38bdf8,#06b6d4);
+    -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;
+  }
+  .ef-hero__sub { font-size:.82rem; color:rgba(255,255,255,.45); font-weight:500; margin:0; }
+  .ef-hero__pills {
+    position:relative; z-index:1; flex-shrink:0;
+    display:flex; flex-direction:column; align-items:flex-end; gap:.4rem;
+  }
+  .ef-hero__pill {
+    display:inline-flex; align-items:center; gap:.35rem;
+    background:rgba(14,165,233,.15); color:#7dd3fc;
+    border:1px solid rgba(14,165,233,.25);
+    border-radius:99px; padding:.22rem .75rem;
+    font-size:.7rem; font-weight:700; white-space:nowrap;
+  }
+
+  .ef-unsaved {
+    display:flex; align-items:center; gap:.85rem;
+    background:var(--nc-card-bg);
+    border:1px solid var(--nc-card-border);
+    border-left:3.5px solid var(--ef-amber);
+    border-radius:var(--ef-r);
+    padding:.9rem 1.35rem;
+    margin-bottom:var(--ef-gap);
+    box-shadow:var(--nc-card-shadow);
+  }
+  .ef-unsaved__icon {
+    width:32px; height:32px; border-radius:9px; flex-shrink:0;
+    background:rgba(245,158,11,.1); color:var(--ef-amber);
+    display:flex; align-items:center; justify-content:center; font-size:.8rem;
+  }
+  .ef-unsaved__copy { flex:1; }
+  .ef-unsaved__title { font-size:.8rem; font-weight:700; color:var(--nc-text-2); margin-bottom:.1rem; }
+  .ef-unsaved__hint  { font-size:.72rem; color:var(--nc-text-muted); font-weight:500; }
+  .ef-delta {
+    display:inline-flex; align-items:center; gap:.35rem;
+    font-size:.72rem; font-weight:700;
+    color:var(--nc-text-faint);
+    background:var(--nc-surface-2);
+    border:1.5px solid var(--nc-border);
+    border-radius:99px; padding:.22rem .75rem;
+    transition:all .25s;
+    white-space:nowrap;
+  }
+  .ef-delta.hot {
+    background:var(--ef-amber); border-color:var(--ef-amber); color:#fff;
+    box-shadow:0 2px 10px rgba(245,158,11,.35);
+  }
+
+  .ef-body { display:grid; grid-template-columns:1fr 296px; gap:var(--ef-gap); }
+  .ef-left, .ef-right { display:flex; flex-direction:column; gap:var(--ef-gap); }
+
+  .ef-card {
+    background:var(--nc-card-bg);
+    border:1px solid var(--nc-card-border);
+    border-radius:var(--ef-r);
+    box-shadow:var(--nc-card-shadow);
+    overflow:hidden;
+    transition:box-shadow .2s;
+  }
+  .ef-card:focus-within {
+    box-shadow:var(--nc-card-shadow), 0 0 0 3px rgba(245,158,11,.07);
+  }
+  .ef-card-head {
+    display:flex; align-items:center; gap:.7rem;
+    padding:.85rem 1.5rem;
+    border-bottom:1px solid var(--nc-border);
+    background:var(--nc-surface-2);
+  }
+  .ef-card-ico {
+    width:30px; height:30px; border-radius:9px;
+    display:flex; align-items:center; justify-content:center;
+    font-size:.8rem; flex-shrink:0;
+  }
+  .eci-amber  { background:rgba(245,158,11,.12); color:var(--ef-amber); }
+  .eci-blue   { background:rgba(14,165,233,.12);  color:var(--nc-brand); }
+  .eci-violet { background:rgba(124,58,237,.12);  color:#7c3aed; }
+  .eci-teal   { background:rgba(13,148,136,.12);  color:#0d9488; }
+  .eci-rose   { background:rgba(244,63,94,.1);    color:#f43f5e; }
+  .ef-card-title {
+    font-size:.7rem; font-weight:800;
+    text-transform:uppercase; letter-spacing:.1em;
+    color:var(--nc-text-muted);
+  }
+  .ef-card-badge {
+    margin-left:auto; border-radius:99px;
+    padding:.12rem .65rem; font-size:.63rem; font-weight:800;
+    letter-spacing:.04em; text-transform:uppercase;
+    border:1.5px solid transparent;
+  }
+  .ecb-edit { background:rgba(245,158,11,.1); color:var(--ef-amb-d); border-color:rgba(245,158,11,.2); }
+  .ecb-opt  { background:rgba(100,116,139,.08); color:var(--nc-text-faint); border-color:var(--nc-border); }
+  .ecb-serv { background:rgba(14,165,233,.08); color:var(--nc-brand); border-color:rgba(14,165,233,.18); }
+  [data-theme="dark"] .ecb-edit { background:rgba(245,158,11,.1); color:#fbbf24; }
+
+  .ef-card-body { padding:1.5rem; }
+
+  .ef-fld { display:flex; flex-direction:column; gap:.42rem; }
+  .ef-fld + .ef-fld { margin-top:1.1rem; }
+
+  .ef-lbl {
+    display:flex; align-items:center; gap:.45rem;
+    font-size:.74rem; font-weight:700;
+    color:var(--nc-text-2); letter-spacing:.01em;
+  }
+  .ef-lbl-ico {
+    width:18px; height:18px; border-radius:5px;
+    display:inline-flex; align-items:center; justify-content:center;
+    font-size:.58rem; background:var(--nc-surface-3); color:var(--nc-text-faint); flex-shrink:0;
+  }
+  .ef-lbl .req { color:#f43f5e; font-size:.85rem; }
+  .ef-lbl .opt {
+    margin-left:auto; font-size:.63rem; font-weight:600;
+    color:var(--nc-text-faint); background:var(--nc-surface-3);
+    border-radius:4px; padding:.05rem .4rem;
+  }
+
+  .ef-inp, .ef-sel, .ef-ta {
+    width:100%;
+    background:var(--nc-surface-2) !important;
+    border:1.5px solid var(--nc-border) !important;
+    border-radius:var(--ef-r-sm) !important;
+    color:var(--nc-text) !important;
+    font-family:'Sora',sans-serif !important;
+    font-size:.875rem !important; font-weight:500 !important;
+    padding:.68rem 1rem !important;
+    outline:none !important;
+    transition:border-color .18s, box-shadow .18s, background .18s !important;
+  }
+  .ef-inp:focus, .ef-sel:focus, .ef-ta:focus {
+    border-color:var(--ef-amber) !important;
+    background:var(--nc-surface) !important;
+    box-shadow:0 0 0 3px rgba(245,158,11,.12) !important;
+  }
+  .ef-inp.dirty, .ef-sel.dirty, .ef-ta.dirty {
+    border-color:var(--ef-amber) !important;
+    background:var(--ef-amb-l) !important;
+  }
+  .ef-inp::placeholder,.ef-ta::placeholder { color:var(--nc-text-faint) !important; font-weight:400 !important; }
+  .ef-ta { resize:vertical !important; line-height:1.6 !important; min-height:88px !important; }
+
+  .ef-inp-grp { position:relative; }
+  .ef-inp-grp .ef-inp { padding-left:2.6rem !important; }
+  .ef-inp-pre {
+    position:absolute; left:.9rem; top:50%; transform:translateY(-50%);
+    font-size:.72rem; color:var(--nc-text-faint); pointer-events:none; transition:color .18s;
+  }
+  .ef-inp-grp:focus-within .ef-inp-pre { color:var(--ef-amber); }
+
+  .ef-row2 { display:grid; grid-template-columns:1fr 1fr; gap:.9rem; }
+
+  .ef-nut-grid { display:grid; grid-template-columns:1fr 1fr; gap:.75rem; }
+  .ef-nut {
+    border-radius:14px; padding:1rem 1.1rem;
+    border:1.5px solid var(--nc-border);
+    background:var(--nc-surface-2);
+    transition:border-color .18s, box-shadow .18s, background .18s;
+    cursor:text;
+  }
+  .ef-nut:focus-within {
+    background:var(--nc-surface);
+    border-color:var(--ef-amber);
+    box-shadow:0 0 0 3px rgba(245,158,11,.1);
+  }
+  .ef-nut.dirty { border-color:var(--ef-amber) !important; background:var(--ef-amb-l) !important; }
+  .ef-nut-top { display:flex; align-items:center; gap:.4rem; margin-bottom:.55rem; }
+  .ef-nut-bar { height:3px; border-radius:99px; flex:1; opacity:.28; transition:opacity .18s; }
+  .ef-nut:focus-within .ef-nut-bar,
+  .ef-nut.dirty .ef-nut-bar { opacity:1; }
+  .ef-nut-name { font-size:.63rem; font-weight:800; text-transform:uppercase; letter-spacing:.1em; }
+  .ef-nut-val {
+    width:100%; background:transparent !important;
+    border:none !important; outline:none !important;
+    font-family:'JetBrains Mono',monospace !important;
+    font-size:1.35rem !important; font-weight:700 !important;
+    color:var(--nc-text) !important; padding:0 !important; line-height:1.2;
+  }
+  .ef-nut-val::placeholder { color:var(--nc-border-2) !important; font-size:1.1rem !important; }
+  .ef-nut-unit { font-size:.65rem; font-weight:700; color:var(--nc-text-faint); margin-top:.2rem; font-family:'JetBrains Mono',monospace; }
+
+  .en-cal .ef-nut-bar  { background:#f59e0b; }
+  .en-cal .ef-nut-name { color:#b45309; }
+  [data-theme="dark"] .en-cal .ef-nut-name { color:#fbbf24; }
+  .en-pro .ef-nut-bar  { background:#10b981; }
+  .en-pro .ef-nut-name { color:#065f46; }
+  [data-theme="dark"] .en-pro .ef-nut-name { color:#34d399; }
+  .en-car .ef-nut-bar  { background:#8b5cf6; }
+  .en-car .ef-nut-name { color:#5b21b6; }
+  [data-theme="dark"] .en-car .ef-nut-name { color:#c4b5fd; }
+  .en-fat .ef-nut-bar  { background:#f43f5e; }
+  .en-fat .ef-nut-name { color:#be123c; }
+  [data-theme="dark"] .en-fat .ef-nut-name { color:#fb7185; }
+
+  .ef-cur-img {
+    display:flex; align-items:center; gap:1rem;
+    background:var(--nc-surface-2); border:1px solid var(--nc-border);
+    border-radius:14px; padding:.85rem 1rem; margin-bottom:.9rem;
+  }
+  .ef-cur-img img {
+    width:68px; height:68px; object-fit:cover;
+    border-radius:10px; flex-shrink:0;
+    border:1px solid var(--nc-border);
+    box-shadow:0 2px 8px rgba(0,0,0,.09);
+  }
+  .ef-cur-badge {
+    display:inline-flex; align-items:center; gap:.3rem;
+    background:rgba(13,148,136,.1); color:#0d9488;
+    border:1px solid rgba(13,148,136,.2);
+    border-radius:99px; padding:.14rem .6rem;
+    font-size:.63rem; font-weight:800;
+    text-transform:uppercase; letter-spacing:.06em; margin-bottom:.3rem;
+  }
+  [data-theme="dark"] .ef-cur-badge { background:rgba(13,148,136,.12); color:#2dd4bf; }
+  .ef-cur-img__name { font-size:.78rem; font-weight:700; color:var(--nc-text-2); margin:0 0 .18rem; }
+  .ef-cur-img__hint { font-size:.71rem; color:var(--nc-text-muted); margin:0; line-height:1.5; }
+
+  .ef-upload {
+    position:relative; border:2px dashed var(--nc-border-2);
+    border-radius:14px; background:var(--nc-surface-2);
+    padding:1.5rem 1rem; text-align:center; cursor:pointer;
+    transition:border-color .2s, background .2s, transform .15s;
+  }
+  .ef-upload:hover { border-color:var(--ef-amber); background:var(--ef-amb-l); transform:translateY(-1px); }
+  .ef-upload input { position:absolute; inset:0; opacity:0; cursor:pointer; width:100%; height:100%; }
+  .ef-upload-ico {
+    width:42px; height:42px; border-radius:12px;
+    background:var(--nc-surface); border:1px solid var(--nc-border);
+    display:flex; align-items:center; justify-content:center;
+    font-size:1rem; color:var(--ef-amber); margin:0 auto .7rem;
+    box-shadow:0 2px 6px rgba(0,0,0,.05); transition:box-shadow .2s;
+  }
+  .ef-upload:hover .ef-upload-ico { box-shadow:0 4px 14px rgba(245,158,11,.2); }
+  .ef-upload-title { font-size:.8rem; font-weight:700; color:var(--nc-text-2); margin-bottom:.18rem; }
+  .ef-upload-sub   { font-size:.7rem; color:var(--nc-text-faint); font-weight:500; }
+  .ef-upload-pills { display:flex; justify-content:center; gap:.3rem; margin-top:.55rem; }
+  .ef-type-pill {
+    font-size:.58rem; font-weight:700; text-transform:uppercase; letter-spacing:.06em;
+    padding:.12rem .45rem; border-radius:4px;
+    background:var(--nc-surface); border:1px solid var(--nc-border); color:var(--nc-text-faint);
+  }
+  #ef-new-preview {
+    display:none; margin-top:.75rem;
+    border-radius:12px; overflow:hidden;
+    border:1px solid var(--nc-border); box-shadow:0 2px 8px rgba(0,0,0,.06);
+  }
+  #ef-new-preview img { width:100%; height:140px; object-fit:cover; display:block; }
+  .ef-preview-foot {
+    display:flex; align-items:center; justify-content:space-between;
+    padding:.45rem .75rem; background:var(--nc-surface-2); border-top:1px solid var(--nc-border);
+  }
+  .ef-preview-name { font-size:.7rem; font-weight:700; color:var(--nc-text-muted); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:150px; }
+  .ef-preview-rm {
+    display:inline-flex; align-items:center; gap:.3rem;
+    background:none; border:none; cursor:pointer;
+    font-family:'Sora',sans-serif; font-size:.7rem; font-weight:700;
+    color:#f43f5e; transition:color .15s;
+  }
+  .ef-preview-rm:hover { color:#be123c; }
+
+  .ef-live { background:var(--nc-surface-2); border:1px solid var(--nc-border); border-radius:14px; overflow:hidden; }
+  .ef-live-head {
+    padding:.6rem 1rem; background:var(--nc-surface-3); border-bottom:1px solid var(--nc-border);
+    font-size:.65rem; font-weight:800; text-transform:uppercase; letter-spacing:.1em;
+    color:var(--nc-text-faint); display:flex; align-items:center; gap:.4rem;
+  }
+  .ef-live-dot {
+    width:6px; height:6px; border-radius:50%; background:var(--ef-amber);
+    box-shadow:0 0 0 3px rgba(245,158,11,.2); animation:efp 2s infinite;
+  }
+  @keyframes efp {
+    0%,100%{box-shadow:0 0 0 3px rgba(245,158,11,.2);}
+    50%    {box-shadow:0 0 0 5px rgba(245,158,11,.1);}
+  }
+  .ef-live-row {
+    display:flex; justify-content:space-between; align-items:center;
+    padding:.48rem 1rem; border-bottom:1px dashed var(--nc-border); font-size:.77rem;
+  }
+  .ef-live-row:last-child { border-bottom:none; }
+  .ef-live-key { color:var(--nc-text-muted); font-weight:600; }
+  .ef-live-val {
+    font-weight:700; color:var(--nc-text); text-align:right;
+    font-family:'JetBrains Mono',monospace; font-size:.72rem;
+    max-width:140px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+    transition:color .2s;
+  }
+  .ef-live-val.live  { color:var(--ef-amber); }
+  .ef-live-val.empty { color:var(--nc-text-faint); font-family:'Sora',sans-serif; font-size:.71rem; font-weight:500; }
+
+  .ef-macro-wrap { padding:.65rem 1rem; border-top:1px solid var(--nc-border); }
+  .ef-macro-head { font-size:.63rem; font-weight:800; text-transform:uppercase; letter-spacing:.08em; color:var(--nc-text-faint); margin-bottom:.5rem; }
+  .ef-macro-row  { display:flex; align-items:center; gap:.5rem; margin-bottom:.3rem; }
+  .ef-macro-row:last-child { margin-bottom:0; }
+  .ef-macro-lbl  { font-size:.62rem; font-weight:700; width:50px; color:var(--nc-text-muted); flex-shrink:0; }
+  .ef-macro-trk  { flex:1; height:5px; border-radius:99px; background:var(--nc-surface-3); overflow:hidden; }
+  .ef-macro-fill { height:100%; border-radius:99px; width:0%; transition:width .4s cubic-bezier(.34,1.56,.64,1); }
+  .emf-p { background:#10b981; }
+  .emf-c { background:#8b5cf6; }
+  .emf-f { background:#f43f5e; }
+  .ef-macro-num { font-size:.62rem; font-weight:700; color:var(--nc-text-faint); width:28px; text-align:right; flex-shrink:0; font-family:'JetBrains Mono',monospace; }
+
+  .ef-danger {
+    background:var(--nc-card-bg); border:1px solid #fca5a5;
+    border-radius:var(--ef-r); overflow:hidden; box-shadow:var(--nc-card-shadow);
+  }
+  [data-theme="dark"] .ef-danger { border-color:rgba(244,63,94,.22); }
+  .ef-danger-head {
+    display:flex; align-items:center; gap:.7rem;
+    padding:.85rem 1.5rem; border-bottom:1px solid #fca5a5; background:#fff5f5;
+  }
+  [data-theme="dark"] .ef-danger-head { background:rgba(244,63,94,.06); border-color:rgba(244,63,94,.18); }
+  .ef-danger-head-ico {
+    width:28px; height:28px; border-radius:8px;
+    background:rgba(244,63,94,.12); color:#f43f5e;
+    display:flex; align-items:center; justify-content:center; font-size:.75rem; flex-shrink:0;
+  }
+  .ef-danger-head-title {
+    font-size:.7rem; font-weight:800; text-transform:uppercase; letter-spacing:.1em; color:#be123c;
+  }
+  [data-theme="dark"] .ef-danger-head-title { color:#fb7185; }
+  .ef-danger-body { padding:1.1rem 1.5rem; }
+  .ef-danger-desc { font-size:.78rem; color:var(--nc-text-muted); line-height:1.6; margin-bottom:.85rem; font-weight:500; }
+  .ef-btn-del {
+    display:inline-flex; align-items:center; gap:.45rem;
+    background:#fff; border:1.5px solid #fca5a5;
+    border-radius:10px; padding:.6rem 1.1rem;
+    font-family:'Sora',sans-serif; font-size:.82rem; font-weight:700;
+    color:#be123c; cursor:pointer; text-decoration:none;
+    transition:background .15s, border-color .15s, transform .12s;
+  }
+  [data-theme="dark"] .ef-btn-del { background:transparent; border-color:rgba(244,63,94,.3); color:#fb7185; }
+  .ef-btn-del:hover { background:#fef2f2; border-color:#f43f5e; transform:translateY(-1px); }
+  [data-theme="dark"] .ef-btn-del:hover { background:rgba(244,63,94,.08); }
+
+  .ef-bar {
+    background:var(--nc-card-bg); border:1px solid var(--nc-card-border);
+    border-radius:var(--ef-r); box-shadow:var(--nc-card-shadow);
+    overflow:hidden; margin-top:var(--ef-gap);
+  }
+  .ef-bar-inner {
+    display:flex; align-items:center; gap:.75rem;
+    padding:1rem 1.5rem; border-top:3px solid var(--ef-amber);
+  }
+  .ef-btn-save {
+    display:inline-flex; align-items:center; gap:.5rem;
+    background:var(--ef-amber); color:#fff; border:none;
+    border-radius:12px; padding:.72rem 1.65rem;
+    font-family:'Sora',sans-serif; font-size:.88rem; font-weight:700;
+    cursor:pointer; letter-spacing:-.01em;
+    box-shadow:0 4px 14px rgba(245,158,11,.35);
+    transition:transform .12s, box-shadow .15s, background .15s;
+    position:relative; overflow:hidden;
+  }
+  .ef-btn-save::after {
+    content:''; position:absolute; inset:0; pointer-events:none;
+    background:linear-gradient(135deg,rgba(255,255,255,.15),transparent 60%);
+  }
+  .ef-btn-save:hover { background:var(--ef-amb-d); transform:translateY(-2px); box-shadow:0 8px 24px rgba(245,158,11,.4); }
+  .ef-btn-save:active { transform:translateY(0); }
+  .ef-btn-cancel {
+    display:inline-flex; align-items:center; gap:.4rem;
+    background:var(--nc-surface-2); border:1.5px solid var(--nc-border);
+    border-radius:12px; padding:.7rem 1.2rem;
+    font-family:'Sora',sans-serif; font-size:.85rem; font-weight:600;
+    color:var(--nc-text-muted); text-decoration:none;
+    transition:border-color .15s, color .15s, background .15s;
+  }
+  .ef-btn-cancel:hover { border-color:var(--nc-border-2); color:var(--nc-text); background:var(--nc-surface-3); }
+  .ef-shortcut {
+    margin-left:auto; font-size:.73rem; font-weight:600;
+    color:var(--nc-text-faint); display:flex; align-items:center; gap:.4rem;
+  }
+  .ef-kbd {
+    display:inline-flex; align-items:center; justify-content:center;
+    background:var(--nc-surface-2); border:1px solid var(--nc-border);
+    border-bottom-width:2px; border-radius:5px; padding:.1rem .45rem;
+    font-size:.65rem; font-weight:700; font-family:'JetBrains Mono',monospace; color:var(--nc-text-muted);
+  }
+
+  @media(max-width:800px){
+    .ef-body{grid-template-columns:1fr;}
+    .ef-right{order:-1;}
+    .ef-hero__pills{display:none;}
+  }
+  @media(max-width:520px){
+    .ef-row2{grid-template-columns:1fr;}
+    .ef-bar-inner{flex-wrap:wrap;}
+    .ef-shortcut{display:none;}
+    .ef-hero{padding:1.4rem;}
+    .ef-hero__title{font-size:1.25rem;}
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="ef ea1">
+
+  <!-- Breadcrumb -->
+  <nav class="ef-crumb ea1">
+    <a href="{{ url_for('user_dashboard.index') }}"><i class="fas fa-house"></i>&ensp;Home</a>
+    <i class="fas fa-chevron-right"></i>
+    <a href="{{ url_for('food.provider_foods') }}">My Foods</a>
+    <i class="fas fa-chevron-right"></i>
+    <span>Edit</span>
+  </nav>
+
+  <!-- Hero -->
+  <div class="ef-hero ea2">
+    <div class="ef-hero__ico">✏️</div>
+    <div class="ef-hero__body">
+      <div class="ef-hero__eye">Editing food item</div>
+      <h1 class="ef-hero__title">{{ food.name }}</h1>
+      <p class="ef-hero__sub">Update details, nutrition, or swap the photo. Changes are saved on submit.</p>
+    </div>
+    <div class="ef-hero__pills">
+      {% if food.price %}
+        <span class="ef-hero__pill"><i class="fas fa-tag"></i>&ensp;${{ "%.2f"|format(food.price) }}</span>
+      {% endif %}
+      {% if food.diet_type %}
+        <span class="ef-hero__pill"><i class="fas fa-leaf"></i>&ensp;{{ food.diet_type.replace('-',' ').title() }}</span>
+      {% endif %}
+      <span class="ef-hero__pill"><i class="fas fa-pencil"></i>&ensp;Draft edits</span>
+    </div>
+  </div>
+
+  <!-- Change indicator -->
+  <div class="ef-unsaved ea3">
+    <div class="ef-unsaved__icon"><i class="fas fa-pen-to-square"></i></div>
+    <div class="ef-unsaved__copy">
+      <div class="ef-unsaved__title">Editing mode active</div>
+      <div class="ef-unsaved__hint">Modified fields are highlighted in amber — save when you're ready.</div>
+    </div>
+    <span class="ef-delta" id="ef-delta">
+      <i class="fas fa-circle-dot"></i>&ensp;<span id="ef-delta-n">0</span>&thinsp;changes
+    </span>
+  </div>
+
+  <!-- ════════════════════════════════════════
+       MAIN EDIT FORM
+       FIX 1: action attribute added
+       FIX 2: NO nested forms inside this block
+  ════════════════════════════════════════ -->
+  <form method="POST"
+        action="{{ url_for('food.edit_food', id=food.id) }}"
+        enctype="multipart/form-data"
+        id="ef-form">
+
+    <div class="ef-body">
+
+      <!-- ══ LEFT ══ -->
+      <div class="ef-left ea4">
+
+        <!-- Basic Info -->
+        <div class="ef-card">
+          <div class="ef-card-head">
+            <div class="ef-card-ico eci-blue"><i class="fas fa-circle-info"></i></div>
+            <span class="ef-card-title">Basic Information</span>
+            <span class="ef-card-badge ecb-edit">Editable</span>
+          </div>
+          <div class="ef-card-body" style="display:flex;flex-direction:column;gap:0;">
+
+            <div class="ef-fld">
+              <label class="ef-lbl" for="ef-name">
+                <span class="ef-lbl-ico"><i class="fas fa-utensils"></i></span>
+                Food Name <span class="req">*</span>
+              </label>
+              <div class="ef-inp-grp">
+                <i class="fas fa-utensils ef-inp-pre"></i>
+                <input type="text" name="name" id="ef-name"
+                       class="ef-inp form-control"
+                       value="{{ food.name }}" required
+                       data-orig="{{ food.name }}">
+              </div>
+            </div>
+
+            <div class="ef-fld">
+              <label class="ef-lbl" for="ef-desc">
+                <span class="ef-lbl-ico"><i class="fas fa-align-left"></i></span>
+                Description <span class="opt">optional</span>
+              </label>
+              <textarea name="description" id="ef-desc"
+                        class="ef-ta form-control" rows="3"
+                        data-orig="{{ food.description or '' }}">{{ food.description or '' }}</textarea>
+            </div>
+
+            <div class="ef-fld">
+              <div class="ef-row2">
+                <div>
+                  <label class="ef-lbl" for="ef-price">
+                    <span class="ef-lbl-ico"><i class="fas fa-tag"></i></span>
+                    Price <span class="opt">optional</span>
+                  </label>
+                  <div class="ef-inp-grp">
+                    <i class="fas fa-dollar-sign ef-inp-pre"></i>
+                    <input type="number" name="price" id="ef-price"
+                           class="ef-inp form-control"
+                           step="0.01" min="0" placeholder="0.00"
+                           value="{{ food.price or '' }}"
+                           data-orig="{{ food.price or '' }}">
+                  </div>
+                </div>
+                <div>
+                  <label class="ef-lbl" for="ef-diet">
+                    <span class="ef-lbl-ico"><i class="fas fa-leaf"></i></span>
+                    Diet Type <span class="opt">optional</span>
+                  </label>
+                  <select name="diet_type" id="ef-diet" class="ef-sel form-select"
+                          data-orig="{{ food.diet_type or '' }}">
+                    <option value="">All / No type</option>
+                    <option value="vegan"        {{ 'selected' if food.diet_type=='vegan' }}>🌱 Vegan</option>
+                    <option value="vegetarian"   {{ 'selected' if food.diet_type=='vegetarian' }}>🥦 Vegetarian</option>
+                    <option value="keto"         {{ 'selected' if food.diet_type=='keto' }}>🥑 Keto</option>
+                    <option value="paleo"        {{ 'selected' if food.diet_type=='paleo' }}>🍖 Paleo</option>
+                    <option value="gluten-free"  {{ 'selected' if food.diet_type=='gluten-free' }}>🌾 Gluten-Free</option>
+                    <option value="dairy-free"   {{ 'selected' if food.diet_type=='dairy-free' }}>🥛 Dairy-Free</option>
+                    <option value="halal"        {{ 'selected' if food.diet_type=='halal' }}>☪️ Halal</option>
+                    <option value="low-carb"     {{ 'selected' if food.diet_type=='low-carb' }}>📉 Low-Carb</option>
+                    <option value="high-protein" {{ 'selected' if food.diet_type=='high-protein' }}>💪 High-Protein</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- Nutrition -->
+        <div class="ef-card">
+          <div class="ef-card-head">
+            <div class="ef-card-ico eci-amber"><i class="fas fa-fire-flame-curved"></i></div>
+            <span class="ef-card-title">Nutrition Facts</span>
+            <span class="ef-card-badge ecb-serv">Per Serving</span>
+          </div>
+          <div class="ef-card-body">
+            <div class="ef-nut-grid">
+
+              <div class="ef-nut en-cal">
+                <div class="ef-nut-top">
+                  <span class="ef-nut-name">Calories</span>
+                  <div class="ef-nut-bar"></div>
+                </div>
+                <input type="number" name="calories" id="ef-cal"
+                       class="ef-nut-val" step="0.1" min="0" placeholder="0"
+                       value="{{ food.calories or '' }}"
+                       data-orig="{{ food.calories or '' }}">
+                <div class="ef-nut-unit">kcal / serving</div>
+              </div>
+
+              <div class="ef-nut en-pro">
+                <div class="ef-nut-top">
+                  <span class="ef-nut-name">Protein</span>
+                  <div class="ef-nut-bar"></div>
+                </div>
+                <input type="number" name="protein" id="ef-pro"
+                       class="ef-nut-val" step="0.1" min="0" placeholder="0"
+                       value="{{ food.protein or '' }}"
+                       data-orig="{{ food.protein or '' }}">
+                <div class="ef-nut-unit">grams / serving</div>
+              </div>
+
+              <div class="ef-nut en-car">
+                <div class="ef-nut-top">
+                  <span class="ef-nut-name">Carbs</span>
+                  <div class="ef-nut-bar"></div>
+                </div>
+                <input type="number" name="carbs" id="ef-car"
+                       class="ef-nut-val" step="0.1" min="0" placeholder="0"
+                       value="{{ food.carbs or '' }}"
+                       data-orig="{{ food.carbs or '' }}">
+                <div class="ef-nut-unit">grams / serving</div>
+              </div>
+
+              <div class="ef-nut en-fat">
+                <div class="ef-nut-top">
+                  <span class="ef-nut-name">Fat</span>
+                  <div class="ef-nut-bar"></div>
+                </div>
+                <input type="number" name="fat" id="ef-fat"
+                       class="ef-nut-val" step="0.1" min="0" placeholder="0"
+                       value="{{ food.fat or '' }}"
+                       data-orig="{{ food.fat or '' }}">
+                <div class="ef-nut-unit">grams / serving</div>
+              </div>
+
+            </div>
+          </div>
+        </div>
+
+      </div><!-- /ef-left -->
+
+      <!-- ══ RIGHT ══ -->
+      <div class="ef-right ea5">
+
+        <!-- Image -->
+        <div class="ef-card">
+          <div class="ef-card-head">
+            <div class="ef-card-ico eci-violet"><i class="fas fa-image"></i></div>
+            <span class="ef-card-title">Food Photo</span>
+            <span class="ef-card-badge ecb-opt">Optional</span>
+          </div>
+          <div class="ef-card-body" style="padding-top:1.1rem;">
+
+            {% if food.image %}
+            <div class="ef-cur-img">
+              <img src="{{ url_for('static', filename='uploads/' + food.image) }}" alt="{{ food.name }}">
+              <div>
+                <div class="ef-cur-badge"><i class="fas fa-check"></i>&ensp;Current photo</div>
+                <p class="ef-cur-img__name">{{ food.image }}</p>
+                <p class="ef-cur-img__hint">Upload a new photo to replace it, or leave blank to keep this one.</p>
+              </div>
+            </div>
+            {% endif %}
+
+            <div class="ef-upload" id="ef-upload-zone">
+              <input type="file" name="image" id="ef-img-inp"
+                     accept="image/*" onchange="handleImg(this)">
+              <div class="ef-upload-ico"><i class="fas fa-cloud-arrow-up"></i></div>
+              <div class="ef-upload-title">{{ 'Replace photo' if food.image else 'Upload a photo' }}</div>
+              <div class="ef-upload-sub">Drag &amp; drop or click to browse</div>
+              <div class="ef-upload-pills">
+                <span class="ef-type-pill">PNG</span>
+                <span class="ef-type-pill">JPG</span>
+                <span class="ef-type-pill">GIF</span>
+                <span class="ef-type-pill">WEBP</span>
+              </div>
+            </div>
+
+            <div id="ef-new-preview">
+              <img id="ef-prev-img" src="" alt="New preview">
+              <div class="ef-preview-foot">
+                <span class="ef-preview-name" id="ef-file-name">—</span>
+                <button type="button" class="ef-preview-rm" onclick="removeImg()">
+                  <i class="fas fa-trash-can"></i> Remove
+                </button>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- Live preview -->
+        <div class="ef-card">
+          <div class="ef-card-head">
+            <div class="ef-card-ico eci-teal"><i class="fas fa-eye"></i></div>
+            <span class="ef-card-title">Live Preview</span>
+          </div>
+          <div>
+            <div class="ef-live">
+              <div class="ef-live-head"><span class="ef-live-dot"></span>&ensp;Current values</div>
+              <div class="ef-live-row">
+                <span class="ef-live-key">Name</span>
+                <span class="ef-live-val" id="lv-name">{{ food.name }}</span>
+              </div>
+              <div class="ef-live-row">
+                <span class="ef-live-key">Price</span>
+                <span class="ef-live-val {{ 'empty' if not food.price }}" id="lv-price">
+                  {{ ('$%.2f'|format(food.price)) if food.price else '—' }}
+                </span>
+              </div>
+              <div class="ef-live-row">
+                <span class="ef-live-key">Diet</span>
+                <span class="ef-live-val {{ 'empty' if not food.diet_type }}" id="lv-diet">
+                  {{ food.diet_type.replace('-',' ').title() if food.diet_type else '—' }}
+                </span>
+              </div>
+              <div class="ef-live-row">
+                <span class="ef-live-key">Calories</span>
+                <span class="ef-live-val {{ 'empty' if not food.calories }}" id="lv-cal">
+                  {{ (food.calories|string + ' kcal') if food.calories else '—' }}
+                </span>
+              </div>
+            </div>
+
+            <div class="ef-macro-wrap">
+              <div class="ef-macro-head">Macro breakdown</div>
+              <div class="ef-macro-row">
+                <span class="ef-macro-lbl">Protein</span>
+                <div class="ef-macro-trk"><div class="ef-macro-fill emf-p" id="bar-p"></div></div>
+                <span class="ef-macro-num" id="num-p">{{ (food.protein|int)|string + 'g' if food.protein else '0g' }}</span>
+              </div>
+              <div class="ef-macro-row">
+                <span class="ef-macro-lbl">Carbs</span>
+                <div class="ef-macro-trk"><div class="ef-macro-fill emf-c" id="bar-c"></div></div>
+                <span class="ef-macro-num" id="num-c">{{ (food.carbs|int)|string + 'g' if food.carbs else '0g' }}</span>
+              </div>
+              <div class="ef-macro-row">
+                <span class="ef-macro-lbl">Fat</span>
+                <div class="ef-macro-trk"><div class="ef-macro-fill emf-f" id="bar-f"></div></div>
+                <span class="ef-macro-num" id="num-f">{{ (food.fat|int)|string + 'g' if food.fat else '0g' }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ══ DANGER ZONE ══
+             NOTE: This div is inside the grid for layout purposes only.
+             The actual delete button triggers a SEPARATE form below (ef-delete-form)
+             via JS — it is NOT nested inside ef-form.
+        ══════════════════════════════════════════════ -->
+        <div class="ef-danger">
+          <div class="ef-danger-head">
+            <div class="ef-danger-head-ico"><i class="fas fa-triangle-exclamation"></i></div>
+            <span class="ef-danger-head-title">Danger Zone</span>
+          </div>
+          <div class="ef-danger-body">
+            <p class="ef-danger-desc">
+              Permanently delete <strong style="color:var(--nc-text)">{{ food.name }}</strong> from your menu.
+              This action <strong style="color:#be123c">cannot be undone</strong>.
+            </p>
+            <!-- type="button" prevents this from submitting ef-form -->
+            <button type="button" class="ef-btn-del" onclick="submitDelete()">
+              <i class="fas fa-trash-can"></i> Delete this item
+            </button>
+          </div>
+        </div>
+
+      </div><!-- /ef-right -->
+    </div><!-- /ef-body -->
+
+    <!-- Action bar -->
+    <div class="ef-bar ea5">
+      <div class="ef-bar-inner">
+        <button type="submit" class="ef-btn-save" id="ef-save-btn">
+          <i class="fas fa-floppy-disk"></i>&ensp;Save Changes
+        </button>
+        <a href="{{ url_for('food.provider_foods') }}" class="ef-btn-cancel">
+          <i class="fas fa-xmark"></i>&ensp;Discard
+        </a>
+        <div class="ef-shortcut">
+          <span>Quick save</span>
+          <kbd class="ef-kbd">Ctrl</kbd>
+          <kbd class="ef-kbd">↵</kbd>
+        </div>
+      </div>
+    </div>
+
+  </form>
+  <!-- ↑↑↑  ef-form ends here  ↑↑↑ -->
+
+  <!-- ════════════════════════════════════════
+       FIX 2: DELETE FORM — standalone, never nested inside ef-form
+  ════════════════════════════════════════ -->
+  <form id="ef-delete-form"
+        method="POST"
+        action="{{ url_for('food.delete_food', id=food.id) }}"
+        style="display:none;">
+  </form>
+
+</div><!-- /ef -->
+{% endblock %}
+
+{% block extra_js %}
+<script>
+(function(){
+
+  /* ── FIX 2: Delete via standalone form to avoid nested-form issues ── */
+  window.submitDelete = function(){
+    if(confirm("Permanently delete '{{ food.name|e }}'? This cannot be undone.")){
+      document.getElementById('ef-delete-form').submit();
+    }
+  };
+
+  /* ── Image preview ── */
+  window.handleImg = function(inp){
+    if(!inp.files||!inp.files[0])return;
+    const f=inp.files[0], r=new FileReader();
+    r.onload=e=>{
+      document.getElementById('ef-prev-img').src=e.target.result;
+      document.getElementById('ef-file-name').textContent=f.name;
+      document.getElementById('ef-new-preview').style.display='block';
+      document.getElementById('ef-upload-zone').style.display='none';
+    };
+    r.readAsDataURL(f);
+  };
+  window.removeImg=function(){
+    document.getElementById('ef-img-inp').value='';
+    document.getElementById('ef-new-preview').style.display='none';
+    document.getElementById('ef-upload-zone').style.display='block';
+  };
+
+  /* ── Change tracking ── */
+  const tracked=document.querySelectorAll('[data-orig]');
+  function countChanges(){
+    let n=0;
+    tracked.forEach(el=>{
+      const dirty=el.value.trim()!==el.dataset.orig.trim();
+      el.classList.toggle('dirty',dirty);
+      const nut=el.closest('.ef-nut');
+      if(nut)nut.classList.toggle('dirty',dirty);
+      if(dirty)n++;
+    });
+    document.getElementById('ef-delta-n').textContent=n;
+    document.getElementById('ef-delta').classList.toggle('hot',n>0);
+  }
+
+  /* ── Live preview ── */
+  function lv(id,val,cls='live'){
+    const el=document.getElementById(id);
+    if(!el)return;
+    if(val){el.textContent=val;el.className='ef-live-val '+cls;}
+    else   {el.textContent='—';el.className='ef-live-val empty';}
+  }
+  function bar(bId,nId,val,tot){
+    const pct=tot>0?Math.min(val/tot*100,100):0;
+    document.getElementById(bId).style.width=pct+'%';
+    document.getElementById(nId).textContent=val?val+'g':'0g';
+  }
+  function update(){
+    countChanges();
+    const name =document.getElementById('ef-name').value.trim();
+    const price=document.getElementById('ef-price').value;
+    const diet =document.getElementById('ef-diet');
+    const cal  =parseFloat(document.getElementById('ef-cal').value)||0;
+    const p    =parseFloat(document.getElementById('ef-pro').value)||0;
+    const c    =parseFloat(document.getElementById('ef-car').value)||0;
+    const f    =parseFloat(document.getElementById('ef-fat').value)||0;
+
+    lv('lv-name',  name||null);
+    lv('lv-price', price?'$'+parseFloat(price).toFixed(2):null);
+    lv('lv-diet',  diet.value?diet.options[diet.selectedIndex].text.replace(/^\S+\s/,''):null);
+    lv('lv-cal',   cal?cal+' kcal':null);
+
+    const tot=p+c+f||1;
+    bar('bar-p','num-p',p,tot);
+    bar('bar-c','num-c',c,tot);
+    bar('bar-f','num-f',f,tot);
+  }
+
+  tracked.forEach(el=>{el.addEventListener('input',update);el.addEventListener('change',update);});
+  update();
+
+  /* ── Ctrl+Enter quick save ── */
+  document.addEventListener('keydown',e=>{
+    if((e.ctrlKey||e.metaKey)&&e.key==='Enter')
+      document.getElementById('ef-form').requestSubmit();
+  });
+
+  /* ── Loading state on submit ── */
+  document.getElementById('ef-form').addEventListener('submit',()=>{
+    const btn=document.getElementById('ef-save-btn');
+    btn.innerHTML='<i class="fas fa-spinner fa-spin"></i>&ensp;Saving…';
+    btn.disabled=true;
+  });
+
+})();
+</script>
+{% endblock %}

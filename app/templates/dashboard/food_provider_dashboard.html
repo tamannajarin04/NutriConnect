@@ -1,17 +1,855 @@
 {% extends "base.html" %}
-{% block title %}Food Provider Dashboard{% endblock %}
+{% block title %}My Food Items · NutriConnect{% endblock %}
+
+{% block extra_css %}
+<link href="https://fonts.googleapis.com/css2?family=Cabinet+Grotesk:wght@400;500;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+{% endblock %}
 
 {% block content %}
-<h2>Welcome, {{ user.first_name or user.username }}!</h2>
+<style>
+  body, button, input, select, textarea {
+    font-family: 'Cabinet Grotesk', sans-serif !important;
+  }
 
-<p class="lead">
-  Your Role: <span class="badge bg-warning text-dark">Food Provider</span>
-</p>
+  .fp {
+    /* All from base.html tokens */
+    --surf:  var(--nc-surface);
+    --s2:    var(--nc-surface-2);
+    --s3:    var(--nc-surface-3);
+    --bdr:   var(--nc-border);
+    --bdr2:  var(--nc-border-2);
+    --txt:   var(--nc-text);
+    --txt2:  var(--nc-text-2);
+    --mu:    var(--nc-text-muted);
+    --fa:    var(--nc-text-faint);
+    --brand: var(--nc-brand);
+    --brand-d: var(--nc-brand-d);
+    --brand-l: var(--nc-brand-l);
 
-<hr>
+    /* Accents */
+    --emerald:   #34d399;
+    --emerald-d: #10b981;
+    --emerald-l: rgba(52,211,153,.12);
+    --amber:     #fbbf24;
+    --amber-l:   rgba(251,191,36,.12);
+    --rose:      #fb7185;
+    --rose-l:    rgba(251,113,133,.12);
+    --violet:    #a78bfa;
 
-<div class="alert alert-info">
-  <i class="fas fa-info-circle"></i>
-  Dietary preferences are only available for regular users.
+    --r: 14px;
+    --r-lg: 18px;
+  }
+
+  @keyframes up { from{opacity:0;transform:translateY(14px)} to{opacity:1;transform:none} }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
+
+  /* ══ BANNER ══ */
+  .fp-banner {
+    background:
+      radial-gradient(ellipse 60% 140% at -5% 50%,  rgba(14,165,233,.38) 0%, transparent 52%),
+      radial-gradient(ellipse 35% 80%  at 105% 10%,  rgba(52,211,153,.18) 0%, transparent 50%),
+      radial-gradient(ellipse 45% 60%  at 60%  110%, rgba(56,189,248,.12) 0%, transparent 48%),
+      radial-gradient(ellipse 25% 40%  at 85%  80%,  rgba(167,139,250,.1) 0%, transparent 50%),
+      linear-gradient(145deg, #060f1e 0%, #091828 35%, #0b1f38 65%, #070e1c 100%);
+    border-radius: var(--r-lg);
+    border: 1px solid rgba(56,189,248,.15);
+    padding: 2.25rem 2.5rem;
+    margin-bottom: 1.5rem;
+    position: relative; overflow: hidden; isolation: isolate;
+    box-shadow:
+      0 0 0 1px rgba(56,189,248,.05) inset,
+      0 1px 0 rgba(255,255,255,.06) inset,
+      0 12px 48px rgba(0,0,0,.45),
+      0 4px 16px rgba(14,165,233,.08);
+    animation: up .38s cubic-bezier(.16,1,.3,1) both;
+  }
+
+  /* dot-grid */
+  .fp-banner::before {
+    content: ''; position: absolute; inset: 0; z-index: 0;
+    background-image: radial-gradient(circle, rgba(255,255,255,.05) 1px, transparent 1px);
+    background-size: 26px 26px;
+    mask-image: radial-gradient(ellipse 100% 100% at 50% 50%, black 30%, transparent 100%);
+    pointer-events: none;
+  }
+
+  /* diagonal shimmer streak */
+  .fp-banner::after {
+    content: ''; position: absolute;
+    top: -60%; left: -10%; width: 55%; height: 220%;
+    background: linear-gradient(105deg, transparent 40%, rgba(56,189,248,.04) 50%, transparent 60%);
+    transform: rotate(0deg);
+    z-index: 0; pointer-events: none;
+  }
+
+  /* bottom glow line */
+  .fp-banner-scan {
+    position: absolute; bottom: 0; left: 0; right: 0; height: 1px;
+    background: linear-gradient(90deg,
+      transparent 0%,
+      rgba(56,189,248,.0) 10%,
+      rgba(56,189,248,.7) 35%,
+      rgba(52,211,153,.5) 55%,
+      rgba(56,189,248,.6) 70%,
+      rgba(56,189,248,.0) 90%,
+      transparent 100%);
+    z-index: 4;
+    filter: blur(.4px);
+  }
+
+  /* top inner highlight */
+  .fp-banner-top {
+    position: absolute; top: 0; left: 0; right: 0; height: 1px;
+    background: linear-gradient(90deg, transparent 10%, rgba(255,255,255,.12) 40%, rgba(255,255,255,.12) 60%, transparent 90%);
+    z-index: 4;
+  }
+
+  .fp-banner-inner {
+    position: relative; z-index: 3;
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 2rem; flex-wrap: wrap;
+  }
+
+  .fp-eyebrow {
+    display: inline-flex; align-items: center; gap: .4rem;
+    background: rgba(56,189,248,.1);
+    border: 1px solid rgba(56,189,248,.22);
+    border-radius: 99px; padding: .22rem .9rem;
+    font-size: .62rem; font-weight: 800; letter-spacing: .1em;
+    text-transform: uppercase; color: rgba(255,255,255,.7); margin-bottom: .55rem;
+    box-shadow: 0 0 12px rgba(56,189,248,.08);
+  }
+  .fp-eyebrow-dot {
+    width: 5px; height: 5px; border-radius: 50%;
+    background: #38bdf8; box-shadow: 0 0 8px #38bdf8, 0 0 16px rgba(56,189,248,.5);
+    animation: pulse 2s ease-in-out infinite;
+  }
+
+  .fp-banner-title {
+    font-size: 1.75rem; font-weight: 900; color: #fff;
+    letter-spacing: -.045em; line-height: 1.1; margin: 0 0 .3rem;
+    text-shadow: 0 2px 20px rgba(14,165,233,.2);
+  }
+  .fp-banner-title .hl {
+    background: linear-gradient(135deg, #38bdf8 0%, #7dd3fc 40%, #34d399 100%);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    filter: drop-shadow(0 0 12px rgba(56,189,248,.35));
+  }
+  .fp-banner-sub {
+    color: rgba(255,255,255,.38); font-size: .8rem; margin: 0;
+    letter-spacing: .01em;
+  }
+
+  /* Stats glass panel */
+  .fp-banner-stats {
+    display: flex; align-items: stretch;
+    background: rgba(255,255,255,.04);
+    border: 1px solid rgba(255,255,255,.1);
+    border-radius: var(--r);
+    overflow: hidden;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    flex-shrink: 0;
+    box-shadow: 0 4px 24px rgba(0,0,0,.2), 0 1px 0 rgba(255,255,255,.06) inset;
+  }
+  .fp-bs {
+    padding: .9rem 1.5rem; text-align: center;
+    border-right: 1px solid rgba(255,255,255,.07);
+    display: flex; flex-direction: column; gap: .22rem;
+    position: relative;
+    transition: background .2s;
+  }
+  .fp-bs::before {
+    content: ''; position: absolute; top: 0; left: 20%; right: 20%; height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(56,189,248,.3), transparent);
+  }
+  .fp-bs:hover { background: rgba(255,255,255,.04); }
+  .fp-bs:last-child { border-right: none; }
+  .fp-bs-val {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 1.5rem; font-weight: 700; color: #fff; line-height: 1;
+    text-shadow: 0 0 20px currentColor;
+  }
+  .fp-bs-val.c-brand   { color: #38bdf8; }
+  .fp-bs-val.c-emerald { color: #34d399; }
+  .fp-bs-val.c-amber   { color: #fbbf24; }
+  .fp-bs-lbl {
+    font-size: .56rem; font-weight: 800; text-transform: uppercase;
+    letter-spacing: .12em; color: rgba(255,255,255,.28);
+  }
+
+  .btn-insights {
+    display: inline-flex; align-items: center; gap: .42rem;
+    background: var(--s2); color: var(--txt2);
+    border: 1px solid var(--bdr); border-radius: var(--r);
+    padding: .62rem 1.1rem; font-size: .83rem; font-weight: 700;
+    cursor: pointer; font-family: inherit;
+    transition: background .14s, border-color .14s, color .14s;
+  }
+  .btn-insights:hover { background: var(--violet-l); border-color: rgba(167,139,250,.3); color: var(--violet); }
+  .btn-insights-badge {
+    background: rgba(167,139,250,.15); color: var(--violet);
+    border: 1px solid rgba(167,139,250,.25);
+    border-radius: 99px; padding: .05rem .42rem;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: .68rem; font-weight: 700;
+  }
+
+  /* ══ TOOLBAR ══ */
+  .fp-toolbar {
+    display: flex; align-items: center; justify-content: space-between;
+    flex-wrap: wrap; gap: .75rem; margin-bottom: 1.25rem;
+  }
+  .fp-count {
+    display: flex; align-items: center; gap: .5rem;
+    font-size: .82rem; font-weight: 600; color: var(--mu);
+  }
+  .fp-count-dot {
+    width: 7px; height: 7px; border-radius: 50%;
+    background: var(--brand);
+    box-shadow: 0 0 8px rgba(14,165,233,.5);
+  }
+  .fp-count strong { color: var(--txt); font-weight: 800; }
+
+  .btn-add {
+    display: inline-flex; align-items: center; gap: .42rem;
+    background: linear-gradient(135deg, var(--brand-d), var(--brand));
+    color: #fff; border: none; border-radius: var(--r);
+    padding: .62rem 1.25rem; font-size: .83rem; font-weight: 800;
+    text-decoration: none; cursor: pointer; font-family: inherit;
+    box-shadow: 0 2px 12px rgba(14,165,233,.3), 0 0 0 1px rgba(14,165,233,.15);
+    transition: filter .15s, transform .12s, box-shadow .2s;
+  }
+  .btn-add:hover {
+    filter: brightness(1.1); color: #fff; transform: translateY(-1px);
+    box-shadow: 0 6px 20px rgba(14,165,233,.42), 0 0 0 1px rgba(14,165,233,.25);
+  }
+
+  /* ══ GRID ══ */
+  .fp-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
+    gap: 1.1rem;
+  }
+
+  /* ══ CARD ══ */
+  .fp-card {
+    background: var(--surf);
+    border: 1px solid var(--bdr);
+    border-radius: var(--r-lg);
+    overflow: hidden;
+    display: flex; flex-direction: column;
+    box-shadow: var(--nc-card-shadow);
+    transition: transform .22s cubic-bezier(.16,1,.3,1), box-shadow .22s, border-color .22s;
+    animation: up .42s cubic-bezier(.16,1,.3,1) both;
+  }
+  .fp-card:nth-child(1){animation-delay:.05s} .fp-card:nth-child(2){animation-delay:.09s}
+  .fp-card:nth-child(3){animation-delay:.13s} .fp-card:nth-child(4){animation-delay:.17s}
+  .fp-card:nth-child(5){animation-delay:.21s} .fp-card:nth-child(6){animation-delay:.25s}
+  .fp-card:hover {
+    transform: translateY(-4px);
+    border-color: var(--bdr2);
+    box-shadow: 0 12px 40px rgba(0,0,0,.15), 0 0 0 1px rgba(14,165,233,.12);
+  }
+
+  /* top stripe */
+  .fp-card-bar { height: 3px; background: linear-gradient(90deg, var(--brand-d), var(--brand), #67e8f9); }
+
+  /* image */
+  .fp-card-img {
+    height: 185px; background: var(--s3);
+    position: relative; overflow: hidden;
+  }
+  .fp-card-img img {
+    width: 100%; height: 100%; object-fit: cover;
+    transition: transform .45s cubic-bezier(.16,1,.3,1);
+  }
+  .fp-card:hover .fp-card-img img { transform: scale(1.06); }
+
+  .fp-no-img {
+    width: 100%; height: 100%;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    gap: .5rem; background: var(--s3);
+  }
+  .fp-no-img i    { font-size: 2rem; color: var(--fa); }
+  .fp-no-img span { font-size: .58rem; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; color: var(--fa); }
+
+  /* price badge */
+  .fp-price {
+    position: absolute; bottom: 10px; left: 10px;
+    background: rgba(0,0,0,.72); backdrop-filter: blur(10px);
+    border: 1px solid rgba(255,255,255,.14);
+    color: #fff; font-family: 'JetBrains Mono', monospace;
+    font-size: .85rem; font-weight: 700;
+    border-radius: 99px; padding: .22rem .8rem;
+    transition: background .2s, border-color .2s;
+  }
+  .fp-card:hover .fp-price { background: var(--brand-d); border-color: transparent; }
+
+  /* body */
+  .fp-card-body {
+    padding: 1rem 1.2rem .8rem;
+    flex: 1; display: flex; flex-direction: column; gap: .45rem;
+  }
+  .fp-card-name {
+    font-size: .98rem; font-weight: 900; color: var(--txt);
+    letter-spacing: -.025em; line-height: 1.25; margin: 0;
+  }
+  .fp-card-desc {
+    font-size: .77rem; color: var(--mu); line-height: 1.58; margin: 0;
+    display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+  }
+
+  /* diet tag */
+  .fp-diet {
+    display: inline-flex; align-items: center; gap: .28rem;
+    background: var(--emerald-l); color: var(--emerald);
+    border: 1px solid rgba(52,211,153,.2);
+    border-radius: 99px; padding: .16rem .65rem;
+    font-size: .65rem; font-weight: 700;
+  }
+
+  /* nutrition pills */
+  .fp-nutr { display: flex; flex-wrap: wrap; gap: .28rem; margin-top: auto; padding-top: .55rem; }
+  .fp-nb {
+    display: inline-flex; align-items: center; gap: .25rem;
+    background: var(--s2); border: 1px solid var(--bdr);
+    border-radius: 99px; padding: .2rem .65rem;
+    font-size: .7rem; font-weight: 600; color: var(--txt2);
+    transition: border-color .15s;
+  }
+  .fp-card:hover .fp-nb { border-color: var(--bdr2); }
+  .fp-nb b { font-family: 'JetBrains Mono', monospace; font-size: .72rem; }
+  .nb-cal b { color: #fb923c; }
+  .nb-pro b { color: var(--emerald); }
+  .nb-car b { color: var(--violet); }
+  .nb-fat b { color: #f472b6; }
+
+  /* footer */
+  .fp-card-foot {
+    padding: .65rem 1.2rem .85rem;
+    display: flex; gap: .5rem;
+    border-top: 1px solid var(--bdr);
+    background: var(--s2);
+  }
+  .fp-btn-edit {
+    flex: 1; display: inline-flex; align-items: center; justify-content: center; gap: .38rem;
+    background: var(--surf); border: 1px solid var(--bdr);
+    color: var(--txt2); border-radius: var(--r);
+    padding: .54rem 0; font-size: .78rem; font-weight: 700;
+    text-decoration: none; cursor: pointer; font-family: inherit;
+    transition: background .14s, border-color .14s, color .14s;
+  }
+  .fp-btn-edit:hover { background: var(--brand-l); border-color: rgba(14,165,233,.25); color: var(--brand); }
+
+  .fp-btn-del {
+    flex: 1; display: inline-flex; align-items: center; justify-content: center; gap: .38rem;
+    background: var(--surf); border: 1px solid var(--bdr);
+    color: var(--mu); border-radius: var(--r);
+    padding: .54rem 0; font-size: .78rem; font-weight: 700;
+    cursor: pointer; font-family: inherit;
+    transition: background .14s, border-color .14s, color .14s;
+  }
+  .fp-btn-del:hover { background: var(--rose-l); border-color: rgba(251,113,133,.3); color: var(--rose); }
+
+  /* ══ EMPTY ══ */
+  .fp-empty {
+    grid-column: 1/-1;
+    background: var(--s2);
+    border: 1.5px dashed var(--bdr2);
+    border-radius: var(--r-lg); padding: 4rem 2rem;
+    display: flex; flex-direction: column; align-items: center;
+    text-align: center; gap: .8rem;
+  }
+  .fp-empty-ico {
+    width: 56px; height: 56px; border-radius: 15px;
+    background: var(--brand-l); color: var(--brand);
+    font-size: 1.4rem; display: flex; align-items: center; justify-content: center;
+    border: 1px solid rgba(14,165,233,.2); margin-bottom: .2rem;
+  }
+  .fp-empty h3 { font-size: 1rem; font-weight: 900; color: var(--txt); margin: 0; letter-spacing: -.02em; }
+  .fp-empty p  { font-size: .8rem; color: var(--mu); margin: 0; max-width: 240px; line-height: 1.65; }
+</style>
+
+{% set foods = foods if foods else [] %}
+{% set cf = foods | selectattr('calories') | list %}
+{% set pf = foods | selectattr('price')    | list %}
+
+<div class="fp">
+
+  <!-- ══ BANNER — stats live here only ══ -->
+  <div class="fp-banner">
+    <div class="fp-banner-scan"></div>
+    <div class="fp-banner-top"></div>
+    <div class="fp-banner-inner">
+
+      <div>
+        <div class="fp-eyebrow">
+          <span class="fp-eyebrow-dot"></span>
+          NutriConnect · Provider Panel
+        </div>
+        <div class="fp-banner-title">My <span class="hl">Food Items</span></div>
+        <p class="fp-banner-sub">Manage your listings — add, edit, or remove items anytime.</p>
+      </div>
+
+      <div class="fp-banner-stats">
+        <div class="fp-bs">
+          <div class="fp-bs-val c-brand">{{ foods|length }}</div>
+          <div class="fp-bs-lbl">Total Items</div>
+        </div>
+        <div class="fp-bs">
+          <div class="fp-bs-val c-emerald">{{ foods|selectattr('image')|list|length }}</div>
+          <div class="fp-bs-lbl">With Photos</div>
+        </div>
+        <div class="fp-bs">
+          <div class="fp-bs-val c-amber">{% if cf %}{{ (cf|map(attribute='calories')|sum / cf|length)|round(0)|int }}{% else %}—{% endif %}</div>
+          <div class="fp-bs-lbl">Avg Calories</div>
+        </div>
+        {% if pf %}
+        <div class="fp-bs">
+          <div class="fp-bs-val" style="color:#a78bfa;">${{ (pf|map(attribute='price')|sum / pf|length)|round(2) }}</div>
+          <div class="fp-bs-lbl">Avg Price</div>
+        </div>
+        {% endif %}
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ══ TOOLBAR ══ -->
+  <div class="fp-toolbar">
+    <div class="fp-count">
+      <span class="fp-count-dot"></span>
+      {% if foods %}
+        <strong>{{ foods|length }}</strong> item{{ 's' if foods|length != 1 }} listed
+      {% else %}
+        No items yet
+      {% endif %}
+    </div>
+    <div style="display:flex;align-items:center;gap:.6rem;">
+      {% if foods %}
+      <button class="btn-insights" onclick="openInsights()">
+        <i class="fas fa-chart-bar"></i> Insights
+        <span class="btn-insights-badge">{{ total_views }}</span>
+      </button>
+      {% endif %}
+      <a href="{{ url_for('food.add_food') }}" class="btn-add">
+        <i class="fas fa-plus"></i> Add New Food
+      </a>
+    </div>
+  </div>
+
+  <!-- ══ GRID ══ -->
+  <div class="fp-grid">
+
+    {% if foods %}
+      {% for food in foods %}
+      <div class="fp-card">
+        <div class="fp-card-bar"></div>
+
+        <div class="fp-card-img">
+          {% if food.image %}
+            <img src="{{ url_for('static', filename='uploads/' + food.image) }}" alt="{{ food.name }}">
+          {% else %}
+            <div class="fp-no-img">
+              <i class="fas fa-utensils"></i>
+              <span>No Image</span>
+            </div>
+          {% endif %}
+          {% if food.price %}
+            <div class="fp-price">${{ "%.2f"|format(food.price) }}</div>
+          {% endif %}
+        </div>
+
+        <div class="fp-card-body">
+          <h3 class="fp-card-name">{{ food.name }}</h3>
+
+          {% if food.description %}
+            <p class="fp-card-desc">{{ food.description }}</p>
+          {% endif %}
+
+          {% if food.diet_type %}
+            <div>
+              <span class="fp-diet">
+                <i class="fas fa-leaf" style="font-size:.55rem"></i>
+                {{ food.diet_type.replace('-',' ').title() }}
+              </span>
+            </div>
+          {% endif %}
+
+          {% if food.calories or food.protein or food.carbs or food.fat %}
+          <div class="fp-nutr">
+            {% if food.calories %}<div class="fp-nb nb-cal"><b>{{ food.calories|int }}</b>&nbsp;kcal</div>{% endif %}
+            {% if food.protein  %}<div class="fp-nb nb-pro"><b>{{ food.protein }}g</b>&nbsp;prot</div>{% endif %}
+            {% if food.carbs    %}<div class="fp-nb nb-car"><b>{{ food.carbs }}g</b>&nbsp;carbs</div>{% endif %}
+            {% if food.fat      %}<div class="fp-nb nb-fat"><b>{{ food.fat }}g</b>&nbsp;fat</div>{% endif %}
+          </div>
+          {% endif %}
+        </div>
+
+        <div class="fp-card-foot">
+          <a href="{{ url_for('food.edit_food', id=food.id) }}" class="fp-btn-edit">
+            <i class="fas fa-pen"></i> Edit
+          </a>
+          <form method="POST" action="{{ url_for('food.delete_food', id=food.id) }}"
+                onsubmit="return confirm('Delete \'{{ food.name }}\'? This cannot be undone.');"
+                style="flex:1;display:flex;">
+            <button type="submit" class="fp-btn-del" style="width:100%;">
+              <i class="fas fa-trash-can"></i> Delete
+            </button>
+          </form>
+        </div>
+      </div>
+      {% endfor %}
+
+    {% else %}
+      <div class="fp-empty">
+        <div class="fp-empty-ico"><i class="fas fa-utensils"></i></div>
+        <h3>No food items yet</h3>
+        <p>Start building your menu by adding your first food item.</p>
+        <a href="{{ url_for('food.add_food') }}" class="btn-add" style="margin-top:.5rem;">
+          <i class="fas fa-plus"></i> Add your first item
+        </a>
+      </div>
+    {% endif %}
+
+  </div>
 </div>
+
+
+<!-- ══ INSIGHTS FLOATING PAGE ══ -->
+<style>
+  /* backdrop */
+  .ins-backdrop {
+    position: fixed; inset: 0; z-index: 8500;
+    background: rgba(0,0,0,.65); backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    opacity: 0; pointer-events: none;
+    transition: opacity .28s;
+    display: flex; align-items: center; justify-content: center;
+    padding: 1.5rem;
+  }
+  .ins-backdrop.open { opacity: 1; pointer-events: auto; }
+
+  /* floating page */
+  .ins-page {
+    background: var(--nc-surface);
+    border: 1px solid var(--nc-border);
+    border-radius: 24px;
+    width: 100%; max-width: 680px;
+    max-height: 88vh;
+    display: flex; flex-direction: column;
+    box-shadow: 0 32px 80px rgba(0,0,0,.5), 0 0 0 1px rgba(255,255,255,.04) inset;
+    transform: scale(.93) translateY(20px);
+    opacity: 0;
+    transition: transform .32s cubic-bezier(.16,1,.3,1), opacity .28s;
+    overflow: hidden;
+  }
+  .ins-backdrop.open .ins-page {
+    transform: scale(1) translateY(0);
+    opacity: 1;
+  }
+
+  /* ── header hero ── */
+  .ins-hd {
+    flex-shrink: 0;
+    background:
+      radial-gradient(ellipse 90% 160% at 0% 60%,  rgba(124,58,237,.5)  0%, transparent 52%),
+      radial-gradient(ellipse 60% 100% at 100% 0%,  rgba(56,189,248,.2)  0%, transparent 50%),
+      radial-gradient(ellipse 45% 70%  at 55% 110%, rgba(52,211,153,.12) 0%, transparent 48%),
+      linear-gradient(145deg, #060f1e 0%, #0c1635 55%, #070e1c 100%);
+    position: relative; overflow: hidden;
+    padding: 1.5rem 1.75rem 0;
+  }
+  .ins-hd::before {
+    content: ''; position: absolute; inset: 0;
+    background-image: radial-gradient(rgba(255,255,255,.045) 1px, transparent 1px);
+    background-size: 22px 22px; pointer-events: none;
+  }
+  /* diagonal shimmer */
+  .ins-hd::after {
+    content: ''; position: absolute; inset: 0;
+    background: linear-gradient(115deg, transparent 30%, rgba(255,255,255,.03) 48%, rgba(255,255,255,.06) 52%, rgba(255,255,255,.03) 56%, transparent 74%);
+    pointer-events: none;
+  }
+  .ins-hd-inner {
+    position: relative; z-index: 2;
+    display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem;
+    margin-bottom: 1.25rem;
+  }
+  .ins-hd-left { display: flex; align-items: center; gap: .85rem; }
+  .ins-hd-ico {
+    width: 44px; height: 44px; border-radius: 13px; flex-shrink: 0;
+    background: rgba(167,139,250,.2); color: #c4b5fd;
+    border: 1px solid rgba(167,139,250,.3);
+    display: flex; align-items: center; justify-content: center; font-size: 1.05rem;
+  }
+  .ins-hd-title { font-size: 1.15rem; font-weight: 900; color: #fff; letter-spacing: -.035em; margin-bottom: .06rem; }
+  .ins-hd-sub   { font-size: .72rem; color: rgba(255,255,255,.38); }
+  .ins-hd-close {
+    width: 32px; height: 32px; border-radius: 9px; flex-shrink: 0;
+    background: rgba(255,255,255,.07); border: 1px solid rgba(255,255,255,.1);
+    color: rgba(255,255,255,.55); cursor: pointer; font-size: .82rem;
+    display: flex; align-items: center; justify-content: center;
+    transition: background .14s, color .14s;
+  }
+  .ins-hd-close:hover { background: rgba(251,113,133,.18); color: #fb7185; border-color: rgba(251,113,133,.3); }
+
+  /* stat cards row */
+  .ins-stats {
+    position: relative; z-index: 2;
+    display: grid; grid-template-columns: repeat(4, 1fr);
+    gap: .65rem; margin-bottom: 1.4rem;
+  }
+  .ins-sc {
+    background: rgba(255,255,255,.06);
+    border: 1px solid rgba(255,255,255,.1);
+    border-radius: 14px; padding: .9rem .75rem;
+    text-align: center; transition: background .15s;
+    position: relative; overflow: hidden;
+  }
+  .ins-sc::before {
+    content: ''; position: absolute; top: 0; left: 15%; right: 15%; height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,.15), transparent);
+  }
+  .ins-sc:hover { background: rgba(255,255,255,.1); }
+  .ins-sc-val {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 1.3rem; font-weight: 700; line-height: 1; color: #fff;
+    margin-bottom: .22rem;
+  }
+  .ins-sc-val.vi { color: #c4b5fd; text-shadow: 0 0 14px rgba(196,181,253,.4); }
+  .ins-sc-val.am { color: #fbbf24; text-shadow: 0 0 14px rgba(251,191,36,.35); }
+  .ins-sc-val.cy { color: #38bdf8; text-shadow: 0 0 14px rgba(56,189,248,.35); }
+  .ins-sc-val.em { color: #34d399; text-shadow: 0 0 14px rgba(52,211,153,.35); }
+  .ins-sc-lbl {
+    font-size: .54rem; font-weight: 800; text-transform: uppercase;
+    letter-spacing: .1em; color: rgba(255,255,255,.3);
+  }
+
+  /* scan line at bottom of header */
+  .ins-hd-scan {
+    position: absolute; bottom: 0; left: 0; right: 0; height: 1px; z-index: 2;
+    background: linear-gradient(90deg, transparent 5%, rgba(167,139,250,.6) 35%, rgba(56,189,248,.5) 65%, transparent 95%);
+  }
+
+  /* ── body ── */
+  .ins-body {
+    flex: 1; overflow-y: auto; padding: 1.25rem 1.75rem 1.5rem;
+    display: flex; flex-direction: column; gap: .85rem;
+  }
+  .ins-body::-webkit-scrollbar { width: 4px; }
+  .ins-body::-webkit-scrollbar-thumb { background: var(--nc-border-2); border-radius: 99px; }
+
+  .ins-sec-lbl {
+    display: flex; align-items: center; gap: .45rem;
+    font-size: .6rem; font-weight: 900; text-transform: uppercase;
+    letter-spacing: .1em; color: var(--nc-text-faint);
+  }
+  .ins-sec-lbl::after { content:''; flex:1; height:1px; background: var(--nc-border); }
+
+  /* ranked list */
+  .ins-list {
+    border: 1px solid var(--nc-border);
+    border-radius: 16px; overflow: hidden;
+  }
+  .ins-row {
+    display: grid;
+    grid-template-columns: 30px 54px 1fr auto;
+    align-items: center; gap: .85rem;
+    padding: .9rem 1.1rem;
+    border-bottom: 1px solid var(--nc-border);
+    transition: background .12s;
+  }
+  .ins-row:last-child { border-bottom: none; }
+  .ins-row:hover { background: var(--nc-surface-2); }
+
+  .ins-rank {
+    width: 30px; height: 30px; border-radius: 8px; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center; font-size: .88rem;
+  }
+  .ins-rank.r1 { background: rgba(251,191,36,.12); border: 1px solid rgba(251,191,36,.22); }
+  .ins-rank.r2 { background: rgba(148,163,184,.08); border: 1px solid rgba(148,163,184,.18); }
+  .ins-rank.r3 { background: rgba(180,100,50,.1);   border: 1px solid rgba(180,100,50,.2); }
+  .ins-rank.rn {
+    background: var(--nc-surface-2); border: 1px solid var(--nc-border);
+    font-family: 'JetBrains Mono', monospace; font-size: .68rem;
+    font-weight: 700; color: var(--nc-text-faint);
+  }
+
+  .ins-thumb {
+    width: 54px; height: 54px; border-radius: 11px;
+    object-fit: cover; border: 1px solid var(--nc-border); flex-shrink: 0;
+  }
+  .ins-thumb-ph {
+    width: 54px; height: 54px; border-radius: 11px; flex-shrink: 0;
+    background: var(--nc-surface-3); border: 1px solid var(--nc-border);
+    display: flex; align-items: center; justify-content: center;
+    color: var(--nc-text-faint); font-size: 1rem;
+  }
+
+  .ins-info { min-width: 0; }
+  .ins-name {
+    font-size: .88rem; font-weight: 800; color: var(--nc-text);
+    letter-spacing: -.025em; margin-bottom: .3rem;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .ins-chips { display: flex; gap: .28rem; flex-wrap: wrap; }
+  .ins-chip {
+    font-size: .58rem; font-weight: 800; text-transform: uppercase;
+    letter-spacing: .04em; padding: .12rem .48rem; border-radius: 5px;
+  }
+  .ic-diet  { background: rgba(52,211,153,.1);  color: #34d399; }
+  .ic-cal   { background: rgba(251,191,36,.1);  color: #fbbf24; }
+  .ic-price { background: rgba(56,189,248,.1);  color: #38bdf8; }
+
+  /* right side */
+  .ins-right {
+    display: flex; flex-direction: column; align-items: flex-end;
+    gap: .32rem; flex-shrink: 0; min-width: 70px;
+  }
+  .ins-views-num {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 1.1rem; font-weight: 700; color: #a78bfa; line-height: 1;
+  }
+  .ins-views-sub {
+    font-size: .55rem; font-weight: 700; color: var(--nc-text-faint);
+    text-transform: uppercase; letter-spacing: .06em;
+  }
+  .ins-bar { width: 70px; height: 5px; background: var(--nc-surface-3); border-radius: 99px; overflow: hidden; }
+  .ins-bar-fill { height: 100%; border-radius: 99px; width: 0; transition: width 1s cubic-bezier(.16,1,.3,1); }
+  .ibf-1 { background: linear-gradient(90deg, #f59e0b, #fbbf24); }
+  .ibf-2 { background: linear-gradient(90deg, #475569, #94a3b8); }
+  .ibf-3 { background: linear-gradient(90deg, #78350f, #c77b3b); }
+  .ibf-n { background: linear-gradient(90deg, #7c3aed, #a78bfa); }
+
+  /* empty */
+  .ins-empty {
+    display: flex; flex-direction: column; align-items: center;
+    text-align: center; gap: .65rem; padding: 2.5rem 1rem;
+  }
+  .ins-empty-ico {
+    width: 52px; height: 52px; border-radius: 14px;
+    background: rgba(167,139,250,.1); color: #a78bfa;
+    border: 1px solid rgba(167,139,250,.18);
+    display: flex; align-items: center; justify-content: center; font-size: 1.25rem;
+  }
+  .ins-empty p { font-size: .8rem; color: var(--nc-text-muted); margin: 0; max-width: 240px; line-height: 1.7; }
+</style>
+
+{% if foods %}
+<!-- Backdrop (click outside closes) -->
+<div class="ins-backdrop" id="insBackdrop" onclick="handleBackdropClick(event)">
+
+  <!-- Floating Page -->
+  <div class="ins-page" id="insPage">
+
+    <!-- Hero Header -->
+    <div class="ins-hd">
+      <div class="ins-hd-scan"></div>
+      <div class="ins-hd-inner">
+        <div class="ins-hd-left">
+          <div class="ins-hd-ico"><i class="fas fa-chart-bar"></i></div>
+          <div>
+            <div class="ins-hd-title">Popularity Insights</div>
+            <div class="ins-hd-sub">Based on user clicks on food cards</div>
+          </div>
+        </div>
+        <button class="ins-hd-close" onclick="closeInsights()"><i class="fas fa-xmark"></i></button>
+      </div>
+
+      {% set top_views  = insights[0].views if insights else 0 %}
+      {% set viewed_cnt = insights | selectattr('views', 'gt', 0) | list | length %}
+      {% set avg_views  = (total_views / foods|length)|round(1) if foods|length > 0 and total_views > 0 else 0 %}
+
+      <div class="ins-stats">
+        <div class="ins-sc">
+          <div class="ins-sc-val vi">{{ total_views }}</div>
+          <div class="ins-sc-lbl">Total Views</div>
+        </div>
+        <div class="ins-sc">
+          <div class="ins-sc-val am">{{ top_views }}</div>
+          <div class="ins-sc-lbl">Best Item</div>
+        </div>
+        <div class="ins-sc">
+          <div class="ins-sc-val cy">{{ viewed_cnt }}/{{ foods|length }}</div>
+          <div class="ins-sc-lbl">Viewed</div>
+        </div>
+        <div class="ins-sc">
+          <div class="ins-sc-val em">{{ avg_views }}</div>
+          <div class="ins-sc-lbl">Avg / Item</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Body -->
+    <div class="ins-body">
+      <div class="ins-sec-lbl"><i class="fas fa-fire" style="color:#fb7185"></i> Ranking</div>
+
+      {% if total_views == 0 %}
+      <div class="ins-empty">
+        <div class="ins-empty-ico"><i class="fas fa-chart-bar"></i></div>
+        <p>No views yet. Views are counted when users click a food card on the search page.</p>
+      </div>
+
+      {% else %}
+      {% set max_views = insights[0].views if insights[0].views > 0 else 1 %}
+      <div class="ins-list">
+        {% for item in insights %}
+        {% set pct = ((item.views / max_views) * 100)|round(0)|int %}
+        {% set bar_cls = 'ibf-1' if loop.index==1 else 'ibf-2' if loop.index==2 else 'ibf-3' if loop.index==3 else 'ibf-n' %}
+        <div class="ins-row">
+          <div class="ins-rank {{ 'r1' if loop.index==1 else 'r2' if loop.index==2 else 'r3' if loop.index==3 else 'rn' }}">
+            {% if loop.index==1 %}🥇{% elif loop.index==2 %}🥈{% elif loop.index==3 %}🥉{% else %}{{ loop.index }}{% endif %}
+          </div>
+          {% if item.food.image %}
+            <img class="ins-thumb" src="{{ url_for('static', filename='uploads/'+item.food.image) }}" alt="{{ item.food.name }}">
+          {% else %}
+            <div class="ins-thumb-ph"><i class="fas fa-utensils"></i></div>
+          {% endif %}
+          <div class="ins-info">
+            <div class="ins-name">{{ item.food.name }}</div>
+            <div class="ins-chips">
+              {% if item.food.diet_type %}<span class="ins-chip ic-diet">{{ item.food.diet_type.replace('-',' ').title() }}</span>{% endif %}
+              {% if item.food.calories  %}<span class="ins-chip ic-cal">{{ item.food.calories|int }} kcal</span>{% endif %}
+              {% if item.food.price     %}<span class="ins-chip ic-price">${{ "%.2f"|format(item.food.price) }}</span>{% endif %}
+            </div>
+          </div>
+          <div class="ins-right">
+            <div class="ins-views-num">{{ item.views }}</div>
+            <div class="ins-views-sub">views</div>
+            <div class="ins-bar">
+              <div class="ins-bar-fill {{ bar_cls }}" data-w="{{ pct }}"></div>
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+      {% endif %}
+
+    </div>
+  </div>
+</div>
+
+<script>
+function openInsights() {
+  document.getElementById('insBackdrop').classList.add('open');
+  document.body.style.overflow = 'hidden';
+  setTimeout(() => {
+    document.querySelectorAll('.ins-bar-fill[data-w]').forEach(el => {
+      el.style.width = el.dataset.w + '%';
+    });
+  }, 380);
+}
+function closeInsights() {
+  document.getElementById('insBackdrop').classList.remove('open');
+  document.body.style.overflow = '';
+}
+function handleBackdropClick(e) {
+  if (e.target === document.getElementById('insBackdrop')) closeInsights();
+}
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeInsights(); });
+</script>
+{% endif %}
+
 {% endblock %}
