@@ -22,6 +22,28 @@ def protect_provider_routes():
         return redirect(url_for("main.home"))
 
 
+def get_food_views_count(food):
+    for attr_name in ("view_count", "total_views", "views_count"):
+        value = getattr(food, attr_name, None)
+        if value is not None:
+            try:
+                return int(value or 0)
+            except (TypeError, ValueError):
+                pass
+
+    views_rel = getattr(food, "views", None)
+    if views_rel is not None:
+        try:
+            return int(views_rel.count())
+        except TypeError:
+            try:
+                return int(len(views_rel))
+            except TypeError:
+                pass
+
+    return 0
+
+
 def get_provider_foods_with_ratings():
     rows = (
         db.session.query(
@@ -40,6 +62,7 @@ def get_provider_foods_with_ratings():
     for food, avg_rating, rating_total in rows:
         food.average_rating_display = round(float(avg_rating or 0), 1)
         food.rating_count_display = int(rating_total or 0)
+        food.total_views_display = get_food_views_count(food)
         foods.append(food)
 
     return foods
@@ -48,6 +71,7 @@ def get_provider_foods_with_ratings():
 def get_provider_food_summary(foods):
     total_foods = len(foods)
     total_with_photos = sum(1 for food in foods if food.image)
+    total_views = sum(get_food_views_count(food) for food in foods)
 
     calorie_values = [
         float(food.calories) for food in foods
@@ -66,7 +90,41 @@ def get_provider_food_summary(foods):
         "total_with_photos": total_with_photos,
         "avg_calories": avg_calories,
         "avg_price": avg_price,
+        "total_views": total_views,
     }
+
+
+def get_provider_content_insights(foods):
+    insights = []
+
+    for food in foods:
+        views = int(getattr(food, "total_views_display", 0) or 0)
+        orders = int(getattr(food, "order_count", 0) or 0)
+        rating = float(getattr(food, "average_rating_display", 0) or 0)
+        reviews = int(getattr(food, "rating_count_display", 0) or 0)
+
+        insights.append({
+            "food": food,
+            "name": food.name,
+            "title": food.name,
+            "views": views,
+            "orders": orders,
+            "order_count": orders,
+            "rating": rating,
+            "avg_rating": rating,
+            "reviews": reviews,
+            "rating_count": reviews,
+            "image": food.image,
+            "price": float(food.price) if food.price is not None else None,
+            "is_available": bool(food.is_available),
+        })
+
+    insights.sort(
+        key=lambda item: (item["views"], item["orders"], item["rating"]),
+        reverse=True,
+    )
+
+    return insights
 
 
 def get_provider_order_insight_data():
@@ -174,6 +232,7 @@ def provider_dashboard():
 
     foods = get_provider_foods_with_ratings()
     food_summary = get_provider_food_summary(foods)
+    insights = get_provider_content_insights(foods)
 
     return render_template(
         "dashboard/food_provider_dashboard.html",
@@ -183,10 +242,12 @@ def provider_dashboard():
         revenue=round(float(revenue), 2),
         avg_rating=round(float(avg_rating), 1),
         foods=foods,
+        insights=insights,
         total_foods=food_summary["total_foods"],
         total_with_photos=food_summary["total_with_photos"],
         avg_calories=food_summary["avg_calories"],
         avg_price=food_summary["avg_price"],
+        total_views=food_summary["total_views"],
     )
 
 
