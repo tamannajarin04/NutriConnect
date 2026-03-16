@@ -664,6 +664,127 @@
   #foodGrid { grid-template-columns: 1fr; }
   .fs-hero__h1 { font-size: 1.2rem; }
 }
+
+/* ══════════════════════════════════════════════════════
+   FOOD DETAIL MODAL
+══════════════════════════════════════════════════════ */
+.fd-overlay {
+  position: fixed; inset: 0; z-index: 9000;
+  background: rgba(0,0,0,.65);
+  backdrop-filter: blur(6px);
+  display: flex; align-items: center; justify-content: center;
+  padding: 1rem;
+  opacity: 0; pointer-events: none;
+  transition: opacity .22s;
+}
+.fd-overlay.open {
+  opacity: 1; pointer-events: auto;
+}
+.fd-modal {
+  background: var(--nc-surface);
+  border: 1px solid var(--nc-border);
+  border-radius: 20px;
+  width: 100%; max-width: 520px;
+  max-height: 90vh; overflow-y: auto;
+  box-shadow: 0 24px 80px rgba(0,0,0,.4), 0 0 0 1px rgba(56,189,248,.1);
+  transform: scale(.94) translateY(12px);
+  transition: transform .25s cubic-bezier(.16,1,.3,1);
+  position: relative;
+}
+.fd-overlay.open .fd-modal {
+  transform: scale(1) translateY(0);
+}
+.fd-modal-img {
+  width: 100%; height: 220px; object-fit: cover;
+  border-radius: 20px 20px 0 0;
+  display: block;
+}
+.fd-modal-img-ph {
+  width: 100%; height: 180px;
+  background: var(--nc-surface-2);
+  border-radius: 20px 20px 0 0;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center; gap: .5rem;
+  color: var(--nc-text-faint);
+}
+.fd-modal-img-ph i { font-size: 2.5rem; }
+.fd-modal-img-ph span { font-size: .65rem; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; }
+
+.fd-modal-body { padding: 1.4rem 1.6rem 1.8rem; }
+.fd-modal-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem; margin-bottom: .85rem; }
+.fd-modal-name { font-size: 1.25rem; font-weight: 900; color: var(--nc-text); letter-spacing: -.03em; line-height: 1.2; margin: 0; }
+.fd-modal-close {
+  width: 32px; height: 32px; border-radius: 8px; flex-shrink: 0;
+  background: var(--nc-surface-2); border: 1px solid var(--nc-border);
+  color: var(--nc-text-muted); cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  font-size: .8rem; transition: background .14s, color .14s;
+}
+.fd-modal-close:hover { background: var(--nc-surface-3); color: var(--nc-text); }
+
+.fd-modal-meta { display: flex; flex-wrap: wrap; align-items: center; gap: .45rem; margin-bottom: 1rem; }
+.fd-modal-diet {
+  display: inline-flex; align-items: center; gap: .28rem;
+  background: rgba(16,185,129,.1); color: #34d399;
+  border: 1px solid rgba(52,211,153,.25);
+  border-radius: 99px; padding: .22rem .75rem;
+  font-size: .68rem; font-weight: 700;
+}
+.fd-modal-price {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: .85rem; font-weight: 700;
+  color: var(--nc-brand);
+  background: var(--nc-brand-l);
+  border: 1px solid rgba(14,165,233,.2);
+  border-radius: 99px; padding: .22rem .75rem;
+}
+
+.fd-modal-desc {
+  font-size: .84rem; color: var(--nc-text-muted); line-height: 1.7;
+  margin-bottom: 1.1rem;
+}
+
+.fd-modal-nutr-title {
+  font-size: .62rem; font-weight: 900; text-transform: uppercase;
+  letter-spacing: .1em; color: var(--nc-text-faint); margin-bottom: .6rem;
+}
+.fd-modal-nutr {
+  display: grid; grid-template-columns: repeat(4, 1fr);
+  gap: .5rem; margin-bottom: 1.1rem;
+}
+.fd-modal-nb {
+  background: var(--nc-surface-2); border: 1px solid var(--nc-border);
+  border-radius: 12px; padding: .65rem .5rem;
+  display: flex; flex-direction: column; align-items: center; gap: .2rem;
+  text-align: center;
+}
+.fd-modal-nb b {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: .92rem; font-weight: 700; line-height: 1;
+}
+.fd-modal-nb span { font-size: .55rem; font-weight: 800; text-transform: uppercase; letter-spacing: .07em; color: var(--nc-text-faint); }
+.fd-modal-nb.kcal b { color: #f97316; }
+.fd-modal-nb.prot b { color: #06b6d4; }
+.fd-modal-nb.carb b { color: #a78bfa; }
+.fd-modal-nb.fat  b { color: #ec4899; }
+
+.fd-modal-provider {
+  display: flex; align-items: center; gap: .6rem;
+  padding-top: .85rem; border-top: 1px solid var(--nc-border);
+  font-size: .78rem; color: var(--nc-text-muted); font-weight: 600;
+}
+.fd-modal-pav {
+  width: 28px; height: 28px; border-radius: 50%; flex-shrink: 0;
+  background: linear-gradient(135deg, var(--nc-brand) 0%, #38bdf8 100%);
+  display: flex; align-items: center; justify-content: center;
+  font-size: .72rem; font-weight: 900; color: #fff;
+}
+.fd-modal-views {
+  margin-left: auto;
+  display: inline-flex; align-items: center; gap: .3rem;
+  font-size: .68rem; font-weight: 700; color: var(--nc-text-faint);
+}
+.fd-modal-views i { font-size: .6rem; }
 </style>
 {% endblock %}
 
@@ -955,6 +1076,12 @@
 
 </div>
 {% endif %}
+<!-- ══ FOOD DETAIL MODAL ══ -->
+<div class="fd-overlay" id="fdOverlay">
+  <div class="fd-modal" id="fdModal">
+    <div id="fdModalContent"></div>
+  </div>
+</div>
 
 </div>
 {% endblock %}
@@ -1068,6 +1195,8 @@
       document.querySelectorAll('.food-card').forEach((c,i) => {
         c.style.animationDelay = `${i*.05}s`;
       });
+      attachCardClicks();
+
       if (push) history.pushState({}, '', `?${p}`);
     })
     .catch(() => {
@@ -1101,6 +1230,92 @@
 
   window.addEventListener('popstate', () => fetch_(false));
   renderChips();
+
+
+  /* ── Food Detail Modal ── */
+  const overlay = document.getElementById('fdOverlay');
+  const modalContent = document.getElementById('fdModalContent');
+
+  function openFoodModal(card) {
+    const id       = card.dataset.id;
+    const name     = card.dataset.name;
+    const desc     = card.dataset.desc;
+    const img      = card.dataset.img;
+    const price    = card.dataset.price;
+    const diet     = card.dataset.diet;
+    const cal      = card.dataset.cal;
+    const prot     = card.dataset.prot;
+    const carb     = card.dataset.carb;
+    const fat      = card.dataset.fat;
+    const provider = card.dataset.provider;
+    const views    = card.dataset.views || '—';
+
+    modalContent.innerHTML = `
+      ${img
+        ? `<img class="fd-modal-img" src="/static/uploads/${img}" alt="${name}">`
+        : `<div class="fd-modal-img-ph"><i class="fas fa-utensils"></i><span>No photo</span></div>`
+      }
+      <div class="fd-modal-body">
+        <div class="fd-modal-top">
+          <h2 class="fd-modal-name">${name}</h2>
+          <button class="fd-modal-close" onclick="closeFoodModal()"><i class="fas fa-xmark"></i></button>
+        </div>
+        <div class="fd-modal-meta">
+          ${diet ? `<span class="fd-modal-diet"><i class="fas fa-leaf" style="font-size:.55rem"></i> ${diet}</span>` : ''}
+          ${price ? `<span class="fd-modal-price">$${price}</span>` : ''}
+        </div>
+        ${desc ? `<p class="fd-modal-desc">${desc}</p>` : ''}
+        ${(cal || prot || carb || fat) ? `
+        <div class="fd-modal-nutr-title">Nutrition per serving</div>
+        <div class="fd-modal-nutr">
+          ${cal  ? `<div class="fd-modal-nb kcal"><b>${cal}</b><span>kcal</span></div>` : ''}
+          ${prot ? `<div class="fd-modal-nb prot"><b>${prot}g</b><span>protein</span></div>` : ''}
+          ${carb ? `<div class="fd-modal-nb carb"><b>${carb}g</b><span>carbs</span></div>` : ''}
+          ${fat  ? `<div class="fd-modal-nb fat"><b>${fat}g</b><span>fat</span></div>` : ''}
+        </div>` : ''}
+        <div class="fd-modal-provider">
+          <div class="fd-modal-pav">${provider ? provider[0].toUpperCase() : '?'}</div>
+          <span>by ${provider || 'Unknown'}</span>
+          <div class="fd-modal-views"><i class="fas fa-eye"></i> ${views} views</div>
+        </div>
+      </div>
+    `;
+
+    overlay.classList.add('open');
+    document.body.style.overflow = 'hidden';
+
+    // Track view — only once per session
+    const key = `viewed_${id}`;
+    if (!sessionStorage.getItem(key)) {
+      fetch(`/food/view/${id}`, { method: 'POST' });
+      sessionStorage.setItem(key, '1');
+    }
+  }
+
+  window.closeFoodModal = function() {
+    overlay.classList.remove('open');
+    document.body.style.overflow = '';
+  };
+
+  overlay.addEventListener('click', e => {
+    if (e.target === overlay) closeFoodModal();
+  });
+
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') closeFoodModal();
+  });
+
+  // Attach click to food cards (called after render too)
+  function attachCardClicks() {
+    document.querySelectorAll('.food-card[data-id]').forEach(card => {
+      card.style.cursor = 'pointer';
+      card.onclick = () => openFoodModal(card);
+    });
+  }
+  attachCardClicks();
+
+
+
 })();
 </script>
 {% endblock %}

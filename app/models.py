@@ -251,6 +251,39 @@ class FoodItem(db.Model):
     @property
     def rating_count(self):
         return FoodRating.query.filter_by(food_id=self.id).count()
+    # Relationship to views
+    views = db.relationship(
+        "FoodView",
+        backref="food",
+        lazy="dynamic",
+        cascade="all, delete-orphan"
+    )
+
+
+# ---------------------------
+# Food Views (Popularity Tracking)
+# ---------------------------
+class FoodView(db.Model):
+    __tablename__ = "food_views"
+
+    id = db.Column(db.Integer, primary_key=True)
+
+    food_id = db.Column(
+        db.Integer,
+        db.ForeignKey("food_items.id"),
+        nullable=False
+    )
+
+    viewer_id = db.Column(
+        db.Integer,
+        db.ForeignKey("users.id"),
+        nullable=False
+    )
+
+    viewed_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
+
+    def __repr__(self):
+        return f"<FoodView food_id={self.food_id} viewer_id={self.viewer_id}>"
 
 
 class RoleUpgradeRequest(db.Model):

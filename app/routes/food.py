@@ -7,6 +7,10 @@ import uuid
 from sqlalchemy import or_
 
 from app.models import db, FoodItem, User, FoodImage, FavoriteFood, RecentlyViewed, FoodRating
+from sqlalchemy import or_, func
+from datetime import datetime
+
+from app.models import db, FoodItem, User, FoodView
 
 food_bp = Blueprint("food", __name__)
 food_search_bp = Blueprint("food_search", __name__)
@@ -83,6 +87,51 @@ def track_recent_view(user_id, food):
 @food_provider_required
 def provider_foods():
     return redirect(url_for("provider.provider_dashboard"))
+    foods = FoodItem.query.filter_by(provider_id=current_user.id).all()
+
+    # Build popularity insights: view count per food item
+    view_counts = dict(
+        db.session.query(FoodView.food_id, func.count(FoodView.id))
+        .filter(FoodView.food_id.in_([f.id for f in foods]))
+        .group_by(FoodView.food_id)
+        .all()
+    ) if foods else {}
+
+    # Attach view count to each food and sort by popularity
+    insights = sorted(
+        [{"food": f, "views": view_counts.get(f.id, 0)} for f in foods],
+        key=lambda x: x["views"],
+        reverse=True
+    )
+
+    total_views = sum(view_counts.values()) if view_counts else 0
+
+    return render_template(
+        "dashboard/food_provider_dashboard.html",
+        foods=foods,
+        insights=insights,
+        total_views=total_views,
+    )
+
+
+# ── Track Food View (one view per user per day) ───────────────────────────────
+@food_search_bp.route("/view/<int:food_id>", methods=["POST"])
+@login_required
+def track_view(food_id):
+    today = datetime.utcnow().date()
+
+    already_viewed = FoodView.query.filter(
+        FoodView.food_id   == food_id,
+        FoodView.viewer_id == current_user.id,
+        db.func.date(FoodView.viewed_at) == today
+    ).first()
+
+    if not already_viewed:
+        view = FoodView(food_id=food_id, viewer_id=current_user.id)
+        db.session.add(view)
+        db.session.commit()
+
+    return jsonify({"ok": True})
 
 
 # ── Add Food ──────────────────────────────────────────────────────────────────
@@ -372,7 +421,8 @@ def search_foods():
             "html": cards_html,
             "total": results.total,
             "has_next": results.has_next,
-            "page": results.page,
+            "page":     results.page,
+            "food_ids": [f.id for f in results.items],
         })
 
     return render_template(
