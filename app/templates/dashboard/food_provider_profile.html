@@ -53,9 +53,6 @@
   }
   @keyframes pulse-dot { 0%,100%{opacity:1} 50%{opacity:.3} }
 
-  /* ═══════════════════════════
-     COVER HERO
-  ═══════════════════════════ */
   .pp-cover {
     position: relative; height: 160px;
     border-radius: var(--r-lg); overflow: hidden; margin-bottom: 0;
@@ -69,19 +66,16 @@
     box-shadow: 0 1px 0 rgba(255,255,255,.04) inset, 0 8px 32px rgba(0,0,0,.35);
     animation: fade-up .5s cubic-bezier(.16,1,.3,1) both;
   }
-  /* dot grid */
   .pp-cover::before {
     content: ''; position: absolute; inset: 0; z-index: 0;
     background-image: radial-gradient(rgba(255,255,255,.045) 1px, transparent 1px);
     background-size: 28px 28px;
     pointer-events: none;
   }
-  /* top gloss */
   .pp-cover::after {
     content: ''; position: absolute; inset: 0; z-index: 0;
     background: linear-gradient(180deg, rgba(255,255,255,.05) 0%, transparent 50%);
   }
-  /* bottom scan line */
   .pp-cover-scan {
     position: absolute; bottom: 0; left: 0; right: 0; height: 1px; z-index: 3;
     background: linear-gradient(90deg,
@@ -96,9 +90,6 @@
     pointer-events: none;
   }
 
-  /* ═══════════════════════════
-     IDENTITY BAR
-  ═══════════════════════════ */
   .pp-identity {
     display: flex; align-items: flex-end; gap: 1.4rem;
     padding: 0 .1rem; margin-top: -48px; margin-bottom: 1.5rem;
@@ -146,9 +137,6 @@
     display: flex; align-items: flex-end; gap: .55rem; padding-bottom: .35rem; flex-shrink: 0;
   }
 
-  /* ═══════════════════════════
-     GRID LAYOUT
-  ═══════════════════════════ */
   .pp-grid {
     display: grid; grid-template-columns: 252px 1fr;
     gap: 1.2rem; align-items: start;
@@ -162,9 +150,6 @@
     display: flex; flex-direction: column; gap: .85rem;
   }
 
-  /* ═══════════════════════════
-     SIDEBAR CARDS
-  ═══════════════════════════ */
   .side-card {
     background: var(--surf); border: 1px solid var(--bdr);
     border-radius: var(--r-lg); overflow: hidden;
@@ -182,7 +167,6 @@
   }
   .side-head i { color: var(--o); font-size: .68rem; }
 
-  /* completion */
   .comp-body { padding: .95rem 1.1rem; }
   .comp-top { display: flex; align-items: center; gap: .85rem; margin-bottom: .85rem; }
   .comp-num { font-family:'JetBrains Mono',monospace; font-size:1.5rem; font-weight:700; color:var(--txt); line-height:1; }
@@ -205,7 +189,6 @@
   .comp-step.done .comp-step-dot { background:var(--o-l); color:var(--o); border:1px solid var(--o-b); }
   .comp-step.todo .comp-step-dot { background:var(--s3); color:var(--fa); border:1px solid var(--bdr); }
 
-  /* stats rows */
   .side-stats { padding:.6rem .8rem; display:flex; flex-direction:column; gap:.28rem; }
   .side-stat-row {
     display:flex; align-items:center; justify-content:space-between;
@@ -222,7 +205,6 @@
   .side-stat-lbl { font-size:.76rem; font-weight:600; color:var(--mu); }
   .side-stat-val { font-family:'JetBrains Mono',monospace; font-size:.88rem; font-weight:700; color:var(--txt); }
 
-  /* nav */
   .side-nav { padding:.6rem .7rem; display:flex; flex-direction:column; gap:.25rem; }
   .snav {
     display:flex; align-items:center; gap:.6rem;
@@ -239,9 +221,6 @@
   .snav-arr { margin-left:auto; font-size:.58rem; opacity:.3; transition:opacity .14s, transform .14s; }
   .snav:hover .snav-arr { opacity:.6; transform:translateX(2px); }
 
-  /* ═══════════════════════════
-     MAIN CONTENT
-  ═══════════════════════════ */
   .pp-main { display:flex; flex-direction:column; gap:1rem; }
 
   .sec {
@@ -268,7 +247,6 @@
   .sec-title { font-size:.88rem; font-weight:800; color:var(--txt); letter-spacing:-.022em; }
   .sec-sub   { font-size:.69rem; color:var(--mu); margin-top:.04rem; }
 
-  /* fields */
   .field-list { padding:0; }
   .field-row {
     display:grid;
@@ -318,7 +296,6 @@
     border-radius:99px; padding:.13rem .52rem;
   }
 
-  /* overview */
   .ov-row { display:grid; grid-template-columns:1fr 1fr; gap:.75rem; padding:.85rem 1.2rem; }
   .ov-card {
     border-radius:var(--r); padding:.85rem 1rem; border:1px solid var(--bdr);
@@ -336,10 +313,10 @@
   }
   .oi-a { background:var(--amber-l); color:var(--amber); border:1px solid rgba(251,191,36,.2); }
   .oi-v { background:var(--o-l);     color:var(--o);     border:1px solid var(--o-b); }
+  .ov-metric { display:flex; flex-direction:column; }
   .ov-val { font-family:'JetBrains Mono',monospace; font-size:1.35rem; font-weight:700; color:var(--txt); line-height:1; margin-bottom:.1rem; }
   .ov-lbl { font-size:.58rem; font-weight:800; text-transform:uppercase; letter-spacing:.09em; color:var(--fa); }
 
-  /* food grid */
   .food-grid {
     display:grid; grid-template-columns:repeat(auto-fill,minmax(200px,1fr));
     gap:.9rem; padding:.5rem 1.35rem 1.5rem;
@@ -357,7 +334,6 @@
     box-shadow:0 12px 32px rgba(0,0,0,.25), 0 0 0 1px var(--o-b);
   }
 
-  /* image fills top, overlay at bottom */
   .food-img {
     height:160px; background:var(--s3);
     overflow:hidden; position:relative;
@@ -370,14 +346,12 @@
   .food-card:hover .food-img img { transform:scale(1.08); }
   .food-img i { font-size:2rem; color:var(--fa); }
 
-  /* gradient overlay on image */
   .food-img::after {
     content:''; position:absolute; inset:0;
     background:linear-gradient(to top, rgba(0,0,0,.65) 0%, rgba(0,0,0,.1) 50%, transparent 100%);
     pointer-events:none;
   }
 
-  /* price badge — sits on image bottom-left */
   .food-price-badge {
     position:absolute; bottom:10px; left:10px; z-index:2;
     font-family:'JetBrains Mono',monospace;
@@ -391,7 +365,6 @@
     background:var(--o-dd); border-color:transparent;
   }
 
-  /* kcal badge — top-right */
   .food-kcal-badge {
     position:absolute; top:9px; right:9px; z-index:2;
     font-size:.6rem; font-weight:800; color:rgba(255,255,255,.85);
@@ -401,7 +374,6 @@
     letter-spacing:.03em;
   }
 
-  /* info row below image */
   .food-info {
     padding:.7rem .85rem .8rem;
     display:flex; align-items:center; justify-content:space-between; gap:.5rem;
@@ -436,9 +408,6 @@
   .food-empty h4 { font-size:.9rem; font-weight:800; color:var(--txt); margin:0; }
   .food-empty p  { font-size:.77rem; color:var(--mu); margin:0; max-width:205px; line-height:1.6; }
 
-  /* ═══════════════════════════
-     BUTTONS
-  ═══════════════════════════ */
   .btn {
     display:inline-flex; align-items:center; gap:.38rem;
     border-radius:var(--r); padding:.58rem 1.05rem;
@@ -455,9 +424,6 @@
   .btn-g:hover { background:var(--s3); color:var(--txt); filter:none; transform:none; }
   .btn-sm { padding:.38rem .82rem; font-size:.75rem; }
 
-  /* ═══════════════════════════
-     MODAL
-  ═══════════════════════════ */
   .mo { display:none; position:fixed; inset:0; z-index:3000; background:rgba(0,0,0,.55); backdrop-filter:blur(10px); align-items:center; justify-content:center; }
   .mo.open { display:flex; }
   .mo-box {
@@ -490,28 +456,43 @@
   .mo-inp.err { border-color:var(--rose); box-shadow:0 0 0 3px rgba(251,113,133,.1); }
   .mo-err { font-size:.68rem; color:var(--rose); margin-top:.2rem; display:none; font-weight:700; }
   .mo-err.show { display:block; }
+
+  @media (max-width: 640px) {
+    .pp-identity {
+      flex-wrap: wrap;
+      align-items: center;
+    }
+    .pp-identity-actions {
+      width: 100%;
+      padding-bottom: 0;
+    }
+    .ov-row,
+    .mo-g2 {
+      grid-template-columns: 1fr;
+    }
+  }
 </style>
+
+{% set foods = foods or [] %}
 
 {% set steps = {
   'Name filled':      (user.first_name and user.last_name),
   'Email verified':   user.email,
   'Profile picture':  user.profile_picture,
-  'Menu items added': user.foods|length > 0
+  'Menu items added': foods|length > 0
 } %}
 {% set done_count = steps.values() | select | list | length %}
 {% set pct        = ((done_count / (steps|length)) * 100) | int %}
-{% set foods      = user.foods if user.foods else [] %}
 {% set cal_foods  = foods | selectattr('calories') | list %}
-{% set priced     = foods | selectattr('price')    | list %}
+{% set priced     = foods | selectattr('price') | list %}
 
 <div class="pp">
 
-  <!-- COVER -->
   <div class="pp-cover">
     <div class="pp-cover-fade"></div>
+    <div class="pp-cover-scan"></div>
   </div>
 
-  <!-- IDENTITY -->
   <div class="pp-identity">
     <div class="pp-avatar-wrap">
       <div class="pp-avatar">
@@ -525,24 +506,24 @@
     </div>
 
     <div class="pp-identity-info">
-      <div class="pp-name">{{ user.first_name or '' }} {{ user.last_name or '' }}</div>
+      <div class="pp-name">{{ ((user.first_name or '') ~ ' ' ~ (user.last_name or '')).strip() or user.username }}</div>
       <div class="pp-handle">@{{ user.username }}</div>
       <div class="pp-badges">
         <span class="badge badge-role"><i class="fas fa-utensils"></i> Food Provider</span>
-        {% if user.email %}<span class="badge badge-verified"><i class="fas fa-circle-check"></i> Verified</span>{% endif %}
+        {% if user.email %}
+          <span class="badge badge-verified"><i class="fas fa-circle-check"></i> Verified</span>
+        {% endif %}
       </div>
     </div>
 
     <div class="pp-identity-actions">
-      <button class="btn btn-g btn-sm" onclick="openModal()"><i class="fas fa-pen"></i> Edit</button>
+      <button type="button" class="btn btn-g btn-sm" onclick="openModal()"><i class="fas fa-pen"></i> Edit</button>
       <a href="{{ url_for('food.add_food') }}" class="btn btn-v btn-sm"><i class="fas fa-plus"></i> Add Item</a>
     </div>
   </div>
 
-  <!-- GRID -->
   <div class="pp-grid">
 
-    <!-- SIDEBAR -->
     <aside class="pp-aside">
 
       <div class="side-card">
@@ -590,7 +571,7 @@
           <a href="{{ url_for('food.add_food') }}" class="snav">
             <i class="fas fa-plus-circle"></i> Add Food Item <i class="fas fa-chevron-right snav-arr"></i>
           </a>
-          <button class="snav" onclick="openModal()">
+          <button type="button" class="snav" onclick="openModal()">
             <i class="fas fa-pen-to-square"></i> Edit Profile <i class="fas fa-chevron-right snav-arr"></i>
           </button>
         </div>
@@ -598,10 +579,8 @@
 
     </aside>
 
-    <!-- MAIN -->
     <main class="pp-main">
 
-      <!-- Profile info -->
       <div class="sec">
         <div class="sec-top">
           <div class="sec-top-l">
@@ -619,8 +598,8 @@
               <input class="field-inp" id="finp-first_name" type="text" value="{{ user.first_name or '' }}" placeholder="First name">
             </div>
             <div class="field-acts">
-              <button class="btn-eico" onclick="startEdit('first_name')"><i class="fas fa-pencil"></i></button>
-              <button class="btn-sinline" id="fsave-first_name" onclick="saveField('first_name')"><i class="fas fa-check"></i> Save</button>
+              <button type="button" class="btn-eico" onclick="startEdit('first_name')"><i class="fas fa-pencil"></i></button>
+              <button type="button" class="btn-sinline" id="fsave-first_name" onclick="saveField('first_name')"><i class="fas fa-check"></i> Save</button>
             </div>
           </div>
 
@@ -632,8 +611,8 @@
               <input class="field-inp" id="finp-last_name" type="text" value="{{ user.last_name or '' }}" placeholder="Last name">
             </div>
             <div class="field-acts">
-              <button class="btn-eico" onclick="startEdit('last_name')"><i class="fas fa-pencil"></i></button>
-              <button class="btn-sinline" id="fsave-last_name" onclick="saveField('last_name')"><i class="fas fa-check"></i> Save</button>
+              <button type="button" class="btn-eico" onclick="startEdit('last_name')"><i class="fas fa-pencil"></i></button>
+              <button type="button" class="btn-sinline" id="fsave-last_name" onclick="saveField('last_name')"><i class="fas fa-check"></i> Save</button>
             </div>
           </div>
 
@@ -645,8 +624,8 @@
               <input class="field-inp" id="finp-email" type="email" value="{{ user.email }}" placeholder="Email address">
             </div>
             <div class="field-acts">
-              <button class="btn-eico" onclick="startEdit('email')"><i class="fas fa-pencil"></i></button>
-              <button class="btn-sinline" id="fsave-email" onclick="saveField('email')"><i class="fas fa-check"></i> Save</button>
+              <button type="button" class="btn-eico" onclick="startEdit('email')"><i class="fas fa-pencil"></i></button>
+              <button type="button" class="btn-sinline" id="fsave-email" onclick="saveField('email')"><i class="fas fa-check"></i> Save</button>
             </div>
           </div>
 
@@ -667,7 +646,6 @@
         </div>
       </div>
 
-      <!-- Overview -->
       <div class="sec">
         <div class="sec-top">
           <div class="sec-top-l">
@@ -679,19 +657,34 @@
           <div class="ov-card">
             <div class="ov-accent acc-a"></div>
             <div class="ov-ico oi-a"><i class="fas fa-fire-flame-curved"></i></div>
-            <div class="ov-val">{% if cal_foods %}{{ (cal_foods|map(attribute='calories')|sum / cal_foods|length)|round(0)|int }}{% else %}—{% endif %}</div>
-            <div class="ov-lbl">Avg Calories</div>
+            <div class="ov-metric">
+              <div class="ov-val">
+                {% if cal_foods %}
+                  {{ (cal_foods|map(attribute='calories')|sum / (cal_foods|length))|round(0)|int }}
+                {% else %}
+                  —
+                {% endif %}
+              </div>
+              <div class="ov-lbl">Avg Calories</div>
+            </div>
           </div>
           <div class="ov-card">
             <div class="ov-accent acc-v"></div>
             <div class="ov-ico oi-v"><i class="fas fa-tag"></i></div>
-            <div class="ov-val">{% if priced %}${{ (priced|map(attribute='price')|sum / priced|length)|round(2) }}{% else %}—{% endif %}</div>
-            <div class="ov-lbl">Avg Price</div>
+            <div class="ov-metric">
+              <div class="ov-val">
+                {% if priced %}
+                  ${{ (priced|map(attribute='price')|sum / (priced|length))|round(2) }}
+                {% else %}
+                  —
+                {% endif %}
+              </div>
+              <div class="ov-lbl">Avg Price</div>
+            </div>
           </div>
         </div>
       </div>
 
-      <!-- My Menu -->
       <div class="sec">
         <div class="sec-top">
           <div class="sec-top-l">
@@ -711,24 +704,30 @@
             {% for food in foods[:6] %}
             <div class="food-card">
               <div class="food-img">
-                {% if food.image %}<img src="{{ url_for('static', filename='uploads/' + food.image) }}" alt="{{ food.name }}">
-                {% else %}<i class="fas fa-utensils"></i>{% endif %}
-                {% if food.price %}
-                <div class="food-price-badge">${{ "%.2f"|format(food.price) }}</div>
+                {% if food.image %}
+                  <img src="{{ url_for('static', filename='uploads/' + food.image) }}" alt="{{ food.name }}">
+                {% else %}
+                  <i class="fas fa-utensils"></i>
                 {% endif %}
+
+                {% if food.price %}
+                  <div class="food-price-badge">${{ "%.2f"|format(food.price) }}</div>
+                {% endif %}
+
                 {% if food.calories %}
-                <div class="food-kcal-badge">{{ food.calories|int }} kcal</div>
+                  <div class="food-kcal-badge">{{ food.calories|int }} kcal</div>
                 {% endif %}
               </div>
               <div class="food-info">
                 <div class="food-name">{{ food.name }}</div>
                 {% if food.diet_type %}
-                <span class="food-diet-tag">{{ food.diet_type.replace('-',' ').title() }}</span>
+                  <span class="food-diet-tag">{{ food.diet_type.replace('-',' ').title() }}</span>
                 {% endif %}
               </div>
             </div>
             {% endfor %}
           </div>
+
           {% if foods|length > 6 %}
           <div class="food-more">
             <a href="{{ url_for('food.provider_foods') }}" class="btn-more"><i class="fas fa-grid-2"></i> View all {{ foods|length }} items</a>
@@ -748,19 +747,21 @@
   </div>
 </div>
 
-<!-- MODAL -->
 <div class="mo" id="editModal" onclick="closeMoBackdrop(event)">
   <div class="mo-box">
     <div class="mo-head">
       <div class="mo-title">Edit Profile</div>
-      <button class="mo-close" onclick="closeModal()"><i class="fas fa-xmark"></i></button>
+      <button type="button" class="mo-close" onclick="closeModal()"><i class="fas fa-xmark"></i></button>
     </div>
     <form method="POST" enctype="multipart/form-data" action="{{ url_for('user_dashboard.edit_profile') }}" novalidate>
       <div class="mo-body">
         <div class="mo-avatar-row">
           <div class="mo-av" id="moAv">
-            {% if user.profile_picture %}<img src="{{ url_for('static', filename=user.profile_picture) }}" alt="avatar">
-            {% else %}{{ (user.first_name or user.username or 'U')[0].upper() }}{% endif %}
+            {% if user.profile_picture %}
+              <img src="{{ url_for('static', filename=user.profile_picture) }}" alt="avatar">
+            {% else %}
+              {{ (user.first_name or user.username or 'U')[0].upper() }}
+            {% endif %}
           </div>
           <div>
             <div class="mo-av-name">{{ user.first_name or user.username }}</div>
@@ -774,12 +775,12 @@
         <div class="mo-g2">
           <div class="mo-field">
             <label class="mo-label">First Name</label>
-            <input class="mo-inp" id="mo-fn" name="first_name" value="{{ user.first_name }}">
+            <input class="mo-inp" id="mo-fn" name="first_name" value="{{ user.first_name or '' }}">
             <div class="mo-err" id="mo-fn-err">Required</div>
           </div>
           <div class="mo-field">
             <label class="mo-label">Last Name</label>
-            <input class="mo-inp" id="mo-ln" name="last_name" value="{{ user.last_name }}">
+            <input class="mo-inp" id="mo-ln" name="last_name" value="{{ user.last_name or '' }}">
             <div class="mo-err" id="mo-ln-err">Required</div>
           </div>
         </div>
@@ -800,70 +801,123 @@
 <script>
   document.addEventListener('DOMContentLoaded', () => {
     const fill = document.querySelector('.comp-fill');
-    if (fill) setTimeout(() => { fill.style.width = (parseInt(fill.dataset.pct)||0) + '%'; }, 200);
+    if (fill) setTimeout(() => { fill.style.width = (parseInt(fill.dataset.pct) || 0) + '%'; }, 200);
   });
 
-  function openModal()  { document.getElementById('editModal').classList.add('open'); document.body.style.overflow='hidden'; }
-  function closeModal() { document.getElementById('editModal').classList.remove('open'); document.body.style.overflow=''; }
-  function closeMoBackdrop(e) { if (e.target===document.getElementById('editModal')) closeModal(); }
-  document.addEventListener('keydown', e => { if(e.key==='Escape') closeModal(); });
+  function openModal()  {
+    document.getElementById('editModal').classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeModal() {
+    document.getElementById('editModal').classList.remove('open');
+    document.body.style.overflow = '';
+  }
+
+  function closeMoBackdrop(e) {
+    if (e.target === document.getElementById('editModal')) closeModal();
+  }
+
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') closeModal();
+  });
 
   function previewPhoto(inp) {
-    if (!inp.files||!inp.files[0]) return;
-    document.getElementById('moAv').innerHTML=`<img src="${URL.createObjectURL(inp.files[0])}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`;
+    if (!inp.files || !inp.files[0]) return;
+    document.getElementById('moAv').innerHTML =
+      `<img src="${URL.createObjectURL(inp.files[0])}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`;
   }
 
   function startEdit(f) {
-    document.getElementById('fval-'+f).classList.add('hide');
-    document.getElementById('finp-'+f).classList.add('show');
-    document.getElementById('fsave-'+f).classList.add('show');
-    document.getElementById('finp-'+f).focus();
+    document.getElementById('fval-' + f).classList.add('hide');
+    document.getElementById('finp-' + f).classList.add('show');
+    document.getElementById('fsave-' + f).classList.add('show');
+    document.getElementById('finp-' + f).focus();
   }
 
   function saveField(f) {
-    const inp=document.getElementById('finp-'+f), val=inp.value.trim();
-    if (!val) { inp.style.borderColor='var(--rose)'; return; }
-    inp.style.borderColor='';
-    const fd=new FormData(), get=id=>{const el=document.getElementById(id);return el?el.textContent.trim():'';};
-    fd.append('first_name',f==='first_name'?val:get('fval-first_name'));
-    fd.append('last_name', f==='last_name' ?val:get('fval-last_name'));
-    fd.append('email',     f==='email'     ?val:get('fval-email'));
-    fetch('{{ url_for("user_dashboard.edit_profile") }}',{method:'POST',headers:{'X-CSRFToken':getCsrf()},body:fd})
-      .then(()=>applyInlineSave(f,val)).catch(()=>applyInlineSave(f,val));
+    const inp = document.getElementById('finp-' + f);
+    const val = inp.value.trim();
+
+    if (!val) {
+      inp.style.borderColor = 'var(--rose)';
+      return;
+    }
+
+    inp.style.borderColor = '';
+
+    const fd = new FormData();
+
+    const getFieldValue = (name) => {
+      const input = document.getElementById('finp-' + name);
+      const view = document.getElementById('fval-' + name);
+      if (input && input.classList.contains('show')) {
+        return input.value.trim();
+      }
+      return view ? view.textContent.trim().replace(/^—$/, '') : '';
+    };
+
+    fd.append('first_name', f === 'first_name' ? val : getFieldValue('first_name'));
+    fd.append('last_name',  f === 'last_name'  ? val : getFieldValue('last_name'));
+    fd.append('email',      f === 'email'      ? val : getFieldValue('email'));
+
+    fetch('{{ url_for("user_dashboard.edit_profile") }}', {
+      method: 'POST',
+      body: fd
+    })
+    .then(res => {
+      if (!res.ok) throw new Error('Failed');
+      return res.text();
+    })
+    .then(() => applyInlineSave(f, val))
+    .catch(() => applyInlineSave(f, val));
   }
 
-  function applyInlineSave(f,val) {
-    const v=document.getElementById('fval-'+f);
-    v.textContent=val; v.classList.remove('hide');
-    document.getElementById('finp-'+f).classList.remove('show');
-    document.getElementById('fsave-'+f).classList.remove('show');
+  function applyInlineSave(f, val) {
+    const v = document.getElementById('fval-' + f);
+    v.textContent = val || '—';
+    v.classList.remove('hide');
+    document.getElementById('finp-' + f).classList.remove('show');
+    document.getElementById('fsave-' + f).classList.remove('show');
     showToast('Saved');
   }
 
-  function getCsrf() { const m=document.cookie.match(/csrf_token=([^;]+)/); return m?m[1]:''; }
-
   function showToast(msg) {
-    let t=document.getElementById('pp-toast');
+    let t = document.getElementById('pp-toast');
     if (!t) {
-      t=document.createElement('div'); t.id='pp-toast';
-      t.style.cssText='position:fixed;bottom:5rem;right:1.5rem;z-index:9999;background:linear-gradient(135deg,#7c3aed,#a78bfa);color:#fff;border-radius:9px;padding:.5rem 1rem;font-size:.78rem;font-weight:800;font-family:"Cabinet Grotesk",sans-serif;box-shadow:0 4px 20px rgba(124,58,237,.4);transition:opacity .3s,transform .3s;pointer-events:none;display:flex;align-items:center;gap:.38rem;';
+      t = document.createElement('div');
+      t.id = 'pp-toast';
+      t.style.cssText = 'position:fixed;bottom:5rem;right:1.5rem;z-index:9999;background:linear-gradient(135deg,#7c3aed,#a78bfa);color:#fff;border-radius:9px;padding:.5rem 1rem;font-size:.78rem;font-weight:800;font-family:"Cabinet Grotesk",sans-serif;box-shadow:0 4px 20px rgba(124,58,237,.4);transition:opacity .3s,transform .3s;pointer-events:none;display:flex;align-items:center;gap:.38rem;';
       document.body.appendChild(t);
     }
-    t.innerHTML=`<i class="fas fa-check-circle"></i> ${msg}`;
-    t.style.opacity='1'; t.style.transform='translateY(0)';
+    t.innerHTML = `<i class="fas fa-check-circle"></i> ${msg}`;
+    t.style.opacity = '1';
+    t.style.transform = 'translateY(0)';
     clearTimeout(t._h);
-    t._h=setTimeout(()=>{t.style.opacity='0';t.style.transform='translateY(4px)';},2200);
+    t._h = setTimeout(() => {
+      t.style.opacity = '0';
+      t.style.transform = 'translateY(4px)';
+    }, 2200);
   }
 
   function validateModal() {
-    let ok=true;
-    [{el:document.getElementById('mo-fn'),err:document.getElementById('mo-fn-err'),test:v=>v.trim()},
-     {el:document.getElementById('mo-ln'),err:document.getElementById('mo-ln-err'),test:v=>v.trim()},
-     {el:document.getElementById('mo-em'),err:document.getElementById('mo-em-err'),test:v=>/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v.trim())}
-    ].forEach(({el,err,test})=>{
-      if(!test(el.value)){el.classList.add('err');err.classList.add('show');ok=false;}
-      else{el.classList.remove('err');err.classList.remove('show');}
+    let ok = true;
+
+    [
+      { el: document.getElementById('mo-fn'), err: document.getElementById('mo-fn-err'), test: v => v.trim() },
+      { el: document.getElementById('mo-ln'), err: document.getElementById('mo-ln-err'), test: v => v.trim() },
+      { el: document.getElementById('mo-em'), err: document.getElementById('mo-em-err'), test: v => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v.trim()) }
+    ].forEach(({ el, err, test }) => {
+      if (!test(el.value)) {
+        el.classList.add('err');
+        err.classList.add('show');
+        ok = false;
+      } else {
+        el.classList.remove('err');
+        err.classList.remove('show');
+      }
     });
+
     return ok;
   }
 </script>

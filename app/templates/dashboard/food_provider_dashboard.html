@@ -1,61 +1,55 @@
 {% extends "base.html" %}
-{% block title %}My Food Items · NutriConnect{% endblock %}
+{% block title %}Provider Dashboard · NutriConnect{% endblock %}
 
 {% block extra_css %}
 <link href="https://fonts.googleapis.com/css2?family=Cabinet+Grotesk:wght@400;500;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
-{% endblock %}
-
-{% block content %}
 <style>
-  body, button, input, select, textarea {
-    font-family: 'Cabinet Grotesk', sans-serif !important;
-  }
+  body, button, input, select, textarea { font-family: 'Cabinet Grotesk', sans-serif !important; }
 
-  .fp {
-    /* All from base.html tokens */
-    --surf:  var(--nc-surface);
-    --s2:    var(--nc-surface-2);
-    --s3:    var(--nc-surface-3);
-    --bdr:   var(--nc-border);
-    --bdr2:  var(--nc-border-2);
-    --txt:   var(--nc-text);
-    --txt2:  var(--nc-text-2);
-    --mu:    var(--nc-text-muted);
-    --fa:    var(--nc-text-faint);
-    --brand: var(--nc-brand);
-    --brand-d: var(--nc-brand-d);
-    --brand-l: var(--nc-brand-l);
+  .pd{
+    --surf:var(--nc-surface);
+    --s2:var(--nc-surface-2);
+    --s3:var(--nc-surface-3);
+    --bdr:var(--nc-border);
+    --bdr2:var(--nc-border-2);
+    --txt:var(--nc-text);
+    --txt2:var(--nc-text-2);
+    --mu:var(--nc-text-muted);
+    --fa:var(--nc-text-faint);
+    --brand:var(--nc-brand);
+    --brand-d:var(--nc-brand-d);
+    --brand-l:var(--nc-brand-l);
 
-    /* Accents */
-    --emerald:   #34d399;
-    --emerald-d: #10b981;
-    --emerald-l: rgba(52,211,153,.12);
-    --amber:     #fbbf24;
-    --amber-l:   rgba(251,191,36,.12);
-    --rose:      #fb7185;
-    --rose-l:    rgba(251,113,133,.12);
-    --violet:    #a78bfa;
+    --emerald:#34d399;
+    --emerald-l:rgba(52,211,153,.12);
+    --amber:#fbbf24;
+    --amber-l:rgba(251,191,36,.12);
+    --rose:#fb7185;
+    --rose-l:rgba(251,113,133,.12);
+    --violet:#a78bfa;
+    --violet-l:rgba(167,139,250,.12);
 
-    --r: 14px;
-    --r-lg: 18px;
+    --r:14px;
+    --r-lg:18px;
   }
 
   @keyframes up { from{opacity:0;transform:translateY(14px)} to{opacity:1;transform:none} }
-  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
 
-  /* ══ BANNER ══ */
-  .fp-banner {
+  .pd-wrap{animation:up .35s cubic-bezier(.16,1,.3,1) both;}
+
+  .pd-banner{
     background:
-      radial-gradient(ellipse 60% 140% at -5% 50%,  rgba(14,165,233,.38) 0%, transparent 52%),
-      radial-gradient(ellipse 35% 80%  at 105% 10%,  rgba(52,211,153,.18) 0%, transparent 50%),
-      radial-gradient(ellipse 45% 60%  at 60%  110%, rgba(56,189,248,.12) 0%, transparent 48%),
-      radial-gradient(ellipse 25% 40%  at 85%  80%,  rgba(167,139,250,.1) 0%, transparent 50%),
+      radial-gradient(ellipse 60% 140% at -5% 50%, rgba(14,165,233,.38) 0%, transparent 52%),
+      radial-gradient(ellipse 35% 80% at 105% 10%, rgba(52,211,153,.18) 0%, transparent 50%),
+      radial-gradient(ellipse 45% 60% at 60% 110%, rgba(56,189,248,.12) 0%, transparent 48%),
       linear-gradient(145deg, #060f1e 0%, #091828 35%, #0b1f38 65%, #070e1c 100%);
-    border-radius: var(--r-lg);
-    border: 1px solid rgba(56,189,248,.15);
-    padding: 2.25rem 2.5rem;
-    margin-bottom: 1.5rem;
-    position: relative; overflow: hidden; isolation: isolate;
+    border-radius:var(--r-lg);
+    border:1px solid rgba(56,189,248,.15);
+    padding:2.1rem 2.2rem;
+    margin-bottom:1.35rem;
+    position:relative;
+    overflow:hidden;
+    isolation:isolate;
     box-shadow:
       0 0 0 1px rgba(56,189,248,.05) inset,
       0 1px 0 rgba(255,255,255,.06) inset,
@@ -371,51 +365,563 @@
   .fp-empty p  { font-size: .8rem; color: var(--mu); margin: 0; max-width: 240px; line-height: 1.65; }
 </style>
 
-{% set foods = foods if foods else [] %}
-{% set cf = foods | selectattr('calories') | list %}
-{% set pf = foods | selectattr('price')    | list %}
+  .pd-banner::before{
+    content:'';
+    position:absolute;
+    inset:0;
+    background-image:radial-gradient(circle, rgba(255,255,255,.05) 1px, transparent 1px);
+    background-size:26px 26px;
+    mask-image:radial-gradient(ellipse 100% 100% at 50% 50%, black 30%, transparent 100%);
+    pointer-events:none;
+  }
 
-<div class="fp">
+  .pd-banner-inner{
+    position:relative;
+    z-index:2;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:1.5rem;
+    flex-wrap:wrap;
+  }
 
-  <!-- ══ BANNER — stats live here only ══ -->
-  <div class="fp-banner">
-    <div class="fp-banner-scan"></div>
-    <div class="fp-banner-top"></div>
-    <div class="fp-banner-inner">
+  .pd-eyebrow{
+    display:inline-flex;
+    align-items:center;
+    gap:.4rem;
+    background:rgba(56,189,248,.1);
+    border:1px solid rgba(56,189,248,.22);
+    border-radius:99px;
+    padding:.22rem .9rem;
+    font-size:.62rem;
+    font-weight:800;
+    letter-spacing:.1em;
+    text-transform:uppercase;
+    color:rgba(255,255,255,.75);
+    margin-bottom:.55rem;
+  }
 
-      <div>
-        <div class="fp-eyebrow">
-          <span class="fp-eyebrow-dot"></span>
-          NutriConnect · Provider Panel
+  .pd-eyebrow-dot{
+    width:5px;
+    height:5px;
+    border-radius:50%;
+    background:#38bdf8;
+    box-shadow:0 0 8px #38bdf8;
+  }
+
+  .pd-title{
+    font-size:1.85rem;
+    font-weight:900;
+    color:#fff;
+    letter-spacing:-.045em;
+    line-height:1.06;
+    margin:0 0 .3rem;
+  }
+
+  .pd-title .hl{
+    background:linear-gradient(135deg, #38bdf8 0%, #7dd3fc 40%, #34d399 100%);
+    -webkit-background-clip:text;
+    -webkit-text-fill-color:transparent;
+    background-clip:text;
+  }
+
+  .pd-sub{
+    color:rgba(255,255,255,.42);
+    font-size:.82rem;
+    margin:0;
+    max-width:560px;
+    line-height:1.65;
+  }
+
+  .pd-banner-actions{
+    display:flex;
+    align-items:center;
+    gap:.65rem;
+    flex-wrap:wrap;
+  }
+
+  .pd-btn,
+  .pd-btn-ghost{
+    display:inline-flex;
+    align-items:center;
+    gap:.42rem;
+    border-radius:12px;
+    padding:.72rem 1.05rem;
+    font-size:.8rem;
+    font-weight:800;
+    text-decoration:none;
+    transition:all .15s ease;
+  }
+
+  .pd-btn{
+    background:linear-gradient(135deg, var(--brand-d), var(--brand));
+    color:#fff;
+    border:none;
+    box-shadow:0 6px 18px rgba(14,165,233,.22);
+  }
+  .pd-btn:hover{color:#fff;transform:translateY(-1px);filter:brightness(1.05);}
+
+  .pd-btn-ghost{
+    background:rgba(255,255,255,.06);
+    color:#e6edf3;
+    border:1px solid rgba(255,255,255,.1);
+    backdrop-filter:blur(8px);
+  }
+  .pd-btn-ghost:hover{
+    color:#fff;
+    border-color:rgba(56,189,248,.35);
+    background:rgba(56,189,248,.12);
+  }
+
+  .pd-stats{
+    display:grid;
+    grid-template-columns:repeat(5, 1fr);
+    gap:1rem;
+    margin-bottom:1.35rem;
+  }
+
+  .pd-stat{
+    background:var(--surf);
+    border:1px solid var(--bdr);
+    border-radius:var(--r-lg);
+    box-shadow:var(--nc-card-shadow);
+    padding:1rem 1.05rem;
+  }
+
+  .pd-stat-top{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:.75rem;
+    margin-bottom:.65rem;
+  }
+
+  .pd-stat-ico{
+    width:40px;
+    height:40px;
+    border-radius:12px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:.92rem;
+  }
+
+  .ic-brand{background:var(--brand-l);color:var(--brand);}
+  .ic-amber{background:var(--amber-l);color:#d97706;}
+  .ic-emerald{background:var(--emerald-l);color:var(--emerald);}
+  .ic-violet{background:var(--violet-l);color:var(--violet);}
+  .ic-rose{background:var(--rose-l);color:var(--rose);}
+
+  .pd-stat-label{
+    font-size:.68rem;
+    font-weight:800;
+    text-transform:uppercase;
+    letter-spacing:.1em;
+    color:var(--fa);
+  }
+
+  .pd-stat-value{
+    font-family:'JetBrains Mono', monospace;
+    font-size:1.35rem;
+    font-weight:800;
+    color:var(--txt);
+    line-height:1;
+  }
+
+  .pd-panel{
+    background:var(--surf);
+    border:1px solid var(--bdr);
+    border-radius:var(--r-lg);
+    overflow:hidden;
+    box-shadow:var(--nc-card-shadow);
+  }
+
+  .pd-panel-head{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:1rem;
+    padding:1rem 1.2rem;
+    border-bottom:1px solid var(--bdr);
+    background:var(--s2);
+    flex-wrap:wrap;
+  }
+
+  .pd-panel-head-left{
+    display:flex;
+    align-items:center;
+    gap:.7rem;
+  }
+
+  .pd-icon{
+    width:34px;
+    height:34px;
+    border-radius:10px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:.8rem;
+    background:var(--brand-l);
+    color:var(--brand);
+  }
+
+  .pd-panel-title{
+    font-size:.92rem;
+    font-weight:900;
+    color:var(--txt);
+    letter-spacing:-.02em;
+  }
+
+  .pd-panel-sub{
+    font-size:.72rem;
+    color:var(--mu);
+    margin-top:.08rem;
+  }
+
+  .pd-count{
+    display:flex;
+    align-items:center;
+    gap:.5rem;
+    font-size:.8rem;
+    font-weight:700;
+    color:var(--mu);
+  }
+
+  .pd-count-dot{
+    width:8px;
+    height:8px;
+    border-radius:50%;
+    background:var(--brand);
+    box-shadow:0 0 8px rgba(14,165,233,.45);
+  }
+
+  .pd-grid-wrap{padding:1rem 1.2rem 1.2rem;}
+
+  .pd-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fill, minmax(290px, 1fr));
+    gap:1.1rem;
+  }
+
+  .pd-card{
+    background:var(--surf);
+    border:1px solid var(--bdr);
+    border-radius:var(--r-lg);
+    overflow:hidden;
+    display:flex;
+    flex-direction:column;
+    box-shadow:var(--nc-card-shadow);
+    transition:transform .22s cubic-bezier(.16,1,.3,1), box-shadow .22s, border-color .22s;
+  }
+
+  .pd-card:hover{
+    transform:translateY(-4px);
+    border-color:var(--bdr2);
+    box-shadow:0 12px 40px rgba(0,0,0,.15), 0 0 0 1px rgba(14,165,233,.12);
+  }
+
+  .pd-card-bar{height:3px;background:linear-gradient(90deg, var(--brand-d), var(--brand), #67e8f9);}
+
+  .pd-card-img{
+    height:185px;
+    background:var(--s3);
+    position:relative;
+    overflow:hidden;
+  }
+
+  .pd-card-img img{
+    width:100%;
+    height:100%;
+    object-fit:cover;
+    transition:transform .45s cubic-bezier(.16,1,.3,1);
+  }
+
+  .pd-card:hover .pd-card-img img{transform:scale(1.06);}
+
+  .pd-no-img{
+    width:100%;
+    height:100%;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    gap:.5rem;
+    background:var(--s3);
+  }
+
+  .pd-no-img i{font-size:2rem;color:var(--fa);}
+  .pd-no-img span{
+    font-size:.58rem;
+    font-weight:700;
+    text-transform:uppercase;
+    letter-spacing:.08em;
+    color:var(--fa);
+  }
+
+  .pd-price-badge{
+    position:absolute;
+    bottom:10px;
+    left:10px;
+    background:rgba(0,0,0,.72);
+    backdrop-filter:blur(10px);
+    border:1px solid rgba(255,255,255,.14);
+    color:#fff;
+    font-family:'JetBrains Mono', monospace;
+    font-size:.82rem;
+    font-weight:700;
+    border-radius:99px;
+    padding:.22rem .78rem;
+  }
+
+  .pd-status-badge{
+    position:absolute;
+    top:10px;
+    right:10px;
+    padding:.22rem .68rem;
+    border-radius:999px;
+    font-size:.62rem;
+    font-weight:900;
+    text-transform:uppercase;
+    letter-spacing:.05em;
+  }
+
+  .pd-status-badge.on{background:rgba(34,197,94,.88);color:#fff;}
+  .pd-status-badge.off{background:rgba(239,68,68,.84);color:#fff;}
+
+  .pd-card-body{
+    padding:1rem 1.15rem .8rem;
+    flex:1;
+    display:flex;
+    flex-direction:column;
+    gap:.45rem;
+  }
+
+  .pd-card-name{
+    font-size:.98rem;
+    font-weight:900;
+    color:var(--txt);
+    letter-spacing:-.025em;
+    line-height:1.25;
+    margin:0;
+  }
+
+  .pd-card-desc{
+    font-size:.77rem;
+    color:var(--mu);
+    line-height:1.58;
+    margin:0;
+    display:-webkit-box;
+    -webkit-line-clamp:2;
+    -webkit-box-orient:vertical;
+    overflow:hidden;
+  }
+
+  .pd-row-tags{
+    display:flex;
+    align-items:center;
+    gap:.45rem;
+    flex-wrap:wrap;
+  }
+
+  .pd-diet{
+    display:inline-flex;
+    align-items:center;
+    gap:.28rem;
+    background:var(--emerald-l);
+    color:var(--emerald);
+    border:1px solid rgba(52,211,153,.2);
+    border-radius:99px;
+    padding:.16rem .65rem;
+    font-size:.65rem;
+    font-weight:800;
+  }
+
+  .pd-rating{
+    display:inline-flex;
+    align-items:center;
+    gap:.28rem;
+    background:var(--amber-l);
+    color:#b45309;
+    border:1px solid rgba(251,191,36,.22);
+    border-radius:99px;
+    padding:.16rem .65rem;
+    font-size:.65rem;
+    font-weight:800;
+  }
+
+  .pd-rating.muted{
+    background:var(--s2);
+    color:var(--mu);
+    border-color:var(--bdr);
+  }
+
+  .pd-nutr{
+    display:flex;
+    flex-wrap:wrap;
+    gap:.28rem;
+    margin-top:auto;
+    padding-top:.55rem;
+  }
+
+  .pd-nb{
+    display:inline-flex;
+    align-items:center;
+    gap:.25rem;
+    background:var(--s2);
+    border:1px solid var(--bdr);
+    border-radius:99px;
+    padding:.2rem .65rem;
+    font-size:.7rem;
+    font-weight:700;
+    color:var(--txt2);
+  }
+
+  .pd-nb b{
+    font-family:'JetBrains Mono', monospace;
+    font-size:.72rem;
+  }
+
+  .nb-cal b{color:#fb923c;}
+  .nb-pro b{color:var(--emerald);}
+  .nb-car b{color:var(--violet);}
+  .nb-fat b{color:#f472b6;}
+
+  .pd-card-foot{
+    padding:.7rem 1.15rem .9rem;
+    display:flex;
+    gap:.55rem;
+    border-top:1px solid var(--bdr);
+    background:var(--s2);
+  }
+
+  .pd-edit,
+  .pd-delete{
+    flex:1;
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    gap:.38rem;
+    border-radius:12px;
+    padding:.58rem 0;
+    font-size:.78rem;
+    font-weight:800;
+    font-family:inherit;
+    text-decoration:none;
+    transition:all .14s ease;
+  }
+
+  .pd-edit{
+    background:var(--surf);
+    border:1px solid var(--bdr);
+    color:var(--txt2);
+  }
+
+  .pd-edit:hover{
+    background:var(--brand-l);
+    border-color:rgba(14,165,233,.25);
+    color:var(--brand-d);
+  }
+
+  .pd-delete{
+    background:var(--surf);
+    border:1px solid var(--bdr);
+    color:var(--mu);
+    cursor:pointer;
+  }
+
+  .pd-delete:hover{
+    background:var(--rose-l);
+    border-color:rgba(251,113,133,.3);
+    color:var(--rose);
+  }
+
+  .pd-empty{
+    background:var(--s2);
+    border:1.5px dashed var(--bdr2);
+    border-radius:var(--r-lg);
+    padding:3rem 1.5rem;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    text-align:center;
+    gap:.8rem;
+  }
+
+  .pd-empty-ico{
+    width:58px;
+    height:58px;
+    border-radius:16px;
+    background:var(--brand-l);
+    color:var(--brand);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:1.45rem;
+  }
+
+  .pd-empty h4{
+    font-size:1rem;
+    font-weight:900;
+    color:var(--txt);
+    margin:0;
+  }
+
+  .pd-empty p{
+    font-size:.8rem;
+    color:var(--mu);
+    margin:0;
+    max-width:280px;
+    line-height:1.65;
+  }
+
+  @media (max-width: 1100px){
+    .pd-stats{grid-template-columns:repeat(2, 1fr);}
+  }
+
+  @media (max-width: 768px){
+    .pd-stats{grid-template-columns:1fr;}
+    .pd-grid{grid-template-columns:1fr;}
+    .pd-banner{padding:1.45rem 1.2rem;}
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="pd">
+  <div class="pd-wrap">
+
+    <div class="pd-banner">
+      <div class="pd-banner-inner">
+        <div>
+          <div class="pd-eyebrow">
+            <span class="pd-eyebrow-dot"></span>
+            NutriConnect · Provider Dashboard
+          </div>
+          <h1 class="pd-title">Manage your <span class="hl">menu and orders</span></h1>
+          <p class="pd-sub">
+            Track your store at a glance, keep food listings updated, and jump into order management whenever you need.
+          </p>
         </div>
-        <div class="fp-banner-title">My <span class="hl">Food Items</span></div>
-        <p class="fp-banner-sub">Manage your listings — add, edit, or remove items anytime.</p>
+
+        <div class="pd-banner-actions">
+          <a href="{{ url_for('provider.provider_orders') }}" class="pd-btn">
+            <i class="fas fa-bag-shopping"></i> Manage Orders
+          </a>
+          <a href="{{ url_for('food.add_food') }}" class="pd-btn-ghost">
+            <i class="fas fa-plus"></i> Add New Food
+          </a>
+        </div>
       </div>
-
-      <div class="fp-banner-stats">
-        <div class="fp-bs">
-          <div class="fp-bs-val c-brand">{{ foods|length }}</div>
-          <div class="fp-bs-lbl">Total Items</div>
-        </div>
-        <div class="fp-bs">
-          <div class="fp-bs-val c-emerald">{{ foods|selectattr('image')|list|length }}</div>
-          <div class="fp-bs-lbl">With Photos</div>
-        </div>
-        <div class="fp-bs">
-          <div class="fp-bs-val c-amber">{% if cf %}{{ (cf|map(attribute='calories')|sum / cf|length)|round(0)|int }}{% else %}—{% endif %}</div>
-          <div class="fp-bs-lbl">Avg Calories</div>
-        </div>
-        {% if pf %}
-        <div class="fp-bs">
-          <div class="fp-bs-val" style="color:#a78bfa;">${{ (pf|map(attribute='price')|sum / pf|length)|round(2) }}</div>
-          <div class="fp-bs-lbl">Avg Price</div>
-        </div>
-        {% endif %}
-      </div>
-
     </div>
-  </div>
 
+    <div class="pd-stats">
+      <div class="pd-stat">
+        <div class="pd-stat-top">
+          <span class="pd-stat-label">Total Orders</span>
+          <div class="pd-stat-ico ic-brand"><i class="fas fa-bag-shopping"></i></div>
+        </div>
+        <div class="pd-stat-value">{{ total_orders }}</div>
+      </div>
   <!-- ══ TOOLBAR ══ -->
   <div class="fp-toolbar">
     <div class="fp-count">
@@ -439,79 +945,153 @@
     </div>
   </div>
 
-  <!-- ══ GRID ══ -->
-  <div class="fp-grid">
-
-    {% if foods %}
-      {% for food in foods %}
-      <div class="fp-card">
-        <div class="fp-card-bar"></div>
-
-        <div class="fp-card-img">
-          {% if food.image %}
-            <img src="{{ url_for('static', filename='uploads/' + food.image) }}" alt="{{ food.name }}">
-          {% else %}
-            <div class="fp-no-img">
-              <i class="fas fa-utensils"></i>
-              <span>No Image</span>
-            </div>
-          {% endif %}
-          {% if food.price %}
-            <div class="fp-price">${{ "%.2f"|format(food.price) }}</div>
-          {% endif %}
+      <div class="pd-stat">
+        <div class="pd-stat-top">
+          <span class="pd-stat-label">Pending</span>
+          <div class="pd-stat-ico ic-amber"><i class="fas fa-hourglass-half"></i></div>
         </div>
+        <div class="pd-stat-value">{{ pending_orders }}</div>
+      </div>
 
-        <div class="fp-card-body">
-          <h3 class="fp-card-name">{{ food.name }}</h3>
+      <div class="pd-stat">
+        <div class="pd-stat-top">
+          <span class="pd-stat-label">Delivered</span>
+          <div class="pd-stat-ico ic-emerald"><i class="fas fa-circle-check"></i></div>
+        </div>
+        <div class="pd-stat-value">{{ delivered_orders }}</div>
+      </div>
 
-          {% if food.description %}
-            <p class="fp-card-desc">{{ food.description }}</p>
-          {% endif %}
+      <div class="pd-stat">
+        <div class="pd-stat-top">
+          <span class="pd-stat-label">Revenue</span>
+          <div class="pd-stat-ico ic-violet"><i class="fas fa-dollar-sign"></i></div>
+        </div>
+        <div class="pd-stat-value">${{ "%.2f"|format(revenue) }}</div>
+      </div>
 
-          {% if food.diet_type %}
-            <div>
-              <span class="fp-diet">
-                <i class="fas fa-leaf" style="font-size:.55rem"></i>
-                {{ food.diet_type.replace('-',' ').title() }}
-              </span>
+      <div class="pd-stat">
+        <div class="pd-stat-top">
+          <span class="pd-stat-label">Avg Rating</span>
+          <div class="pd-stat-ico ic-rose"><i class="fas fa-star"></i></div>
+        </div>
+        <div class="pd-stat-value">{{ avg_rating if avg_rating else "—" }}</div>
+      </div>
+    </div>
+
+    <div class="pd-panel">
+      <div class="pd-panel-head">
+        <div class="pd-panel-head-left">
+          <div class="pd-icon"><i class="fas fa-utensils"></i></div>
+          <div>
+            <div class="pd-panel-title">My Food Items</div>
+            <div class="pd-panel-sub">
+              {{ total_foods }} item{{ '' if total_foods == 1 else 's' }} ·
+              {{ total_with_photos }} with photo ·
+              Avg calories: {{ avg_calories if avg_calories is not none else "—" }} ·
+              Avg price: {% if avg_price is not none %}${{ "%.2f"|format(avg_price) }}{% else %}—{% endif %}
             </div>
-          {% endif %}
-
-          {% if food.calories or food.protein or food.carbs or food.fat %}
-          <div class="fp-nutr">
-            {% if food.calories %}<div class="fp-nb nb-cal"><b>{{ food.calories|int }}</b>&nbsp;kcal</div>{% endif %}
-            {% if food.protein  %}<div class="fp-nb nb-pro"><b>{{ food.protein }}g</b>&nbsp;prot</div>{% endif %}
-            {% if food.carbs    %}<div class="fp-nb nb-car"><b>{{ food.carbs }}g</b>&nbsp;carbs</div>{% endif %}
-            {% if food.fat      %}<div class="fp-nb nb-fat"><b>{{ food.fat }}g</b>&nbsp;fat</div>{% endif %}
           </div>
-          {% endif %}
         </div>
 
-        <div class="fp-card-foot">
-          <a href="{{ url_for('food.edit_food', id=food.id) }}" class="fp-btn-edit">
-            <i class="fas fa-pen"></i> Edit
-          </a>
-          <form method="POST" action="{{ url_for('food.delete_food', id=food.id) }}"
-                onsubmit="return confirm('Delete \'{{ food.name }}\'? This cannot be undone.');"
-                style="flex:1;display:flex;">
-            <button type="submit" class="fp-btn-del" style="width:100%;">
-              <i class="fas fa-trash-can"></i> Delete
-            </button>
-          </form>
+        <div class="pd-count">
+          <span class="pd-count-dot"></span>
+          <span><strong>{{ total_foods }}</strong> total menu item{{ '' if total_foods == 1 else 's' }}</span>
         </div>
       </div>
-      {% endfor %}
 
-    {% else %}
-      <div class="fp-empty">
-        <div class="fp-empty-ico"><i class="fas fa-utensils"></i></div>
-        <h3>No food items yet</h3>
-        <p>Start building your menu by adding your first food item.</p>
-        <a href="{{ url_for('food.add_food') }}" class="btn-add" style="margin-top:.5rem;">
-          <i class="fas fa-plus"></i> Add your first item
-        </a>
+      <div class="pd-grid-wrap">
+        {% if foods %}
+          <div class="pd-grid">
+            {% for food in foods %}
+            <div class="pd-card">
+              <div class="pd-card-bar"></div>
+
+              <div class="pd-card-img">
+                {% if food.image %}
+                  <img src="{{ url_for('static', filename='uploads/' + food.image) }}" alt="{{ food.name }}">
+                {% else %}
+                  <div class="pd-no-img">
+                    <i class="fas fa-utensils"></i>
+                    <span>No Image</span>
+                  </div>
+                {% endif %}
+
+                {% if food.price is not none %}
+                  <div class="pd-price-badge">${{ "%.2f"|format(food.price) }}</div>
+                {% endif %}
+
+                <div class="pd-status-badge {{ 'on' if food.availability_status == 'available' else 'off' }}">
+                  {{ 'Available' if food.availability_status == 'available' else 'Out of Stock' }}
+                </div>
+              </div>
+
+              <div class="pd-card-body">
+                <h3 class="pd-card-name">{{ food.name }}</h3>
+
+                {% if food.description %}
+                  <p class="pd-card-desc">{{ food.description }}</p>
+                {% endif %}
+
+                <div class="pd-row-tags">
+                  {% if food.diet_type %}
+                    <span class="pd-diet">
+                      <i class="fas fa-leaf" style="font-size:.55rem"></i>
+                      {{ food.diet_type.split(',')[0].replace('-', ' ').title() }}
+                    </span>
+                  {% endif %}
+
+                  {% if food.rating_count_display and food.average_rating_display > 0 %}
+                    <span class="pd-rating">
+                      <i class="fas fa-star"></i>
+                      {{ "%.1f"|format(food.average_rating_display) }} · {{ food.rating_count_display }}
+                    </span>
+                  {% else %}
+                    <span class="pd-rating muted">
+                      <i class="far fa-star"></i>
+                      No ratings yet
+                    </span>
+                  {% endif %}
+                </div>
+
+                {% if food.calories or food.protein or food.carbs or food.fat %}
+                <div class="pd-nutr">
+                  {% if food.calories %}<div class="pd-nb nb-cal"><b>{{ food.calories|int }}</b>&nbsp;kcal</div>{% endif %}
+                  {% if food.protein %}<div class="pd-nb nb-pro"><b>{{ food.protein }}</b>&nbsp;prot</div>{% endif %}
+                  {% if food.carbs %}<div class="pd-nb nb-car"><b>{{ food.carbs }}</b>&nbsp;carbs</div>{% endif %}
+                  {% if food.fat %}<div class="pd-nb nb-fat"><b>{{ food.fat }}</b>&nbsp;fat</div>{% endif %}
+                </div>
+                {% endif %}
+              </div>
+
+              <div class="pd-card-foot">
+                <a href="{{ url_for('food.edit_food', id=food.id) }}" class="pd-edit">
+                  <i class="fas fa-pen"></i> Edit
+                </a>
+
+                <form method="POST"
+                      action="{{ url_for('food.delete_food', id=food.id) }}"
+                      style="flex:1;display:flex;"
+                      onsubmit="return confirm('Delete {{ food.name|e }}? This cannot be undone.');">
+                  <button type="submit" class="pd-delete" style="width:100%;">
+                    <i class="fas fa-trash-can"></i> Delete
+                  </button>
+                </form>
+              </div>
+            </div>
+            {% endfor %}
+          </div>
+        {% else %}
+          <div class="pd-empty">
+            <div class="pd-empty-ico"><i class="fas fa-utensils"></i></div>
+            <h4>No food items yet</h4>
+            <p>Start building your menu by adding your first food item from this dashboard.</p>
+            <a href="{{ url_for('food.add_food') }}" class="pd-btn" style="margin-top:.4rem;">
+              <i class="fas fa-plus"></i> Add First Food
+            </a>
+          </div>
+        {% endif %}
       </div>
-    {% endif %}
+    </div>
 
   </div>
 </div>

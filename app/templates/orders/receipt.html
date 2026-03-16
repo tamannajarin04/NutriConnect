@@ -1,0 +1,447 @@
+{% extends "base.html" %}
+{% block title %}Receipt · NutriConnect{% endblock %}
+
+{% block content %}
+<style>
+.rc {
+  --surf:     var(--nc-surface);
+  --s2:       var(--nc-surface-2);
+  --s3:       var(--nc-surface-3);
+  --bdr:      var(--nc-border);
+  --bdr2:     var(--nc-border-2);
+  --txt:      var(--nc-text);
+  --txt2:     var(--nc-text-2);
+  --mu:       var(--nc-text-muted);
+  --fa:       var(--nc-text-faint);
+  --brand:    var(--nc-brand);
+  --brand-d:  var(--nc-brand-d);
+  --brand-l:  var(--nc-brand-l);
+  --em:       #10b981;
+  --em-l:     rgba(16,185,129,.12);
+  --r: 20px;
+  font-family: 'Sora', sans-serif;
+}
+
+.rc-page {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.rc-hero {
+  position: relative;
+  overflow: hidden;
+  border-radius: var(--r);
+  padding: 1.85rem 2rem;
+  background:
+    radial-gradient(circle at 12% 20%, rgba(56,189,248,.16), transparent 28%),
+    radial-gradient(circle at 90% 12%, rgba(52,211,153,.12), transparent 24%),
+    linear-gradient(135deg, #07111d 0%, #0c1d33 48%, #113055 100%);
+  border: 1px solid rgba(56,189,248,.16);
+  box-shadow: 0 18px 48px rgba(0,0,0,.24);
+}
+.rc-hero::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: radial-gradient(circle, rgba(255,255,255,.05) 1px, transparent 1px);
+  background-size: 28px 28px;
+  pointer-events: none;
+}
+.rc-hero > * { position: relative; z-index: 1; }
+
+.rc-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: .45rem;
+  padding: .28rem .82rem;
+  border-radius: 999px;
+  background: rgba(255,255,255,.08);
+  border: 1px solid rgba(255,255,255,.14);
+  color: rgba(255,255,255,.88);
+  font-size: .69rem;
+  font-weight: 800;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  margin-bottom: .85rem;
+}
+
+.rc-hero-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.rc-title {
+  margin: 0;
+  color: #fff;
+  font-size: clamp(1.55rem, 4vw, 2.3rem);
+  font-weight: 800;
+  letter-spacing: -.04em;
+}
+.rc-sub {
+  margin-top: .45rem;
+  color: rgba(255,255,255,.68);
+  font-size: .9rem;
+  line-height: 1.6;
+}
+
+.rc-actions {
+  display: flex;
+  gap: .7rem;
+  flex-wrap: wrap;
+}
+
+.rc-btn,
+.rc-btn-soft {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: .45rem;
+  border-radius: 12px;
+  padding: .72rem 1.15rem;
+  font-size: .82rem;
+  font-weight: 800;
+  text-decoration: none;
+  transition: all .15s ease;
+  font-family: inherit;
+  cursor: pointer;
+}
+.rc-btn {
+  background: #fff;
+  color: #06203c;
+  border: none;
+}
+.rc-btn:hover {
+  color: #031427;
+  transform: translateY(-1px);
+}
+.rc-btn-soft {
+  background: rgba(255,255,255,.08);
+  color: #fff;
+  border: 1px solid rgba(255,255,255,.14);
+}
+.rc-btn-soft:hover {
+  background: rgba(255,255,255,.14);
+  color: #fff;
+  transform: translateY(-1px);
+}
+
+.rc-card {
+  background: var(--nc-card-bg);
+  border: 1px solid var(--nc-card-border);
+  border-radius: var(--r);
+  overflow: hidden;
+  box-shadow: var(--nc-card-shadow);
+}
+
+.rc-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: .8rem;
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid var(--bdr);
+  background: var(--s2);
+}
+.rc-head-left {
+  display: flex;
+  align-items: center;
+  gap: .65rem;
+}
+.rc-icon {
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--brand-l);
+  color: var(--brand-d);
+  font-size: .8rem;
+}
+[data-theme="dark"] .rc-icon {
+  background: rgba(14,165,233,.12);
+  color: #38bdf8;
+}
+.rc-head-title {
+  font-size: .92rem;
+  font-weight: 800;
+  color: var(--txt);
+  letter-spacing: -.02em;
+}
+.rc-head-sub {
+  font-size: .7rem;
+  color: var(--mu);
+  margin-top: .04rem;
+}
+
+.rc-body {
+  padding: 1.2rem 1.25rem 1.3rem;
+}
+
+.rc-meta {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: .8rem;
+  margin-bottom: 1rem;
+}
+@media (max-width: 720px) {
+  .rc-meta {
+    grid-template-columns: 1fr;
+  }
+}
+
+.rc-meta-box {
+  background: var(--s2);
+  border: 1px solid var(--bdr);
+  border-radius: 14px;
+  padding: .95rem 1rem;
+}
+.rc-meta-label {
+  font-size: .66rem;
+  font-weight: 800;
+  color: var(--fa);
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  margin-bottom: .28rem;
+}
+.rc-meta-value {
+  font-size: .86rem;
+  font-weight: 700;
+  color: var(--txt);
+  line-height: 1.55;
+  word-break: break-word;
+}
+
+.rc-status {
+  display: inline-flex;
+  align-items: center;
+  gap: .34rem;
+  padding: .22rem .7rem;
+  border-radius: 999px;
+  background: var(--em-l);
+  color: #065f46;
+  border: 1px solid rgba(16,185,129,.2);
+  font-size: .68rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: .06em;
+}
+[data-theme="dark"] .rc-status {
+  background: rgba(16,185,129,.12);
+  color: #34d399;
+}
+
+.rc-table-wrap {
+  overflow-x: auto;
+  border: 1px solid var(--bdr);
+  border-radius: 16px;
+}
+
+.rc-table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 620px;
+}
+.rc-table thead th {
+  background: var(--s2);
+  color: var(--mu);
+  font-size: .68rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  padding: .9rem 1rem;
+  border-bottom: 1px solid var(--bdr);
+  text-align: left;
+}
+.rc-table tbody td {
+  padding: .95rem 1rem;
+  border-bottom: 1px solid var(--bdr);
+  font-size: .84rem;
+  color: var(--txt);
+}
+.rc-table tbody tr:last-child td {
+  border-bottom: none;
+}
+.rc-mono {
+  font-family: 'JetBrains Mono', monospace;
+  font-weight: 700;
+}
+
+.rc-total {
+  margin-top: 1rem;
+  display: flex;
+  justify-content: flex-end;
+}
+.rc-total-box {
+  min-width: 260px;
+  background: var(--s2);
+  border: 1px solid var(--bdr);
+  border-radius: 16px;
+  padding: 1rem 1.1rem;
+}
+.rc-total-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+}
+.rc-total-label {
+  font-size: .72rem;
+  font-weight: 800;
+  color: var(--mu);
+  text-transform: uppercase;
+  letter-spacing: .08em;
+}
+.rc-total-value {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--txt);
+}
+
+@media print {
+  .nc-navbar,
+  .nc-footer,
+  .theme-fab,
+  .rc-actions {
+    display: none !important;
+  }
+
+  body,
+  .container,
+  main {
+    background: #fff !important;
+    color: #000 !important;
+  }
+
+  .rc-card,
+  .rc-meta-box,
+  .rc-total-box,
+  .rc-table-wrap {
+    box-shadow: none !important;
+    border-color: #d1d5db !important;
+    background: #fff !important;
+  }
+
+  .rc-head,
+  .rc-table thead th {
+    background: #f8fafc !important;
+    color: #111827 !important;
+  }
+
+  .rc-title,
+  .rc-sub,
+  .rc-badge {
+    color: #111827 !important;
+  }
+
+  .rc-hero {
+    background: #fff !important;
+    border: 1px solid #d1d5db !important;
+    box-shadow: none !important;
+  }
+
+  .rc-hero::after {
+    display: none !important;
+  }
+}
+</style>
+
+<div class="rc">
+  <div class="rc-page">
+
+    <div class="rc-hero">
+      <div class="rc-badge">
+        <i class="fas fa-receipt"></i> Payment Record
+      </div>
+
+      <div class="rc-hero-row">
+        <div>
+          <h1 class="rc-title">Receipt</h1>
+          <div class="rc-sub">Order ID: {{ order.order_number }}</div>
+        </div>
+
+        <div class="rc-actions">
+          <a href="{{ url_for('orders.order_detail', order_id=order.id) }}" class="rc-btn-soft">
+            <i class="fas fa-arrow-left"></i> Back to Order
+          </a>
+          <button type="button" class="rc-btn" onclick="window.print()">
+            <i class="fas fa-print"></i> Print
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="rc-card">
+      <div class="rc-head">
+        <div class="rc-head-left">
+          <div class="rc-icon"><i class="fas fa-file-invoice-dollar"></i></div>
+          <div>
+            <div class="rc-head-title">Receipt Details</div>
+            <div class="rc-head-sub">Clear summary for your completed order</div>
+          </div>
+        </div>
+        <span class="rc-status"><i class="fas fa-circle-check"></i> {{ order.status.title() }}</span>
+      </div>
+
+      <div class="rc-body">
+        <div class="rc-meta">
+          <div class="rc-meta-box">
+            <div class="rc-meta-label">Date</div>
+            <div class="rc-meta-value">{{ order.created_at.strftime("%d %b %Y, %I:%M %p") if order.created_at else "—" }}</div>
+          </div>
+          <div class="rc-meta-box">
+            <div class="rc-meta-label">Phone</div>
+            <div class="rc-meta-value">{{ order.phone or "Not provided" }}</div>
+          </div>
+          <div class="rc-meta-box">
+            <div class="rc-meta-label">Delivery Address</div>
+            <div class="rc-meta-value">{{ order.delivery_address or "Not provided" }}</div>
+          </div>
+          <div class="rc-meta-box">
+            <div class="rc-meta-label">Notes</div>
+            <div class="rc-meta-value">{{ order.notes or "No delivery note added." }}</div>
+          </div>
+        </div>
+
+        <div class="rc-table-wrap">
+          <table class="rc-table">
+            <thead>
+              <tr>
+                <th>Item</th>
+                <th>Qty</th>
+                <th>Price</th>
+                <th>Subtotal</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for item in order.items %}
+              <tr>
+                <td>{{ item.food_name }}</td>
+                <td class="rc-mono">{{ item.quantity }}</td>
+                <td class="rc-mono">${{ "%.2f"|format(item.food_price or 0) }}</td>
+                <td class="rc-mono">${{ "%.2f"|format(item.subtotal or 0) }}</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+
+        <div class="rc-total">
+          <div class="rc-total-box">
+            <div class="rc-total-row">
+              <div class="rc-total-label">Total</div>
+              <div class="rc-total-value">${{ "%.2f"|format(order.total_price or 0) }}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+{% endblock %}

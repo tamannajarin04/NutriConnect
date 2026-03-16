@@ -1,3 +1,7 @@
+{% for food in foods %}
+{% set avg_rating = (food.average_rating_display if food.average_rating_display is defined else (food.average_rating or 0)) %}
+{% set review_count = (food.rating_count_display if food.rating_count_display is defined else (food.ratings.count() if food.ratings else 0)) %}
+{% set is_provider_own_food = current_user.is_authenticated and current_user.is_food_provider() and food.provider_id == current_user.id %}
 {% if foods %}
   {% for food in foods %}
   <div class="food-card"
@@ -13,51 +17,54 @@
        data-fat="{{ food.fat|int if food.fat else '' }}"
        data-provider="{{ food.provider.first_name or food.provider.username }}">
 
-    <!-- Image -->
-    <div class="fc-img">
-      {% if food.image %}
-        <img src="{{ url_for('static', filename='uploads/' ~ food.image) }}"
-             alt="{{ food.name }}" loading="lazy">
-      {% else %}
-        <div class="fc-img-placeholder">
-          <i class="fas fa-utensils"></i>
-          <span>No photo</span>
-        </div>
-      {% endif %}
+<div class="food-card">
+  <div class="fc-img">
+    {% if food.image %}
+      <img src="{{ url_for('static', filename='uploads/' ~ food.image) }}" alt="{{ food.name }}">
+    {% else %}
+      <div class="fc-img-placeholder">
+        <i class="fas fa-utensils"></i>
+        <span>No Image</span>
+      </div>
+    {% endif %}
 
-      {% if food.price %}
-        <span class="fc-price">${{ "%.2f"|format(food.price) }}</span>
-      {% endif %}
+    {% if food.price %}
+      <div class="fc-price">${{ "%.2f"|format(food.price) }}</div>
+    {% endif %}
 
-      {% if food.is_available is defined %}
-        <span class="fc-avail {{ 'on' if food.is_available else 'off' }}">
-          {{ 'Available' if food.is_available else 'Out of Stock' }}
-        </span>
-      {% endif %}
-
-      {% if food.category %}
-        <span class="fc-cat">{{ food.category }}</span>
-      {% endif %}
+    <div class="fc-avail {{ 'on' if food.is_available else 'off' }}">
+      {{ 'Available' if food.is_available else 'Out of Stock' }}
     </div>
 
-    <!-- Body -->
-    <div class="fc-body">
+    {% if food.diet_type %}
+      <div class="fc-cat">{{ food.diet_type.replace('-', ' ').title() }}</div>
+    {% endif %}
+  </div>
 
-      <div class="fc-name">{{ food.name }}</div>
+  <div class="fc-body">
+    <div class="fc-name">{{ food.name }}</div>
 
-      {% if food.description %}
-        <div class="fc-desc">
-          {{ food.description[:90] }}{% if food.description|length > 90 %}…{% endif %}
+    <div class="fc-desc">
+      {{ food.description[:120] if food.description else 'No description available.' }}
+    </div>
+
+    <div style="display:flex;align-items:center;gap:.4rem;flex-wrap:wrap;">
+      {% if food.diet_type %}
+        <div class="fc-diet">
+          <i class="fas fa-leaf"></i>
+          {{ food.diet_type.replace('-', ' ').title() }}
         </div>
       {% endif %}
 
-      {% if food.diet_type %}
-        <span class="fc-diet">
-          <i class="fas fa-leaf fa-xs"></i>
-          {{ food.diet_type.replace('-', ' ').title() }}
-        </span>
+      {% if is_provider_own_food %}
+        <div
+          style="display:inline-flex;align-items:center;gap:.26rem;width:fit-content;background:var(--nc-brand-l);color:var(--nc-brand-d);border:1.5px solid rgba(14,165,233,.2);border-radius:99px;padding:.15rem .65rem;font-size:.65rem;font-weight:800;"
+        >
+          <i class="fas fa-store"></i>
+          Your Item
+        </div>
       {% endif %}
-
+    </div>
       <!-- Nutrition boxes -->
       <div class="fc-nutr">
         {% if food.calories %}
@@ -86,27 +93,106 @@
         {% endif %}
       </div>
 
-      <!-- Provider -->
-      <div class="fc-prov">
-        <div class="fc-pav">
-          {{ (food.provider.first_name or food.provider.username)[0]|upper }}
+    <div
+      class="fc-rating"
+      style="display:flex;align-items:center;justify-content:space-between;gap:.65rem;padding:.15rem 0 .35rem;border-bottom:1px solid var(--nc-border);margin-top:.1rem;"
+    >
+      <div style="display:flex;align-items:center;gap:.45rem;flex-wrap:wrap;">
+        <div style="display:flex;align-items:center;gap:.08rem;color:#fbbf24;font-size:.76rem;">
+          {% for i in range(5) %}
+            {% if avg_rating >= i + 1 %}
+              <i class="fas fa-star"></i>
+            {% elif avg_rating >= i + 0.5 %}
+              <i class="fas fa-star-half-stroke"></i>
+            {% else %}
+              <i class="far fa-star" style="color:var(--nc-text-faint);"></i>
+            {% endif %}
+          {% endfor %}
         </div>
+
+        <span
+          style="font-family:'JetBrains Mono',monospace;font-size:.74rem;font-weight:800;color:var(--nc-text);"
+        >
+          {{ "%.1f"|format(avg_rating) }}
         <span>{{ food.provider.first_name or food.provider.username }}</span>
         <span style="margin-left:auto;font-size:.65rem;opacity:.5;">
           <i class="fas fa-arrow-up-right-from-square" style="font-size:.55rem"></i> View
         </span>
       </div>
 
+      <div style="font-size:.68rem;font-weight:700;color:var(--nc-text-muted);white-space:nowrap;">
+        {{ review_count }} review{% if review_count != 1 %}s{% endif %}
+      </div>
     </div>
-  </div>
-  {% endfor %}
 
-{% else %}
-  <div class="fs-empty">
-    <div class="fs-empty__icon">
-      <i class="fas fa-magnifying-glass"></i>
+    <div class="fc-nutr">
+      <div class="nb kcal">
+        <b>{{ food.calories|int if food.calories else '—' }}</b>
+        <span>kcal</span>
+      </div>
+      <div class="nb prot">
+        <b>{{ food.protein|int if food.protein else '—' }}</b>
+        <span>prot</span>
+      </div>
+      <div class="nb carb">
+        <b>{{ food.carbs|int if food.carbs else '—' }}</b>
+        <span>carb</span>
+      </div>
+      <div class="nb fat">
+        <b>{{ food.fat|int if food.fat else '—' }}</b>
+        <span>fat</span>
+      </div>
     </div>
-    <h4>No food items found</h4>
-    <p>Try a different keyword or adjust your filters.</p>
+
+    <div class="fc-prov">
+      <div class="fc-pav">
+        {{ (food.provider.full_name or food.provider.username or 'P')[0].upper() if food.provider else 'P' }}
+      </div>
+      <span>
+        {{ food.provider.full_name if food.provider and food.provider.full_name else (food.provider.username if food.provider else 'Unknown Provider') }}
+      </span>
+    </div>
   </div>
-{% endif %}
+
+  <div
+    class="food-footer"
+    style="display:flex;align-items:center;justify-content:space-between;padding:.85rem 1rem;border-top:1px solid var(--nc-border);background:var(--nc-surface-2);gap:.5rem;"
+  >
+    <a
+      href="{{ url_for('food_search.food_detail', food_id=food.id) }}"
+      class="btn-view"
+      style="display:inline-flex;align-items:center;gap:.35rem;background:var(--nc-brand-l);color:var(--nc-brand);border:1px solid rgba(14,165,233,.2);border-radius:10px;padding:.45rem .85rem;font-size:.74rem;font-weight:800;text-decoration:none;"
+    >
+      <i class="fas fa-eye"></i> Details
+    </a>
+
+    {% if current_user.is_authenticated and not current_user.is_food_provider() and not current_user.is_admin() %}
+      {% if food.is_available %}
+        <form method="post" action="{{ url_for('orders.add_to_cart', food_id=food.id) }}" style="margin:0;">
+          <input type="hidden" name="quantity" value="1">
+          <button
+            type="submit"
+            style="display:inline-flex;align-items:center;gap:.35rem;background:linear-gradient(135deg,var(--nc-brand-d),var(--nc-brand));color:#fff;border:none;border-radius:10px;padding:.48rem .95rem;font-size:.74rem;font-weight:800;cursor:pointer;"
+          >
+            <i class="fas fa-cart-plus"></i> Add
+          </button>
+        </form>
+      {% else %}
+        <button
+          type="button"
+          disabled
+          style="display:inline-flex;align-items:center;gap:.35rem;background:#9ca3af;color:#fff;border:none;border-radius:10px;padding:.48rem .95rem;font-size:.74rem;font-weight:800;cursor:not-allowed;opacity:.8;"
+        >
+          <i class="fas fa-ban"></i> Stock Out
+        </button>
+      {% endif %}
+    {% endif %}
+  </div>
+</div>
+{% else %}
+<div class="fs-empty">
+  <div class="fs-empty__icon"><i class="fas fa-bowl-food"></i></div>
+  <h4>No foods found</h4>
+  <p>Try changing your search or filters.</p>
+</div>
+{% endfor %}

@@ -1,0 +1,141 @@
+{% extends "base.html" %}
+{% block title %}Food Leaderboard · NutriConnect{% endblock %}
+
+{% block content %}
+<style>
+.lb{--surf:var(--nc-surface);--s2:var(--nc-surface-2);--s3:var(--nc-surface-3);--bdr:var(--nc-border);--bdr2:var(--nc-border-2);--txt:var(--nc-text);--txt2:var(--nc-text-2);--mu:var(--nc-text-muted);--fa:var(--nc-text-faint);--brand:var(--nc-brand);--brand-d:var(--nc-brand-d);--brand-l:var(--nc-brand-l);--emerald:#34d399;--emerald-l:rgba(52,211,153,.1);--rose:#fb7185;--amber:#fbbf24;--r:14px;--r-lg:18px;font-family:'Sora',sans-serif;}
+@keyframes up{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+.lb-wrap{max-width:960px;margin:0 auto;padding:2rem 1rem;}
+.lb-banner{background:radial-gradient(ellipse 55% 130% at -5% 50%,rgba(245,158,11,.32) 0%,transparent 55%),radial-gradient(ellipse 40% 80% at 105% 10%,rgba(251,191,36,.12) 0%,transparent 50%),linear-gradient(145deg,#0d0800 0%,#160d00 40%,#1a1000 100%);border-radius:var(--r-lg);border:1px solid rgba(251,191,36,.2);padding:2.25rem 2.5rem;margin-bottom:1.5rem;position:relative;overflow:hidden;animation:up .35s cubic-bezier(.16,1,.3,1) both;}
+.lb-banner::before{content:'';position:absolute;inset:0;background-image:radial-gradient(circle,rgba(255,255,255,.04) 1px,transparent 1px);background-size:26px 26px;mask-image:radial-gradient(ellipse 100% 100% at 50% 50%,black 30%,transparent 100%);}
+.lb-banner-title{font-size:1.7rem;font-weight:900;color:#fff;letter-spacing:-.04em;position:relative;display:flex;align-items:center;gap:.5rem;}
+.lb-banner-title .hl{background:linear-gradient(135deg,#f59e0b 0%,#fbbf24 60%,#fde68a 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.lb-banner-sub{color:rgba(255,255,255,.3);font-size:.78rem;margin:.3rem 0 0;position:relative;}
+.lb-section-label{font-size:.72rem;font-weight:800;text-transform:uppercase;letter-spacing:.12em;color:var(--mu);margin:1.5rem 0 .85rem;display:flex;align-items:center;gap:.5rem;}
+.lb-section-label::after{content:'';flex:1;height:1px;background:var(--bdr);}
+.lb-card{background:var(--surf);border:1px solid var(--bdr);border-radius:var(--r-lg);overflow:hidden;box-shadow:var(--nc-card-shadow);animation:up .3s cubic-bezier(.16,1,.3,1) both;margin-bottom:1.5rem;}
+.lb-row{display:flex;align-items:center;padding:.85rem 1.4rem;border-bottom:1px solid var(--bdr);transition:background .15s;gap:1rem;}
+.lb-row:last-child{border-bottom:none;}
+.lb-row:hover{background:var(--s2);}
+.lb-rank{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:.85rem;font-weight:900;font-family:'JetBrains Mono',monospace;flex-shrink:0;}
+.rank-gold{background:linear-gradient(135deg,#d97706,#fbbf24);color:#fff;box-shadow:0 2px 10px rgba(245,158,11,.4);}
+.rank-silver{background:linear-gradient(135deg,#6b7280,#9ca3af);color:#fff;box-shadow:0 2px 8px rgba(107,114,128,.3);}
+.rank-bronze{background:linear-gradient(135deg,#92400e,#d97706);color:#fff;box-shadow:0 2px 8px rgba(146,64,14,.3);}
+.rank-other{background:var(--s2);color:var(--mu);border:1px solid var(--bdr);}
+.lb-food-img{width:52px;height:52px;border-radius:12px;object-fit:cover;background:var(--s3);border:1px solid var(--bdr);flex-shrink:0;}
+.lb-food-no-img{width:52px;height:52px;border-radius:12px;background:var(--s3);border:1px solid var(--bdr);display:flex;align-items:center;justify-content:center;color:var(--fa);font-size:1.25rem;flex-shrink:0;}
+.lb-food-info{flex:1;min-width:0;}
+.lb-food-name{font-weight:800;font-size:.9rem;color:var(--txt);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.lb-food-provider{font-size:.72rem;color:var(--mu);margin-top:.1rem;}
+.lb-food-price{font-family:'JetBrains Mono',monospace;font-weight:700;color:var(--brand);font-size:.82rem;}
+.lb-rating-block{text-align:right;flex-shrink:0;}
+.lb-stars{color:var(--amber);font-size:.85rem;}
+.lb-avg{font-family:'JetBrains Mono',monospace;font-weight:900;font-size:1.2rem;color:var(--amber);}
+.lb-count{font-size:.68rem;color:var(--mu);font-weight:600;}
+.mo-row{display:flex;align-items:center;padding:.75rem 1.4rem;border-bottom:1px solid var(--bdr);gap:.75rem;transition:background .15s;}
+.mo-row:last-child{border-bottom:none;}
+.mo-row:hover{background:var(--s2);}
+.mo-bar{flex:1;}
+.mo-bar-track{height:6px;background:var(--s3);border-radius:99px;overflow:hidden;margin-top:.3rem;}
+.mo-bar-fill{height:100%;background:linear-gradient(90deg,var(--brand-d),var(--brand));border-radius:99px;transition:width .5s cubic-bezier(.16,1,.3,1);}
+.mo-name{font-weight:700;font-size:.85rem;color:var(--txt);}
+.mo-count{font-family:'JetBrains Mono',monospace;font-weight:900;color:var(--brand);font-size:.9rem;flex-shrink:0;}
+.empty-msg{padding:2.5rem;text-align:center;color:var(--fa);font-size:.85rem;}
+</style>
+
+<div class="lb">
+<div class="lb-wrap">
+
+  <div class="lb-banner">
+    <div class="lb-banner-title">🏆 Food <span class="hl">Leaderboard</span></div>
+    <div class="lb-banner-sub">Top rated and most ordered foods across the platform.</div>
+  </div>
+
+  <div class="lb-section-label"><i class="fas fa-star" style="color:var(--amber);"></i> Top Rated Foods</div>
+  <div class="lb-card">
+    {% if foods %}
+      {% for food in foods %}
+      {% set avg = food.average_rating or 0 %}
+      {% set review_count = food.ratings.count() %}
+      <div class="lb-row" style="animation-delay:{{ loop.index0 * 0.03 }}s">
+        <div class="lb-rank {% if loop.index == 1 %}rank-gold{% elif loop.index == 2 %}rank-silver{% elif loop.index == 3 %}rank-bronze{% else %}rank-other{% endif %}">
+          {% if loop.index == 1 %}🥇{% elif loop.index == 2 %}🥈{% elif loop.index == 3 %}🥉{% else %}{{ loop.index }}{% endif %}
+        </div>
+
+        {% if food.image %}
+          <img class="lb-food-img" src="{{ url_for('static', filename='uploads/' ~ food.image) }}" alt="{{ food.name }}">
+        {% else %}
+          <div class="lb-food-no-img"><i class="fas fa-utensils"></i></div>
+        {% endif %}
+
+        <div class="lb-food-info">
+          <div class="lb-food-name">{{ food.name }}</div>
+          <div class="lb-food-provider">
+            <i class="fas fa-store" style="font-size:.6rem;"></i>
+            {{ food.provider.full_name if food.provider and food.provider.full_name else (food.provider.username if food.provider else '—') }}
+            {% if food.provider and food.provider.is_verified %}
+            <span style="font-size:.62rem;color:#34d399;"><i class="fas fa-check-circle"></i> Verified</span>
+            {% endif %}
+          </div>
+          {% if food.price is not none %}
+          <div class="lb-food-price">${{ "%.2f"|format(food.price) }}</div>
+          {% endif %}
+        </div>
+
+        <div class="lb-rating-block">
+          <div class="lb-avg">{{ avg }}</div>
+          <div class="lb-stars">
+            {% for i in range(avg|int) %}<i class="fas fa-star"></i>{% endfor %}
+            {% if avg % 1 >= 0.5 %}<i class="fas fa-star-half-stroke"></i>{% endif %}
+          </div>
+          <div class="lb-count">{{ review_count }} review{% if review_count != 1 %}s{% endif %}</div>
+        </div>
+
+        <a href="{{ url_for('food_search.food_detail', food_id=food.id) }}" style="display:inline-flex;align-items:center;gap:.25rem;background:var(--brand-l);color:var(--brand);border:1px solid rgba(14,165,233,.2);border-radius:9px;padding:.35rem .75rem;font-size:.72rem;font-weight:700;text-decoration:none;flex-shrink:0;">
+          <i class="fas fa-eye"></i>
+        </a>
+      </div>
+      {% endfor %}
+    {% else %}
+    <div class="empty-msg">No rated foods yet. Be the first to rate!</div>
+    {% endif %}
+  </div>
+
+  <div class="lb-section-label"><i class="fas fa-shopping-bag" style="color:var(--brand);"></i> Most Ordered</div>
+  <div class="lb-card">
+    {% if foods %}
+      {% set max_orders = foods[0].order_count or 0 %}
+      {% for food in foods %}
+      <div class="mo-row" style="animation-delay:{{ loop.index0 * 0.04 }}s">
+        <div class="lb-rank {% if loop.index == 1 %}rank-gold{% elif loop.index == 2 %}rank-silver{% elif loop.index == 3 %}rank-bronze{% else %}rank-other{% endif %}">
+          {{ loop.index }}
+        </div>
+        <div class="mo-bar">
+          <div class="mo-name">{{ food.name }}</div>
+          <div class="mo-bar-track">
+            <div class="mo-bar-fill" style="width:{% if max_orders > 0 %}{{ (food.order_count / max_orders * 100)|round }}%{% else %}0{% endif %};"></div>
+          </div>
+        </div>
+        <div class="mo-count">{{ food.order_count or 0 }}</div>
+        <a href="{{ url_for('food_search.food_detail', food_id=food.id) }}" style="display:inline-flex;align-items:center;gap:.25rem;background:var(--brand-l);color:var(--brand);border:1px solid rgba(14,165,233,.2);border-radius:9px;padding:.35rem .75rem;font-size:.72rem;font-weight:700;text-decoration:none;flex-shrink:0;">
+          <i class="fas fa-eye"></i>
+        </a>
+      </div>
+      {% endfor %}
+    {% else %}
+    <div class="empty-msg">No order data yet.</div>
+    {% endif %}
+  </div>
+
+  <div style="display:flex;gap:.75rem;flex-wrap:wrap;">
+    <a href="{{ url_for('orders.trending_foods') }}" style="display:inline-flex;align-items:center;gap:.4rem;background:linear-gradient(135deg,#d97706,#fbbf24);color:#fff;border:none;border-radius:var(--r);padding:.55rem 1.15rem;font-size:.8rem;font-weight:700;text-decoration:none;">
+      <i class="fas fa-fire"></i> Trending
+    </a>
+    <a href="{{ url_for('food_search.search_foods') }}" style="display:inline-flex;align-items:center;gap:.4rem;background:var(--s2);color:var(--txt2);border:1px solid var(--bdr);border-radius:var(--r);padding:.55rem 1.15rem;font-size:.8rem;font-weight:700;text-decoration:none;">
+      <i class="fas fa-magnifying-glass"></i> Search Foods
+    </a>
+  </div>
+
+</div>
+</div>
+{% endblock %}
