@@ -1,0 +1,910 @@
+{% extends "base.html" %}
+{% block title %}My Cart | NutriConnect{% endblock %}
+
+{% block content %}
+<style>
+.cart-page{
+  --surf:var(--nc-surface);
+  --s2:var(--nc-surface-2);
+  --s3:var(--nc-surface-3);
+  --bdr:var(--nc-border);
+  --bdr2:var(--nc-border-2);
+  --txt:var(--nc-text);
+  --txt2:var(--nc-text-2);
+  --mu:var(--nc-text-muted);
+  --fa:var(--nc-text-faint);
+  --brand:var(--nc-brand);
+  --brand-d:var(--nc-brand-d);
+  --brand-l:var(--nc-brand-l);
+  --emerald:#10b981;
+  --emerald-l:rgba(16,185,129,.12);
+  --rose:#f43f5e;
+  --rose-l:rgba(244,63,94,.12);
+  --amber:#f59e0b;
+  --amber-l:rgba(245,158,11,.12);
+  --violet:#8b5cf6;
+  --violet-l:rgba(139,92,246,.12);
+  --cyan:#06b6d4;
+  --cyan-l:rgba(6,182,212,.12);
+  --r:18px;
+  --r-sm:12px;
+  font-family:'Sora',sans-serif;
+}
+
+@keyframes rise{
+  from{opacity:0;transform:translateY(18px)}
+  to{opacity:1;transform:none}
+}
+
+.cp-wrap{
+  max-width:1200px;
+  margin:0 auto;
+  padding:2rem 1rem;
+}
+
+.cp-hero{
+  position:relative;
+  overflow:hidden;
+  border-radius:var(--r);
+  padding:2.2rem 2.2rem;
+  margin-bottom:1.25rem;
+  background:
+    radial-gradient(ellipse 65% 90% at 0% 0%, rgba(34,211,238,.18) 0%, transparent 55%),
+    radial-gradient(ellipse 45% 65% at 100% 20%, rgba(139,92,246,.16) 0%, transparent 55%),
+    linear-gradient(145deg,#06101f 0%,#0a1830 42%,#0d2345 100%);
+  border:1px solid rgba(56,189,248,.14);
+  box-shadow:var(--nc-card-shadow);
+  animation:rise .45s cubic-bezier(.16,1,.3,1) both;
+}
+
+.cp-hero::after{
+  content:'';
+  position:absolute;
+  inset:0;
+  background-image:radial-gradient(circle, rgba(255,255,255,.05) 1px, transparent 1px);
+  background-size:26px 26px;
+  opacity:.45;
+  pointer-events:none;
+}
+
+.cp-hero > *{position:relative;z-index:1;}
+
+.cp-badge{
+  display:inline-flex;
+  align-items:center;
+  gap:.4rem;
+  padding:.28rem .8rem;
+  border-radius:999px;
+  background:rgba(255,255,255,.1);
+  border:1px solid rgba(255,255,255,.14);
+  color:rgba(255,255,255,.82);
+  font-size:.66rem;
+  font-weight:800;
+  text-transform:uppercase;
+  letter-spacing:.08em;
+  margin-bottom:.85rem;
+}
+
+.cp-title{
+  font-size:clamp(1.7rem,3vw,2.35rem);
+  font-weight:900;
+  letter-spacing:-.05em;
+  color:#fff;
+  margin-bottom:.45rem;
+}
+
+.cp-title .hl{
+  background:linear-gradient(135deg,#38bdf8 0%,#67e8f9 55%,#c4b5fd 100%);
+  -webkit-background-clip:text;
+  -webkit-text-fill-color:transparent;
+  background-clip:text;
+}
+
+.cp-sub{
+  font-size:.9rem;
+  color:rgba(255,255,255,.58);
+  max-width:620px;
+  line-height:1.65;
+  margin-bottom:1.2rem;
+}
+
+.cp-actions{
+  display:flex;
+  gap:.75rem;
+  flex-wrap:wrap;
+}
+
+.cp-btn-primary,
+.cp-btn-secondary{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:.42rem;
+  border-radius:11px;
+  padding:.72rem 1.1rem;
+  font-size:.82rem;
+  font-weight:800;
+  text-decoration:none;
+  transition:all .15s ease;
+}
+
+.cp-btn-primary{
+  background:linear-gradient(135deg,var(--brand-d),var(--brand));
+  color:#fff;
+  border:none;
+  box-shadow:0 10px 24px rgba(14,165,233,.2);
+}
+.cp-btn-primary:hover{
+  color:#fff;
+  transform:translateY(-1px);
+}
+
+.cp-btn-secondary{
+  background:rgba(255,255,255,.08);
+  color:#fff;
+  border:1px solid rgba(255,255,255,.12);
+}
+.cp-btn-secondary:hover{
+  color:#fff;
+  background:rgba(255,255,255,.12);
+}
+
+.cp-grid{
+  display:grid;
+  grid-template-columns:minmax(0,2fr) minmax(320px,1fr);
+  gap:1.2rem;
+  margin-bottom:1.2rem;
+}
+
+@media(max-width:992px){
+  .cp-grid{
+    grid-template-columns:1fr;
+  }
+}
+
+.cp-card{
+  background:var(--surf);
+  border:1px solid var(--bdr);
+  border-radius:var(--r);
+  overflow:hidden;
+  box-shadow:var(--nc-card-shadow);
+  animation:rise .45s cubic-bezier(.16,1,.3,1) both;
+}
+
+.cp-card-head{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:1rem;
+  padding:1rem 1.2rem;
+  border-bottom:1px solid var(--bdr);
+  background:var(--s2);
+}
+
+.cp-card-head-left{
+  display:flex;
+  align-items:center;
+  gap:.7rem;
+}
+
+.cp-icon{
+  width:34px;
+  height:34px;
+  border-radius:10px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:.8rem;
+}
+
+.ic-brand{background:var(--brand-l);color:var(--brand-d);}
+.ic-amber{background:var(--amber-l);color:#b45309;}
+.ic-violet{background:var(--violet-l);color:#6d28d9;}
+.ic-emerald{background:var(--emerald-l);color:#047857;}
+
+[data-theme="dark"] .ic-brand{background:rgba(14,165,233,.12);color:#38bdf8;}
+[data-theme="dark"] .ic-amber{background:rgba(245,158,11,.12);color:#fcd34d;}
+[data-theme="dark"] .ic-violet{background:rgba(139,92,246,.12);color:#c4b5fd;}
+[data-theme="dark"] .ic-emerald{background:rgba(16,185,129,.12);color:#34d399;}
+
+.cp-card-title{
+  font-size:.9rem;
+  font-weight:800;
+  color:var(--txt);
+  letter-spacing:-.02em;
+}
+
+.cp-card-sub{
+  font-size:.72rem;
+  color:var(--mu);
+  margin-top:.08rem;
+}
+
+.cp-cart-body{
+  padding:1rem 1.2rem;
+}
+
+.cp-item{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:1rem;
+  padding:1rem 0;
+  border-bottom:1px solid var(--bdr);
+}
+
+.cp-item:last-child{
+  border-bottom:none;
+}
+
+.cp-item-main{
+  display:flex;
+  align-items:center;
+  gap:.9rem;
+  min-width:0;
+  flex:1;
+}
+
+.cp-thumb{
+  width:64px;
+  height:64px;
+  border-radius:14px;
+  background:var(--s3);
+  border:1px solid var(--bdr);
+  overflow:hidden;
+  flex-shrink:0;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  color:var(--fa);
+  font-size:1.1rem;
+}
+
+.cp-thumb img{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+}
+
+.cp-item-name{
+  font-size:.92rem;
+  font-weight:800;
+  color:var(--txt);
+  letter-spacing:-.02em;
+}
+
+.cp-item-meta{
+  font-size:.75rem;
+  color:var(--mu);
+  margin-top:.2rem;
+}
+
+.cp-stock{
+  display:inline-flex;
+  align-items:center;
+  gap:.3rem;
+  margin-top:.45rem;
+  padding:.2rem .65rem;
+  border-radius:999px;
+  font-size:.67rem;
+  font-weight:800;
+}
+
+.cp-stock-out{
+  background:var(--rose-l);
+  color:#be123c;
+}
+
+.cp-item-actions{
+  display:flex;
+  align-items:center;
+  gap:.55rem;
+  flex-wrap:wrap;
+  justify-content:flex-end;
+}
+
+.cp-qty-form{
+  display:flex;
+  align-items:center;
+  gap:.45rem;
+}
+
+.cp-input{
+  width:86px;
+  background:var(--surf);
+  border:1px solid var(--bdr);
+  color:var(--txt);
+  border-radius:10px;
+  padding:.48rem .65rem;
+  font-size:.78rem;
+  font-weight:700;
+  outline:none;
+}
+
+.cp-input:focus{
+  border-color:var(--brand);
+  box-shadow:0 0 0 3px rgba(14,165,233,.12);
+}
+
+.cp-btn-sm,
+.cp-btn-danger{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:.35rem;
+  border-radius:10px;
+  padding:.5rem .85rem;
+  font-size:.74rem;
+  font-weight:800;
+  text-decoration:none;
+  cursor:pointer;
+  transition:all .15s ease;
+}
+
+.cp-btn-sm{
+  border:1px solid rgba(14,165,233,.18);
+  background:var(--brand-l);
+  color:var(--brand-d);
+}
+.cp-btn-sm:hover{
+  background:var(--brand);
+  color:#fff;
+}
+
+.cp-btn-danger{
+  border:1px solid rgba(244,63,94,.18);
+  background:var(--rose-l);
+  color:#be123c;
+}
+.cp-btn-danger:hover{
+  background:#e11d48;
+  color:#fff;
+}
+
+.cp-summary{
+  padding:1.1rem 1.2rem 1.2rem;
+}
+
+.cp-summary-box{
+  background:var(--s2);
+  border:1px solid var(--bdr);
+  border-radius:14px;
+  padding:1rem;
+  margin-bottom:1rem;
+}
+
+.cp-summary-row{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:1rem;
+  padding:.45rem 0;
+  font-size:.82rem;
+  color:var(--txt2);
+}
+
+.cp-summary-row.total{
+  margin-top:.3rem;
+  padding-top:.8rem;
+  border-top:1px solid var(--bdr);
+  font-size:.95rem;
+  font-weight:900;
+  color:var(--txt);
+}
+
+.cp-summary-price{
+  font-family:'JetBrains Mono',monospace;
+}
+
+.cp-summary-note{
+  font-size:.74rem;
+  line-height:1.65;
+  color:var(--mu);
+  margin-top:.6rem;
+}
+
+.cp-checkout{
+  width:100%;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:.45rem;
+  text-decoration:none;
+  border:none;
+  border-radius:12px;
+  padding:.82rem 1rem;
+  font-size:.84rem;
+  font-weight:800;
+  color:#fff;
+  background:linear-gradient(135deg,var(--brand-d),var(--brand));
+  box-shadow:0 10px 24px rgba(14,165,233,.18);
+  transition:all .15s ease;
+}
+.cp-checkout:hover{
+  color:#fff;
+  transform:translateY(-1px);
+}
+
+.cp-empty{
+  padding:3rem 1.5rem;
+  text-align:center;
+}
+
+.cp-empty-icon{
+  width:72px;
+  height:72px;
+  margin:0 auto 1rem;
+  border-radius:22px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:var(--brand-l);
+  color:var(--brand);
+  font-size:1.7rem;
+}
+
+.cp-empty h4{
+  font-size:1rem;
+  font-weight:900;
+  color:var(--txt);
+  margin-bottom:.45rem;
+  letter-spacing:-.02em;
+}
+
+.cp-empty p{
+  font-size:.82rem;
+  color:var(--mu);
+  line-height:1.65;
+  max-width:320px;
+  margin:0 auto 1.1rem;
+}
+
+.cp-orders-card{
+  animation-delay:.08s;
+}
+
+.cp-order-tools{
+  padding:1rem 1.2rem 0;
+}
+
+.cp-filter-form{
+  display:flex;
+  gap:.7rem;
+  flex-wrap:wrap;
+}
+
+.cp-select{
+  min-width:180px;
+  background:var(--surf);
+  border:1px solid var(--bdr);
+  color:var(--txt);
+  border-radius:10px;
+  padding:.58rem .78rem;
+  font-size:.78rem;
+  font-weight:700;
+  outline:none;
+}
+
+.cp-select:focus{
+  border-color:var(--brand);
+  box-shadow:0 0 0 3px rgba(14,165,233,.12);
+}
+
+.cp-table-wrap{
+  padding:1rem 1.2rem 1.2rem;
+}
+
+.cp-table{
+  width:100%;
+  border-collapse:collapse;
+}
+
+.cp-table th{
+  padding:.82rem .8rem;
+  text-align:left;
+  font-size:.67rem;
+  font-weight:900;
+  text-transform:uppercase;
+  letter-spacing:.08em;
+  color:var(--fa);
+  border-bottom:1px solid var(--bdr);
+}
+
+.cp-table td{
+  padding:1rem .8rem;
+  border-bottom:1px solid var(--bdr);
+  vertical-align:middle;
+  font-size:.82rem;
+  color:var(--txt2);
+}
+
+.cp-table tr:last-child td{
+  border-bottom:none;
+}
+
+.cp-order-id{
+  font-size:.84rem;
+  font-weight:800;
+  color:var(--txt);
+}
+
+.cp-order-date{
+  font-size:.73rem;
+  color:var(--mu);
+  margin-top:.18rem;
+}
+
+.cp-badge{
+  display:inline-flex;
+  align-items:center;
+  gap:.3rem;
+  padding:.24rem .7rem;
+  border-radius:999px;
+  font-size:.68rem;
+  font-weight:800;
+}
+
+.st-pending{background:var(--amber-l);color:#92400e;}
+.st-confirmed{background:var(--cyan-l);color:#0e7490;}
+.st-preparing{background:var(--violet-l);color:#6d28d9;}
+.st-ready{background:var(--emerald-l);color:#047857;}
+.st-delivered{background:var(--emerald-l);color:#047857;}
+.st-cancelled{background:var(--rose-l);color:#be123c;}
+
+[data-theme="dark"] .st-pending{background:rgba(245,158,11,.12);color:#fcd34d;}
+[data-theme="dark"] .st-confirmed{background:rgba(6,182,212,.12);color:#22d3ee;}
+[data-theme="dark"] .st-preparing{background:rgba(139,92,246,.12);color:#c4b5fd;}
+[data-theme="dark"] .st-ready{background:rgba(16,185,129,.12);color:#34d399;}
+[data-theme="dark"] .st-delivered{background:rgba(16,185,129,.12);color:#34d399;}
+[data-theme="dark"] .st-cancelled{background:rgba(244,63,94,.12);color:#fb7185;}
+
+.cp-price{
+  font-family:'JetBrains Mono',monospace;
+  font-weight:800;
+  color:var(--txt);
+}
+
+.cp-view{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:.35rem;
+  padding:.5rem .85rem;
+  border-radius:10px;
+  background:var(--s2);
+  border:1px solid var(--bdr);
+  color:var(--txt2);
+  text-decoration:none;
+  font-size:.74rem;
+  font-weight:800;
+  transition:all .15s ease;
+}
+.cp-view:hover{
+  background:var(--brand-l);
+  border-color:rgba(14,165,233,.2);
+  color:var(--brand-d);
+}
+
+.cp-orders-empty{
+  padding:2.6rem 1rem 2.8rem;
+  text-align:center;
+}
+
+.cp-orders-empty i{
+  font-size:1.5rem;
+  color:var(--fa);
+  margin-bottom:.7rem;
+}
+
+.cp-orders-empty h4{
+  font-size:.96rem;
+  font-weight:900;
+  color:var(--txt);
+  margin-bottom:.35rem;
+}
+
+.cp-orders-empty p{
+  font-size:.8rem;
+  color:var(--mu);
+  margin:0;
+}
+
+.cp-pagination{
+  display:flex;
+  justify-content:center;
+  gap:.45rem;
+  flex-wrap:wrap;
+  padding:0 1.2rem 1.3rem;
+}
+
+.cp-page{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  min-width:38px;
+  height:38px;
+  padding:0 .8rem;
+  border-radius:10px;
+  text-decoration:none;
+  border:1px solid var(--bdr);
+  background:var(--surf);
+  color:var(--txt2);
+  font-size:.76rem;
+  font-weight:800;
+  transition:all .15s ease;
+}
+.cp-page:hover{
+  background:var(--s2);
+  color:var(--txt);
+}
+.cp-page.active{
+  background:var(--brand);
+  color:#fff;
+  border-color:var(--brand);
+}
+
+@media(max-width:768px){
+  .cp-item{
+    align-items:flex-start;
+    flex-direction:column;
+  }
+
+  .cp-item-actions{
+    justify-content:flex-start;
+    width:100%;
+  }
+
+  .cp-table-wrap{
+    overflow-x:auto;
+  }
+
+  .cp-table{
+    min-width:720px;
+  }
+
+  .cp-hero{
+    padding:1.8rem 1.3rem;
+  }
+}
+</style>
+
+<div class="cart-page">
+  <div class="cp-wrap">
+
+    <div class="cp-hero">
+      <div class="cp-badge">
+        <i class="fas fa-cart-shopping"></i> Unified Cart & Orders
+      </div>
+      <div class="cp-title">My <span class="hl">Cart</span></div>
+      <div class="cp-sub">
+        Manage your selected items and review your order history from one place instead of separate cart and orders pages.
+      </div>
+      <div class="cp-actions">
+        <a href="{{ url_for('food_search.search_foods') }}" class="cp-btn-primary">
+          <i class="fas fa-magnifying-glass"></i> Browse Foods
+        </a>
+
+      </div>
+    </div>
+
+    <div class="cp-grid">
+      <div class="cp-card">
+        <div class="cp-card-head">
+          <div class="cp-card-head-left">
+            <div class="cp-icon ic-brand"><i class="fas fa-basket-shopping"></i></div>
+            <div>
+              <div class="cp-card-title">Cart Items</div>
+              <div class="cp-card-sub">
+                {{ items|length if items else 0 }} item{{ '' if items|length == 1 else 's' }} currently in your cart
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {% if items %}
+        <div class="cp-cart-body">
+          {% for item in items %}
+          <div class="cp-item">
+            <div class="cp-item-main">
+              <div class="cp-thumb">
+                {% if item.food.image %}
+                  <img src="{{ url_for('static', filename='uploads/' ~ item.food.image) }}" alt="{{ item.food.name }}">
+                {% else %}
+                  <i class="fas fa-utensils"></i>
+                {% endif %}
+              </div>
+
+              <div style="min-width:0;">
+                <div class="cp-item-name">{{ item.food.name }}</div>
+                <div class="cp-item-meta">${{ "%.2f"|format(item.food.price or 0) }} each</div>
+
+                {% if not item.food.is_available %}
+                <div class="cp-stock cp-stock-out">
+                  <i class="fas fa-ban"></i> Out of Stock
+                </div>
+                {% endif %}
+              </div>
+            </div>
+
+            <div class="cp-item-actions">
+              <form method="post" action="{{ url_for('orders.update_cart', item_id=item.id) }}" class="cp-qty-form">
+                <input type="number" name="quantity" min="1" max="99" value="{{ item.quantity }}" class="cp-input">
+                <button class="cp-btn-sm" type="submit">
+                  <i class="fas fa-rotate"></i> Update
+                </button>
+              </form>
+
+              <form method="post" action="{{ url_for('orders.remove_from_cart', item_id=item.id) }}">
+                <button class="cp-btn-danger" type="submit">
+                  <i class="fas fa-trash"></i> Remove
+                </button>
+              </form>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+        {% else %}
+        <div class="cp-empty">
+          <div class="cp-empty-icon">
+            <i class="fas fa-cart-shopping"></i>
+          </div>
+          <h4>Your cart is empty</h4>
+          <p>Add foods from the catalog to start building your next order.</p>
+          <a href="{{ url_for('food_search.search_foods') }}" class="cp-btn-primary">
+            <i class="fas fa-magnifying-glass"></i> Browse Foods
+          </a>
+        </div>
+        {% endif %}
+      </div>
+
+      <div class="cp-card">
+        <div class="cp-card-head">
+          <div class="cp-card-head-left">
+            <div class="cp-icon ic-amber"><i class="fas fa-receipt"></i></div>
+            <div>
+              <div class="cp-card-title">Order Summary</div>
+              <div class="cp-card-sub">Quick checkout overview</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="cp-summary">
+          <div class="cp-summary-box">
+            <div class="cp-summary-row">
+              <span>Items</span>
+              <span class="cp-summary-price">{{ items|length if items else 0 }}</span>
+            </div>
+            <div class="cp-summary-row">
+              <span>Subtotal</span>
+              <span class="cp-summary-price">${{ "%.2f"|format(total or 0) }}</span>
+            </div>
+            <div class="cp-summary-row">
+              <span>Delivery</span>
+              <span class="cp-summary-price">Calculated later</span>
+            </div>
+            <div class="cp-summary-row total">
+              <span>Total</span>
+              <span class="cp-summary-price">${{ "%.2f"|format(total or 0) }}</span>
+            </div>
+          </div>
+
+          <div class="cp-summary-note">
+            Your selected items remain saved here until you update quantities, remove them, or complete checkout.
+          </div>
+
+          <a href="{{ url_for('orders.checkout') }}" class="cp-checkout" style="margin-top:1rem;">
+            <i class="fas fa-credit-card"></i> Proceed to Checkout
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <div class="cp-card cp-orders-card">
+      <div class="cp-card-head">
+        <div class="cp-card-head-left">
+          <div class="cp-icon ic-violet"><i class="fas fa-clock-rotate-left"></i></div>
+          <div>
+            <div class="cp-card-title">Order History</div>
+            <div class="cp-card-sub">Previously placed orders and their status</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="cp-order-tools">
+        <form method="get" class="cp-filter-form">
+          <select name="status" class="cp-select">
+            <option value="">All Status</option>
+            {% for s in ['pending','confirmed','preparing','ready','delivered','cancelled'] %}
+            <option value="{{ s }}" {% if status_filter == s %}selected{% endif %}>{{ s.title() }}</option>
+            {% endfor %}
+          </select>
+
+          <select name="sort" class="cp-select">
+            <option value="date_desc" {% if sort_by == 'date_desc' %}selected{% endif %}>Newest</option>
+            <option value="date_asc" {% if sort_by == 'date_asc' %}selected{% endif %}>Oldest</option>
+            <option value="price_desc" {% if sort_by == 'price_desc' %}selected{% endif %}>Highest Price</option>
+            <option value="price_asc" {% if sort_by == 'price_asc' %}selected{% endif %}>Lowest Price</option>
+          </select>
+
+          <button class="cp-btn-sm" type="submit">
+            <i class="fas fa-filter"></i> Apply
+          </button>
+        </form>
+      </div>
+
+      {% if orders and orders.items %}
+      <div class="cp-table-wrap">
+        <table class="cp-table">
+          <thead>
+            <tr>
+              <th>Order</th>
+              <th>Status</th>
+              <th>Total</th>
+              <th>Date</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for order in orders.items %}
+            <tr>
+              <td>
+                <div class="cp-order-id">{{ order.order_number }}</div>
+                <div class="cp-order-date">Placed order</div>
+              </td>
+              <td>
+                <span class="cp-badge st-{{ order.status }}">
+                  {{ order.status.title() }}
+                </span>
+              </td>
+              <td class="cp-price">${{ "%.2f"|format(order.total_price or 0) }}</td>
+              <td>{{ order.created_at.strftime("%d %b %Y, %I:%M %p") if order.created_at else "—" }}</td>
+              <td>
+                <a href="{{ url_for('orders.order_detail', order_id=order.id) }}" class="cp-view">
+                  <i class="fas fa-eye"></i> View
+                </a>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+
+      {% if orders.pages > 1 %}
+      <div class="cp-pagination">
+        {% if orders.has_prev %}
+          <a class="cp-page" href="{{ url_for('orders.cart', page=orders.prev_num, status=status_filter, sort=sort_by) }}">
+            <i class="fas fa-chevron-left"></i>
+          </a>
+        {% endif %}
+
+        {% for p in orders.iter_pages(left_edge=1, right_edge=1, left_current=2, right_current=2) %}
+          {% if p %}
+            <a class="cp-page {% if p == orders.page %}active{% endif %}"
+               href="{{ url_for('orders.cart', page=p, status=status_filter, sort=sort_by) }}">
+              {{ p }}
+            </a>
+          {% else %}
+            <span class="cp-page">…</span>
+          {% endif %}
+        {% endfor %}
+
+        {% if orders.has_next %}
+          <a class="cp-page" href="{{ url_for('orders.cart', page=orders.next_num, status=status_filter, sort=sort_by) }}">
+            <i class="fas fa-chevron-right"></i>
+          </a>
+        {% endif %}
+      </div>
+      {% endif %}
+
+      {% else %}
+      <div class="cp-orders-empty">
+        <i class="fas fa-bag-shopping"></i>
+        <h4>No orders found</h4>
+        <p>Your placed orders will appear here once the cart route is updated to load them.</p>
+      </div>
+      {% endif %}
+    </div>
+
+  </div>
+</div>
+{% endblock %}

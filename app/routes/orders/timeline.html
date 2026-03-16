@@ -1,0 +1,15 @@
+<h2>Order Timeline</h2>
+
+<ul>
+
+{% for step in order.timeline %}
+
+<li>
+<strong>{{step.status}}</strong>
+<br>
+{{step.created_at}}
+</li>
+
+{% endfor %}
+
+</ul>

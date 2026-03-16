@@ -1,0 +1,150 @@
+{% extends "base.html" %}
+{% block title %}{{ food.name }} | NutriConnect{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+  <div class="row g-4">
+    <div class="col-lg-7">
+      <div class="card border-0 shadow-sm">
+        {% if food.image %}
+        <img src="{{ url_for('static', filename='uploads/' ~ food.image) }}"
+             class="card-img-top"
+             style="height:380px; object-fit:cover;">
+        {% endif %}
+
+        <div class="card-body">
+          <div class="d-flex justify-content-between align-items-start flex-wrap gap-3">
+            <div>
+              <h2 class="mb-1">{{ food.name }}</h2>
+              <div class="text-muted">
+                by {{ food.provider.full_name if food.provider and food.provider.full_name else (food.provider.username if food.provider else 'Unknown Provider') }}
+                {% if food.provider and food.provider.is_verified %}
+                  <span class="badge bg-success ms-2">Verified</span>
+                {% endif %}
+              </div>
+            </div>
+
+            <span class="badge {% if food.is_available %}bg-success{% else %}bg-danger{% endif %}">
+              {{ "Available" if food.is_available else "Out of Stock" }}
+            </span>
+          </div>
+
+          {% if food.diet_type %}
+          <div class="mt-3">
+            <span class="badge bg-info text-dark">{{ food.diet_type.replace('-', ' ').title() }}</span>
+          </div>
+          {% endif %}
+
+          <p class="mt-3 mb-3">{{ food.description or 'No description available.' }}</p>
+
+          <h4 class="mb-3">${{ "%.2f"|format(food.price or 0) }}</h4>
+
+          <div class="d-flex gap-2 mb-4 flex-wrap">
+            {% if current_user.has_role('user') %}
+              {% if food.is_available %}
+              <form method="post"
+                    action="{{ url_for('orders.add_to_cart', food_id=food.id) }}"
+                    class="d-flex gap-2 align-items-center flex-wrap">
+                <input type="number"
+                       name="quantity"
+                       value="1"
+                       min="1"
+                       max="99"
+                       class="form-control"
+                       style="width:90px;">
+                <button type="submit" class="btn btn-primary">
+                  <i class="fas fa-cart-plus me-1"></i> Add to Cart
+                </button>
+              </form>
+              {% else %}
+              <button class="btn btn-secondary" disabled>
+                <i class="fas fa-ban me-1"></i> Out of Stock
+              </button>
+              {% endif %}
+
+              <form method="post" action="{{ url_for('orders.toggle_favorite', food_id=food.id) }}">
+                <button type="submit" class="btn btn-outline-danger">
+                  {% if is_favorite %}
+                    <i class="fas fa-heart-crack me-1"></i> Remove Favorite
+                  {% else %}
+                    <i class="fas fa-heart me-1"></i> Add Favorite
+                  {% endif %}
+                </button>
+              </form>
+            {% endif %}
+          </div>
+
+          {% if gallery %}
+          <h5>Image Gallery</h5>
+          <div class="row g-3 mt-1">
+            {% for image in gallery %}
+            <div class="col-md-4">
+              <img src="{{ url_for('static', filename='uploads/' ~ image.image_path) }}"
+                   class="img-fluid rounded shadow-sm"
+                   style="height:150px; width:100%; object-fit:cover;">
+            </div>
+            {% endfor %}
+          </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+    <div class="col-lg-5">
+      <div class="card border-0 shadow-sm mb-4">
+        <div class="card-body">
+          <h5>Nutrition</h5>
+          <p class="mb-2">Calories: {{ food.calories if food.calories is not none else 'N/A' }}</p>
+          <p class="mb-2">Protein: {{ food.protein if food.protein is not none else 'N/A' }}</p>
+          <p class="mb-2">Carbs: {{ food.carbs if food.carbs is not none else 'N/A' }}</p>
+          <p class="mb-0">Fat: {{ food.fat if food.fat is not none else 'N/A' }}</p>
+        </div>
+      </div>
+
+      {% if current_user.has_role('user') %}
+      <div class="card border-0 shadow-sm">
+        <div class="card-body">
+          <h5>Ratings</h5>
+          <div class="mb-3">
+            Average Rating:
+            <strong>{{ food.average_rating if food.average_rating is not none else 0 }}</strong> / 5
+          </div>
+
+          <form method="post"
+                action="{{ url_for('orders.rate_food', food_id=food.id) }}"
+                class="mb-4">
+            <div class="mb-2">
+              <label class="form-label">Your Rating</label>
+              <select name="rating" class="form-select" required>
+                <option value="">Select</option>
+                {% for i in [5,4,3,2,1] %}
+                <option value="{{ i }}" {% if my_rating and my_rating.rating == i %}selected{% endif %}>{{ i }}</option>
+                {% endfor %}
+              </select>
+            </div>
+
+            <div class="mb-2">
+              <textarea name="review"
+                        class="form-control"
+                        rows="3"
+                        placeholder="Write a review">{{ my_rating.review if my_rating else '' }}</textarea>
+            </div>
+
+            <button type="submit" class="btn btn-primary w-100">Submit Rating</button>
+          </form>
+
+          {% for rating in ratings %}
+          <div class="border-top pt-3 mt-3">
+            <strong>{{ rating.user.username if rating.user else 'User' }}</strong> · {{ rating.rating }}/5
+            <p class="mb-0 text-muted">{{ rating.review or 'No review text.' }}</p>
+          </div>
+          {% else %}
+          <p class="text-muted mb-0">No ratings yet.</p>
+          {% endfor %}
+        </div>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}

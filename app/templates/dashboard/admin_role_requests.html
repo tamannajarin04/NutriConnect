@@ -1,275 +1,644 @@
 {% extends "base.html" %}
-{% block title %}Role Requests{% endblock %}
+{% block title %}Role Requests · NutriConnect{% endblock %}
 
 {% block content %}
-
 <style>
-  .btn-approve {
-    background: #2563eb;   /* blue */
-    border-color: #2563eb;
-    color: #fff;
-  }
-  .btn-approve:hover {
-    background: #1d4ed8;
-    border-color: #1d4ed8;
-    color: #fff;
-  }
+.admin-req {
+  --surf:     var(--nc-surface);
+  --s2:       var(--nc-surface-2);
+  --s3:       var(--nc-surface-3);
+  --bdr:      var(--nc-border);
+  --bdr2:     var(--nc-border-2);
+  --txt:      var(--nc-text);
+  --txt2:     var(--nc-text-2);
+  --mu:       var(--nc-text-muted);
 
-  .btn-reject {
-    background: #0ea5e9;   /* sky blue */
-    border-color: #0ea5e9;
-    color: #fff;
-  }
-  .btn-reject:hover {
-    background: #0284c7;
-    border-color: #0284c7;
-    color: #fff;
-  }
+  --brand:    var(--nc-brand);
+  --brand-d:  var(--nc-brand-d);
+  --brand-l:  var(--nc-brand-l);
 
-  .stat-card{
-    border: 1px solid rgba(0,0,0,.06);
-    border-radius: 16px;
-    box-shadow: 0 8px 18px rgba(0,0,0,.04);
-    background: #fff;
-  }
-  .stat-pill{
-    width: 44px;
-    height: 44px;
-    border-radius: 12px;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: 700;
-  }
-  .pill-pending{ background: rgba(37,99,235,.10); color:#2563eb; }
-  .pill-approved{ background: rgba(14,165,233,.12); color:#0284c7; }
-  .pill-rejected{ background: rgba(59,130,246,.10); color:#1d4ed8; }
-  .pill-total{ background: rgba(2,132,199,.12); color:#0369a1; }
+  --teal:   #0d9488; --teal-l: #ccfbf1; --teal-d: #0f766e;
+  --amber:  #f59e0b; --amber-l:#fef3c7; --amber-d:#d97706;
+  --rose:   #f43f5e; --rose-l: #ffe4e6; --rose-d:#be123c;
+  --violet: #7c3aed; --violet-l:#ede9fe; --violet-d:#5b21b6;
+  --cyan:   #06b6d4; --cyan-l:#cffafe; --cyan-d:#0e7490;
+
+  --r: 18px;
+  font-family: 'Sora', sans-serif;
+}
+
+.req-shell {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  gap: 1rem;
+}
+
+.req-card {
+  background: var(--nc-card-bg);
+  border: 1px solid var(--nc-card-border);
+  border-radius: var(--r);
+  overflow: hidden;
+  box-shadow: var(--nc-card-shadow);
+}
+
+.r-hero   { grid-column: span 12; }
+.r-stat-1 { grid-column: span 3; }
+.r-stat-2 { grid-column: span 3; }
+.r-stat-3 { grid-column: span 3; }
+.r-stat-4 { grid-column: span 3; }
+.r-pend   { grid-column: span 12; }
+.r-hist   { grid-column: span 12; }
+
+@media (max-width: 992px) {
+  .r-stat-1, .r-stat-2, .r-stat-3, .r-stat-4 { grid-column: span 6; }
+}
+@media (max-width: 576px) {
+  .r-stat-1, .r-stat-2, .r-stat-3, .r-stat-4 { grid-column: span 12; }
+}
+
+.req-hero {
+  position: relative;
+  overflow: hidden;
+  border-radius: var(--r);
+  padding: 2rem 2.3rem;
+  background: linear-gradient(135deg, #082f49 0%, #0c4a6e 45%, #155e75 100%);
+  color: #fff;
+}
+.req-hero::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at 10% 20%, rgba(255,255,255,.12), transparent 28%),
+    radial-gradient(circle at 90% 15%, rgba(255,255,255,.08), transparent 24%),
+    radial-gradient(circle at 55% 120%, rgba(255,255,255,.06), transparent 32%);
+}
+.req-hero > * { position: relative; z-index: 1; }
+
+.req-badge-top {
+  display: inline-flex;
+  align-items: center;
+  gap: .45rem;
+  padding: .32rem .82rem;
+  border-radius: 999px;
+  font-size: .72rem;
+  font-weight: 800;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  background: rgba(255,255,255,.12);
+  border: 1px solid rgba(255,255,255,.16);
+  margin-bottom: .9rem;
+}
+.req-title {
+  font-size: clamp(1.65rem, 3vw, 2.3rem);
+  font-weight: 800;
+  letter-spacing: -.04em;
+  margin-bottom: .4rem;
+}
+.req-sub {
+  font-size: .9rem;
+  color: rgba(255,255,255,.8);
+  line-height: 1.6;
+  max-width: 760px;
+}
+.req-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .7rem;
+  margin-top: 1.2rem;
+}
+.req-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: .45rem;
+  text-decoration: none;
+  border-radius: 11px;
+  padding: .66rem 1.05rem;
+  font-size: .83rem;
+  font-weight: 700;
+  transition: all .15s ease;
+}
+.req-btn-light {
+  background: #fff;
+  color: #0c4a6e;
+}
+.req-btn-light:hover {
+  color: #082f49;
+  transform: translateY(-1px);
+}
+.req-btn-soft {
+  background: rgba(255,255,255,.1);
+  color: #fff;
+  border: 1px solid rgba(255,255,255,.16);
+}
+.req-btn-soft:hover {
+  background: rgba(255,255,255,.16);
+  color: #fff;
+}
+
+.stat-top {
+  height: 3px;
+}
+.st-pending  { background: linear-gradient(90deg, #f59e0b, #fbbf24); }
+.st-approved { background: linear-gradient(90deg, #0d9488, #06b6d4); }
+.st-rejected { background: linear-gradient(90deg, #f43f5e, #fb7185); }
+.st-total    { background: linear-gradient(90deg, #7c3aed, #a78bfa); }
+
+.stat-body {
+  padding: 1.2rem 1.3rem;
+}
+.stat-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: .78rem;
+}
+.stat-icon {
+  width: 38px;
+  height: 38px;
+  border-radius: 11px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: .9rem;
+}
+.si-pending  { background: var(--amber-l); color: var(--amber-d); }
+.si-approved { background: var(--teal-l); color: var(--teal-d); }
+.si-rejected { background: var(--rose-l); color: var(--rose-d); }
+.si-total    { background: var(--violet-l); color: var(--violet-d); }
+
+[data-theme="dark"] .si-pending  { background: rgba(245,158,11,.12); color: #fcd34d; }
+[data-theme="dark"] .si-approved { background: rgba(13,148,136,.13); color: #2dd4bf; }
+[data-theme="dark"] .si-rejected { background: rgba(244,63,94,.10); color: #fb7185; }
+[data-theme="dark"] .si-total    { background: rgba(124,58,237,.12); color: #c4b5fd; }
+
+.stat-value {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 1.8rem;
+  font-weight: 600;
+  line-height: 1;
+  color: var(--txt);
+}
+.stat-label {
+  margin-top: .38rem;
+  color: var(--mu);
+  font-size: .72rem;
+  font-weight: 700;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+
+.sec-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1rem 1.3rem;
+  border-bottom: 1px solid var(--bdr);
+}
+.sec-left {
+  display: flex;
+  align-items: center;
+  gap: .65rem;
+}
+.sec-icon {
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: .82rem;
+}
+.sec-amber { background: var(--amber-l); color: var(--amber-d); }
+.sec-brand { background: var(--brand-l); color: var(--brand-d); }
+
+[data-theme="dark"] .sec-amber { background: rgba(245,158,11,.12); color: #fcd34d; }
+[data-theme="dark"] .sec-brand { background: rgba(14,165,233,.13); color: #38bdf8; }
+
+.sec-title {
+  font-size: .9rem;
+  font-weight: 800;
+  color: var(--txt);
+  letter-spacing: -.02em;
+}
+.sec-sub {
+  font-size: .7rem;
+  color: var(--mu);
+  margin-top: .05rem;
+}
+.sec-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: .3rem;
+  padding: .24rem .72rem;
+  border-radius: 999px;
+  font-size: .7rem;
+  font-weight: 800;
+  background: var(--brand-l);
+  color: var(--brand-d);
+}
+[data-theme="dark"] .sec-badge { background: rgba(14,165,233,.13); color: #38bdf8; }
+
+.table-wrap {
+  overflow-x: auto;
+}
+.table-clean {
+  width: 100%;
+  border-collapse: collapse;
+}
+.table-clean th,
+.table-clean td {
+  padding: .95rem 1rem;
+  border-bottom: 1px solid var(--bdr);
+  vertical-align: top;
+}
+.table-clean th {
+  font-size: .72rem;
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  color: var(--mu);
+  font-weight: 800;
+  background: var(--s2);
+  white-space: nowrap;
+}
+.table-clean td {
+  font-size: .84rem;
+  color: var(--txt2);
+}
+.table-clean tr:hover td {
+  background: var(--s2);
+}
+.table-clean tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.user-main {
+  font-weight: 800;
+  color: var(--txt);
+}
+.user-sub {
+  margin-top: .18rem;
+  font-size: .72rem;
+  color: var(--mu);
+}
+.note-text {
+  color: var(--txt2);
+  line-height: 1.5;
+  max-width: 280px;
+  word-break: break-word;
+}
+.empty-box {
+  padding: 2rem 1.2rem;
+  text-align: center;
+  color: var(--mu);
+}
+
+.role-badge,
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: .3rem;
+  border-radius: 999px;
+  padding: .24rem .72rem;
+  font-size: .68rem;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.role-admin {
+  background: var(--rose-l);
+  color: var(--rose-d);
+}
+.role-provider {
+  background: var(--amber-l);
+  color: #92400e;
+}
+.role-generic {
+  background: var(--s3);
+  color: var(--txt2);
+}
+
+.status-pending {
+  background: var(--amber-l);
+  color: #92400e;
+}
+.status-approved {
+  background: var(--teal-l);
+  color: var(--teal-d);
+}
+.status-rejected {
+  background: var(--rose-l);
+  color: var(--rose-d);
+}
+
+[data-theme="dark"] .role-admin { background: rgba(244,63,94,.10); color: #fb7185; }
+[data-theme="dark"] .role-provider { background: rgba(245,158,11,.12); color: #fcd34d; }
+[data-theme="dark"] .role-generic { background: var(--s3); color: var(--txt2); }
+
+[data-theme="dark"] .status-pending { background: rgba(245,158,11,.12); color: #fcd34d; }
+[data-theme="dark"] .status-approved { background: rgba(13,148,136,.13); color: #2dd4bf; }
+[data-theme="dark"] .status-rejected { background: rgba(244,63,94,.10); color: #fb7185; }
+
+.action-stack {
+  display: flex;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: .45rem;
+}
+.btn-note,
+.btn-approve,
+.btn-reject {
+  border: none;
+  border-radius: 10px;
+  padding: .48rem .78rem;
+  font-size: .76rem;
+  font-weight: 700;
+  transition: all .15s ease;
+}
+.btn-note {
+  background: var(--s3);
+  color: var(--txt2);
+  border: 1px solid var(--bdr);
+}
+.btn-note:hover {
+  background: var(--s2);
+  color: var(--txt);
+}
+.btn-approve {
+  background: #2563eb;
+  color: #fff;
+}
+.btn-approve:hover {
+  background: #1d4ed8;
+  color: #fff;
+}
+.btn-reject {
+  background: #0ea5e9;
+  color: #fff;
+}
+.btn-reject:hover {
+  background: #0284c7;
+  color: #fff;
+}
+
+.modal-content {
+  background: var(--nc-surface);
+  color: var(--nc-text);
+  border: 1px solid var(--nc-border);
+  border-radius: 16px;
+}
+.modal-header,
+.modal-footer {
+  border-color: var(--nc-border);
+}
+.modal-title {
+  font-weight: 800;
+}
 </style>
 
-<div class="d-flex justify-content-between align-items-center mb-3">
-  <div>
-    <h3 class="mb-0">Role Upgrade Requests</h3>
-    <div class="text-muted">Approve or reject role upgrade requests</div>
-  </div>
-  <a href="{{ url_for('admin.dashboard') }}" class="btn btn-sm btn-outline-secondary">
-    Back to Admin Dashboard
-  </a>
-</div>
+<div class="admin-req">
+  <div class="req-shell">
 
-<!-- ✅ Stylish Counts -->
-<div class="row g-3 mb-4">
-  <div class="col-md-3">
-    <div class="stat-card p-3 h-100">
-      <div class="d-flex justify-content-between align-items-center">
-        <div>
-          <div class="text-muted small">Pending</div>
-          <div class="fs-3 fw-bold">{{ pending_count or 0 }}</div>
+    <div class="r-hero">
+      <div class="req-hero">
+        <div class="req-badge-top">
+          <i class="fas fa-clipboard-check"></i> Admin Review Queue
         </div>
-        <div class="stat-pill pill-pending"><i class="fas fa-clock"></i></div>
-      </div>
-      <div class="text-muted small mt-2">Needs review</div>
-    </div>
-  </div>
-
-  <div class="col-md-3">
-    <div class="stat-card p-3 h-100">
-      <div class="d-flex justify-content-between align-items-center">
-        <div>
-          <div class="text-muted small">Approved</div>
-          <div class="fs-3 fw-bold">{{ approved_count or 0 }}</div>
+        <div class="req-title">Role Upgrade Requests</div>
+        <div class="req-sub">
+          Review pending requests, save admin notes, and approve or reject access changes across the platform.
         </div>
-        <div class="stat-pill pill-approved"><i class="fas fa-check"></i></div>
-      </div>
-      <div class="text-muted small mt-2">Accepted requests</div>
-    </div>
-  </div>
-
-  <div class="col-md-3">
-    <div class="stat-card p-3 h-100">
-      <div class="d-flex justify-content-between align-items-center">
-        <div>
-          <div class="text-muted small">Rejected</div>
-          <div class="fs-3 fw-bold">{{ rejected_count or 0 }}</div>
+        <div class="req-actions">
+          <a href="{{ url_for('admin.dashboard') }}" class="req-btn req-btn-light">
+            <i class="fas fa-arrow-left"></i> Back to Dashboard
+          </a>
         </div>
-        <div class="stat-pill pill-rejected"><i class="fas fa-times"></i></div>
       </div>
-      <div class="text-muted small mt-2">Denied requests</div>
     </div>
-  </div>
 
-  <div class="col-md-3">
-    <div class="stat-card p-3 h-100">
-      <div class="d-flex justify-content-between align-items-center">
-        <div>
-          <div class="text-muted small">Total</div>
-          <div class="fs-3 fw-bold">{{ total_count or 0 }}</div>
+    <div class="req-card r-stat-1">
+      <div class="stat-top st-pending"></div>
+      <div class="stat-body">
+        <div class="stat-head">
+          <div class="stat-icon si-pending"><i class="fas fa-clock"></i></div>
         </div>
-        <div class="stat-pill pill-total"><i class="fas fa-layer-group"></i></div>
+        <div class="stat-value">{{ pending_count or 0 }}</div>
+        <div class="stat-label">Pending</div>
       </div>
-      <div class="text-muted small mt-2">All requests</div>
     </div>
-  </div>
-</div>
 
-<!-- Pending Requests -->
-<div class="card shadow-sm mb-4">
-  <div class="card-header d-flex justify-content-between align-items-center">
-    <h5 class="mb-0"><i class="fas fa-clock"></i> Pending Requests</h5>
-    <span class="badge bg-primary">{{ pending_requests|length if pending_requests else 0 }}</span>
-  </div>
+    <div class="req-card r-stat-2">
+      <div class="stat-top st-approved"></div>
+      <div class="stat-body">
+        <div class="stat-head">
+          <div class="stat-icon si-approved"><i class="fas fa-check"></i></div>
+        </div>
+        <div class="stat-value">{{ approved_count or 0 }}</div>
+        <div class="stat-label">Approved</div>
+      </div>
+    </div>
 
-  <div class="card-body p-0">
-    {% if pending_requests and pending_requests|length > 0 %}
-    <div class="table-responsive">
-      <table class="table table-hover align-middle mb-0">
-        <thead class="table-light">
-          <tr>
-            <th style="width:18%;">User</th>
-            <th style="width:22%;">Email</th>
-            <th style="width:14%;">Requested</th>
-            <th style="width:20%;">User Note</th>
-            <th style="width:14%;">Date</th>
-            <th class="text-end" style="width:12%;">Action</th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for r in pending_requests %}
-          <tr>
-            <td class="fw-semibold">
-              {{ r.user.username }}
-              <div class="text-muted small">ID: {{ r.user.id }}</div>
-            </td>
-            <td>{{ r.user.email }}</td>
-            <td>
-              {% if r.requested_role == "admin" %}
-                <span class="badge bg-danger">Admin</span>
-              {% elif r.requested_role == "food_provider" %}
-                <span class="badge bg-warning text-dark">Food Provider</span>
-              {% else %}
-                <span class="badge bg-secondary">{{ r.requested_role }}</span>
-              {% endif %}
-            </td>
-            <td class="text-muted">{{ r.note or "-" }}</td>
-            <td>
-              <div>{{ r.created_at.strftime("%Y-%m-%d") if r.created_at else "" }}</div>
-              <div class="text-muted small">{{ r.created_at.strftime("%H:%M") if r.created_at else "" }}</div>
-            </td>
+    <div class="req-card r-stat-3">
+      <div class="stat-top st-rejected"></div>
+      <div class="stat-body">
+        <div class="stat-head">
+          <div class="stat-icon si-rejected"><i class="fas fa-times"></i></div>
+        </div>
+        <div class="stat-value">{{ rejected_count or 0 }}</div>
+        <div class="stat-label">Rejected</div>
+      </div>
+    </div>
 
-            <td class="text-end">
-              <div class="btn-group">
-                <button class="btn btn-sm btn-outline-secondary"
-                        data-bs-toggle="modal"
-                        data-bs-target="#noteModal{{ r.id }}">
-                  <i class="fas fa-comment-dots"></i> Note
-                </button>
+    <div class="req-card r-stat-4">
+      <div class="stat-top st-total"></div>
+      <div class="stat-body">
+        <div class="stat-head">
+          <div class="stat-icon si-total"><i class="fas fa-layer-group"></i></div>
+        </div>
+        <div class="stat-value">{{ total_count or 0 }}</div>
+        <div class="stat-label">Total</div>
+      </div>
+    </div>
 
-                <form method="POST" action="{{ url_for('admin.approve_request', req_id=r.id) }}">
-                  <input type="hidden" name="admin_comment" id="approveNote{{ r.id }}">
-                  <button class="btn btn-sm btn-approve" type="submit">
-                    <i class="fas fa-check"></i> Approve
+    <!-- Pending Requests -->
+    <div class="req-card r-pend">
+      <div class="sec-head">
+        <div class="sec-left">
+          <div class="sec-icon sec-amber"><i class="fas fa-hourglass-half"></i></div>
+          <div>
+            <div class="sec-title">Pending Requests</div>
+            <div class="sec-sub">Requests waiting for admin action</div>
+          </div>
+        </div>
+        <span class="sec-badge">
+          <i class="fas fa-clock"></i> {{ pending_requests|length if pending_requests else 0 }}
+        </span>
+      </div>
+
+      {% if pending_requests and pending_requests|length > 0 %}
+      <div class="table-wrap">
+        <table class="table-clean">
+          <thead>
+            <tr>
+              <th>User</th>
+              <th>Email</th>
+              <th>Requested Role</th>
+              <th>User Note</th>
+              <th>Date</th>
+              <th style="text-align:right;">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for r in pending_requests %}
+            <tr>
+              <td>
+                <div class="user-main">{{ r.user.username }}</div>
+                <div class="user-sub">ID: {{ r.user.id }}</div>
+              </td>
+              <td>{{ r.user.email }}</td>
+              <td>
+                {% if r.requested_role == "admin" %}
+                  <span class="role-badge role-admin"><i class="fas fa-shield-halved"></i> Admin</span>
+                {% elif r.requested_role == "food_provider" %}
+                  <span class="role-badge role-provider"><i class="fas fa-store"></i> Food Provider</span>
+                {% else %}
+                  <span class="role-badge role-generic">{{ r.requested_role }}</span>
+                {% endif %}
+              </td>
+              <td>
+                <div class="note-text">{{ r.note or "-" }}</div>
+              </td>
+              <td>
+                <div>{{ r.created_at.strftime("%Y-%m-%d") if r.created_at else "" }}</div>
+                <div class="user-sub">{{ r.created_at.strftime("%H:%M") if r.created_at else "" }}</div>
+              </td>
+              <td style="text-align:right;">
+                <div class="action-stack">
+                  <button class="btn-note"
+                          data-bs-toggle="modal"
+                          data-bs-target="#noteModal{{ r.id }}">
+                    <i class="fas fa-comment-dots"></i> Note
                   </button>
-                </form>
 
-                <form method="POST" action="{{ url_for('admin.reject_request', req_id=r.id) }}">
-                  <input type="hidden" name="admin_comment" id="rejectNote{{ r.id }}">
-                  <button class="btn btn-sm btn-reject" type="submit">
-                    <i class="fas fa-times"></i> Reject
-                  </button>
-                </form>
-              </div>
+                  <form method="POST" action="{{ url_for('admin.approve_request', req_id=r.id) }}">
+                    <input type="hidden" name="admin_comment" id="approveNote{{ r.id }}">
+                    <button class="btn-approve" type="submit">
+                      <i class="fas fa-check"></i> Approve
+                    </button>
+                  </form>
 
-              <!-- Note Modal -->
-              <div class="modal fade" id="noteModal{{ r.id }}" tabindex="-1" aria-hidden="true">
-                <div class="modal-dialog modal-dialog-centered">
-                  <div class="modal-content">
-                    <div class="modal-header">
-                      <h5 class="modal-title">Admin Note (Optional)</h5>
-                      <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                    </div>
-                    <div class="modal-body">
-                      <input type="text" class="form-control" id="noteInput{{ r.id }}"
-                             placeholder="Reason or comment...">
-                      <div class="text-muted small mt-2">
-                        This note will be saved as <strong>admin_comment</strong>.
+                  <form method="POST" action="{{ url_for('admin.reject_request', req_id=r.id) }}">
+                    <input type="hidden" name="admin_comment" id="rejectNote{{ r.id }}">
+                    <button class="btn-reject" type="submit">
+                      <i class="fas fa-times"></i> Reject
+                    </button>
+                  </form>
+                </div>
+
+                <div class="modal fade" id="noteModal{{ r.id }}" tabindex="-1" aria-hidden="true">
+                  <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content">
+                      <div class="modal-header">
+                        <h5 class="modal-title">Admin Note</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                       </div>
-                    </div>
-                    <div class="modal-footer">
-                      <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
-                      <button type="button" class="btn btn-primary"
-                              onclick="
-                                const v=document.getElementById('noteInput{{ r.id }}').value;
-                                document.getElementById('approveNote{{ r.id }}').value=v;
-                                document.getElementById('rejectNote{{ r.id }}').value=v;
-                                bootstrap.Modal.getInstance(document.getElementById('noteModal{{ r.id }}')).hide();
-                              ">
-                        Save Note
-                      </button>
+                      <div class="modal-body">
+                        <input type="text" class="form-control" id="noteInput{{ r.id }}" placeholder="Reason or comment...">
+                        <div class="text-muted small mt-2">
+                          This note will be saved as <strong>admin_comment</strong>.
+                        </div>
+                      </div>
+                      <div class="modal-footer">
+                        <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
+                        <button type="button" class="btn btn-primary"
+                                onclick="
+                                  const v=document.getElementById('noteInput{{ r.id }}').value;
+                                  document.getElementById('approveNote{{ r.id }}').value=v;
+                                  document.getElementById('rejectNote{{ r.id }}').value=v;
+                                  bootstrap.Modal.getInstance(document.getElementById('noteModal{{ r.id }}')).hide();
+                                ">
+                          Save Note
+                        </button>
+                      </div>
                     </div>
                   </div>
                 </div>
-              </div>
-
-            </td>
-          </tr>
-          {% endfor %}
-        </tbody>
-      </table>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% else %}
+      <div class="empty-box">No pending requests.</div>
+      {% endif %}
     </div>
-    {% else %}
-      <div class="p-4 text-muted">No pending requests.</div>
-    {% endif %}
-  </div>
-</div>
 
-<!-- History -->
-<div class="card shadow-sm">
-  <div class="card-header">
-    <h5 class="mb-0"><i class="fas fa-history"></i> Recent History</h5>
-  </div>
+    <!-- History -->
+    <div class="req-card r-hist">
+      <div class="sec-head">
+        <div class="sec-left">
+          <div class="sec-icon sec-brand"><i class="fas fa-history"></i></div>
+          <div>
+            <div class="sec-title">Recent History</div>
+            <div class="sec-sub">Latest request activity across the system</div>
+          </div>
+        </div>
+      </div>
 
-  <div class="card-body p-0">
-    {% if all_requests and all_requests|length > 0 %}
-    <div class="table-responsive">
-      <table class="table table-hover align-middle mb-0">
-        <thead class="table-light">
-          <tr>
-            <th style="width:22%;">User</th>
-            <th style="width:18%;">Requested Role</th>
-            <th style="width:14%;">Status</th>
-            <th style="width:30%;">Admin Comment</th>
-            <th style="width:16%;">Date</th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for r in all_requests %}
-          <tr>
-            <td class="fw-semibold">{{ r.user.username }}</td>
-            <td>{{ r.requested_role }}</td>
-            <td>
-              <span class="badge bg-{% if r.status=='pending' %}warning text-dark{% elif r.status=='approved' %}primary{% else %}secondary{% endif %}">
-                {{ r.status }}
-              </span>
-            </td>
-            <td class="text-muted">
-              {% if r.admin_comment %}
-                <span title="{{ r.admin_comment }}">
-                  {{ r.admin_comment[:60] ~ ("..." if r.admin_comment|length > 60 else "") }}
+      {% if all_requests and all_requests|length > 0 %}
+      <div class="table-wrap">
+        <table class="table-clean">
+          <thead>
+            <tr>
+              <th>User</th>
+              <th>Requested Role</th>
+              <th>Status</th>
+              <th>Admin Comment</th>
+              <th>Date</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for r in all_requests %}
+            <tr>
+              <td>
+                <div class="user-main">{{ r.user.username }}</div>
+              </td>
+              <td>
+                {% if r.requested_role == "admin" %}
+                  <span class="role-badge role-admin"><i class="fas fa-shield-halved"></i> Admin</span>
+                {% elif r.requested_role == "food_provider" %}
+                  <span class="role-badge role-provider"><i class="fas fa-store"></i> Food Provider</span>
+                {% else %}
+                  <span class="role-badge role-generic">{{ r.requested_role }}</span>
+                {% endif %}
+              </td>
+              <td>
+                <span class="status-badge status-{{ r.status }}">
+                  {{ r.status.title() }}
                 </span>
-              {% else %}
-                -
-              {% endif %}
-            </td>
-            <td>{{ r.created_at.strftime("%Y-%m-%d %H:%M") if r.created_at else "" }}</td>
-          </tr>
-          {% endfor %}
-        </tbody>
-      </table>
+              </td>
+              <td>
+                <div class="note-text">
+                  {% if r.admin_comment %}
+                    {{ r.admin_comment[:60] ~ ("..." if r.admin_comment|length > 60 else "") }}
+                  {% else %}
+                    -
+                  {% endif %}
+                </div>
+              </td>
+              <td>{{ r.created_at.strftime("%Y-%m-%d %H:%M") if r.created_at else "" }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% else %}
+      <div class="empty-box">No requests found.</div>
+      {% endif %}
     </div>
-    {% else %}
-      <div class="p-4 text-muted">No requests found.</div>
-    {% endif %}
+
   </div>
 </div>
-
 {% endblock %}

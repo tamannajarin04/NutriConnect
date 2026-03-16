@@ -1,69 +1,527 @@
 {% extends "base.html" %}
-{% block title %}Admin Dashboard{% endblock %}
+{% block title %}Admin Dashboard · NutriConnect{% endblock %}
 
 {% block content %}
-<div class="d-flex justify-content-between align-items-start flex-wrap gap-2">
-  <div>
-    <h2 class="mb-1">Welcome, {{ user.first_name or user.username }}!</h2>
-    <p class="lead mb-0">
-      Your Role: <span class="badge bg-danger">Admin</span>
-    </p>
-  </div>
+<style>
+.admin-shell {
+  --surf:     var(--nc-surface);
+  --s2:       var(--nc-surface-2);
+  --s3:       var(--nc-surface-3);
+  --bdr:      var(--nc-border);
+  --bdr2:     var(--nc-border-2);
+  --txt:      var(--nc-text);
+  --txt2:     var(--nc-text-2);
+  --mu:       var(--nc-text-muted);
 
-  <div class="d-flex gap-2">
-    <a href="{{ url_for('admin.role_requests') }}" class="btn btn-primary">
-      <i class="fas fa-clipboard-check"></i> Role Requests
-    </a>
+  --brand:    var(--nc-brand);
+  --brand-d:  var(--nc-brand-d);
+  --brand-l:  var(--nc-brand-l);
+
+  --teal:   #0d9488; --teal-l: #ccfbf1; --teal-d: #0f766e;
+  --amber:  #f59e0b; --amber-l:#fef3c7; --amber-d:#d97706;
+  --rose:   #f43f5e; --rose-l: #ffe4e6; --rose-d:#be123c;
+  --violet: #7c3aed; --violet-l:#ede9fe; --violet-d:#5b21b6;
+  --cyan:   #06b6d4; --cyan-l:#cffafe; --cyan-d:#0e7490;
+  --em:     #10b981; --em-l:#d1fae5; --em-d:#065f46;
+
+  --r: 18px;
+  font-family: 'Sora', sans-serif;
+}
+
+.admin-grid {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  gap: 1rem;
+}
+
+.admin-card {
+  background: var(--nc-card-bg);
+  border: 1px solid var(--nc-card-border);
+  border-radius: var(--r);
+  overflow: hidden;
+  box-shadow: var(--nc-card-shadow);
+}
+
+.a-hero   { grid-column: span 12; }
+.a-stat-1 { grid-column: span 3; }
+.a-stat-2 { grid-column: span 3; }
+.a-stat-3 { grid-column: span 3; }
+.a-stat-4 { grid-column: span 3; }
+.a-main   { grid-column: span 8; }
+.a-side   { grid-column: span 4; }
+
+@media (max-width: 992px) {
+  .a-stat-1, .a-stat-2, .a-stat-3, .a-stat-4 { grid-column: span 6; }
+  .a-main, .a-side { grid-column: span 12; }
+}
+@media (max-width: 576px) {
+  .a-stat-1, .a-stat-2, .a-stat-3, .a-stat-4 { grid-column: span 12; }
+}
+
+.admin-hero {
+  position: relative;
+  overflow: hidden;
+  border-radius: var(--r);
+  padding: 2.2rem 2.4rem;
+  background: linear-gradient(135deg, #240b36 0%, #3c1053 42%, #5f1d91 100%);
+  color: #fff;
+}
+.admin-hero::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at 12% 22%, rgba(255,255,255,.14), transparent 30%),
+    radial-gradient(circle at 88% 18%, rgba(255,255,255,.10), transparent 28%),
+    radial-gradient(circle at 50% 120%, rgba(255,255,255,.08), transparent 35%);
+  pointer-events: none;
+}
+.admin-hero > * { position: relative; z-index: 1; }
+
+.admin-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: .45rem;
+  padding: .32rem .85rem;
+  border-radius: 999px;
+  font-size: .72rem;
+  font-weight: 800;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  background: rgba(255,255,255,.12);
+  border: 1px solid rgba(255,255,255,.18);
+  margin-bottom: .9rem;
+}
+
+.admin-title {
+  font-size: clamp(1.8rem, 4vw, 2.6rem);
+  font-weight: 800;
+  letter-spacing: -.04em;
+  margin-bottom: .45rem;
+}
+.admin-sub {
+  font-size: .92rem;
+  color: rgba(255,255,255,.78);
+  max-width: 700px;
+  line-height: 1.6;
+}
+
+.admin-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .7rem;
+  margin-top: 1.3rem;
+}
+
+.admin-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: .45rem;
+  text-decoration: none;
+  border-radius: 11px;
+  padding: .68rem 1.1rem;
+  font-size: .84rem;
+  font-weight: 700;
+  transition: all .15s ease;
+}
+.admin-btn-primary {
+  background: #fff;
+  color: #3c1053;
+}
+.admin-btn-primary:hover {
+  color: #240b36;
+  transform: translateY(-1px);
+}
+.admin-btn-soft {
+  background: rgba(255,255,255,.1);
+  color: #fff;
+  border: 1px solid rgba(255,255,255,.16);
+}
+.admin-btn-soft:hover {
+  background: rgba(255,255,255,.16);
+  color: #fff;
+}
+
+.stat-top {
+  height: 3px;
+}
+.st-amber  { background: linear-gradient(90deg, #f59e0b, #fbbf24); }
+.st-teal   { background: linear-gradient(90deg, #0d9488, #06b6d4); }
+.st-rose   { background: linear-gradient(90deg, #f43f5e, #fb7185); }
+.st-violet { background: linear-gradient(90deg, #7c3aed, #a78bfa); }
+
+.stat-body {
+  padding: 1.25rem 1.3rem;
+}
+.stat-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: .8rem;
+}
+.stat-icon {
+  width: 38px;
+  height: 38px;
+  border-radius: 11px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: .9rem;
+}
+.si-amber  { background: var(--amber-l); color: var(--amber-d); }
+.si-teal   { background: var(--teal-l);  color: var(--teal-d); }
+.si-rose   { background: var(--rose-l);  color: var(--rose-d); }
+.si-violet { background: var(--violet-l); color: var(--violet-d); }
+
+[data-theme="dark"] .si-amber  { background: rgba(245,158,11,.12); color: #fcd34d; }
+[data-theme="dark"] .si-teal   { background: rgba(13,148,136,.13); color: #2dd4bf; }
+[data-theme="dark"] .si-rose   { background: rgba(244,63,94,.10); color: #fb7185; }
+[data-theme="dark"] .si-violet { background: rgba(124,58,237,.12); color: #c4b5fd; }
+
+.stat-value {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 1.8rem;
+  font-weight: 600;
+  line-height: 1;
+  color: var(--txt);
+}
+.stat-label {
+  margin-top: .4rem;
+  color: var(--mu);
+  font-size: .72rem;
+  font-weight: 700;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+
+.section-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1rem 1.3rem;
+  border-bottom: 1px solid var(--bdr);
+}
+.section-head-left {
+  display: flex;
+  align-items: center;
+  gap: .65rem;
+}
+.section-icon {
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: .82rem;
+}
+.sec-brand { background: var(--brand-l); color: var(--brand-d); }
+.sec-em    { background: var(--em-l); color: var(--em-d); }
+.sec-cyan  { background: var(--cyan-l); color: var(--cyan-d); }
+
+[data-theme="dark"] .sec-brand { background: rgba(14,165,233,.13); color: #38bdf8; }
+[data-theme="dark"] .sec-em    { background: rgba(16,185,129,.11); color: #34d399; }
+[data-theme="dark"] .sec-cyan  { background: rgba(6,182,212,.11); color: #22d3ee; }
+
+.section-title {
+  font-size: .9rem;
+  font-weight: 800;
+  color: var(--txt);
+  letter-spacing: -.02em;
+}
+.section-sub {
+  font-size: .7rem;
+  color: var(--mu);
+  margin-top: .05rem;
+}
+
+.section-body {
+  padding: 1.2rem 1.3rem;
+}
+
+.request-list {
+  display: flex;
+  flex-direction: column;
+  gap: .7rem;
+}
+.request-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+  border: 1px solid var(--bdr);
+  background: var(--s2);
+  border-radius: 14px;
+  padding: .95rem 1rem;
+}
+.request-item:hover {
+  border-color: var(--bdr2);
+  background: var(--s3);
+}
+.request-title {
+  font-size: .86rem;
+  font-weight: 800;
+  color: var(--txt);
+}
+.request-meta {
+  font-size: .73rem;
+  color: var(--mu);
+  margin-top: .15rem;
+}
+.request-note {
+  margin-top: .35rem;
+  font-size: .78rem;
+  color: var(--txt2);
+  line-height: 1.45;
+}
+.req-badge {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: .28rem;
+  padding: .22rem .72rem;
+  border-radius: 999px;
+  font-size: .68rem;
+  font-weight: 800;
+}
+.req-pending {
+  background: var(--amber-l);
+  color: var(--amber-d);
+}
+[data-theme="dark"] .req-pending {
+  background: rgba(245,158,11,.12);
+  color: #fcd34d;
+}
+
+.quick-links {
+  display: flex;
+  flex-direction: column;
+  gap: .75rem;
+}
+.quick-link {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: .8rem;
+  padding: .95rem 1rem;
+  border-radius: 14px;
+  background: var(--s2);
+  border: 1px solid var(--bdr);
+  color: var(--txt);
+  text-decoration: none;
+  transition: all .15s ease;
+}
+.quick-link:hover {
+  background: var(--s3);
+  border-color: var(--bdr2);
+  color: var(--txt);
+  transform: translateY(-1px);
+}
+.quick-link-left {
+  display: flex;
+  align-items: center;
+  gap: .8rem;
+}
+.quick-link-title {
+  font-size: .84rem;
+  font-weight: 800;
+}
+.quick-link-sub {
+  font-size: .72rem;
+  color: var(--mu);
+  margin-top: .1rem;
+}
+</style>
+
+<div class="admin-shell">
+  <div class="admin-grid">
+
+    <div class="a-hero">
+      <div class="admin-hero">
+        <div class="admin-badge">
+          <i class="fas fa-shield-halved"></i> Admin Control Panel
+        </div>
+        <div class="admin-title">
+          Welcome, {{ user.first_name or user.username }}!
+        </div>
+        <div class="admin-sub">
+          Review role requests, manage providers, and explore platform analytics from one clean admin dashboard.
+        </div>
+
+        <div class="admin-actions">
+          <a href="{{ url_for('admin.role_requests') }}" class="admin-btn admin-btn-primary">
+            <i class="fas fa-clipboard-check"></i> Role Requests
+          </a>
+          <a href="{{ url_for('admin.provider_management') }}" class="admin-btn admin-btn-soft">
+            <i class="fas fa-user-shield"></i> Manage Providers
+          </a>
+          <a href="{{ url_for('analytics.analytics_dashboard') }}" class="admin-btn admin-btn-soft">
+            <i class="fas fa-chart-line"></i> Analytics
+          </a>
+          <a href="{{ url_for('user_dashboard.view_profile') }}" class="admin-btn admin-btn-soft">
+            <i class="fas fa-user"></i> Profile
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <div class="admin-card a-stat-1">
+      <div class="stat-top st-amber"></div>
+      <div class="stat-body">
+        <div class="stat-head">
+          <div class="stat-icon si-amber"><i class="fas fa-hourglass-half"></i></div>
+        </div>
+        <div class="stat-value">{{ pending_count }}</div>
+        <div class="stat-label">Pending Requests</div>
+      </div>
+    </div>
+
+    <div class="admin-card a-stat-2">
+      <div class="stat-top st-teal"></div>
+      <div class="stat-body">
+        <div class="stat-head">
+          <div class="stat-icon si-teal"><i class="fas fa-circle-check"></i></div>
+        </div>
+        <div class="stat-value">{{ approved_count }}</div>
+        <div class="stat-label">Approved Requests</div>
+      </div>
+    </div>
+
+    <div class="admin-card a-stat-3">
+      <div class="stat-top st-rose"></div>
+      <div class="stat-body">
+        <div class="stat-head">
+          <div class="stat-icon si-rose"><i class="fas fa-circle-xmark"></i></div>
+        </div>
+        <div class="stat-value">{{ rejected_count }}</div>
+        <div class="stat-label">Rejected Requests</div>
+      </div>
+    </div>
+
+    <div class="admin-card a-stat-4">
+      <div class="stat-top st-violet"></div>
+      <div class="stat-body">
+        <div class="stat-head">
+          <div class="stat-icon si-violet"><i class="fas fa-layer-group"></i></div>
+        </div>
+        <div class="stat-value">{{ total_count }}</div>
+        <div class="stat-label">Total Requests</div>
+      </div>
+    </div>
+
+    <div class="admin-card a-main">
+      <div class="section-head">
+        <div class="section-head-left">
+          <div class="section-icon sec-brand"><i class="fas fa-list-check"></i></div>
+          <div>
+            <div class="section-title">Priority Actions</div>
+            <div class="section-sub">The most important admin tasks right now</div>
+          </div>
+        </div>
+      </div>
+      <div class="section-body">
+        <div class="request-list">
+          <div class="request-item">
+            <div>
+              <div class="request-title">Review pending role upgrade requests</div>
+              <div class="request-meta">Requests waiting for admin action</div>
+              <div class="request-note">You currently have {{ pending_count }} request{{ '' if pending_count == 1 else 's' }} waiting for review.</div>
+            </div>
+            <span class="req-badge req-pending">
+              <i class="fas fa-clock"></i> {{ pending_count }} Pending
+            </span>
+          </div>
+
+          <div class="request-item">
+            <div>
+              <div class="request-title">Manage provider verification and access</div>
+              <div class="request-meta">Trust, status control, and provider oversight</div>
+              <div class="request-note">Verify provider accounts and update provider status to active, restricted, or suspended when needed.</div>
+            </div>
+            <a href="{{ url_for('admin.provider_management') }}" class="btn btn-sm btn-outline-primary">Open</a>
+          </div>
+
+          <div class="request-item">
+            <div>
+              <div class="request-title">Review analytics and growth trends</div>
+              <div class="request-meta">Orders, foods, ratings, and platform activity</div>
+              <div class="request-note">Use the analytics page to track platform performance, popular foods, and recent user activity.</div>
+            </div>
+            <a href="{{ url_for('analytics.analytics_dashboard') }}" class="btn btn-sm btn-outline-primary">View</a>
+          </div>
+
+          <div class="request-item">
+            <div>
+              <div class="request-title">Open your admin profile</div>
+              <div class="request-meta">Profile details and account settings</div>
+              <div class="request-note">View your admin profile and update account information from the profile page.</div>
+            </div>
+            <a href="{{ url_for('user_dashboard.view_profile') }}" class="btn btn-sm btn-outline-primary">Profile</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="admin-card a-side">
+      <div class="section-head">
+        <div class="section-head-left">
+          <div class="section-icon sec-em"><i class="fas fa-bolt"></i></div>
+          <div>
+            <div class="section-title">Quick Access</div>
+            <div class="section-sub">Jump into common admin pages</div>
+          </div>
+        </div>
+      </div>
+      <div class="section-body">
+        <div class="quick-links">
+          <a href="{{ url_for('admin.role_requests') }}" class="quick-link">
+            <div class="quick-link-left">
+              <div class="section-icon sec-brand"><i class="fas fa-clipboard-check"></i></div>
+              <div>
+                <div class="quick-link-title">Role Requests</div>
+                <div class="quick-link-sub">Approve or reject upgrades</div>
+              </div>
+            </div>
+            <i class="fas fa-arrow-right"></i>
+          </a>
+
+          <a href="{{ url_for('admin.provider_management') }}" class="quick-link">
+            <div class="quick-link-left">
+              <div class="section-icon sec-em"><i class="fas fa-user-shield"></i></div>
+              <div>
+                <div class="quick-link-title">Manage Providers</div>
+                <div class="quick-link-sub">Verify, restrict, or suspend providers</div>
+              </div>
+            </div>
+            <i class="fas fa-arrow-right"></i>
+          </a>
+
+          <a href="{{ url_for('analytics.analytics_dashboard') }}" class="quick-link">
+            <div class="quick-link-left">
+              <div class="section-icon sec-cyan"><i class="fas fa-chart-line"></i></div>
+              <div>
+                <div class="quick-link-title">Analytics</div>
+                <div class="quick-link-sub">User, order, and food insights</div>
+              </div>
+            </div>
+            <i class="fas fa-arrow-right"></i>
+          </a>
+
+          <a href="{{ url_for('user_dashboard.view_profile') }}" class="quick-link">
+            <div class="quick-link-left">
+              <div class="section-icon sec-brand"><i class="fas fa-user"></i></div>
+              <div>
+                <div class="quick-link-title">Profile</div>
+                <div class="quick-link-sub">View your admin profile</div>
+              </div>
+            </div>
+            <i class="fas fa-arrow-right"></i>
+          </a>
+        </div>
+      </div>
+    </div>
+
   </div>
 </div>
-
-<hr class="my-4">
-
-<!-- Placeholder area for future admin modules -->
-<div class="row g-3">
-  <div class="col-md-6">
-    <div class="card shadow-sm h-100">
-      <div class="card-header bg-light">
-        <h6 class="mb-0"><i class="fas fa-users-cog"></i> User Management</h6>
-      </div>
-      <div class="card-body text-muted">
-        Add user management features here later (block/unblock, reset roles, view reports, etc.).
-      </div>
-    </div>
-  </div>
-
-  <div class="col-md-6">
-    <div class="card shadow-sm h-100">
-      <div class="card-header bg-light">
-        <h6 class="mb-0"><i class="fas fa-store"></i> Food Provider Management</h6>
-      </div>
-      <div class="card-body text-muted">
-        Add provider verification, menu moderation, compliance checks, etc.
-      </div>
-    </div>
-  </div>
-
-  <div class="col-md-6">
-    <div class="card shadow-sm h-100">
-      <div class="card-header bg-light">
-        <h6 class="mb-0"><i class="fas fa-cogs"></i> System Settings</h6>
-      </div>
-      <div class="card-body text-muted">
-        Add settings, security controls, maintenance tools, etc.
-      </div>
-    </div>
-  </div>
-
-  <div class="col-md-6">
-    <div class="card shadow-sm h-100">
-      <div class="card-header bg-light">
-        <h6 class="mb-0"><i class="fas fa-chart-line"></i> Analytics / Reports</h6>
-      </div>
-      <div class="card-body text-muted">
-        Add admin analytics dashboards here later.
-      </div>
-    </div>
-  </div>
-</div>
-
 {% endblock %}

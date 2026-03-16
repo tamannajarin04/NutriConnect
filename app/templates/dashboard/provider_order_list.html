@@ -1,0 +1,584 @@
+{% extends "base.html" %}
+{% block title %}Provider Orders · NutriConnect{% endblock %}
+
+{% block extra_css %}
+<link href="https://fonts.googleapis.com/css2?family=Cabinet+Grotesk:wght@400;500;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  body, button, input, select, textarea { font-family: 'Cabinet Grotesk', sans-serif !important; }
+
+  .po{
+    --surf:var(--nc-surface);
+    --s2:var(--nc-surface-2);
+    --s3:var(--nc-surface-3);
+    --bdr:var(--nc-border);
+    --bdr2:var(--nc-border-2);
+    --txt:var(--nc-text);
+    --txt2:var(--nc-text-2);
+    --mu:var(--nc-text-muted);
+    --fa:var(--nc-text-faint);
+    --brand:var(--nc-brand);
+    --brand-d:var(--nc-brand-d);
+    --brand-l:var(--nc-brand-l);
+
+    --emerald:#34d399;
+    --emerald-l:rgba(52,211,153,.12);
+    --amber:#fbbf24;
+    --amber-l:rgba(251,191,36,.12);
+    --rose:#fb7185;
+    --rose-l:rgba(251,113,133,.12);
+    --violet:#a78bfa;
+    --violet-l:rgba(167,139,250,.12);
+
+    --r:14px;
+    --r-lg:18px;
+  }
+
+  @keyframes up{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+
+  .po-wrap{animation:up .35s cubic-bezier(.16,1,.3,1) both;}
+
+  .po-banner{
+    background:
+      radial-gradient(ellipse 60% 140% at -5% 50%, rgba(14,165,233,.38) 0%, transparent 52%),
+      radial-gradient(ellipse 35% 80% at 105% 10%, rgba(52,211,153,.16) 0%, transparent 50%),
+      linear-gradient(145deg, #061226 0%, #071a2f 36%, #0a2242 68%, #07111f 100%);
+    border-radius:var(--r-lg);
+    border:1px solid rgba(56,189,248,.15);
+    padding:2rem 2.2rem;
+    margin-bottom:1.2rem;
+    position:relative;
+    overflow:hidden;
+    isolation:isolate;
+    box-shadow:
+      0 0 0 1px rgba(56,189,248,.05) inset,
+      0 1px 0 rgba(255,255,255,.06) inset,
+      0 12px 48px rgba(0,0,0,.45),
+      0 4px 16px rgba(14,165,233,.08);
+  }
+
+  .po-banner::before{
+    content:'';
+    position:absolute;
+    inset:0;
+    background-image:radial-gradient(circle, rgba(255,255,255,.04) 1px, transparent 1px);
+    background-size:24px 24px;
+    opacity:.55;
+    pointer-events:none;
+  }
+
+  .po-banner-inner{
+    position:relative;
+    z-index:2;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:1rem;
+    flex-wrap:wrap;
+  }
+
+  .po-eyebrow{
+    display:inline-flex;
+    align-items:center;
+    gap:.42rem;
+    background:rgba(56,189,248,.1);
+    border:1px solid rgba(56,189,248,.22);
+    border-radius:99px;
+    padding:.22rem .85rem;
+    font-size:.62rem;
+    font-weight:800;
+    letter-spacing:.1em;
+    text-transform:uppercase;
+    color:rgba(255,255,255,.72);
+    margin-bottom:.55rem;
+  }
+
+  .po-eyebrow-dot{
+    width:6px;height:6px;border-radius:50%;
+    background:#38bdf8;
+    box-shadow:0 0 8px rgba(56,189,248,.7);
+  }
+
+  .po-title{
+    font-size:1.85rem;
+    font-weight:900;
+    color:#fff;
+    letter-spacing:-.045em;
+    line-height:1.06;
+    margin:0 0 .22rem;
+  }
+
+  .po-title .hl{
+    background:linear-gradient(135deg, #38bdf8 0%, #7dd3fc 40%, #34d399 100%);
+    -webkit-background-clip:text;
+    -webkit-text-fill-color:transparent;
+    background-clip:text;
+  }
+
+  .po-sub{
+    color:rgba(255,255,255,.42);
+    font-size:.82rem;
+    margin:0;
+    max-width:580px;
+    line-height:1.65;
+  }
+
+  .po-banner-actions{
+    display:flex;
+    align-items:center;
+    gap:.7rem;
+    flex-wrap:wrap;
+  }
+
+  .po-btn,
+  .po-btn-ghost{
+    display:inline-flex;
+    align-items:center;
+    gap:.42rem;
+    border-radius:12px;
+    padding:.72rem 1.05rem;
+    font-size:.8rem;
+    font-weight:800;
+    text-decoration:none;
+    transition:all .14s ease;
+  }
+
+  .po-btn{
+    background:linear-gradient(135deg, var(--brand-d), var(--brand));
+    color:#fff;
+    border:none;
+    box-shadow:0 6px 18px rgba(14,165,233,.22);
+  }
+  .po-btn:hover{color:#fff;transform:translateY(-1px);filter:brightness(1.05);}
+
+  .po-btn-ghost{
+    background:rgba(255,255,255,.06);
+    color:#e6edf3;
+    border:1px solid rgba(255,255,255,.1);
+  }
+  .po-btn-ghost:hover{
+    color:#fff;
+    border-color:rgba(56,189,248,.35);
+    background:rgba(56,189,248,.12);
+  }
+
+  .po-panel{
+    background:var(--surf);
+    border:1px solid var(--bdr);
+    border-radius:var(--r-lg);
+    overflow:hidden;
+    box-shadow:var(--nc-card-shadow);
+    margin-bottom:1.2rem;
+  }
+
+  .po-panel-head{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:1rem;
+    padding:1rem 1.2rem;
+    border-bottom:1px solid var(--bdr);
+    background:var(--s2);
+    flex-wrap:wrap;
+  }
+
+  .po-panel-head-left{
+    display:flex;
+    align-items:center;
+    gap:.75rem;
+  }
+
+  .po-icon{
+    width:36px;
+    height:36px;
+    border-radius:12px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:.86rem;
+    background:var(--brand-l);
+    color:var(--brand);
+  }
+
+  .po-panel-title{
+    font-size:.92rem;
+    font-weight:900;
+    color:var(--txt);
+    letter-spacing:-.02em;
+  }
+
+  .po-panel-sub{
+    font-size:.72rem;
+    color:var(--mu);
+    margin-top:.08rem;
+  }
+
+  .po-content{padding:1rem 1.2rem 1.2rem;}
+
+  .po-toolbar{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:.9rem;
+    flex-wrap:wrap;
+    margin-bottom:1rem;
+  }
+
+  .po-count{
+    display:flex;
+    align-items:center;
+    gap:.5rem;
+    font-size:.82rem;
+    font-weight:700;
+    color:var(--mu);
+  }
+
+  .po-count-dot{
+    width:8px;
+    height:8px;
+    border-radius:50%;
+    background:var(--brand);
+    box-shadow:0 0 8px rgba(14,165,233,.45);
+  }
+
+  .po-filter-form{
+    display:flex;
+    align-items:center;
+    gap:.65rem;
+    flex-wrap:wrap;
+  }
+
+  .po-select{
+    min-width:170px;
+    background:var(--s2) !important;
+    border:1.5px solid var(--bdr) !important;
+    border-radius:12px !important;
+    color:var(--txt) !important;
+    font-size:.82rem !important;
+    font-weight:700 !important;
+    padding:.72rem .95rem !important;
+  }
+
+  .po-apply{
+    display:inline-flex;
+    align-items:center;
+    gap:.42rem;
+    background:linear-gradient(135deg, var(--brand-d), var(--brand));
+    color:#fff;
+    border:none;
+    border-radius:12px;
+    padding:.78rem 1.1rem;
+    font-size:.82rem;
+    font-weight:800;
+    box-shadow:0 6px 18px rgba(14,165,233,.22);
+  }
+
+  .po-table-wrap{overflow-x:auto;}
+  .po-table{
+    width:100%;
+    border-collapse:collapse;
+    min-width:880px;
+  }
+
+  .po-table th{
+    padding:.82rem 1rem;
+    text-align:left;
+    font-size:.67rem;
+    font-weight:900;
+    text-transform:uppercase;
+    letter-spacing:.1em;
+    color:var(--fa);
+    border-bottom:1px solid var(--bdr);
+  }
+
+  .po-table td{
+    padding:1rem;
+    border-bottom:1px solid var(--bdr);
+    vertical-align:middle;
+    font-size:.84rem;
+    color:var(--txt2);
+  }
+
+  .po-table tr:last-child td{border-bottom:none;}
+
+  .po-order-id{
+    font-family:'JetBrains Mono', monospace;
+    font-size:.88rem;
+    font-weight:800;
+    color:var(--txt);
+  }
+
+  .po-customer{
+    font-size:.86rem;
+    font-weight:700;
+    color:var(--txt);
+  }
+
+  .po-status{
+    display:inline-flex;
+    align-items:center;
+    gap:.34rem;
+    padding:.28rem .8rem;
+    border-radius:999px;
+    font-size:.7rem;
+    font-weight:900;
+    text-transform:capitalize;
+    letter-spacing:.02em;
+  }
+
+  .st-pending{background:var(--amber-l);color:#92400e;}
+  .st-confirmed{background:rgba(59,130,246,.12);color:#2563eb;}
+  .st-preparing{background:var(--violet-l);color:#6d28d9;}
+  .st-ready{background:rgba(16,185,129,.12);color:#047857;}
+  .st-delivered{background:rgba(16,185,129,.12);color:#10b981;}
+  .st-cancelled{background:var(--rose-l);color:#e11d48;}
+
+  .po-total{
+    font-family:'JetBrains Mono', monospace;
+    font-weight:800;
+    color:var(--txt);
+  }
+
+  .po-date{
+    font-size:.82rem;
+    color:var(--txt2);
+    white-space:nowrap;
+  }
+
+  .po-view{
+    display:inline-flex;
+    align-items:center;
+    gap:.38rem;
+    background:var(--surf);
+    color:var(--txt2);
+    border:1px solid var(--bdr);
+    border-radius:12px;
+    padding:.56rem .95rem;
+    font-size:.78rem;
+    font-weight:800;
+    text-decoration:none;
+    transition:all .14s ease;
+  }
+
+  .po-view:hover{
+    background:var(--brand-l);
+    border-color:rgba(14,165,233,.25);
+    color:var(--brand-d);
+  }
+
+  .po-empty{
+    background:var(--s2);
+    border:1.5px dashed var(--bdr2);
+    border-radius:var(--r-lg);
+    padding:3rem 1.5rem;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    text-align:center;
+    gap:.8rem;
+  }
+
+  .po-empty-ico{
+    width:58px;
+    height:58px;
+    border-radius:16px;
+    background:var(--brand-l);
+    color:var(--brand);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:1.45rem;
+  }
+
+  .po-empty h4{
+    font-size:1rem;
+    font-weight:900;
+    color:var(--txt);
+    margin:0;
+  }
+
+  .po-empty p{
+    font-size:.8rem;
+    color:var(--mu);
+    margin:0;
+    max-width:280px;
+    line-height:1.65;
+  }
+
+  @media (max-width: 768px){
+    .po-banner{padding:1.45rem 1.2rem;}
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="po">
+  <div class="po-wrap">
+
+    <div class="po-banner">
+      <div class="po-banner-inner">
+        <div>
+          <div class="po-eyebrow">
+            <span class="po-eyebrow-dot"></span>
+            NutriConnect · Provider Orders
+          </div>
+          <h1 class="po-title">Manage <span class="hl">orders</span></h1>
+          <p class="po-sub">
+            Review all incoming orders, filter by status, and jump into any order to update progress.
+          </p>
+        </div>
+
+        <div class="po-banner-actions">
+          <a href="{{ url_for('provider.provider_order_insights') }}" class="po-btn">
+            <i class="fas fa-chart-line"></i> Order Insights
+          </a>
+          <a href="{{ url_for('provider.provider_dashboard') }}" class="po-btn-ghost">
+            <i class="fas fa-arrow-left"></i> Dashboard
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <div class="po-panel">
+      <div class="po-panel-head">
+        <div class="po-panel-head-left">
+          <div class="po-icon"><i class="fas fa-bag-shopping"></i></div>
+          <div>
+            <div class="po-panel-title">Order Management</div>
+            <div class="po-panel-sub">Your provider orders in one clean view</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="po-content">
+        <div class="po-toolbar">
+          <div class="po-count">
+            <span class="po-count-dot"></span>
+            <span><strong>{{ orders|length }}</strong> order{{ '' if orders|length == 1 else 's' }} found</span>
+          </div>
+
+          <form class="po-filter-form" method="get">
+            <select name="status" class="po-select">
+              <option value="" {% if not status_filter %}selected{% endif %}>All statuses</option>
+              {% for s in ['pending','confirmed','preparing','ready','delivered','cancelled'] %}
+              <option value="{{ s }}" {% if status_filter == s %}selected{% endif %}>{{ s.title() }}</option>
+              {% endfor %}
+            </select>
+
+            <select name="sort" class="po-select">
+              <option value="date_desc" {% if sort_by == 'date_desc' %}selected{% endif %}>Newest first</option>
+              <option value="date_asc" {% if sort_by == 'date_asc' %}selected{% endif %}>Oldest first</option>
+              <option value="price_desc" {% if sort_by == 'price_desc' %}selected{% endif %}>Highest total</option>
+              <option value="price_asc" {% if sort_by == 'price_asc' %}selected{% endif %}>Lowest total</option>
+            </select>
+
+            <button class="po-apply" type="submit">
+              <i class="fas fa-filter"></i> Apply Filters
+            </button>
+          </form>
+        </div>
+
+        {% if orders %}
+        <div class="po-table-wrap">
+          <table class="po-table">
+            <thead>
+              <tr>
+                <th>Order ID</th>
+                <th>Customer</th>
+                <th>Status</th>
+                <th>Total</th>
+                <th>Date</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for order in orders %}
+              <tr>
+                <td><span class="po-order-id">{{ order.order_number }}</span></td>
+                <td><span class="po-customer">{{ order.customer.full_name if order.customer and order.customer.full_name else (order.customer.username if order.customer else 'Unknown') }}</span></td>
+                <td>
+                  <span class="po-status st-{{ order.status }}">
+                    {{ order.status.title() }}
+                  </span>
+                </td>
+                <td><span class="po-total">${{ "%.2f"|format(order.total_price or 0) }}</span></td>
+                <td><span class="po-date">{{ order.created_at.strftime("%d %b %Y") if order.created_at else "—" }}</span></td>
+                <td>
+                  <a href="{{ url_for('provider.provider_order_detail', order_id=order.id) }}" class="po-view">
+                    <i class="fas fa-eye"></i> View
+                  </a>
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+        {% else %}
+        <div class="po-empty">
+          <div class="po-empty-ico"><i class="fas fa-bag-shopping"></i></div>
+          <h4>No orders found</h4>
+          <p>Orders matching your current filters will appear here.</p>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+
+    <div class="po-panel">
+      <div class="po-panel-head">
+        <div class="po-panel-head-left">
+          <div class="po-icon"><i class="fas fa-clock-rotate-left"></i></div>
+          <div>
+            <div class="po-panel-title">Recent Orders</div>
+            <div class="po-panel-sub">Latest orders placed for your foods</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="po-content">
+        {% if recent_orders %}
+        <div class="po-table-wrap">
+          <table class="po-table">
+            <thead>
+              <tr>
+                <th>Order ID</th>
+                <th>Customer</th>
+                <th>Status</th>
+                <th>Total</th>
+                <th>Date & Time</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for order in recent_orders %}
+              <tr>
+                <td><span class="po-order-id">{{ order.order_number }}</span></td>
+                <td><span class="po-customer">{{ order.customer.full_name if order.customer and order.customer.full_name else (order.customer.username if order.customer else 'Unknown') }}</span></td>
+                <td>
+                  <span class="po-status st-{{ order.status }}">
+                    {{ order.status.title() }}
+                  </span>
+                </td>
+                <td><span class="po-total">${{ "%.2f"|format(order.total_price or 0) }}</span></td>
+                <td><span class="po-date">{{ order.created_at.strftime("%d %b %Y, %I:%M %p") if order.created_at else "—" }}</span></td>
+                <td>
+                  <a href="{{ url_for('provider.provider_order_detail', order_id=order.id) }}" class="po-view">
+                    <i class="fas fa-eye"></i> Open
+                  </a>
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+        {% else %}
+        <div class="po-empty">
+          <div class="po-empty-ico"><i class="fas fa-clock-rotate-left"></i></div>
+          <h4>No recent orders</h4>
+          <p>Your latest provider order activity will appear here.</p>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+
+  </div>
+</div>
+{% endblock %}

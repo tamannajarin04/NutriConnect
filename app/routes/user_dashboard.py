@@ -2,7 +2,19 @@ import os
 from flask import Blueprint, render_template, redirect, url_for, flash, request, current_app
 from flask_login import login_required, current_user
 from werkzeug.utils import secure_filename
-from app.models import db, User, DietaryPreference, BMIRecord, RoleUpgradeRequest, FoodItem
+
+from app.models import (
+    db,
+    User,
+    DietaryPreference,
+    BMIRecord,
+    RoleUpgradeRequest,
+    FoodItem,
+    CartItem,
+    Order,
+    FavoriteFood,
+    RecentlyViewed,
+)
 
 user_dashboard_bp = Blueprint("user_dashboard", __name__)
 
@@ -19,6 +31,10 @@ def index():
     latest_bmi = None
     bmi_records = []
     my_requests = []
+    recent_orders = []
+    favorite_items = []
+    recent_views = []
+    cart_count = 0
 
     try:
         latest_bmi = (
@@ -48,24 +64,71 @@ def index():
     except Exception:
         my_requests = []
 
+    try:
+        recent_orders = (
+            Order.query.filter_by(user_id=current_user.id)
+            .order_by(Order.created_at.desc())
+            .limit(5)
+            .all()
+        )
+    except Exception:
+        recent_orders = []
+
+    try:
+        favorite_items = (
+            FavoriteFood.query.filter_by(user_id=current_user.id)
+            .order_by(FavoriteFood.created_at.desc())
+            .limit(6)
+            .all()
+        )
+    except Exception:
+        favorite_items = []
+
+    try:
+        recent_views = (
+            RecentlyViewed.query.filter_by(user_id=current_user.id)
+            .order_by(RecentlyViewed.viewed_at.desc())
+            .limit(6)
+            .all()
+        )
+    except Exception:
+        recent_views = []
+
+    try:
+        cart_count = CartItem.query.filter_by(user_id=current_user.id).count()
+    except Exception:
+        cart_count = 0
+
     return render_template(
         "dashboard/user_dashboard.html",
         user=current_user,
         latest_bmi=latest_bmi,
         bmi_records=bmi_records,
-        my_requests=my_requests
+        my_requests=my_requests,
+        recent_orders=recent_orders,
+        favorite_items=favorite_items,
+        recent_views=recent_views,
+        cart_count=cart_count,
     )
 
-# ── REPLACE your existing view_profile route with this ──
 
 @user_dashboard_bp.route("/profile")
 @login_required
 def view_profile():
     if current_user.is_food_provider():
-        return render_template("dashboard/food_provider_profile.html", user=current_user)
+        foods = (
+            current_user.foods.all()
+            if hasattr(current_user.foods, "all")
+            else list(current_user.foods or [])
+        )
+
+        return render_template(
+            "dashboard/food_provider_profile.html",
+            user=current_user,
+            foods=foods
+        )
+
     return render_template("dashboard/profile.html", user=current_user)
-
-
 
 
 @user_dashboard_bp.route("/profile/edit", methods=["GET", "POST"])
@@ -114,6 +177,7 @@ def edit_profile():
         return redirect(url_for("user_dashboard.view_profile"))
 
     return render_template("dashboard/edit_profile.html", user=current_user)
+
 
 @user_dashboard_bp.route("/request-upgrade", methods=["GET", "POST"])
 @login_required
@@ -173,10 +237,10 @@ def request_upgrade():
         history=history
     )
 
+
 @user_dashboard_bp.route("/dietary-preferences", methods=["GET", "POST"])
 @login_required
 def dietary_preferences():
-    # ✅ Only regular users can access dietary preferences
     if not current_user.has_role("user"):
         flash("Dietary preferences are only available for regular users.", "warning")
         return redirect(url_for("user_dashboard.index"))
@@ -195,7 +259,7 @@ def dietary_preferences():
         meals_per_day_raw = request.form.get("meals_per_day") or "3"
         try:
             meals_per_day = int(meals_per_day_raw)
-        except:
+        except Exception:
             meals_per_day = 3
 
         def to_int(v):
@@ -206,7 +270,7 @@ def dietary_preferences():
             v = (v or "").strip()
             try:
                 return float(v) if v else None
-            except:
+            except Exception:
                 return None
 
         calorie_goal = to_int(request.form.get("calorie_goal"))

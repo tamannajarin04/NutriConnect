@@ -1,0 +1,654 @@
+{% extends "base.html" %}
+{% block title %}Manage Providers · NutriConnect{% endblock %}
+
+{% block content %}
+<style>
+.providers-page{
+  --surf:var(--nc-surface);
+  --s2:var(--nc-surface-2);
+  --s3:var(--nc-surface-3);
+  --bdr:var(--nc-border);
+  --bdr2:var(--nc-border-2);
+  --txt:var(--nc-text);
+  --txt2:var(--nc-text-2);
+  --mu:var(--nc-text-muted);
+  --fa:var(--nc-text-faint);
+  --brand:var(--nc-brand);
+  --brand-d:var(--nc-brand-d);
+  --brand-l:var(--nc-brand-l);
+
+  --emerald:#10b981;
+  --emerald-l:rgba(16,185,129,.12);
+  --amber:#f59e0b;
+  --amber-l:rgba(245,158,11,.12);
+  --rose:#f43f5e;
+  --rose-l:rgba(244,63,94,.12);
+  --violet:#8b5cf6;
+  --violet-l:rgba(139,92,246,.12);
+  --cyan:#38bdf8;
+  --cyan-l:rgba(56,189,248,.12);
+
+  --r:18px;
+  --r-lg:22px;
+  font-family:'Sora',sans-serif;
+}
+
+.providers-wrap{
+  max-width:1180px;
+  margin:0 auto;
+}
+
+.providers-hero{
+  position:relative;
+  overflow:hidden;
+  border-radius:var(--r-lg);
+  padding:1.9rem 2rem;
+  margin-bottom:1.15rem;
+  background:
+    radial-gradient(circle at 12% 20%, rgba(255,255,255,.10), transparent 24%),
+    radial-gradient(circle at 86% 18%, rgba(255,255,255,.08), transparent 22%),
+    linear-gradient(135deg, #101827 0%, #102b45 45%, #114067 100%);
+  border:1px solid rgba(56,189,248,.16);
+  box-shadow:var(--nc-card-shadow);
+}
+.providers-hero > *{
+  position:relative;
+  z-index:1;
+}
+
+.hero-badge{
+  display:inline-flex;
+  align-items:center;
+  gap:.45rem;
+  padding:.34rem .82rem;
+  border-radius:999px;
+  background:rgba(255,255,255,.08);
+  border:1px solid rgba(255,255,255,.14);
+  color:rgba(255,255,255,.9);
+  font-size:.71rem;
+  font-weight:800;
+  letter-spacing:.08em;
+  text-transform:uppercase;
+  margin-bottom:.9rem;
+}
+
+.hero-title{
+  margin:0;
+  font-size:clamp(1.7rem,4vw,2.45rem);
+  font-weight:900;
+  letter-spacing:-.05em;
+  color:#fff;
+}
+.hero-title .hl{
+  background:linear-gradient(135deg,#38bdf8 0%,#34d399 100%);
+  -webkit-background-clip:text;
+  -webkit-text-fill-color:transparent;
+  background-clip:text;
+}
+
+.hero-sub{
+  margin-top:.55rem;
+  max-width:760px;
+  color:rgba(255,255,255,.78);
+  font-size:.94rem;
+  line-height:1.65;
+}
+
+.hero-actions{
+  display:flex;
+  flex-wrap:wrap;
+  gap:.75rem;
+  margin-top:1.15rem;
+}
+
+.hero-btn{
+  display:inline-flex;
+  align-items:center;
+  gap:.45rem;
+  text-decoration:none;
+  border-radius:12px;
+  padding:.72rem 1.08rem;
+  font-size:.84rem;
+  font-weight:800;
+  transition:all .18s ease;
+}
+.hero-btn-primary{
+  background:#fff;
+  color:#0f172a;
+}
+.hero-btn-primary:hover{
+  color:#020617;
+  transform:translateY(-1px);
+}
+.hero-btn-soft{
+  background:rgba(255,255,255,.08);
+  color:#fff;
+  border:1px solid rgba(255,255,255,.14);
+}
+.hero-btn-soft:hover{
+  background:rgba(255,255,255,.14);
+  color:#fff;
+}
+
+.stats-grid{
+  display:grid;
+  grid-template-columns:repeat(4, 1fr);
+  gap:1rem;
+  margin-bottom:1.15rem;
+}
+@media (max-width:980px){
+  .stats-grid{grid-template-columns:repeat(2,1fr);}
+}
+@media (max-width:560px){
+  .stats-grid{grid-template-columns:1fr;}
+}
+
+.stat-card{
+  background:var(--surf);
+  border:1px solid var(--bdr);
+  border-radius:var(--r);
+  padding:1.08rem 1.1rem 1rem;
+  box-shadow:var(--nc-card-shadow);
+}
+.stat-top{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  margin-bottom:.9rem;
+}
+.stat-icon{
+  width:44px;
+  height:44px;
+  border-radius:13px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:.95rem;
+}
+.si-cyan{background:var(--cyan-l);color:var(--cyan);}
+.si-emerald{background:var(--emerald-l);color:var(--emerald);}
+.si-amber{background:var(--amber-l);color:var(--amber);}
+.si-rose{background:var(--rose-l);color:var(--rose);}
+
+.stat-value{
+  font-family:'JetBrains Mono',monospace;
+  font-size:1.65rem;
+  font-weight:800;
+  line-height:1;
+  color:var(--txt);
+}
+.stat-label{
+  margin-top:.45rem;
+  color:var(--mu);
+  font-size:.72rem;
+  font-weight:800;
+  letter-spacing:.08em;
+  text-transform:uppercase;
+}
+
+.panel{
+  background:var(--surf);
+  border:1px solid var(--bdr);
+  border-radius:var(--r);
+  overflow:hidden;
+  box-shadow:var(--nc-card-shadow);
+}
+
+.panel-head{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:1rem;
+  padding:1rem 1.15rem;
+  border-bottom:1px solid var(--bdr);
+  background:var(--s2);
+}
+.panel-head-left{
+  display:flex;
+  align-items:center;
+  gap:.75rem;
+}
+.panel-icon{
+  width:38px;
+  height:38px;
+  border-radius:11px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:.88rem;
+  background:var(--brand-l);
+  color:var(--brand-d);
+}
+.panel-title{
+  font-size:.94rem;
+  font-weight:800;
+  letter-spacing:-.02em;
+  color:var(--txt);
+}
+.panel-sub{
+  margin-top:.08rem;
+  font-size:.73rem;
+  color:var(--mu);
+}
+.panel-body{
+  padding:1rem 1.15rem 1.15rem;
+}
+
+.table-wrap{
+  overflow-x:auto;
+}
+
+.providers-table{
+  width:100%;
+  border-collapse:collapse;
+}
+
+.providers-table th,
+.providers-table td{
+  padding:1rem .85rem;
+  border-bottom:1px solid var(--bdr);
+  vertical-align:middle;
+  text-align:left;
+}
+
+.providers-table th{
+  font-size:.74rem;
+  font-weight:800;
+  color:var(--mu);
+  text-transform:uppercase;
+  letter-spacing:.08em;
+  background:var(--s2);
+}
+
+.providers-table tbody tr:hover{
+  background:var(--s2);
+}
+
+.provider-meta{
+  display:flex;
+  align-items:center;
+  gap:.8rem;
+  min-width:260px;
+}
+
+.provider-avatar{
+  width:42px;
+  height:42px;
+  border-radius:13px;
+  background:var(--brand-l);
+  color:var(--brand-d);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:.92rem;
+  font-weight:900;
+  border:1px solid var(--bdr);
+  overflow:hidden;
+  flex-shrink:0;
+}
+.provider-avatar img{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+}
+
+.provider-name{
+  font-size:.85rem;
+  font-weight:800;
+  color:var(--txt);
+}
+.provider-email{
+  margin-top:.12rem;
+  font-size:.73rem;
+  color:var(--mu);
+}
+
+.badge-row{
+  display:flex;
+  flex-wrap:wrap;
+  gap:.45rem;
+}
+
+.status-badge{
+  display:inline-flex;
+  align-items:center;
+  gap:.32rem;
+  border-radius:999px;
+  padding:.28rem .72rem;
+  font-size:.68rem;
+  font-weight:800;
+  letter-spacing:.04em;
+  border:1px solid transparent;
+}
+
+.badge-verified{
+  background:var(--emerald-l);
+  color:var(--emerald);
+  border-color:rgba(16,185,129,.22);
+}
+.badge-unverified{
+  background:var(--s2);
+  color:var(--mu);
+  border-color:var(--bdr);
+}
+.badge-active{
+  background:var(--cyan-l);
+  color:var(--cyan);
+  border-color:rgba(56,189,248,.22);
+}
+.badge-restricted{
+  background:var(--amber-l);
+  color:var(--amber);
+  border-color:rgba(245,158,11,.22);
+}
+.badge-suspended{
+  background:var(--rose-l);
+  color:var(--rose);
+  border-color:rgba(244,63,94,.22);
+}
+
+.food-count{
+  font-family:'JetBrains Mono',monospace;
+  font-size:.84rem;
+  font-weight:800;
+  color:var(--txt);
+}
+
+.joined-text{
+  font-size:.78rem;
+  color:var(--txt2);
+}
+.joined-sub{
+  margin-top:.12rem;
+  font-size:.72rem;
+  color:var(--mu);
+}
+
+.actions-cell{
+  min-width:230px;
+}
+
+.actions-wrap{
+  display:flex;
+  flex-wrap:wrap;
+  gap:.55rem;
+  align-items:center;
+}
+
+.inline-form{
+  margin:0;
+}
+
+.action-btn{
+  display:inline-flex;
+  align-items:center;
+  gap:.38rem;
+  padding:.5rem .8rem;
+  border-radius:11px;
+  border:1px solid var(--bdr);
+  background:var(--surf);
+  color:var(--txt2);
+  font-size:.76rem;
+  font-weight:800;
+  cursor:pointer;
+  transition:all .15s ease;
+}
+.action-btn:hover{
+  background:var(--s2);
+  border-color:var(--bdr2);
+}
+.action-btn-success{
+  background:var(--emerald-l);
+  border-color:rgba(16,185,129,.22);
+  color:var(--emerald);
+}
+.action-btn-success:hover{
+  background:rgba(16,185,129,.18);
+  border-color:rgba(16,185,129,.28);
+}
+
+.status-select{
+  min-width:145px;
+  padding:.52rem .75rem;
+  border-radius:11px;
+  border:1px solid var(--bdr);
+  background:var(--surf);
+  color:var(--txt);
+  font-size:.76rem;
+  font-weight:700;
+  cursor:pointer;
+}
+
+.empty-box{
+  background:var(--surf);
+  border:1px solid var(--bdr);
+  border-radius:var(--r);
+  box-shadow:var(--nc-card-shadow);
+  padding:4rem 2rem;
+  text-align:center;
+}
+.empty-icon{
+  width:64px;
+  height:64px;
+  margin:0 auto .9rem;
+  border-radius:18px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:var(--s2);
+  color:var(--fa);
+  font-size:1.45rem;
+}
+.empty-title{
+  font-size:1rem;
+  font-weight:800;
+  color:var(--txt);
+}
+.empty-sub{
+  margin-top:.35rem;
+  font-size:.84rem;
+  color:var(--mu);
+}
+
+.small-note{
+  margin-top:.8rem;
+  font-size:.76rem;
+  color:var(--mu);
+}
+
+@media (max-width:760px){
+  .providers-table th:nth-child(3),
+  .providers-table td:nth-child(3),
+  .providers-table th:nth-child(4),
+  .providers-table td:nth-child(4){
+    display:none;
+  }
+}
+</style>
+
+{% set ns = namespace(verified=0, active=0, restricted=0, suspended=0) %}
+{% for provider in providers %}
+  {% if provider.is_verified %}
+    {% set ns.verified = ns.verified + 1 %}
+  {% endif %}
+  {% set current_status = provider.account_status or 'active' %}
+  {% if current_status == 'active' %}
+    {% set ns.active = ns.active + 1 %}
+  {% elif current_status == 'restricted' %}
+    {% set ns.restricted = ns.restricted + 1 %}
+  {% elif current_status == 'suspended' %}
+    {% set ns.suspended = ns.suspended + 1 %}
+  {% endif %}
+{% endfor %}
+
+<div class="providers-page">
+  <div class="providers-wrap">
+
+    <div class="providers-hero">
+      <div class="hero-badge">
+        <i class="fas fa-user-shield"></i> Provider Management
+      </div>
+      <h1 class="hero-title">Manage <span class="hl">Providers</span></h1>
+      <div class="hero-sub">
+        Review provider accounts, verify trusted providers, and control access with active, restricted, or suspended status from one clean admin page.
+      </div>
+      <div class="hero-actions">
+        <a href="{{ url_for('admin.dashboard') }}" class="hero-btn hero-btn-primary">
+          <i class="fas fa-table-cells-large"></i> Dashboard
+        </a>
+        <a href="{{ url_for('analytics.analytics_dashboard') }}" class="hero-btn hero-btn-soft">
+          <i class="fas fa-chart-line"></i> Analytics
+        </a>
+      </div>
+    </div>
+
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-top">
+          <div class="stat-icon si-cyan"><i class="fas fa-store"></i></div>
+        </div>
+        <div class="stat-value">{{ providers|length }}</div>
+        <div class="stat-label">Total Providers</div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-top">
+          <div class="stat-icon si-emerald"><i class="fas fa-badge-check"></i></div>
+        </div>
+        <div class="stat-value">{{ ns.verified }}</div>
+        <div class="stat-label">Verified</div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-top">
+          <div class="stat-icon si-amber"><i class="fas fa-user-lock"></i></div>
+        </div>
+        <div class="stat-value">{{ ns.restricted }}</div>
+        <div class="stat-label">Restricted</div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-top">
+          <div class="stat-icon si-rose"><i class="fas fa-user-slash"></i></div>
+        </div>
+        <div class="stat-value">{{ ns.suspended }}</div>
+        <div class="stat-label">Suspended</div>
+      </div>
+    </div>
+
+    {% if providers %}
+      <div class="panel">
+        <div class="panel-head">
+          <div class="panel-head-left">
+            <div class="panel-icon"><i class="fas fa-list-check"></i></div>
+            <div>
+              <div class="panel-title">Provider Directory</div>
+              <div class="panel-sub">Verification, account status, join date, and food count</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="panel-body" style="padding:0;">
+          <div class="table-wrap">
+            <table class="providers-table">
+              <thead>
+                <tr>
+                  <th>Provider</th>
+                  <th>Status</th>
+                  <th>Joined</th>
+                  <th>Foods</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for provider in providers %}
+                {% set st = provider.account_status or 'active' %}
+                <tr>
+                  <td>
+                    <div class="provider-meta">
+                      <div class="provider-avatar">
+                        {% if provider.profile_picture %}
+                          <img src="{{ url_for('static', filename=provider.profile_picture) }}" alt="{{ provider.username }}">
+                        {% else %}
+                          {{ provider.username[0]|upper }}
+                        {% endif %}
+                      </div>
+                      <div style="min-width:0;">
+                        <div class="provider-name">{{ provider.username }}</div>
+                        <div class="provider-email">{{ provider.email }}</div>
+                      </div>
+                    </div>
+                  </td>
+
+                  <td>
+                    <div class="badge-row">
+                      {% if provider.is_verified %}
+                        <span class="status-badge badge-verified">
+                          <i class="fas fa-check-circle"></i> Verified
+                        </span>
+                      {% else %}
+                        <span class="status-badge badge-unverified">
+                          <i class="fas fa-circle" style="font-size:.42rem;"></i> Unverified
+                        </span>
+                      {% endif %}
+
+                      <span class="status-badge {% if st == 'active' %}badge-active{% elif st == 'restricted' %}badge-restricted{% else %}badge-suspended{% endif %}">
+                        <i class="fas fa-circle" style="font-size:.42rem;"></i> {{ st|title }}
+                      </span>
+                    </div>
+                  </td>
+
+                  <td>
+                    <div class="joined-text">
+                      {{ provider.created_at.strftime('%b %d, %Y') if provider.created_at else 'N/A' }}
+                    </div>
+                    <div class="joined-sub">Provider joined</div>
+                  </td>
+
+                  <td>
+                    <div class="food-count">{{ provider.foods.count() }}</div>
+                  </td>
+
+                  <td class="actions-cell">
+                    <div class="actions-wrap">
+                      {% if not provider.is_verified %}
+                      <form method="POST" action="{{ url_for('admin.verify_provider', user_id=provider.id) }}" class="inline-form">
+                        <button type="submit" class="action-btn action-btn-success">
+                          <i class="fas fa-check-circle"></i> Verify
+                        </button>
+                      </form>
+                      {% endif %}
+
+                      <form method="POST" action="{{ url_for('admin.update_provider_status', user_id=provider.id) }}" class="inline-form">
+                        <select name="account_status" class="status-select" onchange="this.form.submit()">
+                          <option value="active" {% if st == 'active' %}selected{% endif %}>Active</option>
+                          <option value="restricted" {% if st == 'restricted' %}selected{% endif %}>Restricted</option>
+                          <option value="suspended" {% if st == 'suspended' %}selected{% endif %}>Suspended</option>
+                        </select>
+                      </form>
+                    </div>
+                  </td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+
+          <div class="panel-body" style="padding-top:.9rem;">
+            <div class="small-note">
+              Verify trusted providers first, then use account status to control access without deleting accounts.
+            </div>
+          </div>
+        </div>
+      </div>
+    {% else %}
+      <div class="empty-box">
+        <div class="empty-icon"><i class="fas fa-store"></i></div>
+        <div class="empty-title">No providers found</div>
+        <div class="empty-sub">There are no food providers to manage yet.</div>
+      </div>
+    {% endif %}
+
+  </div>
+</div>
+{% endblock %}

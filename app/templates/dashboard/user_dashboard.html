@@ -24,7 +24,6 @@
   --brand-d:  var(--nc-brand-d);
   --brand-l:  var(--nc-brand-l);
 
-  /* Semantic palette */
   --teal:   #0d9488; --teal-d: #0f766e; --teal-l:   #ccfbf1;
   --cyan:   #06b6d4; --cyan-l: #cffafe;
   --lime:   #84cc16; --lime-l: #ecfccb;
@@ -92,6 +91,7 @@
   .c-completion, .c-streak,
   .c-profile, .c-diet,
   .c-upgrade, .c-bmi { grid-column: span 12; }
+
   .c-stat-a,.c-stat-b,.c-stat-c,.c-stat-d { grid-column: span 6; }
 }
 @media (max-width: 540px) {
@@ -101,7 +101,6 @@
 /* ═══════════════════════════════════════════════════════════
    SHARED ATOMS
 ═══════════════════════════════════════════════════════════ */
-/* Top accent stripe */
 .stripe { height: 3px; }
 .st-brand  { background: linear-gradient(90deg, var(--brand), #06b6d4, #818cf8); }
 .st-teal   { background: linear-gradient(90deg, var(--teal), var(--cyan)); }
@@ -110,7 +109,6 @@
 .st-violet { background: linear-gradient(90deg, var(--violet), var(--brand)); }
 .st-rose   { background: linear-gradient(90deg, var(--rose), #fb923c); }
 
-/* Icon boxes */
 .ico-box {
   width: 32px; height: 32px; border-radius: 9px; flex-shrink: 0;
   display: flex; align-items: center; justify-content: center; font-size: .76rem;
@@ -133,7 +131,6 @@
 [data-theme="dark"] .ib-em     { background: rgba(16,185,129,.11); color: #34d399; }
 [data-theme="dark"] .ib-cyan   { background: rgba(6,182,212,.11);  color: #22d3ee; }
 
-/* Card headers */
 .c-head {
   display: flex; align-items: center; justify-content: space-between;
   padding: 1rem 1.4rem; border-bottom: 1px solid var(--bdr);
@@ -142,7 +139,6 @@
 .c-head-title { font-size: .88rem; font-weight: 800; color: var(--txt); letter-spacing: -.02em; }
 .c-head-sub   { font-size: .69rem; color: var(--mu); font-weight: 500; margin-top: .04rem; }
 
-/* Buttons */
 .btn-ghost {
   display: inline-flex; align-items: center; gap: .38rem;
   background: var(--s2); color: var(--txt2);
@@ -197,7 +193,6 @@
 }
 .btn-rose:hover { background: #e11d48; color:#fff; transform: translateY(-1px); }
 
-/* Empty states */
 .empty-state {
   display: flex; flex-direction: column; align-items: center;
   padding: 2.2rem 1rem; text-align: center; gap: .7rem;
@@ -220,7 +215,6 @@
   justify-content: space-between; flex-wrap: wrap; gap: 2rem;
 }
 
-/* Layered glow blobs */
 .hero-wrap::before {
   content: ''; position: absolute; inset: 0; z-index: 0;
   background:
@@ -229,14 +223,12 @@
     radial-gradient(ellipse 45% 55% at 58% 115%, rgba(6,182,212,.32)  0%, transparent 52%);
 }
 
-/* Dot texture */
 .hero-wrap::after {
   content: ''; position: absolute; inset: 0; z-index: 0;
   background-image: radial-gradient(circle, rgba(255,255,255,.07) 1px, transparent 1px);
   background-size: 28px 28px;
 }
 
-/* Bottom accent line */
 .hero-line {
   position: absolute; bottom: 0; left: 0; right: 0; height: 2px; z-index: 1;
   background: linear-gradient(90deg, transparent, #38bdf8, #a5f3fc, transparent);
@@ -273,7 +265,6 @@
   font-weight: 400; max-width: 340px; line-height: 1.6;
 }
 
-/* Ring + stats */
 .hero-right { display: flex; align-items: center; gap: 2.2rem; flex-wrap: wrap; }
 
 .ring-wrap { position: relative; width: 112px; height: 112px; flex-shrink: 0; }
@@ -537,7 +528,6 @@
   gap: 2rem; flex-wrap: wrap;
 }
 
-/* Score box */
 .bmi-score {
   width: 118px; height: 118px; border-radius: 20px; flex-shrink: 0;
   background: var(--s2); border: 1px solid var(--bdr);
@@ -571,7 +561,6 @@
 [data-theme="dark"] .bb-overweight  { background: rgba(245,158,11,.12); color: #fcd34d; }
 [data-theme="dark"] .bb-obese       { background: rgba(244,63,94,.1);   color: #fb7185; }
 
-/* Range */
 .bmi-range { flex: 1; min-width: 200px; }
 .bmi-range-lbl {
   font-size: .67rem; font-weight: 700; text-transform: uppercase;
@@ -592,7 +581,6 @@
   font-size: .6rem; color: var(--fa); line-height: 1.4;
 }
 
-/* History */
 .bmi-hist { flex: 1; min-width: 180px; }
 .bmi-hist-lbl {
   font-size: .67rem; font-weight: 700; text-transform: uppercase;
@@ -607,7 +595,6 @@
 .bmi-val  { font-family: 'JetBrains Mono', monospace; font-weight: 600; color: var(--txt); font-size: .82rem; }
 </style>
 
-{# ── Completion % ── #}
 {% set pct = (((
   (1 if (user.first_name and user.last_name) else 0) +
   (1 if user.email else 0) +
@@ -618,7 +605,6 @@
 <div class="dash">
 <div class="bento">
 
-  {# SVG gradient defs #}
   <svg width="0" height="0" style="position:absolute;pointer-events:none;">
     <defs>
       <linearGradient id="rgGrad" x1="0%" y1="0%" x2="100%" y2="0%">
@@ -628,9 +614,7 @@
     </defs>
   </svg>
 
-  <!-- ══════════════════════════════════
-       HERO
-  ══════════════════════════════════ -->
+  <!-- HERO -->
   <div class="cell c-hero" style="padding:0;background:transparent;border:none;box-shadow:none;">
     <div class="hero-wrap">
       <div class="hero-line"></div>
@@ -643,7 +627,7 @@
         <div class="hero-name">
           Hello, <span class="hero-accent">{{ user.first_name or user.username }}</span> 👋
         </div>
-        <div class="hero-sub">Track your nutrition, complete your profile, and hit your health goals every day.</div>
+        <div class="hero-sub">Track your nutrition, complete your profile, manage your preferences, and monitor your wellness from one place.</div>
       </div>
 
       <div class="hero-right">
@@ -682,9 +666,7 @@
     </div>
   </div>
 
-  <!-- ══════════════════════════════════
-       MINI STATS ROW
-  ══════════════════════════════════ -->
+  <!-- MINI STATS -->
   {% set calorie = user.dietary_preference.calorie_goal    if user.dietary_preference and user.dietary_preference.calorie_goal    else None %}
   {% set protein = user.dietary_preference.protein_goal    if user.dietary_preference and user.dietary_preference.protein_goal    else None %}
   {% set meals   = user.dietary_preference.meals_per_day   if user.dietary_preference and user.dietary_preference.meals_per_day   else None %}
@@ -740,9 +722,7 @@
     </div>
   </div>
 
-  <!-- ══════════════════════════════════
-       COMPLETION
-  ══════════════════════════════════ -->
+  <!-- PROFILE COMPLETION -->
   {% set step_map = {
     'Full Name':   (user.first_name and user.last_name),
     'Email':       user.email,
@@ -777,9 +757,7 @@
     </div>
   </div>
 
-  <!-- ══════════════════════════════════
-       STREAK
-  ══════════════════════════════════ -->
+  <!-- STREAK -->
   <div class="cell c-streak" style="padding:0;border:none;background:transparent;box-shadow:none;">
     <div class="streak-inner">
       <div class="streak-num">7</div>
@@ -790,9 +768,7 @@
     </div>
   </div>
 
-  <!-- ══════════════════════════════════
-       PROFILE
-  ══════════════════════════════════ -->
+  <!-- PROFILE -->
   <div class="cell c-profile">
     <div class="stripe st-teal"></div>
     <div class="profile-pad">
@@ -839,9 +815,7 @@
     </div>
   </div>
 
-  <!-- ══════════════════════════════════
-       DIETARY PREFERENCES
-  ══════════════════════════════════ -->
+  <!-- DIETARY PREFERENCES -->
   <div class="cell c-diet">
     <div class="stripe st-lime"></div>
     <div class="c-head">
@@ -905,9 +879,7 @@
     </div>
   </div>
 
-  <!-- ══════════════════════════════════
-       ROLE UPGRADE REQUESTS
-  ══════════════════════════════════ -->
+  <!-- ROLE UPGRADE REQUESTS -->
   <div class="cell c-upgrade">
     <div class="stripe st-rose"></div>
     <div class="c-head">
@@ -961,9 +933,7 @@
     </div>
   </div>
 
-  <!-- ══════════════════════════════════
-       BMI TRACKER
-  ══════════════════════════════════ -->
+  <!-- BMI TRACKER -->
   <div class="cell c-bmi">
     <div class="stripe st-rose"></div>
     <div class="c-head">
@@ -1038,13 +1008,12 @@
     </div>
   </div>
 
-</div><!-- /bento -->
-</div><!-- /dash -->
+</div>
+</div>
 
 <script>
 document.addEventListener('DOMContentLoaded', () => {
 
-  /* Ring gauge */
   const ring = document.querySelector('.rg-fill');
   if (ring) {
     const pct = parseInt(ring.dataset.pct) || 0;
@@ -1053,13 +1022,11 @@ document.addEventListener('DOMContentLoaded', () => {
     setTimeout(() => { ring.style.strokeDashoffset = C - (pct / 100) * C; }, 130);
   }
 
-  /* Macro bars */
   document.querySelectorAll('.mb-fill').forEach(el => {
     const w = el.dataset.w || 0;
     setTimeout(() => { el.style.width = w + '%'; }, 260);
   });
 
-  /* Streak dots — staggered pop-in */
   document.querySelectorAll('.sdot.on').forEach((dot, i) => {
     dot.style.opacity = '0';
     dot.style.transform = 'scale(0)';
