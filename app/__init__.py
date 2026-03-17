@@ -32,6 +32,9 @@ def create_app(config_name="default"):
     from .routes.bmi import bmi_bp
     from .routes.admin import admin_bp
     from app.routes.food import food_bp, food_search_bp       # ← updated
+    from app.routes.meal_log import meal_log_bp
+
+    
 
     app.register_blueprint(main_bp)
     app.register_blueprint(auth_bp,            url_prefix="/auth")
@@ -40,6 +43,7 @@ def create_app(config_name="default"):
     app.register_blueprint(admin_bp,           url_prefix="/admin")
     app.register_blueprint(food_bp,            url_prefix="/provider")  # unchanged ✅
     app.register_blueprint(food_search_bp,     url_prefix="/food")      # new ✅
+    app.register_blueprint(meal_log_bp, url_prefix="/dashboard/meal-log")
 
     with app.app_context():
         create_roles_if_ready()

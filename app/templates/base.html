@@ -557,6 +557,7 @@
             <li><a class="nc-nav__link" href="{{ url_for('user_dashboard.index') }}"><i class="fas fa-table-cells-large"></i> Dashboard</a></li>
             <li><a class="nc-nav__link" href="{{ url_for('user_dashboard.view_profile') }}"><i class="fas fa-user"></i> Profile</a></li>
             <li><a class="nc-nav__link" href="{{ url_for('food_search.search_foods') }}"><i class="fas fa-magnifying-glass"></i> Find Food</a></li>
+            <li><a class="nc-nav__link" href="{{ url_for('meal_log.index') }}"><i class="fas fa-utensils"></i> Meal Log</a></li>
             {% if current_user.is_user() %}
             <li><a class="nc-nav__link" href="{{ url_for('user_dashboard.dietary_preferences') }}"><i class="fas fa-bowl-food"></i> Diet Prefs</a></li>
             {% endif %}
@@ -609,6 +610,7 @@
           <a class="nc-mobile-link" href="{{ url_for('user_dashboard.index') }}"><i class="fas fa-table-cells-large"></i> Dashboard</a>
           <a class="nc-mobile-link" href="{{ url_for('user_dashboard.view_profile') }}"><i class="fas fa-user"></i> Profile</a>
           <a class="nc-mobile-link" href="{{ url_for('food_search.search_foods') }}"><i class="fas fa-magnifying-glass"></i> Find Food</a>
+          <a class="nc-mobile-link" href="{{ url_for('meal_log.index') }}"><i class="fas fa-utensils"></i> Meal Log</a>
           {% if current_user.is_user() %}
           <a class="nc-mobile-link" href="{{ url_for('user_dashboard.dietary_preferences') }}"><i class="fas fa-bowl-food"></i> Diet Preferences</a>
           {% endif %}

@@ -1,0 +1,700 @@
+{% extends "base.html" %}
+{% block title %}Meal Log — {{ selected_date.strftime('%B %d, %Y') }}{% endblock %}
+
+{% block extra_css %}
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;800&family=Sora:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
+  :root, [data-theme="light"] {
+    --ml-accent:       #0ea5e9;
+    --ml-accent-soft:  #e0f2fe;
+    --ml-accent-vivid: #0284c7;
+    --ml-gold:         #f59e0b;
+    --ml-gold-soft:    #fef3c7;
+    --ml-emerald:      #10b981;
+    --ml-emerald-soft: #d1fae5;
+    --ml-violet:       #8b5cf6;
+    --ml-violet-soft:  #ede9fe;
+    --ml-rose:         #ef4444;
+    --ml-rose-soft:    #fef2f2;
+    --ml-gradient-hero: linear-gradient(135deg, #0d1117 0%, #0c2340 50%, #0d1117 100%);
+    --ml-card-glow:    0 0 0 1px rgba(14,165,233,.12), 0 4px 24px rgba(14,165,233,.08);
+    --goal-loss-bg:      #fef2f2;
+    --goal-loss-text:    #dc2626;
+    --goal-loss-border:  rgba(220,38,38,.25);
+    --goal-gain-bg:      #f0fdf4;
+    --goal-gain-text:    #16a34a;
+    --goal-gain-border:  rgba(22,163,74,.25);
+    --goal-maintain-bg:  #eff6ff;
+    --goal-maintain-text:#2563eb;
+    --goal-maintain-border: rgba(37,99,235,.25);
+  }
+
+  [data-theme="dark"] {
+    --ml-accent:       #38bdf8;
+    --ml-accent-soft:  #0c2340;
+    --ml-accent-vivid: #0ea5e9;
+    --ml-gold:         #fbbf24;
+    --ml-gold-soft:    #2d2007;
+    --ml-emerald:      #34d399;
+    --ml-emerald-soft: #0d2e1f;
+    --ml-violet:       #a78bfa;
+    --ml-violet-soft:  #1e1b3a;
+    --ml-rose:         #f87171;
+    --ml-rose-soft:    #2d1515;
+    --ml-gradient-hero: linear-gradient(135deg, #010409 0%, #0c1a30 50%, #010409 100%);
+    --ml-card-glow:    0 0 0 1px rgba(56,189,248,.1), 0 4px 24px rgba(56,189,248,.06);
+    --goal-loss-bg:      #2d1515;
+    --goal-loss-text:    #f87171;
+    --goal-loss-border:  rgba(248,113,113,.2);
+    --goal-gain-bg:      #0d2e1f;
+    --goal-gain-text:    #34d399;
+    --goal-gain-border:  rgba(52,211,153,.2);
+    --goal-maintain-bg:  #0e1e3a;
+    --goal-maintain-text:#60a5fa;
+    --goal-maintain-border: rgba(96,165,250,.2);
+  }
+
+  /* ══ HERO ══ */
+  .ml-hero {
+    background: var(--ml-gradient-hero);
+    border-radius: 20px; padding: 2.4rem 2.2rem 2rem;
+    margin-bottom: 1.75rem; position: relative;
+    overflow: hidden; border: 1px solid rgba(14,165,233,.18);
+  }
+  .ml-hero::before {
+    content:''; position:absolute; top:-60px; right:-60px;
+    width:200px; height:200px; border-radius:50%;
+    background:radial-gradient(circle,rgba(14,165,233,.18) 0%,transparent 70%);
+    pointer-events:none;
+  }
+  .ml-hero::after {
+    content:''; position:absolute; bottom:-40px; left:30%;
+    width:160px; height:160px; border-radius:50%;
+    background:radial-gradient(circle,rgba(139,92,246,.12) 0%,transparent 70%);
+    pointer-events:none;
+  }
+  .ml-hero-inner {
+    position:relative; z-index:1;
+    display:flex; align-items:flex-start;
+    justify-content:space-between; flex-wrap:wrap; gap:1.5rem;
+  }
+  .ml-hero-title {
+    font-family:'Playfair Display',serif;
+    font-size:2.1rem; font-weight:800; color:#f0f6fc;
+    margin:0; line-height:1.15; letter-spacing:-.02em;
+  }
+  .ml-hero-title span {
+    background:linear-gradient(90deg,#38bdf8,#818cf8);
+    -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;
+  }
+  .ml-hero-sub {
+    font-size:.85rem; color:rgba(240,246,252,.55);
+    margin:.45rem 0 0; font-weight:400; line-height:1.6;
+  }
+
+  /* ══ DATE PICKER — cross-browser fixed ══ */
+  .ml-datepicker-wrap {
+    display:flex; align-items:center; gap:.5rem; flex-wrap:wrap;
+  }
+
+  /* Wrapper positions our custom FA icon on top of the native input */
+  .ml-date-field {
+    position:relative; display:inline-flex; align-items:center;
+  }
+  .ml-date-field-icon {
+    position:absolute; left:.85rem; top:50%; transform:translateY(-50%);
+    color:rgba(56,189,248,.8); font-size:.8rem; pointer-events:none; z-index:1;
+  }
+
+  .ml-date-input {
+    -webkit-appearance:none; -moz-appearance:none; appearance:none;
+    background:rgba(255,255,255,.07) !important;
+    border:1.5px solid rgba(255,255,255,.15) !important;
+    color:#f0f6fc !important; border-radius:12px !important;
+    padding:.55rem 1rem .55rem 2.4rem !important;   /* left gap for icon */
+    font-family:'Sora',sans-serif; font-size:.82rem !important; font-weight:600;
+    cursor:pointer; outline:none; backdrop-filter:blur(8px); min-width:155px;
+    transition:border-color .2s, background .2s, box-shadow .2s;
+  }
+  .ml-date-input:focus {
+    border-color:#38bdf8 !important;
+    background:rgba(56,189,248,.1) !important;
+    box-shadow:0 0 0 3px rgba(56,189,248,.15) !important;
+  }
+  /* Hide Chrome's native calendar icon — our overlay handles clicks */
+  .ml-date-input::-webkit-calendar-picker-indicator {
+    opacity:0; width:100%; height:100%;
+    position:absolute; top:0; left:0; cursor:pointer;
+  }
+
+  /* Prev / Next day arrows */
+  .ml-date-nav {
+    display:inline-flex; align-items:center; justify-content:center;
+    width:34px; height:34px;
+    background:rgba(56,189,248,.12); border:1.5px solid rgba(56,189,248,.25);
+    border-radius:10px; color:#38bdf8; font-size:.75rem;
+    text-decoration:none; flex-shrink:0;
+    transition:background .15s, border-color .15s, transform .12s;
+  }
+  .ml-date-nav:hover {
+    background:rgba(56,189,248,.22); border-color:rgba(56,189,248,.45);
+    color:#7dd3fc; transform:translateY(-1px);
+  }
+  .ml-date-nav[aria-disabled="true"] { opacity:.35; pointer-events:none; }
+
+  .ml-today-btn {
+    display:inline-flex; align-items:center; gap:.4rem;
+    background:rgba(56,189,248,.15); border:1.5px solid rgba(56,189,248,.3);
+    border-radius:12px; padding:.55rem 1rem;
+    font-size:.8rem; font-weight:700; color:#38bdf8;
+    text-decoration:none; white-space:nowrap; backdrop-filter:blur(8px);
+    transition:background .18s, border-color .18s, transform .12s;
+  }
+  .ml-today-btn:hover {
+    background:rgba(56,189,248,.25); border-color:rgba(56,189,248,.5);
+    color:#7dd3fc; transform:translateY(-1px);
+  }
+
+  /* ══ STAT STRIP ══ */
+  .ml-stats {
+    display:grid; grid-template-columns:repeat(auto-fit,minmax(130px,1fr));
+    gap:.85rem; margin-bottom:1.75rem;
+  }
+  .ml-stat-card {
+    background:var(--nc-card-bg); border:1.5px solid var(--nc-card-border);
+    border-radius:14px; padding:1rem 1.15rem; box-shadow:var(--nc-card-shadow);
+    position:relative; overflow:hidden; transition:transform .18s, box-shadow .18s;
+  }
+  .ml-stat-card:hover { transform:translateY(-2px); box-shadow:var(--ml-card-glow); }
+  .ml-stat-card::before {
+    content:''; position:absolute; top:0; left:0; right:0;
+    height:3px; border-radius:14px 14px 0 0;
+  }
+  .ml-stat-card--total::before  { background:linear-gradient(90deg,#38bdf8,#818cf8); }
+  .ml-stat-card--bfast::before  { background:linear-gradient(90deg,#f59e0b,#fb923c); }
+  .ml-stat-card--lunch::before  { background:linear-gradient(90deg,#22d3ee,#06b6d4); }
+  .ml-stat-card--dinner::before { background:linear-gradient(90deg,#8b5cf6,#a78bfa); }
+  .ml-stat-card--snack::before  { background:linear-gradient(90deg,#10b981,#34d399); }
+  .ml-stat-icon  { font-size:1.4rem; margin-bottom:.5rem; display:block; }
+  .ml-stat-label { font-size:.68rem; font-weight:700; text-transform:uppercase; letter-spacing:.07em; color:var(--nc-text-muted); margin-bottom:.2rem; }
+  .ml-stat-value { font-family:'Playfair Display',serif; font-size:1.55rem; font-weight:700; color:var(--nc-text); line-height:1; }
+  .ml-stat-date  { font-size:.72rem; color:var(--nc-text-muted); margin-top:.25rem; }
+
+  /* ══ LOG FORM ══ */
+  .ml-form-card {
+    background:var(--nc-card-bg); border:1.5px solid var(--nc-card-border);
+    border-radius:18px; box-shadow:var(--nc-card-shadow);
+    margin-bottom:1.75rem; overflow:hidden; transition:box-shadow .2s;
+  }
+  .ml-form-card:hover { box-shadow:var(--ml-card-glow); }
+  .ml-form-header {
+    display:flex; align-items:center; gap:.75rem; padding:1rem 1.5rem;
+    background:var(--nc-surface-2); border-bottom:1px solid var(--nc-border);
+  }
+  .ml-form-header-icon {
+    width:34px; height:34px;
+    background:linear-gradient(135deg,var(--ml-accent),var(--ml-accent-vivid));
+    border-radius:10px; display:flex; align-items:center; justify-content:center;
+    color:#fff; font-size:.85rem; flex-shrink:0; box-shadow:0 4px 12px rgba(14,165,233,.35);
+  }
+  .ml-form-header-title { font-family:'Playfair Display',serif; font-size:1rem; font-weight:700; color:var(--nc-text); margin:0; }
+  .ml-form-header-sub   { font-size:.72rem; color:var(--nc-text-muted); margin:0; }
+  .ml-form-body { padding:1.35rem 1.5rem; }
+  .ml-field-label {
+    display:block; font-size:.7rem; font-weight:700;
+    text-transform:uppercase; letter-spacing:.06em;
+    color:var(--nc-text-muted); margin-bottom:.45rem;
+  }
+  .ml-required { color:var(--ml-rose); margin-left:.15rem; }
+  .ml-select, .ml-input {
+    width:100%; background:var(--nc-input-bg) !important;
+    border:1.5px solid var(--nc-input-border) !important;
+    border-radius:11px !important; padding:.62rem 1rem !important;
+    font-family:'Sora',sans-serif; font-size:.85rem !important;
+    color:var(--nc-input-text) !important;
+    transition:border-color .18s, box-shadow .18s, background .18s;
+    outline:none; appearance:auto;
+  }
+  .ml-select:focus, .ml-input:focus {
+    border-color:var(--ml-accent) !important;
+    box-shadow:0 0 0 3px rgba(14,165,233,.14) !important;
+  }
+  .ml-input::placeholder { color:var(--nc-text-faint) !important; }
+  .ml-submit-btn {
+    display:inline-flex; align-items:center; justify-content:center; gap:.5rem; width:100%;
+    background:linear-gradient(135deg,var(--ml-accent),var(--ml-accent-vivid));
+    color:#fff; border:none; border-radius:11px; padding:.68rem 1rem;
+    font-family:'Sora',sans-serif; font-size:.87rem; font-weight:700; cursor:pointer;
+    box-shadow:0 4px 16px rgba(14,165,233,.35);
+    transition:transform .14s, box-shadow .14s, filter .14s; letter-spacing:.01em;
+  }
+  .ml-submit-btn:hover { transform:translateY(-2px); box-shadow:0 6px 24px rgba(14,165,233,.45); filter:brightness(1.08); }
+  .ml-submit-btn:active { transform:translateY(0); }
+
+  /* ══ GOAL BADGE ══ */
+  .ml-goal-badge {
+    display:inline-flex; align-items:center; gap:.35rem;
+    border-radius:8px; padding:.22rem .65rem;
+    font-size:.75rem; font-weight:700; border:1px solid transparent; white-space:nowrap;
+  }
+  .ml-goal-badge--weight_loss     { background:var(--goal-loss-bg);     color:var(--goal-loss-text);     border-color:var(--goal-loss-border); }
+  .ml-goal-badge--weight_gain     { background:var(--goal-gain-bg);     color:var(--goal-gain-text);     border-color:var(--goal-gain-border); }
+  .ml-goal-badge--maintain_weight { background:var(--goal-maintain-bg); color:var(--goal-maintain-text); border-color:var(--goal-maintain-border); }
+  .ml-goal-badge--none            { background:var(--nc-surface-2); color:var(--nc-text-faint); border-color:var(--nc-border); font-style:italic; }
+
+  /* ══ MEAL SECTION CARDS ══ */
+  .ml-section {
+    background:var(--nc-card-bg); border:1.5px solid var(--nc-card-border);
+    border-radius:18px; box-shadow:var(--nc-card-shadow);
+    margin-bottom:1rem; overflow:hidden; transition:box-shadow .2s, transform .18s;
+  }
+  .ml-section:hover { box-shadow:var(--ml-card-glow); }
+  .ml-section-head {
+    display:flex; align-items:center; justify-content:space-between;
+    padding:1rem 1.5rem; background:var(--nc-surface-2);
+    border-bottom:1px solid var(--nc-border);
+    cursor:pointer; user-select:none; transition:background .15s;
+  }
+  .ml-section-head:hover { background:var(--nc-surface-3); }
+  .ml-section-head-left { display:flex; align-items:center; gap:.85rem; }
+  .ml-meal-icon {
+    width:38px; height:38px; border-radius:12px;
+    display:flex; align-items:center; justify-content:center; font-size:1.1rem;
+    flex-shrink:0; transition:transform .2s;
+  }
+  .ml-section-head:hover .ml-meal-icon { transform:scale(1.08) rotate(-3deg); }
+  .ml-meal-icon--breakfast { background:var(--ml-gold-soft); }
+  .ml-meal-icon--lunch     { background:var(--ml-accent-soft); }
+  .ml-meal-icon--dinner    { background:var(--ml-violet-soft); }
+  .ml-meal-icon--snack     { background:var(--ml-emerald-soft); }
+  .ml-section-title-group { display:flex; flex-direction:column; gap:.05rem; }
+  .ml-section-title { font-family:'Playfair Display',serif; font-size:.95rem; font-weight:700; color:var(--nc-text); margin:0; }
+  .ml-section-meta  { font-size:.72rem; color:var(--nc-text-muted); }
+  .ml-section-right { display:flex; align-items:center; gap:.75rem; }
+  .ml-count-badge {
+    font-size:.72rem; font-weight:700; padding:.22rem .65rem;
+    border-radius:99px; color:var(--nc-text-muted);
+    background:var(--nc-surface-3); border:1px solid var(--nc-border);
+    transition:background .15s, color .15s;
+  }
+  .ml-count-badge--has { background:var(--ml-accent-soft); color:var(--ml-accent-vivid); border-color:transparent; }
+  .ml-chevron {
+    width:24px; height:24px; border-radius:7px;
+    display:flex; align-items:center; justify-content:center;
+    font-size:.65rem; color:var(--nc-text-muted); background:var(--nc-surface-3);
+    transition:transform .22s cubic-bezier(.34,1.56,.64,1), background .15s;
+  }
+  .ml-section-head:hover .ml-chevron     { background:var(--nc-border); }
+  .ml-section.collapsed .ml-chevron      { transform:rotate(-90deg); }
+  .ml-section.collapsed .ml-section-body { display:none; }
+
+  /* ══ MEAL TABLE ══ */
+  .ml-table-wrap { overflow-x:auto; }
+  .ml-table { width:100%; border-collapse:collapse; font-size:.84rem; }
+  .ml-table thead th {
+    padding:.6rem 1.5rem; font-size:.68rem; font-weight:700;
+    text-transform:uppercase; letter-spacing:.07em; color:var(--nc-text-muted);
+    background:var(--nc-surface-2); border-bottom:1px solid var(--nc-border); white-space:nowrap;
+  }
+  .ml-table tbody tr { border-bottom:1px solid var(--nc-border); transition:background .12s; }
+  .ml-table tbody tr:last-child { border-bottom:none; }
+  .ml-table tbody tr:hover      { background:var(--nc-surface-2); }
+  .ml-table td { padding:.9rem 1.5rem; color:var(--nc-text); vertical-align:middle; }
+  .ml-food-cell { display:flex; align-items:center; gap:.65rem; }
+  .ml-row-num {
+    width:22px; height:22px; border-radius:6px; flex-shrink:0;
+    background:var(--nc-surface-3); border:1px solid var(--nc-border);
+    display:flex; align-items:center; justify-content:center;
+    font-size:.65rem; font-weight:700; color:var(--nc-text-muted);
+    font-family:'JetBrains Mono',monospace;
+  }
+  .ml-food-name { font-weight:600; color:var(--nc-text); font-size:.87rem; }
+  .ml-qty-badge {
+    display:inline-flex; align-items:center; gap:.35rem;
+    background:var(--nc-surface-2); border:1px solid var(--nc-border);
+    border-radius:8px; padding:.22rem .65rem; font-size:.78rem; font-weight:600; color:var(--nc-text-2);
+  }
+  .ml-time {
+    display:inline-flex; align-items:center; gap:.35rem;
+    font-size:.78rem; color:var(--nc-text-muted); font-family:'JetBrains Mono',monospace;
+    background:var(--nc-surface-2); border:1px solid var(--nc-border);
+    border-radius:8px; padding:.22rem .65rem;
+  }
+  .ml-delete-btn {
+    background:none; border:1.5px solid transparent; border-radius:9px; padding:.35rem .55rem;
+    color:var(--nc-text-faint); cursor:pointer; font-size:.82rem; line-height:1;
+    transition:color .15s, background .15s, border-color .15s, transform .12s;
+  }
+  .ml-delete-btn:hover { color:var(--ml-rose); background:var(--ml-rose-soft); border-color:rgba(239,68,68,.3); transform:scale(1.1); }
+  .ml-empty-row td { padding:1.5rem; text-align:center; }
+  .ml-empty-inline { display:flex; align-items:center; justify-content:center; flex-direction:column; gap:.4rem; padding:.5rem 0; }
+  .ml-empty-inline-icon { font-size:1.6rem; opacity:.3; }
+  .ml-empty-inline-text { font-size:.82rem; color:var(--nc-text-faint); font-style:italic; }
+
+  /* ══ SECTION ACCENTS ══ */
+  .ml-section--breakfast { border-left:4px solid var(--ml-gold); }
+  .ml-section--lunch     { border-left:4px solid var(--ml-accent); }
+  .ml-section--dinner    { border-left:4px solid var(--ml-violet); }
+  .ml-section--snack     { border-left:4px solid var(--ml-emerald); }
+
+  /* ══ EMPTY STATE ══ */
+  .ml-empty-state {
+    text-align:center; padding:4rem 1rem;
+    background:var(--nc-card-bg); border:1.5px dashed var(--nc-border);
+    border-radius:18px; margin-top:1rem;
+  }
+  .ml-empty-state-graphic {
+    width:88px; height:88px; margin:0 auto 1.25rem;
+    background:var(--nc-surface-2); border-radius:50%;
+    display:flex; align-items:center; justify-content:center; font-size:2.4rem;
+    border:2px dashed var(--nc-border); animation:float 3.5s ease-in-out infinite;
+  }
+  @keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-7px)} }
+  .ml-empty-state-title { font-family:'Playfair Display',serif; font-size:1.3rem; font-weight:700; color:var(--nc-text); margin-bottom:.5rem; }
+  .ml-empty-state-sub   { font-size:.87rem; color:var(--nc-text-muted); max-width:300px; margin:0 auto; line-height:1.7; }
+
+  /* ══ DIVIDER ══ */
+  .ml-section-divider {
+    font-size:.7rem; font-weight:700; text-transform:uppercase; letter-spacing:.1em;
+    color:var(--nc-text-faint); padding:.75rem 0 .4rem;
+    display:flex; align-items:center; gap:.75rem;
+  }
+  .ml-section-divider::before, .ml-section-divider::after { content:''; flex:1; height:1px; background:var(--nc-border); }
+
+  /* ══ RESPONSIVE ══ */
+  @media (max-width: 576px) {
+    .ml-hero { padding:1.6rem 1.25rem 1.4rem; }
+    .ml-hero-title { font-size:1.6rem; }
+    .ml-form-body { padding:1rem 1.1rem; }
+    .ml-table td, .ml-table thead th { padding:.7rem .9rem; }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div style="max-width: 860px; margin: 0 auto;">
+
+  <!-- ══ HERO BANNER ══ -->
+  <div class="ml-hero">
+    <div class="ml-hero-inner">
+      <div>
+        <h1 class="ml-hero-title">Meal<br><span>Journal</span></h1>
+        <p class="ml-hero-sub">Track every bite. Build better habits, one meal at a time.</p>
+      </div>
+
+      <!-- ─── DATE PICKER CONTROLS ─────────────────────── -->
+      <div class="ml-datepicker-wrap">
+
+        {# ◀ Previous day #}
+        {% set prev_date = selected_date - timedelta(days=1) %}
+        <a href="{{ url_for('meal_log.index', date=prev_date.strftime('%Y-%m-%d')) }}"
+           class="ml-date-nav" title="Previous day" aria-label="Previous day">
+          <i class="fas fa-chevron-left"></i>
+        </a>
+
+        {# Calendar input wrapped in a label so the FA icon is always visible #}
+        <form method="GET" action="{{ url_for('meal_log.index') }}" id="datePickerForm">
+          <div class="ml-date-field">
+            <span class="ml-date-field-icon" id="calendarIcon">
+              <i class="fas fa-calendar-alt"></i>
+            </span>
+            <input type="date"
+                   id="datePicker"
+                   name="date"
+                   class="ml-date-input"
+                   value="{{ selected_date.strftime('%Y-%m-%d') }}"
+                   max="{{ today.strftime('%Y-%m-%d') }}"
+                   aria-label="Select a date">
+          </div>
+        </form>
+
+        {# ▶ Next day — disabled when already on today #}
+        {% if selected_date < today %}
+          {% set next_date = selected_date + timedelta(days=1) %}
+          <a href="{{ url_for('meal_log.index', date=next_date.strftime('%Y-%m-%d')) }}"
+             class="ml-date-nav" title="Next day" aria-label="Next day">
+            <i class="fas fa-chevron-right"></i>
+          </a>
+        {% else %}
+          <span class="ml-date-nav" aria-disabled="true" title="Can't go past today">
+            <i class="fas fa-chevron-right"></i>
+          </span>
+        {% endif %}
+
+        {# "Today" shortcut — only when not already on today #}
+        {% if selected_date != today %}
+          <a href="{{ url_for('meal_log.index') }}" class="ml-today-btn">
+            <i class="fas fa-calendar-day"></i> Today
+          </a>
+        {% endif %}
+
+      </div>
+      <!-- ─── end date picker ──────────────────────────── -->
+
+    </div>
+  </div>
+
+  <!-- ══ STAT STRIP ══ -->
+  {% set total_entries = grouped.values() | map('length') | sum %}
+  <div class="ml-stats">
+    <div class="ml-stat-card ml-stat-card--total">
+      <span class="ml-stat-icon">📋</span>
+      <div class="ml-stat-label">Total Entries</div>
+      <div class="ml-stat-value">{{ total_entries }}</div>
+      <div class="ml-stat-date">{{ selected_date.strftime('%a, %b %d') }}</div>
+    </div>
+    <div class="ml-stat-card ml-stat-card--bfast">
+      <span class="ml-stat-icon">☀️</span>
+      <div class="ml-stat-label">Breakfast</div>
+      <div class="ml-stat-value">{{ grouped['breakfast'] | length }}</div>
+      <div class="ml-stat-date">items logged</div>
+    </div>
+    <div class="ml-stat-card ml-stat-card--lunch">
+      <span class="ml-stat-icon">🌤️</span>
+      <div class="ml-stat-label">Lunch</div>
+      <div class="ml-stat-value">{{ grouped['lunch'] | length }}</div>
+      <div class="ml-stat-date">items logged</div>
+    </div>
+    <div class="ml-stat-card ml-stat-card--dinner">
+      <span class="ml-stat-icon">🌙</span>
+      <div class="ml-stat-label">Dinner</div>
+      <div class="ml-stat-value">{{ grouped['dinner'] | length }}</div>
+      <div class="ml-stat-date">items logged</div>
+    </div>
+    <div class="ml-stat-card ml-stat-card--snack">
+      <span class="ml-stat-icon">🍎</span>
+      <div class="ml-stat-label">Snacks</div>
+      <div class="ml-stat-value">{{ grouped['snack'] | length }}</div>
+      <div class="ml-stat-date">items logged</div>
+    </div>
+  </div>
+
+  <!-- ══ LOG A MEAL FORM ══ -->
+  <div class="ml-form-card">
+    <div class="ml-form-header">
+      <div class="ml-form-header-icon"><i class="fas fa-plus"></i></div>
+      <div>
+        <h2 class="ml-form-header-title">Log a Meal</h2>
+        <p class="ml-form-header-sub">Add what you ate to your daily journal</p>
+      </div>
+    </div>
+    <div class="ml-form-body">
+      <form method="POST" action="{{ url_for('meal_log.add') }}">
+        <input type="hidden" name="log_date" value="{{ selected_date.strftime('%Y-%m-%d') }}">
+        <div class="row g-3 align-items-end">
+
+          <div class="col-12 col-sm-6 col-md-3">
+            <label class="ml-field-label">Meal Type <span class="ml-required">*</span></label>
+            <select name="meal_type" class="ml-select" required>
+              <option value="" disabled selected>Select...</option>
+              <option value="breakfast">☀️ Breakfast</option>
+              <option value="lunch">🌤️ Lunch</option>
+              <option value="dinner">🌙 Dinner</option>
+              <option value="snack">🍎 Snack</option>
+            </select>
+          </div>
+
+          <div class="col-12 col-sm-6 col-md-3">
+            <label class="ml-field-label">Food Name <span class="ml-required">*</span></label>
+            <input type="text" name="food_name" class="ml-input"
+                   placeholder="e.g. Rice with chicken curry"
+                   required maxlength="120" autocomplete="off">
+          </div>
+
+          <div class="col-12 col-sm-6 col-md-2">
+            <label class="ml-field-label">Quantity <span class="ml-required">*</span></label>
+            <input type="text" name="quantity" class="ml-input"
+                   placeholder="e.g. 1 plate" required maxlength="50">
+          </div>
+
+          <div class="col-12 col-sm-6 col-md-2">
+            <label class="ml-field-label">Goal</label>
+            <select name="goal" class="ml-select">
+              <option value="">No goal</option>
+              <option value="weight_loss">📉 Weight Loss</option>
+              <option value="weight_gain">📈 Weight Gain</option>
+              <option value="maintain_weight">⚖️ Maintain Weight</option>
+            </select>
+          </div>
+
+          <div class="col-12 col-sm-6 col-md-2">
+            <button type="submit" class="ml-submit-btn">
+              <i class="fas fa-plus"></i> Log It
+            </button>
+          </div>
+
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ══ MEAL SECTIONS ══ -->
+  <div class="ml-section-divider">{{ selected_date.strftime('%A, %B %d') }}'s Meals</div>
+
+  {% for meal_type, icon, icon_class, section_class in [
+      ('breakfast', '☀️', 'ml-meal-icon--breakfast', 'ml-section--breakfast'),
+      ('lunch',     '🌤️', 'ml-meal-icon--lunch',     'ml-section--lunch'),
+      ('dinner',    '🌙', 'ml-meal-icon--dinner',    'ml-section--dinner'),
+      ('snack',     '🍎', 'ml-meal-icon--snack',     'ml-section--snack')
+  ] %}
+  {% set entries = grouped[meal_type] %}
+
+  <div class="ml-section {{ section_class }}" id="section-{{ meal_type }}">
+    <div class="ml-section-head" onclick="toggleSection('{{ meal_type }}')">
+      <div class="ml-section-head-left">
+        <div class="ml-meal-icon {{ icon_class }}">{{ icon }}</div>
+        <div class="ml-section-title-group">
+          <h3 class="ml-section-title">{{ meal_type | capitalize }}</h3>
+          <span class="ml-section-meta">
+            {% if entries %}
+              {{ entries | length }} item{{ 's' if entries | length != 1 else '' }} &middot;
+              last at {{ entries[-1].logged_at.strftime('%I:%M %p') }}
+            {% else %}No entries yet{% endif %}
+          </span>
+        </div>
+      </div>
+      <div class="ml-section-right">
+        <span class="ml-count-badge {% if entries %}ml-count-badge--has{% endif %}">
+          {{ entries | length }}
+        </span>
+        <div class="ml-chevron"><i class="fas fa-chevron-down"></i></div>
+      </div>
+    </div>
+
+    <div class="ml-section-body">
+      {% if entries %}
+      <div class="ml-table-wrap">
+        <table class="ml-table">
+          <thead>
+            <tr>
+              <th>#&nbsp;&nbsp;Food Name</th>
+              <th>Quantity</th>
+              <th>Goal</th>
+              <th>Time</th>
+              <th style="text-align:center;">Remove</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for log in entries %}
+            <tr>
+              <td>
+                <div class="ml-food-cell">
+                  <span class="ml-row-num">{{ loop.index }}</span>
+                  <span class="ml-food-name">{{ log.food_name }}</span>
+                </div>
+              </td>
+              <td>
+                <span class="ml-qty-badge">
+                  <i class="fas fa-bowl-rice" style="font-size:.62rem;opacity:.5;"></i>
+                  {{ log.quantity }}
+                </span>
+              </td>
+              <td>
+                {% if log.goal == 'weight_loss' %}
+                  <span class="ml-goal-badge ml-goal-badge--weight_loss">📉 Weight Loss</span>
+                {% elif log.goal == 'weight_gain' %}
+                  <span class="ml-goal-badge ml-goal-badge--weight_gain">📈 Weight Gain</span>
+                {% elif log.goal == 'maintain_weight' %}
+                  <span class="ml-goal-badge ml-goal-badge--maintain_weight">⚖️ Maintain</span>
+                {% else %}
+                  <span class="ml-goal-badge ml-goal-badge--none">—</span>
+                {% endif %}
+              </td>
+              <td>
+                <span class="ml-time">
+                  <i class="fas fa-clock" style="font-size:.65rem;opacity:.5;"></i>
+                  {{ log.logged_at.strftime('%I:%M %p') }}
+                </span>
+              </td>
+              <td style="text-align:center;">
+                <form method="POST"
+                      action="{{ url_for('meal_log.delete', log_id=log.id) }}"
+                      onsubmit="return confirm('Remove \'{{ log.food_name }}\' from your log?')">
+                  <button type="submit" class="ml-delete-btn" title="Remove entry">
+                    <i class="fas fa-trash-can"></i>
+                  </button>
+                </form>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% else %}
+      <table class="ml-table"><tbody>
+        <tr class="ml-empty-row">
+          <td colspan="5">
+            <div class="ml-empty-inline">
+              <div class="ml-empty-inline-icon">{{ icon }}</div>
+              <div class="ml-empty-inline-text">No {{ meal_type }} logged for this day</div>
+            </div>
+          </td>
+        </tr>
+      </tbody></table>
+      {% endif %}
+    </div>
+  </div>
+  {% endfor %}
+
+  {% if total_entries == 0 %}
+  <div class="ml-empty-state">
+    <div class="ml-empty-state-graphic">🥗</div>
+    <div class="ml-empty-state-title">Your journal is empty</div>
+    <p class="ml-empty-state-sub">
+      Start recording what you ate on
+      <strong>{{ selected_date.strftime('%B %d') }}</strong> using the form above.
+    </p>
+  </div>
+  {% endif %}
+
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  // ── Date picker: submit on change, guard against future dates ──
+  const datePicker = document.getElementById('datePicker');
+  const dateForm   = document.getElementById('datePickerForm');
+
+  if (datePicker && dateForm) {
+    datePicker.addEventListener('change', () => {
+      const chosen = new Date(datePicker.value);
+      const today  = new Date();
+      today.setHours(23, 59, 59, 999);
+      if (!isNaN(chosen) && chosen <= today) {
+        dateForm.submit();
+      }
+    });
+
+    // Clicking the FA icon also opens the native calendar
+    const icon = document.getElementById('calendarIcon');
+    if (icon) {
+      icon.style.cursor = 'pointer';
+      icon.addEventListener('click', () => {
+        // showPicker() is modern; fall back to focus() for older browsers
+        if (typeof datePicker.showPicker === 'function') {
+          datePicker.showPicker();
+        } else {
+          datePicker.focus();
+        }
+      });
+    }
+  }
+
+  // ── Collapsible sections ──
+  function toggleSection(mealType) {
+    document.getElementById('section-' + mealType)?.classList.toggle('collapsed');
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    ['breakfast','lunch','dinner','snack'].forEach(meal => {
+      const sec   = document.getElementById('section-' + meal);
+      const badge = sec?.querySelector('.ml-count-badge');
+      if (sec && badge && !badge.classList.contains('ml-count-badge--has')) {
+        sec.classList.add('collapsed');
+      }
+    });
+  });
+</script>
+{% endblock %}
