@@ -38,8 +38,16 @@ class User(UserMixin, db.Model):
     profile_picture = db.Column(db.String(200))
 
     # provider/admin platform flags
-    is_verified = db.Column(db.Boolean, default=False, nullable=False)
-    account_status = db.Column(db.String(20), default="active", nullable=False)  # active/suspended/restricted
+    is_verified = db.Column(
+    db.Boolean,
+    nullable=False,
+    server_default="false"
+)
+    account_status = db.Column(
+    db.String(20),
+    nullable=False,
+    server_default="active"
+)
     last_seen = db.Column(db.DateTime, default=datetime.utcnow)
 
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
@@ -198,7 +206,7 @@ class FoodItem(db.Model):
     fat = db.Column(db.Float)
 
     image = db.Column(db.String(255))
-    availability_status = db.Column(db.String(20), default="available", nullable=False)
+    availability_status = db.Column(db.String(20), nullable=False, server_default="available")
     order_count = db.Column(db.Integer, default=0)
     view_count = db.Column(db.Integer, default=0)
 
