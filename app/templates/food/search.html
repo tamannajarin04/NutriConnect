@@ -1,0 +1,1508 @@
+{% extends "base.html" %}
+{% block title %}Find Food · NutriConnect{% endblock %}
+
+{% block extra_css %}
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+.fs {
+  --sky:    #0ea5e9;
+  --sky-d:  #0284c7;
+  --sky-l:  rgba(14,165,233,.12);
+  --sky-g:  rgba(14,165,233,.06);
+  --teal:   #0d9488;
+  --teal-l: rgba(13,148,136,.12);
+  --violet: #7c3aed;
+  --rose:   #e11d48;
+  --amber:  #d97706;
+
+  --dk:     #0f1117;
+  --dk2:    #161b27;
+  --dk3:    #1e2435;
+  --dk4:    #252d40;
+  --dk5:    #2e384f;
+
+  --t1: #f0f4ff;
+  --t2: #b0bbd4;
+  --t3: #6b7a99;
+  --t4: #414d66;
+
+  --b1: rgba(255,255,255,.07);
+  --b2: rgba(255,255,255,.12);
+
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  background: var(--nc-bg);
+  min-height: 70vh;
+}
+
+@keyframes up   { from{opacity:0;transform:translateY(16px)} to{opacity:1;transform:translateY(0)} }
+@keyframes glow { 0%,100%{opacity:.5} 50%{opacity:1} }
+@keyframes skel { 0%,100%{opacity:.35} 50%{opacity:.7} }
+@keyframes livepulse {
+  0%   { box-shadow: 0 0 0 0 rgba(14,165,233,.7); }
+  70%  { box-shadow: 0 0 0 8px rgba(14,165,233,0); }
+  100% { box-shadow: 0 0 0 0 rgba(14,165,233,0); }
+}
+
+.fs-hero {
+  position: relative;
+  overflow: hidden;
+  border-radius: 16px;
+  margin-bottom: 1.25rem;
+  padding: 1.25rem 1.75rem 1.4rem;
+  background:
+    radial-gradient(ellipse 70% 80% at 90% -10%, rgba(56,189,248,.35) 0%, transparent 55%),
+    radial-gradient(ellipse 60% 60% at -10% 110%, rgba(99,102,241,.3) 0%, transparent 55%),
+    radial-gradient(ellipse 50% 50% at 50% 120%, rgba(14,165,233,.2) 0%, transparent 60%),
+    linear-gradient(145deg, #060d1f 0%, #0a1628 40%, #0d1e3a 70%, #050e1c 100%);
+  border: 1px solid rgba(56,189,248,.15);
+  box-shadow:
+    0 0 0 1px rgba(56,189,248,.08),
+    0 16px 48px rgba(0,0,0,.4),
+    inset 0 1px 0 rgba(255,255,255,.06);
+}
+
+.fs-hero::before {
+  content: '';
+  position: absolute; inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+  pointer-events: none; opacity: .4;
+}
+
+.fs-hero::after {
+  content: '';
+  position: absolute; inset: 0;
+  background:
+    linear-gradient(rgba(56,189,248,.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(56,189,248,.04) 1px, transparent 1px);
+  background-size: 48px 48px;
+  pointer-events: none;
+}
+
+.fs-hero__inner {
+  position: relative; z-index: 2;
+  display: flex; align-items: center; gap: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.fs-orb {
+  position: absolute; border-radius: 50%;
+  filter: blur(60px); pointer-events: none;
+  animation: glow 4s ease-in-out infinite;
+}
+.fs-orb--a {
+  width: 280px; height: 280px;
+  background: radial-gradient(circle, rgba(56,189,248,.18), transparent 65%);
+  top: -120px; right: -40px; animation-delay: 0s;
+}
+.fs-orb--b {
+  width: 200px; height: 200px;
+  background: radial-gradient(circle, rgba(99,102,241,.15), transparent 65%);
+  bottom: -100px; left: -30px; animation-delay: 1.5s;
+}
+.fs-orb--c { display: none; }
+
+.fs-hero__left {
+  flex: 1; min-width: 200px;
+  animation: up .5s cubic-bezier(.16,1,.3,1) both;
+}
+
+.fs-hero__badge {
+  display: inline-flex; align-items: center; gap: .4rem;
+  background: rgba(14,165,233,.1);
+  border: 1px solid rgba(14,165,233,.28);
+  border-radius: 99px; padding: .2rem .75rem;
+  font-size: .62rem; font-weight: 800; letter-spacing: .1em;
+  text-transform: uppercase; color: #7dd3fc;
+  margin-bottom: .55rem;
+}
+.fs-hero__badge-dot {
+  width: 5px; height: 5px; border-radius: 50%; background: #38bdf8;
+  animation: livepulse 2s ease-in-out infinite;
+}
+
+.fs-hero__h1 {
+  font-size: clamp(1.15rem, 2.4vw, 1.55rem);
+  font-weight: 900; line-height: 1.15;
+  letter-spacing: -.04em; color: #fff;
+  margin: 0 0 .2rem;
+}
+.fs-hero__h1 .grad {
+  background: linear-gradient(135deg, #7dd3fc 0%, #38bdf8 35%, #818cf8 70%, #a5b4fc 100%);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.fs-hero__sub {
+  font-size: .78rem; color: rgba(255,255,255,.38); font-weight: 500;
+  margin: 0;
+}
+
+.fs-hero__right {
+  flex: 2; min-width: 280px; display: flex; flex-direction: column; gap: .75rem;
+  animation: up .5s cubic-bezier(.16,1,.3,1) .1s both;
+}
+
+.fs-hero__searchbar { position: relative; }
+.fs-hero__searchbar-ico {
+  position: absolute; left: 1rem; top: 50%;
+  transform: translateY(-50%);
+  color: rgba(255,255,255,.28); font-size: .85rem;
+  pointer-events: none; transition: color .2s; z-index: 2;
+}
+.fs-hero__searchbar:focus-within .fs-hero__searchbar-ico { color: #38bdf8; }
+
+#searchInput {
+  width: 100%;
+  background: rgba(255,255,255,.06);
+  border: 1.5px solid rgba(255,255,255,.1);
+  border-radius: 12px;
+  padding: .72rem 5rem .72rem 2.75rem;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: .88rem; font-weight: 600;
+  color: #fff; outline: none;
+  backdrop-filter: blur(16px);
+  transition: border-color .2s, box-shadow .2s, background .2s;
+}
+#searchInput::placeholder { color: rgba(255,255,255,.25); font-weight: 500; }
+#searchInput:focus {
+  border-color: rgba(56,189,248,.5);
+  background: rgba(255,255,255,.09);
+  box-shadow: 0 0 0 3px rgba(14,165,233,.12);
+}
+
+.fs-search-tag {
+  position: absolute; right: .85rem; top: 50%;
+  transform: translateY(-50%);
+  display: flex; gap: .2rem; align-items: center;
+  pointer-events: none;
+}
+.fs-kbd {
+  background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.12);
+  border-radius: 6px; padding: .12rem .38rem;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: .58rem; font-weight: 700; color: rgba(255,255,255,.35);
+}
+
+.fs-hero__stats {
+  display: flex; flex-wrap: wrap; gap: 0;
+}
+.fs-hstat {
+  padding-right: 1.25rem; margin-right: 1.25rem;
+  border-right: 1px solid rgba(255,255,255,.1);
+}
+.fs-hstat:last-child { border: none; margin: 0; padding: 0; }
+.fs-hstat__val {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 1.05rem; font-weight: 700; color: #fff;
+  line-height: 1; letter-spacing: -.03em;
+}
+.fs-hstat__lbl {
+  font-size: .58rem; font-weight: 800; text-transform: uppercase;
+  letter-spacing: .09em; color: rgba(255,255,255,.32); margin-top: .18rem;
+}
+
+.fs-body {
+  display: grid;
+  grid-template-columns: 256px 1fr;
+  gap: 1.5rem;
+  align-items: start;
+}
+@media (max-width: 900px) {
+  .fs-body { grid-template-columns: 1fr; }
+}
+
+.fs-sidebar {
+  position: sticky; top: 80px;
+  animation: up .5s cubic-bezier(.16,1,.3,1) .2s both;
+}
+
+.fs-panel {
+  background: var(--nc-card-bg);
+  border: 1px solid var(--nc-card-border);
+  border-radius: 18px;
+  overflow: hidden;
+  box-shadow: var(--nc-card-shadow);
+}
+
+.fs-panel__hd {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: .9rem 1.15rem;
+  background: var(--nc-surface-2);
+  border-bottom: 1px solid var(--nc-border);
+}
+.fs-panel__title {
+  font-size: .72rem; font-weight: 900;
+  text-transform: uppercase; letter-spacing: .1em;
+  color: var(--nc-text-muted);
+  display: flex; align-items: center; gap: .42rem;
+}
+.fs-panel__title i { color: var(--nc-brand); font-size: .68rem; }
+
+.fs-btn-reset {
+  background: none; border: none; cursor: pointer;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: .71rem; font-weight: 800;
+  color: var(--nc-text-faint);
+  padding: 0; display: flex; align-items: center; gap: .28rem;
+  transition: color .14s;
+}
+.fs-btn-reset:hover { color: #ef4444; }
+
+.fs-fsec {
+  padding: .8rem 1.15rem;
+  border-bottom: 1px solid var(--nc-border);
+}
+.fs-fsec:last-child { border-bottom: none; }
+
+.fs-flbl {
+  font-size: .62rem; font-weight: 900;
+  text-transform: uppercase; letter-spacing: .09em;
+  color: var(--nc-text-faint);
+  display: flex; align-items: center; gap: .3rem;
+  margin-bottom: .6rem;
+}
+.fs-flbl i { font-size: .58rem; }
+
+.fs-pills { display: flex; flex-wrap: wrap; gap: .34rem; }
+.fs-pill {
+  background: var(--nc-surface-2);
+  border: 1.5px solid var(--nc-border);
+  border-radius: 99px; padding: .23rem .68rem;
+  font-size: .71rem; font-weight: 700;
+  color: var(--nc-text-muted);
+  cursor: pointer; user-select: none;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  transition: all .13s;
+}
+.fs-pill:hover { border-color: var(--nc-brand); color: var(--nc-brand); background: var(--nc-brand-l); }
+.fs-pill.on { background: var(--nc-brand-l); border-color: var(--nc-brand); color: var(--nc-brand-d); font-weight: 800; }
+[data-theme="dark"] .fs-pill.on { color: #38bdf8; }
+
+.fs-rrow { display: flex; align-items: center; gap: .55rem; }
+.fs-range {
+  flex: 1; -webkit-appearance: none; appearance: none;
+  height: 4px; border-radius: 99px;
+  background: var(--nc-border); outline: none; cursor: pointer;
+}
+.fs-range::-webkit-slider-thumb {
+  -webkit-appearance: none; width: 16px; height: 16px;
+  border-radius: 50%; background: var(--nc-brand);
+  border: 2.5px solid var(--nc-card-bg);
+  box-shadow: 0 0 0 3px rgba(14,165,233,.22);
+  cursor: pointer; transition: box-shadow .14s, transform .14s;
+}
+.fs-range::-webkit-slider-thumb:hover { box-shadow: 0 0 0 5px rgba(14,165,233,.3); transform: scale(1.12); }
+.fs-rval {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: .69rem; font-weight: 700; color: var(--nc-brand);
+  min-width: 72px; text-align: right; white-space: nowrap;
+}
+
+.fs-chips {
+  display: flex; flex-wrap: wrap; gap: .34rem;
+  padding: .68rem 1.15rem;
+  border-top: 1px solid var(--nc-border);
+}
+.fs-chips:empty { display: none; }
+.fs-chip {
+  display: inline-flex; align-items: center; gap: .3rem;
+  background: var(--nc-brand-l); color: var(--nc-brand-d);
+  border: 1.5px solid rgba(14,165,233,.2);
+  border-radius: 99px; padding: .18rem .65rem;
+  font-size: .68rem; font-weight: 700; cursor: pointer;
+  transition: background .12s;
+}
+.fs-chip:hover { background: #bae6fd; }
+[data-theme="dark"] .fs-chip { background: rgba(14,165,233,.1); color: #38bdf8; border-color: rgba(14,165,233,.22); }
+[data-theme="dark"] .fs-chip:hover { background: rgba(14,165,233,.2); }
+.fs-chip i { font-size: .5rem; opacity: .6; }
+
+.fs-results { display: flex; flex-direction: column; gap: 1.1rem; }
+
+.fs-meta {
+  display: flex; align-items: center; justify-content: space-between;
+  flex-wrap: wrap; gap: .7rem;
+  animation: up .4s cubic-bezier(.16,1,.3,1) .22s both;
+}
+.fs-cblock { display: flex; align-items: center; gap: .55rem; }
+.fs-cdot {
+  width: 8px; height: 8px; border-radius: 50%;
+  background: var(--nc-brand); flex-shrink: 0;
+  animation: livepulse 2s ease-in-out infinite;
+}
+.fs-cnum {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 1.45rem; font-weight: 700;
+  color: var(--nc-text); letter-spacing: -.04em; line-height: 1;
+}
+.fs-clbl { font-size: .77rem; color: var(--nc-text-muted); font-weight: 600; }
+
+.fs-srow  { display: flex; align-items: center; gap: .5rem; }
+.fs-slbl  { font-size: .7rem; font-weight: 800; color: var(--nc-text-faint); }
+.fs-ssel {
+  background: var(--nc-card-bg);
+  border: 1.5px solid var(--nc-border);
+  border-radius: 9px; padding: .42rem .8rem;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: .78rem; font-weight: 700; color: var(--nc-text-2);
+  outline: none; cursor: pointer;
+  appearance: none; -webkit-appearance: none;
+  padding-right: 1.65rem;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M4 6l4 4 4-4' stroke='%236b7280' stroke-width='1.5' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat; background-position: right .5rem center; background-size: 12px;
+  transition: border-color .14s;
+}
+.fs-ssel:focus { border-color: var(--nc-brand); }
+
+#foodGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(248px, 1fr));
+  gap: 1rem;
+}
+
+.food-card {
+  background: var(--nc-card-bg);
+  border: 1px solid var(--nc-card-border);
+  border-radius: 18px; overflow: hidden;
+  display: flex; flex-direction: column;
+  box-shadow: var(--nc-card-shadow);
+  transition: transform .2s cubic-bezier(.16,1,.3,1), box-shadow .2s cubic-bezier(.16,1,.3,1), border-color .2s;
+  animation: up .4s cubic-bezier(.16,1,.3,1) both;
+}
+.food-card:nth-child(1){animation-delay:.04s}
+.food-card:nth-child(2){animation-delay:.08s}
+.food-card:nth-child(3){animation-delay:.12s}
+.food-card:nth-child(4){animation-delay:.16s}
+.food-card:nth-child(5){animation-delay:.20s}
+.food-card:nth-child(6){animation-delay:.24s}
+.food-card:nth-child(7){animation-delay:.28s}
+.food-card:nth-child(8){animation-delay:.32s}
+.food-card:nth-child(9){animation-delay:.36s}
+
+.food-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 18px 48px rgba(0,0,0,.13), 0 0 0 1px rgba(14,165,233,.2);
+  border-color: rgba(14,165,233,.25);
+}
+[data-theme="dark"] .food-card:hover { box-shadow: 0 18px 48px rgba(0,0,0,.5), 0 0 0 1px rgba(14,165,233,.2); }
+
+.fc-img {
+  position: relative; height: 175px;
+  background: var(--nc-surface-2); overflow: hidden; flex-shrink: 0;
+}
+.fc-img img { width: 100%; height: 100%; object-fit: cover; transition: transform .45s cubic-bezier(.16,1,.3,1); }
+.food-card:hover .fc-img img { transform: scale(1.07); }
+
+.fc-img-placeholder {
+  width: 100%; height: 100%;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center; gap: .45rem;
+  background: linear-gradient(135deg, var(--nc-surface-2) 0%, var(--nc-surface-3) 100%);
+}
+.fc-img-placeholder i    { font-size: 2.2rem; color: var(--nc-text-faint); }
+.fc-img-placeholder span { font-size: .58rem; font-weight: 800; text-transform: uppercase; letter-spacing: .08em; color: var(--nc-text-faint); }
+
+.fc-price {
+  position: absolute; bottom: 9px; left: 9px;
+  background: rgba(0,0,0,.65); backdrop-filter: blur(10px);
+  border: 1px solid rgba(255,255,255,.15);
+  color: #fff; font-family: 'JetBrains Mono', monospace;
+  font-size: .82rem; font-weight: 700;
+  border-radius: 99px; padding: .2rem .7rem;
+  transition: background .2s, border-color .2s;
+}
+.food-card:hover .fc-price { background: var(--nc-brand); border-color: transparent; }
+
+.fc-avail { position: absolute; top: 9px; right: 9px; font-size: .6rem; font-weight: 800; text-transform: uppercase; letter-spacing: .05em; padding: .2rem .6rem; border-radius: 99px; }
+.fc-avail.on  { background: rgba(34,197,94,.85); color: #fff; }
+.fc-avail.off { background: rgba(239,68,68,.82); color: #fff; }
+
+.fc-cat {
+  position: absolute; top: 9px; left: 9px;
+  background: rgba(0,0,0,.58); backdrop-filter: blur(8px);
+  border: 1px solid rgba(255,255,255,.1);
+  color: rgba(255,255,255,.88); font-size: .58rem; font-weight: 800;
+  text-transform: uppercase; letter-spacing: .06em;
+  border-radius: 8px; padding: .18rem .55rem;
+}
+
+.fc-body { padding: 1rem 1.05rem .88rem; flex: 1; display: flex; flex-direction: column; gap: .46rem; }
+.fc-name { font-size: .95rem; font-weight: 900; color: var(--nc-text); letter-spacing: -.025em; line-height: 1.22; }
+.fc-desc { font-size: .76rem; color: var(--nc-text-muted); line-height: 1.55; font-weight: 500; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+
+.fc-diet {
+  display: inline-flex; align-items: center; gap: .26rem; width: fit-content;
+  background: #d1fae5; color: #065f46; border: 1.5px solid #a7f3d0;
+  border-radius: 99px; padding: .15rem .65rem; font-size: .65rem; font-weight: 800;
+}
+[data-theme="dark"] .fc-diet { background: rgba(16,185,129,.1); color: #34d399; border-color: rgba(16,185,129,.25); }
+
+.fc-nutr { display: flex; flex-wrap: wrap; gap: .3rem; margin-top: auto; padding-top: .42rem; border-top: 1px solid var(--nc-border); }
+.nb { display: inline-flex; flex-direction: column; align-items: center; background: var(--nc-surface-2); border: 1px solid var(--nc-border); border-radius: 9px; padding: .28rem .5rem; min-width: 46px; transition: border-color .14s, transform .14s; }
+.food-card:hover .nb { border-color: var(--nc-border-2); transform: translateY(-1px); }
+.nb b { font-family: 'JetBrains Mono', monospace; font-size: .72rem; font-weight: 700; line-height: 1; }
+.nb span { font-size: .53rem; font-weight: 800; text-transform: uppercase; letter-spacing: .06em; color: var(--nc-text-faint); margin-top: .1rem; }
+.nb.kcal b { color: #f97316; }
+.nb.prot b { color: #06b6d4; }
+.nb.carb b { color: #a78bfa; }
+.nb.fat  b { color: #ec4899; }
+
+.fc-prov { display: flex; align-items: center; gap: .45rem; padding-top: .44rem; border-top: 1px solid var(--nc-border); font-size: .71rem; color: var(--nc-text-faint); font-weight: 700; }
+.fc-pav { width: 22px; height: 22px; border-radius: 50%; flex-shrink: 0; background: linear-gradient(135deg, var(--nc-brand) 0%, #38bdf8 100%); display: flex; align-items: center; justify-content: center; font-size: .58rem; font-weight: 900; color: #fff; }
+
+.fs-empty { grid-column: 1 / -1; display: flex; flex-direction: column; align-items: center; text-align: center; padding: 4rem 2rem; gap: .85rem; }
+.fs-empty__icon { width: 72px; height: 72px; border-radius: 20px; background: var(--nc-brand-l); color: var(--nc-brand); display: flex; align-items: center; justify-content: center; font-size: 1.7rem; box-shadow: 0 0 0 10px var(--nc-brand-l); }
+[data-theme="dark"] .fs-empty__icon { background: rgba(14,165,233,.1); box-shadow: 0 0 0 10px rgba(14,165,233,.06); }
+.fs-empty h4 { font-size: 1rem; font-weight: 900; color: var(--nc-text); margin: 0; letter-spacing: -.025em; }
+.fs-empty p  { font-size: .83rem; color: var(--nc-text-muted); margin: 0; max-width: 240px; line-height: 1.65; font-weight: 500; }
+
+.fs-skel-g { display: grid; grid-template-columns: repeat(auto-fill, minmax(248px, 1fr)); gap: 1rem; }
+.fs-sk { background: var(--nc-card-bg); border: 1px solid var(--nc-card-border); border-radius: 18px; overflow: hidden; animation: skel 1.5s ease-in-out infinite; }
+.sk-img  { height: 175px; background: var(--nc-surface-2); }
+.sk-body { padding: 1rem 1.05rem; display: flex; flex-direction: column; gap: .6rem; }
+.sk-ln   { background: var(--nc-surface-2); border-radius: 6px; height: 11px; }
+.sk-ln.w3 { width: 72%; } .sk-ln.w2 { width: 52%; }
+.sk-ft   { display: flex; gap: .32rem; padding-top: .42rem; border-top: 1px solid var(--nc-border); }
+.sk-nb   { height: 38px; width: 48px; border-radius: 9px; background: var(--nc-surface-2); }
+
+.fs-pages { display: flex; justify-content: center; align-items: center; gap: .4rem; flex-wrap: wrap; padding-top: .25rem; }
+.pg-btn { display: inline-flex; align-items: center; gap: .3rem; background: var(--nc-card-bg); color: var(--nc-text-muted); border: 1.5px solid var(--nc-border); border-radius: 10px; padding: .5rem .9rem; font-size: .79rem; font-weight: 700; font-family: 'Plus Jakarta Sans', sans-serif; text-decoration: none; transition: all .14s; }
+.pg-btn:hover { border-color: var(--nc-brand); color: var(--nc-brand); background: var(--nc-brand-l); }
+.pg-btn.active { background: var(--nc-brand); color: #fff; border-color: var(--nc-brand); }
+.pg-btn.ellipsis { opacity: .35; pointer-events: none; }
+[data-theme="dark"] .pg-btn:hover { background: rgba(14,165,233,.1); }
+
+.fs-bottom-sections{
+  margin-top: 1.4rem;
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:1rem;
+}
+@media (max-width: 900px) {
+  .fs-bottom-sections{ grid-template-columns:1fr; }
+}
+
+.fs-qcard{
+  background: var(--nc-card-bg);
+  border: 1px solid var(--nc-card-border);
+  border-radius: 18px;
+  overflow: hidden;
+  box-shadow: var(--nc-card-shadow);
+}
+.fs-qhead{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:1rem;
+  padding: .95rem 1.1rem;
+  background: var(--nc-surface-2);
+  border-bottom: 1px solid var(--nc-border);
+}
+.fs-qhead-left{
+  display:flex;
+  align-items:center;
+  gap:.6rem;
+}
+.fs-qico{
+  width:34px;
+  height:34px;
+  border-radius:10px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:.8rem;
+}
+.fs-qico.heart{ background: rgba(225,29,72,.12); color:#e11d48; }
+.fs-qico.eye{ background: rgba(245,158,11,.12); color:#d97706; }
+[data-theme="dark"] .fs-qico.heart{ background: rgba(225,29,72,.14); color:#fb7185; }
+[data-theme="dark"] .fs-qico.eye{ background: rgba(245,158,11,.14); color:#fcd34d; }
+
+.fs-qtitle{
+  font-size:.84rem;
+  font-weight:900;
+  color:var(--nc-text);
+  letter-spacing:-.02em;
+}
+.fs-qsub{
+  font-size:.7rem;
+  color:var(--nc-text-muted);
+  margin-top:.05rem;
+}
+.fs-qbtn{
+  display:inline-flex;
+  align-items:center;
+  gap:.35rem;
+  padding:.42rem .75rem;
+  border-radius:10px;
+  border:1px solid var(--nc-border);
+  background:var(--nc-card-bg);
+  color:var(--nc-text-2);
+  text-decoration:none;
+  font-size:.72rem;
+  font-weight:800;
+  transition:all .14s ease;
+}
+.fs-qbtn:hover{
+  background:var(--nc-brand-l);
+  border-color:rgba(14,165,233,.2);
+  color:var(--nc-brand-d);
+}
+
+.fs-qbody{
+  padding: .95rem 1.1rem 1rem;
+}
+.fs-qlist{
+  display:flex;
+  flex-direction:column;
+  gap:.7rem;
+}
+.fs-qitem{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:.8rem;
+  padding:.75rem .82rem;
+  background:var(--nc-surface-2);
+  border:1px solid var(--nc-border);
+  border-radius:14px;
+  transition:all .14s ease;
+}
+.fs-qitem:hover{
+  background:var(--nc-surface-3);
+  border-color:var(--nc-border-2);
+}
+.fs-qitem-left{
+  display:flex;
+  align-items:center;
+  gap:.72rem;
+  min-width:0;
+  flex:1;
+}
+.fs-qthumb{
+  width:48px;
+  height:48px;
+  border-radius:12px;
+  overflow:hidden;
+  background:var(--nc-surface-3);
+  border:1px solid var(--nc-border);
+  flex-shrink:0;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  color:var(--nc-text-faint);
+}
+.fs-qthumb img{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+}
+.fs-qmeta{
+  min-width:0;
+}
+.fs-qname{
+  font-size:.8rem;
+  font-weight:800;
+  color:var(--nc-text);
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+.fs-qdesc{
+  font-size:.7rem;
+  color:var(--nc-text-muted);
+  margin-top:.15rem;
+}
+.fs-qgo{
+  width:34px;
+  height:34px;
+  border-radius:10px;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  text-decoration:none;
+  border:1px solid var(--nc-border);
+  background:var(--nc-card-bg);
+  color:var(--nc-text-2);
+  transition:all .14s ease;
+}
+.fs-qgo:hover{
+  background:var(--nc-brand-l);
+  color:var(--nc-brand-d);
+  border-color:rgba(14,165,233,.2);
+}
+.fs-qempty{
+  text-align:center;
+  padding:1.3rem .8rem 1rem;
+}
+.fs-qempty i{
+  font-size:1.2rem;
+  color:var(--nc-text-faint);
+  margin-bottom:.55rem;
+}
+.fs-qempty h4{
+  font-size:.85rem;
+  font-weight:900;
+  color:var(--nc-text);
+  margin:0 0 .25rem;
+}
+.fs-qempty p{
+  font-size:.74rem;
+  color:var(--nc-text-muted);
+  margin:0;
+  line-height:1.55;
+}
+
+@media (max-width: 768px) {
+  .fs-hero { padding: 1rem 1.25rem 1.2rem; border-radius: 14px; }
+  .fs-hero__inner { flex-direction: column; gap: .85rem; }
+  .fs-hero__right { min-width: 0; width: 100%; }
+  .fs-hstat { padding-right: 1rem; margin-right: 1rem; }
+  #foodGrid { grid-template-columns: 1fr 1fr; }
+  .fs-srow  { display: none; }
+}
+@media (max-width: 520px) {
+  #foodGrid { grid-template-columns: 1fr; }
+  .fs-hero__h1 { font-size: 1.2rem; }
+}
+
+/* Quick view modal */
+.fqv-backdrop{
+  position:fixed;
+  inset:0;
+  z-index:9000;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:1.5rem;
+  background:rgba(3,8,18,.72);
+  backdrop-filter:blur(14px);
+  -webkit-backdrop-filter:blur(14px);
+  opacity:0;
+  pointer-events:none;
+  transition:opacity .22s ease;
+}
+
+.fqv-backdrop.open{
+  opacity:1;
+  pointer-events:auto;
+}
+
+.fqv-modal{
+  width:100%;
+  max-width:520px;
+  border-radius:22px;
+  overflow:hidden;
+  background:linear-gradient(180deg, rgba(18,25,39,.98), rgba(16,22,34,.98));
+  border:1px solid rgba(80,110,160,.25);
+  box-shadow:0 32px 90px rgba(0,0,0,.45);
+  transform:translateY(16px) scale(.97);
+  transition:transform .22s ease;
+}
+
+.fqv-backdrop.open .fqv-modal{
+  transform:translateY(0) scale(1);
+}
+
+.fqv-image{
+  position:relative;
+  height:260px;
+  background:var(--nc-surface-3);
+  overflow:hidden;
+}
+
+.fqv-image img{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  display:block;
+}
+
+.fqv-image-placeholder{
+  width:100%;
+  height:100%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  color:var(--nc-text-faint);
+  font-size:2rem;
+}
+
+.fqv-close{
+  position:absolute;
+  top:14px;
+  right:14px;
+  width:36px;
+  height:36px;
+  border-radius:10px;
+  border:1px solid rgba(255,255,255,.12);
+  background:rgba(20,27,40,.78);
+  color:#cbd5e1;
+  cursor:pointer;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+
+.fqv-body{
+  padding:1.15rem 1.2rem 1.2rem;
+}
+
+.fqv-title{
+  font-size:1.55rem;
+  font-weight:900;
+  color:#f8fafc;
+  letter-spacing:-.03em;
+  margin:0 0 .85rem;
+}
+
+.fqv-meta{
+  display:flex;
+  align-items:center;
+  gap:.55rem;
+  flex-wrap:wrap;
+  margin-bottom:.9rem;
+}
+
+.fqv-pill{
+  display:inline-flex;
+  align-items:center;
+  gap:.35rem;
+  border-radius:999px;
+  padding:.3rem .78rem;
+  font-size:.78rem;
+  font-weight:800;
+}
+
+.fqv-pill.diet{
+  background:rgba(16,185,129,.12);
+  color:#34d399;
+  border:1px solid rgba(16,185,129,.18);
+}
+
+.fqv-pill.price{
+  background:rgba(14,165,233,.14);
+  color:#38bdf8;
+  border:1px solid rgba(14,165,233,.22);
+  font-family:'JetBrains Mono', monospace;
+}
+
+.fqv-rating{
+  display:flex;
+  align-items:center;
+  gap:.55rem;
+  flex-wrap:wrap;
+  margin-bottom:1rem;
+  padding-bottom:1rem;
+  border-bottom:1px solid rgba(148,163,184,.16);
+}
+
+.fqv-stars{
+  display:flex;
+  align-items:center;
+  gap:.08rem;
+  color:#fbbf24;
+  font-size:.9rem;
+}
+
+.fqv-rating-value{
+  font-family:'JetBrains Mono', monospace;
+  font-size:.86rem;
+  font-weight:800;
+  color:#f8fafc;
+}
+
+.fqv-rating-count{
+  font-size:.78rem;
+  font-weight:700;
+  color:#94a3b8;
+}
+
+.fqv-desc{
+  color:#94a3b8;
+  font-size:.95rem;
+  line-height:1.7;
+  margin:0 0 1rem;
+}
+
+.fqv-footer{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:.75rem;
+  padding-top:1rem;
+  border-top:1px solid rgba(148,163,184,.16);
+}
+
+.fqv-provider{
+  display:flex;
+  align-items:center;
+  gap:.65rem;
+  min-width:0;
+}
+
+.fqv-provider-avatar{
+  width:34px;
+  height:34px;
+  border-radius:999px;
+  background:#38bdf8;
+  color:#fff;
+  font-weight:800;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  flex-shrink:0;
+}
+
+.fqv-provider-name{
+  color:#94a3b8;
+  font-size:.84rem;
+  font-weight:700;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+
+.fqv-review-btn{
+  display:inline-flex;
+  align-items:center;
+  gap:.42rem;
+  background:linear-gradient(135deg, var(--nc-brand-d), var(--nc-brand));
+  color:#fff;
+  border:none;
+  text-decoration:none;
+  border-radius:12px;
+  padding:.7rem 1rem;
+  font-size:.82rem;
+  font-weight:800;
+  white-space:nowrap;
+}
+
+.fqv-review-btn:hover{
+  color:#fff;
+  filter:brightness(1.05);
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="fs">
+
+<div class="fs-hero">
+  <div class="fs-orb fs-orb--a"></div>
+  <div class="fs-orb fs-orb--b"></div>
+  <div class="fs-orb fs-orb--c"></div>
+
+  <div class="fs-hero__inner">
+    <div class="fs-hero__left">
+      <div class="fs-hero__badge">
+        <span class="fs-hero__badge-dot"></span>
+        NutriConnect &nbsp;·&nbsp; {% if current_user.is_food_provider() %}Provider Browse{% else %}Food Discovery{% endif %}
+      </div>
+      <h1 class="fs-hero__h1">
+        {% if current_user.is_food_provider() %}
+        Browse <span class="grad">your foods and other providers’ foods</span>
+        {% else %}
+        Find your next <span class="grad">perfect meal</span>
+        {% endif %}
+      </h1>
+      <p class="fs-hero__sub">
+        {% if current_user.is_food_provider() %}
+        Explore the full food catalog across NutriConnect, including your own items, with ratings and nutrition details.
+        {% else %}
+        Search dishes from all NutriConnect providers.
+        {% endif %}
+      </p>
+    </div>
+
+    <div class="fs-hero__right">
+      <div class="fs-hero__searchbar">
+        <i class="fas fa-magnifying-glass fs-hero__searchbar-ico"></i>
+        <input
+          type="text" id="searchInput"
+          value="{{ q }}"
+          placeholder="Search by food name or description…"
+          autocomplete="off" spellcheck="false"
+        >
+        <div class="fs-search-tag">
+          <span class="fs-kbd">⌘</span><span class="fs-kbd">K</span>
+        </div>
+      </div>
+
+      <div class="fs-hero__stats">
+        <div class="fs-hstat">
+          <div class="fs-hstat__val" id="heroCount">{{ foods.total if foods else 0 }}</div>
+          <div class="fs-hstat__lbl">Food Items</div>
+        </div>
+        <div class="fs-hstat">
+          <div class="fs-hstat__val">{{ total_providers or '—' }}</div>
+          <div class="fs-hstat__lbl">Providers</div>
+        </div>
+        <div class="fs-hstat">
+          <div class="fs-hstat__val">{{ favorite_count or 0 }}</div>
+          <div class="fs-hstat__lbl">{% if current_user.is_food_provider() %}Ratings Ready{% else %}Saved Foods{% endif %}</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="fs-body">
+
+  <aside class="fs-sidebar">
+    <form id="filterForm">
+      <input type="hidden" id="hiddenQ" name="q" value="{{ q }}">
+
+      <div class="fs-panel">
+        <div class="fs-panel__hd">
+          <div class="fs-panel__title"><i class="fas fa-sliders"></i> Filters</div>
+          <button type="button" class="fs-btn-reset" id="clearBtn">
+            <i class="fas fa-rotate-left"></i> Reset
+          </button>
+        </div>
+
+        <div class="fs-fsec">
+          <div class="fs-flbl"><i class="fas fa-leaf"></i> Diet Type</div>
+          <div class="fs-pills">
+            {% for dt in ['vegan','vegetarian','keto','paleo','gluten-free','dairy-free','halal','low-carb','high-protein'] %}
+              <span class="fs-pill {{ 'on' if diet_type == dt else '' }}"
+                    data-val="{{ dt }}" onclick="toggleDiet(this)">
+                {{ dt.replace('-',' ').title() }}
+              </span>
+            {% endfor %}
+          </div>
+          <input type="hidden" id="dietInput" name="diet_type" value="{{ diet_type or '' }}">
+        </div>
+
+        <div class="fs-fsec">
+          <div class="fs-flbl"><i class="fas fa-fire-flame-curved"></i> Max Calories</div>
+          <div class="fs-rrow">
+            <input type="range" class="fs-range" id="calRange"
+                   min="0" max="2000" step="50"
+                   value="{{ max_cal or 2000 }}" oninput="onRange('cal')">
+            <span class="fs-rval" id="calVal">{% if max_cal %}{{ max_cal }} kcal{% else %}Any{% endif %}</span>
+          </div>
+          <input type="hidden" id="calInput" name="max_cal" value="{{ max_cal or '' }}">
+        </div>
+
+        <div class="fs-fsec">
+          <div class="fs-flbl"><i class="fas fa-drumstick-bite"></i> Min Protein</div>
+          <div class="fs-rrow">
+            <input type="range" class="fs-range" id="protRange"
+                   min="0" max="100" step="5"
+                   value="{{ min_pro or 0 }}" oninput="onRange('prot')">
+            <span class="fs-rval" id="protVal">{% if min_pro and min_pro|int > 0 %}{{ min_pro }}g{% else %}Any{% endif %}</span>
+          </div>
+          <input type="hidden" id="protInput" name="min_protein" value="{{ min_pro or '' }}">
+        </div>
+
+        <div class="fs-fsec">
+          <div class="fs-flbl"><i class="fas fa-tag"></i> Max Price</div>
+          <div class="fs-rrow">
+            <input type="range" class="fs-range" id="priceRange"
+                   min="0" max="1000" step="10"
+                   value="{{ max_price or 1000 }}" oninput="onRange('price')">
+            <span class="fs-rval" id="priceVal">{% if max_price %}${{ max_price }}{% else %}Any{% endif %}</span>
+          </div>
+          <input type="hidden" id="priceInput" name="max_price" value="{{ max_price or '' }}">
+        </div>
+
+        <div class="fs-chips" id="activeChips"></div>
+      </div>
+    </form>
+  </aside>
+
+  <section class="fs-results">
+    <div class="fs-meta">
+      <div class="fs-cblock">
+        <div class="fs-cdot"></div>
+        <div>
+          <div class="fs-cnum" id="resultCount">{{ foods.total if foods else 0 }}</div>
+          <div class="fs-clbl">items found</div>
+        </div>
+      </div>
+      <div class="fs-srow">
+        <span class="fs-slbl">Sort</span>
+        <select class="fs-ssel" id="sortSelect" onchange="go()">
+          <option value="name"     {{ 'selected' if sort_by == 'name' }}>Name A → Z</option>
+          <option value="cal_asc"  {{ 'selected' if sort_by == 'cal_asc' }}>Calories ↑</option>
+          <option value="cal_desc" {{ 'selected' if sort_by == 'cal_desc' }}>Calories ↓</option>
+          <option value="price"    {{ 'selected' if sort_by == 'price' }}>Price ↑</option>
+          <option value="protein"  {{ 'selected' if sort_by == 'protein' }}>Protein ↓</option>
+        </select>
+      </div>
+    </div>
+
+    <div id="gridWrap">
+      <div id="foodGrid">
+        {% include 'partials/food_cards.html' with context %}
+      </div>
+    </div>
+
+    {% if foods and foods.pages > 1 %}
+    <div class="fs-pages" id="paginationWrap">
+      {% if foods.has_prev %}
+        <a class="pg-btn" href="?{{ request.query_string.decode() }}&page={{ foods.prev_num }}">
+          <i class="fas fa-chevron-left"></i> Prev
+        </a>
+      {% endif %}
+      {% for p in foods.iter_pages(left_edge=1, right_edge=1, left_current=2, right_current=2) %}
+        {% if p %}
+          <a class="pg-btn {{ 'active' if p == foods.page else '' }}"
+             href="?{{ request.query_string.decode() }}&page={{ p }}">{{ p }}</a>
+        {% else %}
+          <span class="pg-btn ellipsis">…</span>
+        {% endif %}
+      {% endfor %}
+      {% if foods.has_next %}
+        <a class="pg-btn" href="?{{ request.query_string.decode() }}&page={{ foods.next_num }}">
+          Next <i class="fas fa-chevron-right"></i>
+        </a>
+      {% endif %}
+    </div>
+    {% endif %}
+  </section>
+</div>
+
+{% if not current_user.is_food_provider() %}
+<div class="fs-bottom-sections">
+
+  <div class="fs-qcard">
+    <div class="fs-qhead">
+      <div class="fs-qhead-left">
+        <div class="fs-qico heart"><i class="fas fa-heart"></i></div>
+        <div>
+          <div class="fs-qtitle">Favourite Foods</div>
+          <div class="fs-qsub">{{ favorite_count or 0 }} saved item{{ '' if (favorite_count or 0) == 1 else 's' }}</div>
+        </div>
+      </div>
+      <a href="{{ url_for('orders.favorites') }}" class="fs-qbtn">
+        <i class="fas fa-heart"></i> View All
+      </a>
+    </div>
+
+    <div class="fs-qbody">
+      {% if favorite_items %}
+      <div class="fs-qlist">
+        {% for fav in favorite_items %}
+          {% if fav.food %}
+          <div class="fs-qitem">
+            <div class="fs-qitem-left">
+              <div class="fs-qthumb">
+                {% if fav.food.image %}
+                  <img src="{{ url_for('static', filename='uploads/' ~ fav.food.image) }}" alt="{{ fav.food.name }}">
+                {% else %}
+                  <i class="fas fa-utensils"></i>
+                {% endif %}
+              </div>
+              <div class="fs-qmeta">
+                <div class="fs-qname">{{ fav.food.name }}</div>
+                <div class="fs-qdesc">
+                  {% if fav.food.price is not none %}${{ "%.2f"|format(fav.food.price) }}{% else %}Price unavailable{% endif %}
+                </div>
+              </div>
+            </div>
+            <a href="{{ url_for('food_search.food_detail', food_id=fav.food.id) }}" class="fs-qgo">
+              <i class="fas fa-arrow-right"></i>
+            </a>
+          </div>
+          {% endif %}
+        {% endfor %}
+      </div>
+      {% else %}
+      <div class="fs-qempty">
+        <i class="fas fa-heart-crack"></i>
+        <h4>No favourites yet</h4>
+        <p>Save foods you like and they will appear here for quick access.</p>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+
+  <div class="fs-qcard">
+    <div class="fs-qhead">
+      <div class="fs-qhead-left">
+        <div class="fs-qico eye"><i class="fas fa-eye"></i></div>
+        <div>
+          <div class="fs-qtitle">Recently Viewed</div>
+          <div class="fs-qsub">{{ recent_view_count or 0 }} recent visit{{ '' if (recent_view_count or 0) == 1 else 's' }}</div>
+        </div>
+      </div>
+      <a href="{{ url_for('food_search.search_foods') }}" class="fs-qbtn">
+        <i class="fas fa-compass"></i> Explore
+      </a>
+    </div>
+
+    <div class="fs-qbody">
+      {% if recent_views %}
+      <div class="fs-qlist">
+        {% for item in recent_views %}
+          {% if item.food %}
+          <div class="fs-qitem">
+            <div class="fs-qitem-left">
+              <div class="fs-qthumb">
+                {% if item.food.image %}
+                  <img src="{{ url_for('static', filename='uploads/' ~ item.food.image) }}" alt="{{ item.food.name }}">
+                {% else %}
+                  <i class="fas fa-utensils"></i>
+                {% endif %}
+              </div>
+              <div class="fs-qmeta">
+                <div class="fs-qname">{{ item.food.name }}</div>
+                <div class="fs-qdesc">
+                  Viewed {{ item.viewed_at.strftime('%d %b %Y, %I:%M %p') if item.viewed_at else 'Recently' }}
+                </div>
+              </div>
+            </div>
+            <a href="{{ url_for('food_search.food_detail', food_id=item.food.id) }}" class="fs-qgo">
+              <i class="fas fa-arrow-right"></i>
+            </a>
+          </div>
+          {% endif %}
+        {% endfor %}
+      </div>
+      {% else %}
+      <div class="fs-qempty">
+        <i class="fas fa-clock-rotate-left"></i>
+        <h4>No recent views yet</h4>
+        <p>Foods you open from the catalog will show up here automatically.</p>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+
+</div>
+{% endif %}
+
+<div class="fqv-backdrop" id="foodQuickView" aria-hidden="true">
+  <div class="fqv-modal" role="dialog" aria-modal="true" aria-labelledby="fqvTitle">
+    <div class="fqv-image" id="fqvImageWrap">
+      <button type="button" class="fqv-close" id="fqvCloseBtn" aria-label="Close">
+        <i class="fas fa-xmark"></i>
+      </button>
+      <div class="fqv-image-placeholder" id="fqvImagePlaceholder">
+        <i class="fas fa-utensils"></i>
+      </div>
+      <img id="fqvImage" alt="" style="display:none;">
+    </div>
+
+    <div class="fqv-body">
+      <h3 class="fqv-title" id="fqvTitle">Food Item</h3>
+
+      <div class="fqv-meta">
+        <span class="fqv-pill diet" id="fqvDiet" style="display:none;"></span>
+        <span class="fqv-pill price" id="fqvPrice" style="display:none;"></span>
+      </div>
+
+      <div class="fqv-rating">
+        <div class="fqv-stars" id="fqvStars"></div>
+        <span class="fqv-rating-value" id="fqvRatingValue">0.0</span>
+        <span class="fqv-rating-count" id="fqvRatingCount">0 reviews</span>
+      </div>
+
+      <p class="fqv-desc" id="fqvDesc">No description available.</p>
+
+      <div class="fqv-footer">
+        <div class="fqv-provider">
+          <div class="fqv-provider-avatar" id="fqvProviderInitial">P</div>
+          <div class="fqv-provider-name" id="fqvProviderName">Unknown Provider</div>
+        </div>
+
+        <a href="#" class="fqv-review-btn" id="fqvReviewBtn">
+          <i class="fas fa-star"></i> Submit Review
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+(function () {
+  const $ = id => document.getElementById(id);
+  const form      = $('filterForm');
+  const gridWrap  = $('gridWrap');
+  const counter   = $('resultCount');
+  const heroCount = $('heroCount');
+  const chipsRow  = $('activeChips');
+  const sortSel   = $('sortSelect');
+  let timer = null;
+  let diet  = $('dietInput').value || '';
+
+  $('searchInput').addEventListener('input', () => {
+    $('hiddenQ').value = $('searchInput').value;
+    deb(fetch_);
+  });
+
+  function deb(fn, ms=380) { clearTimeout(timer); timer = setTimeout(fn, ms); }
+  window.go = () => deb(fetch_, 0);
+
+  window.toggleDiet = el => {
+    const v = el.dataset.val;
+    document.querySelectorAll('.fs-pill').forEach(p => p.classList.remove('on'));
+    diet = (diet === v) ? '' : v;
+    if (diet) el.classList.add('on');
+    $('dietInput').value = diet;
+    go();
+  };
+
+  const RC = {
+    cal:   { r:'calRange',   v:'calVal',   i:'calInput',   fmt:x=>x>=2000?'Any':`${x} kcal`, none:x=>x>=2000 },
+    prot:  { r:'protRange',  v:'protVal',  i:'protInput',  fmt:x=>x<=0?'Any':`${x}g`,        none:x=>x<=0   },
+    price: { r:'priceRange', v:'priceVal', i:'priceInput', fmt:x=>x>=1000?'Any':`$${x}`,     none:x=>x>=1000 },
+  };
+
+  window.onRange = type => {
+    const c = RC[type], raw = parseFloat($(c.r).value);
+    $(c.v).textContent = c.fmt(raw);
+    $(c.i).value = c.none(raw) ? '' : raw;
+    deb(fetch_);
+  };
+
+  function params() {
+    const fd = new FormData(form);
+    fd.set('sort', sortSel.value);
+    const p = new URLSearchParams();
+    for (const [k,v] of fd.entries()) {
+      if (v.trim()) p.append(k, v.trim());
+    }
+    return p;
+  }
+
+  const CL = {
+    diet_type:   v => `🥗 ${v.replace('-',' ').replace(/\b\w/g,c=>c.toUpperCase())}`,
+    max_cal:     v => `🔥 ≤ ${v} kcal`,
+    min_protein: v => `💪 ≥ ${v}g protein`,
+    max_price:   v => `🏷 ≤ $${v}`,
+  };
+
+  function renderChips() {
+    chipsRow.innerHTML = '';
+    for (const [k,v] of params().entries()) {
+      if (k === 'q' || k === 'sort') continue;
+      const el = document.createElement('span');
+      el.className = 'fs-chip';
+      el.innerHTML = `${CL[k] ? CL[k](v) : v} <i class="fas fa-xmark"></i>`;
+      el.onclick = () => clearOne(k);
+      chipsRow.appendChild(el);
+    }
+  }
+
+  function clearOne(key) {
+    const el = form.querySelector(`[name="${key}"]`);
+    if (el) el.value = '';
+    if (key === 'diet_type') {
+      diet = '';
+      document.querySelectorAll('.fs-pill').forEach(p => p.classList.remove('on'));
+    }
+    go();
+  }
+
+  function skeleton() {
+    gridWrap.innerHTML = `<div class="fs-skel-g">${Array.from({length:6}).map(()=>`
+      <div class="fs-sk">
+        <div class="sk-img"></div>
+        <div class="sk-body">
+          <div class="sk-ln w3"></div>
+          <div class="sk-ln w2"></div>
+          <div class="sk-ft"><div class="sk-nb"></div><div class="sk-nb"></div><div class="sk-nb"></div></div>
+        </div>
+      </div>`).join('')}</div>`;
+  }
+
+  function fetch_(push=true) {
+    const p = params();
+    skeleton();
+    renderChips();
+
+    fetch(`{{ url_for('food_search.search_foods') }}?${p}`, {
+      headers: { 'X-Requested-With': 'XMLHttpRequest' }
+    })
+    .then(r => r.json())
+    .then(d => {
+      gridWrap.innerHTML = `<div id="foodGrid">${d.html}</div>`;
+      counter.textContent = heroCount.textContent = d.total;
+
+      document.querySelectorAll('.food-card').forEach((c,i) => {
+        c.style.animationDelay = `${i*.05}s`;
+      });
+
+      if (push) history.pushState({}, '', `?${p}`);
+    })
+    .catch(() => {
+      gridWrap.innerHTML = `<div id="foodGrid"><div class="fs-empty">
+        <div class="fs-empty__icon"><i class="fas fa-triangle-exclamation"></i></div>
+        <h4>Something went wrong</h4><p>Please refresh and try again.</p>
+      </div></div>`;
+    });
+  }
+
+  $('clearBtn').addEventListener('click', () => {
+    form.reset();
+    diet = '';
+    document.querySelectorAll('.fs-pill').forEach(p => p.classList.remove('on'));
+    $('dietInput').value = '';
+    $('hiddenQ').value = '';
+    $('searchInput').value = '';
+    $('calVal').textContent = 'Any';
+    $('protVal').textContent = 'Any';
+    $('priceVal').textContent = 'Any';
+    go();
+  });
+
+  form.addEventListener('submit', e => e.preventDefault());
+
+  document.addEventListener('keydown', e => {
+    if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+      e.preventDefault();
+      $('searchInput').focus();
+      $('searchInput').select();
+    }
+  });
+
+  window.addEventListener('popstate', () => fetch_(false));
+  renderChips();
+
+  const quickView = document.getElementById('foodQuickView');
+  const closeBtn = document.getElementById('fqvCloseBtn');
+  const imageEl = document.getElementById('fqvImage');
+  const imagePlaceholder = document.getElementById('fqvImagePlaceholder');
+  const titleEl = document.getElementById('fqvTitle');
+  const dietEl = document.getElementById('fqvDiet');
+  const priceEl = document.getElementById('fqvPrice');
+  const starsEl = document.getElementById('fqvStars');
+  const ratingValueEl = document.getElementById('fqvRatingValue');
+  const ratingCountEl = document.getElementById('fqvRatingCount');
+  const descEl = document.getElementById('fqvDesc');
+  const providerInitialEl = document.getElementById('fqvProviderInitial');
+  const providerNameEl = document.getElementById('fqvProviderName');
+  const reviewBtnEl = document.getElementById('fqvReviewBtn');
+
+  function renderStars(rating) {
+    let html = '';
+    const value = Number(rating) || 0;
+
+    for (let i = 0; i < 5; i += 1) {
+      if (value >= i + 1) {
+        html += '<i class="fas fa-star"></i>';
+      } else if (value >= i + 0.5) {
+        html += '<i class="fas fa-star-half-stroke"></i>';
+      } else {
+        html += '<i class="far fa-star" style="color:var(--nc-text-faint);"></i>';
+      }
+    }
+
+    return html;
+  }
+
+  function closeQuickView() {
+    quickView.classList.remove('open');
+    quickView.setAttribute('aria-hidden', 'true');
+    document.body.style.overflow = '';
+  }
+
+  function openQuickView(card) {
+    if (!card) return;
+
+    const data = card.dataset;
+    const imagePath = data.img ? `/static/uploads/${data.img}` : '';
+    const rating = parseFloat(data.rating || '0') || 0;
+    const reviewCount = parseInt(data.reviewCount || '0', 10) || 0;
+    const foodId = data.id;
+
+    titleEl.textContent = data.name || 'Food Item';
+    descEl.textContent = data.desc || 'No description available.';
+    providerNameEl.textContent = data.provider || 'Unknown Provider';
+    providerInitialEl.textContent = (data.providerInitial || 'P').charAt(0).toUpperCase();
+    ratingValueEl.textContent = rating.toFixed(1);
+    ratingCountEl.textContent = `${reviewCount} review${reviewCount === 1 ? '' : 's'}`;
+    starsEl.innerHTML = renderStars(rating);
+    reviewBtnEl.href = data.detailUrl || '#';
+
+    if (data.diet) {
+      dietEl.style.display = 'inline-flex';
+      dietEl.innerHTML = `<i class="fas fa-leaf"></i> ${data.diet}`;
+    } else {
+      dietEl.style.display = 'none';
+      dietEl.innerHTML = '';
+    }
+
+    if (data.price) {
+      priceEl.style.display = 'inline-flex';
+      priceEl.textContent = `$${data.price}`;
+    } else {
+      priceEl.style.display = 'none';
+      priceEl.textContent = '';
+    }
+
+    if (imagePath) {
+      imageEl.src = imagePath;
+      imageEl.alt = data.name || 'Food image';
+      imageEl.style.display = 'block';
+      imagePlaceholder.style.display = 'none';
+    } else {
+      imageEl.removeAttribute('src');
+      imageEl.style.display = 'none';
+      imagePlaceholder.style.display = 'flex';
+    }
+
+    quickView.classList.add('open');
+    quickView.setAttribute('aria-hidden', 'false');
+    document.body.style.overflow = 'hidden';
+
+    if (foodId) {
+      const key = `viewed_${foodId}`;
+      if (!sessionStorage.getItem(key)) {
+        fetch(`/food/view/${foodId}`, { method: 'POST' }).catch(() => {});
+        sessionStorage.setItem(key, '1');
+      }
+    }
+  }
+
+  document.addEventListener('click', function (event) {
+    const reviewLink = event.target.closest('.js-review-link');
+    if (reviewLink) {
+      closeQuickView();
+      return;
+    }
+
+    const blockedAction = event.target.closest('.food-footer, form, button, .btn-view');
+    if (blockedAction) {
+      return;
+    }
+
+    const imageTrigger = event.target.closest('.food-card .fc-img');
+    if (!imageTrigger) {
+      return;
+    }
+
+    const card = imageTrigger.closest('.food-card');
+    openQuickView(card);
+  });
+
+  quickView.addEventListener('click', function (event) {
+    if (event.target === quickView) {
+      closeQuickView();
+    }
+  });
+
+  closeBtn.addEventListener('click', closeQuickView);
+
+  reviewBtnEl.addEventListener('click', function () {
+    closeQuickView();
+  });
+
+  document.addEventListener('keydown', function (event) {
+    if (event.key === 'Escape') {
+      closeQuickView();
+    }
+  });
+
+  window.addEventListener('pageshow', function () {
+    closeQuickView();
+  });
+})();
+</script>
+{% endblock %}

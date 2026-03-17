@@ -1,0 +1,514 @@
+{% extends "base.html" %}
+{% block title %}Order Insights · NutriConnect{% endblock %}
+
+{% block extra_css %}
+<link href="https://fonts.googleapis.com/css2?family=Cabinet+Grotesk:wght@400;500;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  body, button, input, select, textarea { font-family: 'Cabinet Grotesk', sans-serif !important; }
+
+  .pi{
+    --surf:var(--nc-surface);
+    --s2:var(--nc-surface-2);
+    --s3:var(--nc-surface-3);
+    --bdr:var(--nc-border);
+    --bdr2:var(--nc-border-2);
+    --txt:var(--nc-text);
+    --txt2:var(--nc-text-2);
+    --mu:var(--nc-text-muted);
+    --fa:var(--nc-text-faint);
+    --brand:var(--nc-brand);
+    --brand-d:var(--nc-brand-d);
+    --brand-l:var(--nc-brand-l);
+
+    --emerald:#34d399;
+    --emerald-l:rgba(52,211,153,.12);
+    --amber:#fbbf24;
+    --amber-l:rgba(251,191,36,.12);
+    --rose:#fb7185;
+    --rose-l:rgba(251,113,133,.12);
+    --violet:#a78bfa;
+    --violet-l:rgba(167,139,250,.12);
+
+    --r:14px;
+    --r-lg:18px;
+  }
+
+  @keyframes up{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+
+  .pi-wrap{animation:up .35s cubic-bezier(.16,1,.3,1) both;}
+
+  .pi-banner{
+    background:
+      radial-gradient(ellipse 60% 140% at -5% 50%, rgba(14,165,233,.38) 0%, transparent 52%),
+      radial-gradient(ellipse 35% 80% at 105% 10%, rgba(52,211,153,.16) 0%, transparent 50%),
+      linear-gradient(145deg, #061226 0%, #071a2f 36%, #0a2242 68%, #07111f 100%);
+    border-radius:var(--r-lg);
+    border:1px solid rgba(56,189,248,.15);
+    padding:2rem 2.2rem;
+    margin-bottom:1.2rem;
+    position:relative;
+    overflow:hidden;
+    isolation:isolate;
+    box-shadow:
+      0 0 0 1px rgba(56,189,248,.05) inset,
+      0 1px 0 rgba(255,255,255,.06) inset,
+      0 12px 48px rgba(0,0,0,.45),
+      0 4px 16px rgba(14,165,233,.08);
+  }
+
+  .pi-banner::before{
+    content:'';
+    position:absolute;
+    inset:0;
+    background-image:radial-gradient(circle, rgba(255,255,255,.04) 1px, transparent 1px);
+    background-size:24px 24px;
+    opacity:.55;
+    pointer-events:none;
+  }
+
+  .pi-banner-inner{
+    position:relative;
+    z-index:2;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:1rem;
+    flex-wrap:wrap;
+  }
+
+  .pi-eyebrow{
+    display:inline-flex;
+    align-items:center;
+    gap:.42rem;
+    background:rgba(56,189,248,.1);
+    border:1px solid rgba(56,189,248,.22);
+    border-radius:99px;
+    padding:.22rem .85rem;
+    font-size:.62rem;
+    font-weight:800;
+    letter-spacing:.1em;
+    text-transform:uppercase;
+    color:rgba(255,255,255,.72);
+    margin-bottom:.55rem;
+  }
+
+  .pi-eyebrow-dot{
+    width:6px;height:6px;border-radius:50%;
+    background:#38bdf8;
+    box-shadow:0 0 8px rgba(56,189,248,.7);
+  }
+
+  .pi-title{
+    font-size:1.85rem;
+    font-weight:900;
+    color:#fff;
+    letter-spacing:-.045em;
+    line-height:1.06;
+    margin:0 0 .22rem;
+  }
+
+  .pi-title .hl{
+    background:linear-gradient(135deg, #38bdf8 0%, #7dd3fc 40%, #34d399 100%);
+    -webkit-background-clip:text;
+    -webkit-text-fill-color:transparent;
+    background-clip:text;
+  }
+
+  .pi-sub{
+    color:rgba(255,255,255,.42);
+    font-size:.82rem;
+    margin:0;
+    max-width:620px;
+    line-height:1.65;
+  }
+
+  .pi-actions{
+    display:flex;
+    align-items:center;
+    gap:.7rem;
+    flex-wrap:wrap;
+  }
+
+  .pi-btn,
+  .pi-btn-ghost{
+    display:inline-flex;
+    align-items:center;
+    gap:.42rem;
+    border-radius:12px;
+    padding:.72rem 1.05rem;
+    font-size:.8rem;
+    font-weight:800;
+    text-decoration:none;
+    transition:all .14s ease;
+  }
+
+  .pi-btn{
+    background:linear-gradient(135deg, var(--brand-d), var(--brand));
+    color:#fff;
+    border:none;
+    box-shadow:0 6px 18px rgba(14,165,233,.22);
+  }
+  .pi-btn:hover{color:#fff;transform:translateY(-1px);filter:brightness(1.05);}
+
+  .pi-btn-ghost{
+    background:rgba(255,255,255,.06);
+    color:#e6edf3;
+    border:1px solid rgba(255,255,255,.1);
+  }
+  .pi-btn-ghost:hover{
+    color:#fff;
+    border-color:rgba(56,189,248,.35);
+    background:rgba(56,189,248,.12);
+  }
+
+  .pi-stats{
+    display:grid;
+    grid-template-columns:repeat(4, 1fr);
+    gap:1rem;
+    margin-bottom:1.2rem;
+  }
+
+  .pi-stat{
+    background:var(--surf);
+    border:1px solid var(--bdr);
+    border-radius:var(--r-lg);
+    box-shadow:var(--nc-card-shadow);
+    padding:1rem 1.05rem;
+  }
+
+  .pi-stat-top{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:.75rem;
+    margin-bottom:.65rem;
+  }
+
+  .pi-stat-label{
+    font-size:.68rem;
+    font-weight:800;
+    text-transform:uppercase;
+    letter-spacing:.1em;
+    color:var(--fa);
+  }
+
+  .pi-stat-value{
+    font-family:'JetBrains Mono', monospace;
+    font-size:1.35rem;
+    font-weight:800;
+    color:var(--txt);
+    line-height:1;
+  }
+
+  .pi-stat-ico{
+    width:40px;
+    height:40px;
+    border-radius:12px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:.92rem;
+  }
+
+  .ic-brand{background:var(--brand-l);color:var(--brand);}
+  .ic-amber{background:var(--amber-l);color:#d97706;}
+  .ic-emerald{background:var(--emerald-l);color:var(--emerald);}
+  .ic-rose{background:var(--rose-l);color:var(--rose);}
+
+  .pi-grid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:1rem;
+  }
+
+  .pi-panel{
+    background:var(--surf);
+    border:1px solid var(--bdr);
+    border-radius:var(--r-lg);
+    overflow:hidden;
+    box-shadow:var(--nc-card-shadow);
+  }
+
+  .pi-panel.full{grid-column:1 / -1;}
+
+  .pi-panel-head{
+    display:flex;
+    align-items:center;
+    gap:.7rem;
+    padding:1rem 1.2rem;
+    border-bottom:1px solid var(--bdr);
+    background:var(--s2);
+  }
+
+  .pi-icon{
+    width:34px;
+    height:34px;
+    border-radius:10px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:.8rem;
+    background:var(--brand-l);
+    color:var(--brand);
+  }
+
+  .pi-panel-title{
+    font-size:.92rem;
+    font-weight:900;
+    color:var(--txt);
+    letter-spacing:-.02em;
+  }
+
+  .pi-panel-sub{
+    font-size:.72rem;
+    color:var(--mu);
+    margin-top:.08rem;
+  }
+
+  .pi-chart-wrap{
+    padding:1rem 1.2rem 1.2rem;
+    height:360px;
+  }
+
+  .pi-chart-wrap.sm{height:330px;}
+  .pi-chart-wrap.lg{height:380px;}
+
+  @media (max-width: 980px){
+    .pi-stats{grid-template-columns:repeat(2, 1fr);}
+    .pi-grid{grid-template-columns:1fr;}
+    .pi-panel.full{grid-column:auto;}
+  }
+
+  @media (max-width: 640px){
+    .pi-stats{grid-template-columns:1fr;}
+    .pi-banner{padding:1.45rem 1.2rem;}
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="pi">
+  <div class="pi-wrap">
+
+    <div class="pi-banner">
+      <div class="pi-banner-inner">
+        <div>
+          <div class="pi-eyebrow">
+            <span class="pi-eyebrow-dot"></span>
+            NutriConnect · Provider Insights
+          </div>
+          <h1 class="pi-title">Current <span class="hl">order insights</span></h1>
+          <p class="pi-sub">
+            These charts only reflect your own store activity, including recent orders, current status breakdown, and your top ordered foods.
+          </p>
+        </div>
+
+        <div class="pi-actions">
+          <a href="{{ url_for('provider.provider_orders') }}" class="pi-btn">
+            <i class="fas fa-bag-shopping"></i> Back to Orders
+          </a>
+          <a href="{{ url_for('provider.provider_dashboard') }}" class="pi-btn-ghost">
+            <i class="fas fa-table-cells-large"></i> Dashboard
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <div class="pi-stats">
+      <div class="pi-stat">
+        <div class="pi-stat-top">
+          <span class="pi-stat-label">Total Orders</span>
+          <div class="pi-stat-ico ic-brand"><i class="fas fa-bag-shopping"></i></div>
+        </div>
+        <div class="pi-stat-value">{{ total_orders }}</div>
+      </div>
+
+      <div class="pi-stat">
+        <div class="pi-stat-top">
+          <span class="pi-stat-label">Pending</span>
+          <div class="pi-stat-ico ic-amber"><i class="fas fa-hourglass-half"></i></div>
+        </div>
+        <div class="pi-stat-value">{{ pending_orders }}</div>
+      </div>
+
+      <div class="pi-stat">
+        <div class="pi-stat-top">
+          <span class="pi-stat-label">Delivered</span>
+          <div class="pi-stat-ico ic-emerald"><i class="fas fa-circle-check"></i></div>
+        </div>
+        <div class="pi-stat-value">{{ delivered_orders }}</div>
+      </div>
+
+      <div class="pi-stat">
+        <div class="pi-stat-top">
+          <span class="pi-stat-label">Cancelled</span>
+          <div class="pi-stat-ico ic-rose"><i class="fas fa-ban"></i></div>
+        </div>
+        <div class="pi-stat-value">{{ cancelled_orders }}</div>
+      </div>
+    </div>
+
+    <div class="pi-grid">
+      <div class="pi-panel">
+        <div class="pi-panel-head">
+          <div class="pi-icon"><i class="fas fa-chart-line"></i></div>
+          <div>
+            <div class="pi-panel-title">Orders in the last 7 days</div>
+            <div class="pi-panel-sub">Daily order count for your store</div>
+          </div>
+        </div>
+        <div class="pi-chart-wrap sm">
+          <canvas id="dailyOrdersChart"></canvas>
+        </div>
+      </div>
+
+      <div class="pi-panel">
+        <div class="pi-panel-head">
+          <div class="pi-icon"><i class="fas fa-chart-pie"></i></div>
+          <div>
+            <div class="pi-panel-title">Order status breakdown</div>
+            <div class="pi-panel-sub">Pending, confirmed, preparing, ready, delivered, cancelled</div>
+          </div>
+        </div>
+        <div class="pi-chart-wrap sm">
+          <canvas id="statusBreakdownChart"></canvas>
+        </div>
+      </div>
+
+      <div class="pi-panel full">
+        <div class="pi-panel-head">
+          <div class="pi-icon"><i class="fas fa-chart-column"></i></div>
+          <div>
+            <div class="pi-panel-title">Top ordered foods</div>
+            <div class="pi-panel-sub">Most ordered food items from your menu</div>
+          </div>
+        </div>
+        <div class="pi-chart-wrap lg">
+          <canvas id="topFoodsChart"></canvas>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+  const dailyLabels = {{ daily_labels | tojson }};
+  const dailyValues = {{ daily_values | tojson }};
+  const statusLabels = {{ status_labels | tojson }};
+  const statusValues = {{ status_values | tojson }};
+  const topFoodLabels = {{ top_food_labels | tojson }};
+  const topFoodValues = {{ top_food_values | tojson }};
+
+  const tickColor = getComputedStyle(document.documentElement).getPropertyValue('--nc-text-muted').trim() || '#8b949e';
+  const gridColor = getComputedStyle(document.documentElement).getPropertyValue('--nc-border').trim() || 'rgba(255,255,255,.08)';
+
+  new Chart(document.getElementById('dailyOrdersChart'), {
+    type: 'line',
+    data: {
+      labels: dailyLabels,
+      datasets: [{
+        label: 'Orders',
+        data: dailyValues,
+        borderColor: '#34d399',
+        backgroundColor: 'rgba(52,211,153,.14)',
+        borderWidth: 3,
+        fill: true,
+        tension: 0.35,
+        pointRadius: 4,
+        pointHoverRadius: 5
+      }]
+    },
+    options: {
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false }
+      },
+      scales: {
+        x: {
+          ticks: { color: tickColor },
+          grid: { color: 'rgba(0,0,0,0)' }
+        },
+        y: {
+          beginAtZero: true,
+          ticks: {
+            color: tickColor,
+            precision: 0
+          },
+          grid: { color: gridColor }
+        }
+      }
+    }
+  });
+
+  new Chart(document.getElementById('statusBreakdownChart'), {
+    type: 'doughnut',
+    data: {
+      labels: statusLabels,
+      datasets: [{
+        data: statusValues,
+        backgroundColor: [
+          '#fbbf24',
+          '#38bdf8',
+          '#a78bfa',
+          '#60a5fa',
+          '#10b981',
+          '#fb7185'
+        ],
+        borderWidth: 0
+      }]
+    },
+    options: {
+      maintainAspectRatio: false,
+      cutout: '62%',
+      plugins: {
+        legend: {
+          position: 'bottom',
+          labels: {
+            color: tickColor,
+            usePointStyle: true,
+            boxWidth: 10
+          }
+        }
+      }
+    }
+  });
+
+  new Chart(document.getElementById('topFoodsChart'), {
+    type: 'bar',
+    data: {
+      labels: topFoodLabels.length ? topFoodLabels : ['No data'],
+      datasets: [{
+        label: 'Orders',
+        data: topFoodValues.length ? topFoodValues : [0],
+        backgroundColor: '#38bdf8',
+        borderRadius: 8,
+        maxBarThickness: 56
+      }]
+    },
+    options: {
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false }
+      },
+      scales: {
+        x: {
+          ticks: { color: tickColor },
+          grid: { color: 'rgba(0,0,0,0)' }
+        },
+        y: {
+          beginAtZero: true,
+          ticks: {
+            color: tickColor,
+            precision: 0
+          },
+          grid: { color: gridColor }
+        }
+      }
+    }
+  });
+</script>
+{% endblock %}

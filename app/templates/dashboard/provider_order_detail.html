@@ -1,0 +1,626 @@
+{% extends "base.html" %}
+{% block title %}Provider Order Detail | NutriConnect{% endblock %}
+
+{% block extra_css %}
+<link href="https://fonts.googleapis.com/css2?family=Cabinet+Grotesk:wght@400;500;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+{% endblock %}
+
+{% block content %}
+<style>
+  body, button, input, select, textarea {
+    font-family: 'Cabinet Grotesk', sans-serif !important;
+  }
+
+  .pod {
+    --surf:  var(--nc-surface);
+    --s2:    var(--nc-surface-2);
+    --s3:    var(--nc-surface-3);
+    --bdr:   var(--nc-border);
+    --bdr2:  var(--nc-border-2);
+    --txt:   var(--nc-text);
+    --txt2:  var(--nc-text-2);
+    --mu:    var(--nc-text-muted);
+    --fa:    var(--nc-text-faint);
+    --brand: var(--nc-brand);
+    --brand-d: var(--nc-brand-d);
+    --brand-l: var(--nc-brand-l);
+
+    --emerald:   #34d399;
+    --emerald-l: rgba(52,211,153,.12);
+    --amber:     #fbbf24;
+    --amber-l:   rgba(251,191,36,.12);
+    --rose:      #fb7185;
+    --rose-l:    rgba(251,113,133,.12);
+    --violet:    #a78bfa;
+    --violet-l:  rgba(167,139,250,.12);
+    --cyan:      #67e8f9;
+    --cyan-l:    rgba(34,211,238,.12);
+
+    --r: 14px;
+    --r-lg: 18px;
+  }
+
+  @keyframes pod-up {
+    from { opacity: 0; transform: translateY(14px); }
+    to { opacity: 1; transform: none; }
+  }
+
+  .pod-wrap {
+    animation: pod-up .35s cubic-bezier(.16,1,.3,1) both;
+  }
+
+  .pod-banner {
+    background:
+      radial-gradient(ellipse 60% 140% at -5% 50%, rgba(14,165,233,.38) 0%, transparent 52%),
+      radial-gradient(ellipse 35% 80% at 105% 10%, rgba(52,211,153,.18) 0%, transparent 50%),
+      radial-gradient(ellipse 45% 60% at 60% 110%, rgba(56,189,248,.12) 0%, transparent 48%),
+      linear-gradient(145deg, #060f1e 0%, #091828 35%, #0b1f38 65%, #070e1c 100%);
+    border-radius: var(--r-lg);
+    border: 1px solid rgba(56,189,248,.15);
+    padding: 2rem 2.2rem;
+    margin-bottom: 1.25rem;
+    position: relative;
+    overflow: hidden;
+    isolation: isolate;
+    box-shadow:
+      0 0 0 1px rgba(56,189,248,.05) inset,
+      0 1px 0 rgba(255,255,255,.06) inset,
+      0 12px 48px rgba(0,0,0,.45),
+      0 4px 16px rgba(14,165,233,.08);
+  }
+
+  .pod-banner::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    background-image: radial-gradient(circle, rgba(255,255,255,.05) 1px, transparent 1px);
+    background-size: 26px 26px;
+    mask-image: radial-gradient(ellipse 100% 100% at 50% 50%, black 30%, transparent 100%);
+    pointer-events: none;
+  }
+
+  .pod-banner-inner {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    flex-wrap: wrap;
+    align-items: end;
+  }
+
+  .pod-eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: .42rem;
+    background: rgba(56,189,248,.1);
+    border: 1px solid rgba(56,189,248,.22);
+    border-radius: 999px;
+    padding: .22rem .9rem;
+    font-size: .62rem;
+    font-weight: 800;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,.72);
+    margin-bottom: .6rem;
+  }
+
+  .pod-eyebrow-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #38bdf8;
+    box-shadow: 0 0 8px #38bdf8;
+  }
+
+  .pod-title {
+    margin: 0 0 .3rem;
+    color: #fff;
+    font-size: 1.8rem;
+    font-weight: 900;
+    letter-spacing: -.04em;
+    line-height: 1.08;
+    word-break: break-word;
+  }
+
+  .pod-sub {
+    margin: 0;
+    color: rgba(255,255,255,.45);
+    font-size: .84rem;
+    line-height: 1.65;
+  }
+
+  .pod-actions {
+    display: flex;
+    gap: .7rem;
+    flex-wrap: wrap;
+  }
+
+  .pod-btn,
+  .pod-btn-ghost {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: .42rem;
+    height: 42px;
+    padding: 0 1rem;
+    border-radius: 12px;
+    text-decoration: none;
+    font-size: .8rem;
+    font-weight: 800;
+    transition: all .14s ease;
+  }
+
+  .pod-btn {
+    border: none;
+    background: linear-gradient(135deg, var(--brand-d), var(--brand));
+    color: #fff;
+    box-shadow: 0 6px 18px rgba(14,165,233,.22);
+  }
+
+  .pod-btn:hover {
+    color: #fff;
+    transform: translateY(-1px);
+    filter: brightness(1.05);
+  }
+
+  .pod-btn-ghost {
+    border: 1px solid rgba(255,255,255,.12);
+    background: rgba(255,255,255,.04);
+    color: #fff;
+  }
+
+  .pod-btn-ghost:hover {
+    color: #fff;
+    background: rgba(255,255,255,.08);
+  }
+
+  .pod-grid {
+    display: grid;
+    grid-template-columns: 1.5fr .95fr;
+    gap: 1.2rem;
+    align-items: start;
+  }
+
+  .pod-card {
+    background: var(--surf);
+    border: 1px solid var(--bdr);
+    border-radius: var(--r-lg);
+    overflow: hidden;
+    box-shadow: var(--nc-card-shadow);
+  }
+
+  .pod-card-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: .8rem;
+    padding: 1rem 1.2rem;
+    border-bottom: 1px solid var(--bdr);
+    background: var(--s2);
+  }
+
+  .pod-card-head-left {
+    display: flex;
+    align-items: center;
+    gap: .75rem;
+  }
+
+  .pod-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 11px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--brand-l);
+    color: var(--brand);
+    border: 1px solid rgba(14,165,233,.16);
+    flex: 0 0 auto;
+  }
+
+  .pod-icon.violet {
+    background: var(--violet-l);
+    color: var(--violet);
+    border-color: rgba(167,139,250,.18);
+  }
+
+  .pod-icon.emerald {
+    background: var(--emerald-l);
+    color: var(--emerald);
+    border-color: rgba(52,211,153,.18);
+  }
+
+  .pod-card-title {
+    font-size: .96rem;
+    font-weight: 900;
+    color: var(--txt);
+    letter-spacing: -.02em;
+  }
+
+  .pod-card-sub {
+    font-size: .73rem;
+    color: var(--mu);
+    margin-top: .14rem;
+  }
+
+  .pod-body {
+    padding: 1rem 1.2rem 1.2rem;
+  }
+
+  .pod-items {
+    display: flex;
+    flex-direction: column;
+    gap: .7rem;
+  }
+
+  .pod-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: .8rem;
+    padding: .95rem 1rem;
+    border: 1px solid var(--bdr);
+    border-radius: 14px;
+    background: var(--s2);
+  }
+
+  .pod-item-name {
+    font-size: .92rem;
+    font-weight: 800;
+    color: var(--txt);
+  }
+
+  .pod-item-meta {
+    font-size: .76rem;
+    color: var(--mu);
+    margin-top: .16rem;
+  }
+
+  .pod-money {
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 800;
+    color: var(--txt);
+    white-space: nowrap;
+  }
+
+  .pod-total {
+    margin-top: 1rem;
+    padding: 1rem 1rem .2rem;
+    border-top: 1px solid var(--bdr);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+  }
+
+  .pod-total-label {
+    color: var(--txt);
+    font-size: 1rem;
+    font-weight: 900;
+  }
+
+  .pod-total-value {
+    font-family: 'JetBrains Mono', monospace;
+    color: var(--brand);
+    font-size: 1.15rem;
+    font-weight: 800;
+  }
+
+  .pod-select {
+    width: 100%;
+    height: 46px;
+    border-radius: 12px;
+    border: 1px solid var(--bdr);
+    background: var(--s2);
+    color: var(--txt);
+    padding: 0 .95rem;
+    outline: none;
+    box-shadow: none;
+    transition: border-color .15s ease, background .15s ease;
+  }
+
+  .pod-select:focus {
+    border-color: rgba(56,189,248,.38);
+    background: var(--surf);
+  }
+
+  .pod-submit {
+    width: 100%;
+    height: 46px;
+    margin-top: .85rem;
+    border: none;
+    border-radius: 12px;
+    background: linear-gradient(135deg, var(--brand-d), var(--brand));
+    color: #fff;
+    font-size: .84rem;
+    font-weight: 800;
+    box-shadow: 0 6px 18px rgba(14,165,233,.22);
+    transition: transform .14s ease, filter .14s ease;
+  }
+
+  .pod-submit:hover {
+    transform: translateY(-1px);
+    filter: brightness(1.05);
+  }
+
+  .pod-submit:disabled {
+    opacity: .65;
+    cursor: not-allowed;
+  }
+
+  .pod-status-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: .8rem;
+    margin-bottom: .85rem;
+    padding: .8rem .95rem;
+    border: 1px solid var(--bdr);
+    background: var(--s2);
+    border-radius: 14px;
+  }
+
+  .pod-status-label {
+    font-size: .74rem;
+    color: var(--mu);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .08em;
+  }
+
+  .pod-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: .34rem;
+    padding: .28rem .72rem;
+    border-radius: 999px;
+    font-size: .68rem;
+    font-weight: 800;
+    text-transform: capitalize;
+    white-space: nowrap;
+  }
+
+  .st-pending   { background: var(--amber-l);  color: #a16207; }
+  .st-confirmed { background: var(--cyan-l);   color: #0e7490; }
+  .st-preparing { background: var(--violet-l); color: #6d28d9; }
+  .st-ready     { background: var(--emerald-l);color: #047857; }
+  .st-delivered { background: var(--emerald-l);color: #047857; }
+  .st-cancelled { background: var(--rose-l);   color: #be123c; }
+
+  [data-theme="dark"] .st-pending   { background: rgba(245,158,11,.12); color: #fcd34d; }
+  [data-theme="dark"] .st-confirmed { background: rgba(6,182,212,.12);  color: #67e8f9; }
+  [data-theme="dark"] .st-preparing { background: rgba(139,92,246,.12); color: #c4b5fd; }
+  [data-theme="dark"] .st-ready     { background: rgba(16,185,129,.12); color: #34d399; }
+  [data-theme="dark"] .st-delivered { background: rgba(16,185,129,.12); color: #34d399; }
+  [data-theme="dark"] .st-cancelled { background: rgba(244,63,94,.12);  color: #fb7185; }
+
+  .pod-timeline {
+    display: flex;
+    flex-direction: column;
+    gap: .9rem;
+  }
+
+  .pod-time-item {
+    position: relative;
+    padding: 0 0 0 1.25rem;
+  }
+
+  .pod-time-item:not(:last-child)::before {
+    content: '';
+    position: absolute;
+    left: 6px;
+    top: 22px;
+    bottom: -18px;
+    width: 1px;
+    background: linear-gradient(180deg, rgba(56,189,248,.28), rgba(255,255,255,.06));
+  }
+
+  .pod-time-dot {
+    position: absolute;
+    left: 0;
+    top: 6px;
+    width: 13px;
+    height: 13px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--brand), #67e8f9);
+    box-shadow: 0 0 0 4px rgba(14,165,233,.12);
+  }
+
+  .pod-time-card {
+    padding: .9rem 1rem;
+    border: 1px solid var(--bdr);
+    border-radius: 14px;
+    background: var(--s2);
+  }
+
+  .pod-time-status {
+    font-size: .92rem;
+    font-weight: 900;
+    color: var(--txt);
+    margin-bottom: .18rem;
+  }
+
+  .pod-time-note {
+    font-size: .8rem;
+    line-height: 1.55;
+    color: var(--txt2);
+  }
+
+  .pod-time-date {
+    margin-top: .3rem;
+    font-size: .74rem;
+    color: var(--mu);
+  }
+
+  .pod-empty {
+    background: var(--s2);
+    border: 1.5px dashed var(--bdr2);
+    border-radius: 16px;
+    padding: 2rem 1rem;
+    text-align: center;
+    color: var(--mu);
+    font-size: .82rem;
+  }
+
+  @media (max-width: 980px) {
+    .pod-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  @media (max-width: 768px) {
+    .pod-banner {
+      padding: 1.5rem 1.2rem;
+    }
+
+    .pod-body {
+      padding: 1rem;
+    }
+
+    .pod-item,
+    .pod-total,
+    .pod-status-row {
+      padding-left: .9rem;
+      padding-right: .9rem;
+    }
+  }
+</style>
+
+{% set items = order.items.all() if order and order.items else [] %}
+{% set timeline_entries = order.timeline.all() if order and order.timeline else [] %}
+
+<div class="pod">
+  <div class="pod-wrap">
+
+    <div class="pod-banner">
+      <div class="pod-banner-inner">
+        <div>
+          <div class="pod-eyebrow">
+            <span class="pod-eyebrow-dot"></span>
+            NutriConnect · Order Detail
+          </div>
+          <h1 class="pod-title">
+            Order {{ order.order_number if order.order_number else ('#' ~ order.id) }}
+          </h1>
+          <p class="pod-sub">
+            Review items, update fulfillment status, and track the full order timeline in one place.
+          </p>
+        </div>
+
+        <div class="pod-actions">
+          <a href="{{ url_for('provider.provider_orders') }}" class="pod-btn-ghost">
+            <i class="fas fa-arrow-left"></i> Back to Orders
+          </a>
+          <a href="{{ url_for('provider.provider_dashboard') }}" class="pod-btn">
+            <i class="fas fa-grid-2"></i> Dashboard
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <div class="pod-grid">
+      <div class="pod-card">
+        <div class="pod-card-head">
+          <div class="pod-card-head-left">
+            <div class="pod-icon emerald"><i class="fas fa-utensils"></i></div>
+            <div>
+              <div class="pod-card-title">Order Items</div>
+              <div class="pod-card-sub">Everything included in this order</div>
+            </div>
+          </div>
+          <span class="pod-badge st-{{ order.status }}">{{ order.status.title() }}</span>
+        </div>
+
+        <div class="pod-body">
+          {% if items %}
+          <div class="pod-items">
+            {% for item in items %}
+            <div class="pod-item">
+              <div>
+                <div class="pod-item-name">{{ item.food_name }} × {{ item.quantity }}</div>
+                <div class="pod-item-meta">Subtotal for this line item</div>
+              </div>
+              <div class="pod-money">${{ "%.2f"|format(item.subtotal or 0) }}</div>
+            </div>
+            {% endfor %}
+          </div>
+
+          <div class="pod-total">
+            <div class="pod-total-label">Total</div>
+            <div class="pod-total-value">${{ "%.2f"|format(order.total_price or 0) }}</div>
+          </div>
+          {% else %}
+          <div class="pod-empty">No items were found for this order.</div>
+          {% endif %}
+        </div>
+      </div>
+
+      <div style="display:flex; flex-direction:column; gap:1.2rem;">
+        <div class="pod-card">
+          <div class="pod-card-head">
+            <div class="pod-card-head-left">
+              <div class="pod-icon"><i class="fas fa-arrows-rotate"></i></div>
+              <div>
+                <div class="pod-card-title">Update Status</div>
+                <div class="pod-card-sub">Keep the customer informed with the latest progress</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="pod-body">
+            <div class="pod-status-row">
+              <div class="pod-status-label">Current Status</div>
+              <span class="pod-badge st-{{ order.status }}">{{ order.status.title() }}</span>
+            </div>
+
+            <form method="post" action="{{ url_for('provider.update_order_status', order_id=order.id) }}">
+              <select name="status" class="pod-select">
+                {% for s in ['pending','confirmed','preparing','ready','delivered','cancelled'] %}
+                <option value="{{ s }}" {% if order.status == s %}selected{% endif %}>{{ s.title() }}</option>
+                {% endfor %}
+              </select>
+              <button class="pod-submit" type="submit">Save Status</button>
+            </form>
+          </div>
+        </div>
+
+        <div class="pod-card">
+          <div class="pod-card-head">
+            <div class="pod-card-head-left">
+              <div class="pod-icon violet"><i class="fas fa-clock-rotate-left"></i></div>
+              <div>
+                <div class="pod-card-title">Timeline</div>
+                <div class="pod-card-sub">Status changes recorded for this order</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="pod-body">
+            {% if timeline_entries %}
+            <div class="pod-timeline">
+              {% for t in timeline_entries %}
+              <div class="pod-time-item">
+                <span class="pod-time-dot"></span>
+                <div class="pod-time-card">
+                  <div class="pod-time-status">{{ t.status.title() }}</div>
+                  <div class="pod-time-note">{{ t.note or 'Status updated' }}</div>
+                  <div class="pod-time-date">
+                    {{ t.created_at.strftime("%d %b %Y, %I:%M %p") if t.created_at else '—' }}
+                  </div>
+                </div>
+              </div>
+              {% endfor %}
+            </div>
+            {% else %}
+            <div class="pod-empty">No timeline entries yet.</div>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+{% endblock %}

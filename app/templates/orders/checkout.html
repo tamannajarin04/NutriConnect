@@ -1,0 +1,541 @@
+{% extends "base.html" %}
+{% block title %}Checkout · NutriConnect{% endblock %}
+
+{% block content %}
+<style>
+.co {
+  --surf:     var(--nc-surface);
+  --s2:       var(--nc-surface-2);
+  --s3:       var(--nc-surface-3);
+  --bdr:      var(--nc-border);
+  --bdr2:     var(--nc-border-2);
+  --txt:      var(--nc-text);
+  --txt2:     var(--nc-text-2);
+  --mu:       var(--nc-text-muted);
+  --fa:       var(--nc-text-faint);
+  --brand:    var(--nc-brand);
+  --brand-d:  var(--nc-brand-d);
+  --brand-l:  var(--nc-brand-l);
+
+  --teal:   #0d9488; --teal-l: rgba(13,148,136,.12);
+  --amber:  #f59e0b; --amber-l: rgba(245,158,11,.12);
+  --violet: #7c3aed; --violet-l: rgba(124,58,237,.12);
+
+  --r: 20px;
+  font-family: 'Sora', sans-serif;
+}
+
+.co-page {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.co-hero {
+  position: relative;
+  overflow: hidden;
+  border-radius: var(--r);
+  padding: 1.9rem 2rem;
+  background:
+    radial-gradient(circle at 10% 20%, rgba(56,189,248,.16), transparent 30%),
+    radial-gradient(circle at 90% 14%, rgba(124,58,237,.12), transparent 26%),
+    linear-gradient(135deg, #07111d 0%, #0c1d33 48%, #113055 100%);
+  border: 1px solid rgba(56,189,248,.16);
+  box-shadow: 0 18px 48px rgba(0,0,0,.24);
+}
+.co-hero::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: radial-gradient(circle, rgba(255,255,255,.05) 1px, transparent 1px);
+  background-size: 28px 28px;
+  pointer-events: none;
+}
+.co-hero > * { position: relative; z-index: 1; }
+
+.co-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: .45rem;
+  padding: .28rem .82rem;
+  border-radius: 999px;
+  background: rgba(255,255,255,.08);
+  border: 1px solid rgba(255,255,255,.14);
+  color: rgba(255,255,255,.88);
+  font-size: .69rem;
+  font-weight: 800;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  margin-bottom: .85rem;
+}
+
+.co-hero-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.co-title {
+  margin: 0;
+  color: #fff;
+  font-size: clamp(1.55rem, 4vw, 2.35rem);
+  font-weight: 800;
+  letter-spacing: -.04em;
+}
+.co-title span {
+  background: linear-gradient(135deg, #7dd3fc 0%, #38bdf8 40%, #67e8f9 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.co-sub {
+  margin-top: .45rem;
+  color: rgba(255,255,255,.68);
+  font-size: .9rem;
+  line-height: 1.65;
+  max-width: 650px;
+}
+
+.co-hero-actions {
+  display: flex;
+  gap: .7rem;
+  flex-wrap: wrap;
+}
+
+.co-btn,
+.co-btn-soft {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: .45rem;
+  border-radius: 12px;
+  padding: .72rem 1.15rem;
+  font-size: .82rem;
+  font-weight: 800;
+  text-decoration: none;
+  transition: all .15s ease;
+}
+.co-btn {
+  background: #fff;
+  color: #06203c;
+  border: none;
+}
+.co-btn:hover {
+  color: #031427;
+  transform: translateY(-1px);
+}
+.co-btn-soft {
+  background: rgba(255,255,255,.08);
+  color: #fff;
+  border: 1px solid rgba(255,255,255,.14);
+}
+.co-btn-soft:hover {
+  background: rgba(255,255,255,.14);
+  color: #fff;
+  transform: translateY(-1px);
+}
+
+.co-form {
+  display: grid;
+  grid-template-columns: minmax(0, 1.15fr) minmax(300px, .85fr);
+  gap: 1rem;
+  align-items: start;
+}
+@media (max-width: 992px) {
+  .co-form {
+    grid-template-columns: 1fr;
+  }
+}
+
+.co-main {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.co-side {
+  position: sticky;
+  top: 86px;
+}
+@media (max-width: 992px) {
+  .co-side {
+    position: static;
+  }
+}
+
+.co-card {
+  background: var(--nc-card-bg);
+  border: 1px solid var(--nc-card-border);
+  border-radius: var(--r);
+  overflow: hidden;
+  box-shadow: var(--nc-card-shadow);
+}
+
+.co-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: .8rem;
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid var(--bdr);
+  background: var(--s2);
+}
+.co-head-left {
+  display: flex;
+  align-items: center;
+  gap: .65rem;
+}
+.co-icon {
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: .8rem;
+}
+.ico-brand  { background: var(--brand-l);  color: var(--brand-d); }
+.ico-teal   { background: var(--teal-l);   color: var(--teal); }
+.ico-violet { background: var(--violet-l); color: #a78bfa; }
+.ico-amber  { background: var(--amber-l);  color: var(--amber); }
+
+[data-theme="dark"] .ico-brand  { background: rgba(14,165,233,.12); color: #38bdf8; }
+[data-theme="dark"] .ico-teal   { background: rgba(13,148,136,.12); color: #2dd4bf; }
+[data-theme="dark"] .ico-violet { background: rgba(124,58,237,.12); color: #c4b5fd; }
+[data-theme="dark"] .ico-amber  { background: rgba(245,158,11,.12); color: #fcd34d; }
+
+.co-head-title {
+  font-size: .92rem;
+  font-weight: 800;
+  color: var(--txt);
+  letter-spacing: -.02em;
+}
+.co-head-sub {
+  font-size: .7rem;
+  color: var(--mu);
+  margin-top: .04rem;
+}
+
+.co-body {
+  padding: 1.15rem 1.25rem 1.25rem;
+}
+
+.co-field {
+  margin-bottom: 1rem;
+}
+.co-field:last-child {
+  margin-bottom: 0;
+}
+.co-label {
+  display: block;
+  margin-bottom: .42rem;
+  font-size: .72rem;
+  font-weight: 800;
+  color: var(--txt2);
+  text-transform: uppercase;
+  letter-spacing: .06em;
+}
+.co-input,
+.co-textarea {
+  width: 100%;
+  border: 1px solid var(--nc-input-border);
+  background: var(--nc-input-bg);
+  color: var(--nc-input-text);
+  border-radius: 14px;
+  padding: .82rem .95rem;
+  font-size: .88rem;
+  font-weight: 600;
+  font-family: inherit;
+  outline: none;
+  transition: border-color .15s ease, box-shadow .15s ease, background .15s ease;
+}
+.co-textarea {
+  min-height: 120px;
+  resize: vertical;
+}
+.co-input:focus,
+.co-textarea:focus {
+  border-color: var(--brand);
+  box-shadow: 0 0 0 3px rgba(14,165,233,.14);
+}
+
+.co-provider-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: .8rem;
+  margin-bottom: .85rem;
+  flex-wrap: wrap;
+}
+.co-provider-name {
+  font-size: .96rem;
+  font-weight: 800;
+  color: var(--txt);
+}
+.co-provider-subtotal {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: .84rem;
+  font-weight: 700;
+  color: var(--brand);
+}
+
+.co-item-list {
+  display: flex;
+  flex-direction: column;
+  gap: .65rem;
+}
+.co-item {
+  display: grid;
+  grid-template-columns: 1fr auto auto auto;
+  gap: .8rem;
+  align-items: center;
+  background: var(--s2);
+  border: 1px solid var(--bdr);
+  border-radius: 14px;
+  padding: .85rem .95rem;
+}
+@media (max-width: 640px) {
+  .co-item {
+    grid-template-columns: 1fr;
+  }
+}
+.co-item-name {
+  font-size: .86rem;
+  font-weight: 800;
+  color: var(--txt);
+}
+.co-item-price,
+.co-item-qty,
+.co-item-subtotal {
+  font-size: .78rem;
+  color: var(--txt);
+  font-family: 'JetBrains Mono', monospace;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.co-summary-box {
+  display: flex;
+  flex-direction: column;
+  gap: .95rem;
+}
+.co-summary-line {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+}
+.co-summary-label {
+  font-size: .75rem;
+  font-weight: 800;
+  color: var(--mu);
+  text-transform: uppercase;
+  letter-spacing: .08em;
+}
+.co-summary-value {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: .95rem;
+  font-weight: 700;
+  color: var(--txt);
+}
+.co-divider {
+  height: 1px;
+  background: var(--bdr);
+}
+.co-total .co-summary-label {
+  font-size: .82rem;
+  color: var(--txt);
+}
+.co-total .co-summary-value {
+  font-size: 1.18rem;
+}
+
+.co-submit {
+  width: 100%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: .5rem;
+  border: none;
+  border-radius: 14px;
+  padding: .95rem 1.1rem;
+  background: linear-gradient(135deg, var(--brand-d), var(--brand));
+  color: #fff;
+  font-size: .92rem;
+  font-weight: 800;
+  font-family: inherit;
+  cursor: pointer;
+  box-shadow: 0 10px 26px rgba(14,165,233,.24);
+  transition: transform .15s ease, box-shadow .15s ease, filter .15s ease;
+}
+.co-submit:hover {
+  transform: translateY(-1px);
+  filter: brightness(1.05);
+  box-shadow: 0 14px 30px rgba(14,165,233,.3);
+}
+
+.co-note {
+  font-size: .78rem;
+  color: var(--mu);
+  line-height: 1.6;
+}
+
+.co-empty {
+  padding: 1rem;
+  text-align: center;
+  color: var(--mu);
+  font-size: .82rem;
+  border: 1px dashed var(--bdr2);
+  border-radius: 14px;
+  background: var(--s2);
+}
+</style>
+
+<div class="co">
+  <div class="co-page">
+
+    <div class="co-hero">
+      <div class="co-badge">
+        <i class="fas fa-credit-card"></i> Final Step
+      </div>
+
+      <div class="co-hero-row">
+        <div>
+          <h1 class="co-title">Secure <span>Checkout</span></h1>
+          <div class="co-sub">
+            Confirm your delivery details, review items from a single provider, and place one clean order before moving to payment integration.
+          </div>
+        </div>
+
+        <div class="co-hero-actions">
+          <a href="{{ url_for('orders.cart') }}" class="co-btn-soft">
+            <i class="fas fa-arrow-left"></i> Back to Cart
+          </a>
+          <a href="{{ url_for('food_search.search_foods') }}" class="co-btn">
+            <i class="fas fa-magnifying-glass"></i> Browse Foods
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <form method="POST" action="{{ url_for('orders.place_order') }}" class="co-form">
+
+      <div class="co-main">
+
+        <div class="co-card">
+          <div class="co-head">
+            <div class="co-head-left">
+              <div class="co-icon ico-brand"><i class="fas fa-location-dot"></i></div>
+              <div>
+                <div class="co-head-title">Delivery Details</div>
+                <div class="co-head-sub">Where and how your order should arrive</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="co-body">
+            <div class="co-field">
+              <label class="co-label" for="delivery_address">Delivery Address</label>
+              <input class="co-input" type="text" id="delivery_address" name="delivery_address" placeholder="Enter delivery address" required>
+            </div>
+
+            <div class="co-field">
+              <label class="co-label" for="phone">Phone</label>
+              <input class="co-input" type="text" id="phone" name="phone" placeholder="Enter contact number" required>
+            </div>
+
+            <div class="co-field">
+              <label class="co-label" for="notes">Notes</label>
+              <textarea class="co-textarea" id="notes" name="notes" placeholder="Optional delivery note, landmark, or special instruction"></textarea>
+            </div>
+          </div>
+        </div>
+
+        <div class="co-card">
+          <div class="co-head">
+            <div class="co-head-left">
+              <div class="co-icon ico-violet"><i class="fas fa-store"></i></div>
+              <div>
+                <div class="co-head-title">
+                  {{ provider.full_name if provider and provider.full_name else (provider.username if provider else 'Provider') }}
+                </div>
+                <div class="co-head-sub">All checkout items are from this provider</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="co-body">
+            <div class="co-provider-top">
+              <div class="co-provider-name">Order Items</div>
+              <div class="co-provider-subtotal">Subtotal: ${{ "%.2f"|format(total or 0) }}</div>
+            </div>
+
+            {% if items %}
+            <div class="co-item-list">
+              {% for item in items %}
+              <div class="co-item">
+                <div class="co-item-name">{{ item.food.name if item.food else 'Food Item' }}</div>
+                <div class="co-item-price">${{ "%.2f"|format(item.food.price or 0) }}</div>
+                <div class="co-item-qty">×{{ item.quantity }}</div>
+                <div class="co-item-subtotal">${{ "%.2f"|format(item.subtotal or 0) }}</div>
+              </div>
+              {% endfor %}
+            </div>
+            {% else %}
+            <div class="co-empty">No checkout items found.</div>
+            {% endif %}
+          </div>
+        </div>
+
+      </div>
+
+      <div class="co-side">
+        <div class="co-card">
+          <div class="co-head">
+            <div class="co-head-left">
+              <div class="co-icon ico-teal"><i class="fas fa-file-invoice"></i></div>
+              <div>
+                <div class="co-head-title">Order Summary</div>
+                <div class="co-head-sub">One provider, one checkout, one order</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="co-body">
+            <div class="co-summary-box">
+              <div class="co-summary-line">
+                <div class="co-summary-label">Provider</div>
+                <div class="co-summary-value">1</div>
+              </div>
+
+              <div class="co-summary-line">
+                <div class="co-summary-label">Items</div>
+                <div class="co-summary-value">{{ total_qty or 0 }}</div>
+              </div>
+
+              <div class="co-divider"></div>
+
+              <div class="co-summary-line co-total">
+                <div class="co-summary-label">Total</div>
+                <div class="co-summary-value">${{ "%.2f"|format(total or 0) }}</div>
+              </div>
+
+              <button type="submit" class="co-submit">
+                <i class="fas fa-circle-check"></i> Place Order
+              </button>
+
+              <div class="co-note">
+                This checkout now accepts items from only one provider at a time, so placing the order will create a single order record.
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </form>
+
+  </div>
+</div>
+{% endblock %}

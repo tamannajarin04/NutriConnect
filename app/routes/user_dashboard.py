@@ -1,8 +1,20 @@
 import os
+
 from flask import Blueprint, render_template, redirect, url_for, flash, request, current_app
 from flask_login import login_required, current_user
 from werkzeug.utils import secure_filename
-from app.models import db, User, DietaryPreference, BMIRecord, RoleUpgradeRequest
+
+from app.models import (
+    db,
+    User,
+    DietaryPreference,
+    BMIRecord,
+    RoleUpgradeRequest,
+    CartItem,
+    Order,
+    FavoriteFood,
+    RecentlyViewed,
+)
 
 user_dashboard_bp = Blueprint("user_dashboard", __name__)
 
@@ -14,11 +26,15 @@ def index():
         return redirect(url_for("admin.dashboard"))
 
     if current_user.is_food_provider():
-        return render_template("dashboard/food_provider_dashboard.html", user=current_user)
+        return redirect(url_for("provider.provider_dashboard"))
 
     latest_bmi = None
     bmi_records = []
     my_requests = []
+    recent_orders = []
+    favorite_items = []
+    recent_views = []
+    cart_count = 0
 
     try:
         latest_bmi = (
@@ -48,17 +64,70 @@ def index():
     except Exception:
         my_requests = []
 
+    try:
+        recent_orders = (
+            Order.query.filter_by(user_id=current_user.id)
+            .order_by(Order.created_at.desc())
+            .limit(5)
+            .all()
+        )
+    except Exception:
+        recent_orders = []
+
+    try:
+        favorite_items = (
+            FavoriteFood.query.filter_by(user_id=current_user.id)
+            .order_by(FavoriteFood.created_at.desc())
+            .limit(6)
+            .all()
+        )
+    except Exception:
+        favorite_items = []
+
+    try:
+        recent_views = (
+            RecentlyViewed.query.filter_by(user_id=current_user.id)
+            .order_by(RecentlyViewed.viewed_at.desc())
+            .limit(6)
+            .all()
+        )
+    except Exception:
+        recent_views = []
+
+    try:
+        cart_count = CartItem.query.filter_by(user_id=current_user.id).count()
+    except Exception:
+        cart_count = 0
+
     return render_template(
         "dashboard/user_dashboard.html",
         user=current_user,
         latest_bmi=latest_bmi,
         bmi_records=bmi_records,
-        my_requests=my_requests
+        my_requests=my_requests,
+        recent_orders=recent_orders,
+        favorite_items=favorite_items,
+        recent_views=recent_views,
+        cart_count=cart_count,
     )
+
 
 @user_dashboard_bp.route("/profile")
 @login_required
 def view_profile():
+    if current_user.is_food_provider():
+        foods = (
+            current_user.foods.all()
+            if hasattr(current_user.foods, "all")
+            else list(current_user.foods or [])
+        )
+
+        return render_template(
+            "dashboard/food_provider_profile.html",
+            user=current_user,
+            foods=foods,
+        )
+
     return render_template("dashboard/profile.html", user=current_user)
 
 
@@ -92,7 +161,7 @@ def edit_profile():
                 current_app.root_path,
                 "static",
                 "uploads",
-                "profiles"
+                "profiles",
             )
 
             if os.path.exists(upload_dir) and not os.path.isdir(upload_dir):
@@ -109,6 +178,7 @@ def edit_profile():
 
     return render_template("dashboard/edit_profile.html", user=current_user)
 
+
 @user_dashboard_bp.route("/request-upgrade", methods=["GET", "POST"])
 @login_required
 def request_upgrade():
@@ -122,7 +192,7 @@ def request_upgrade():
         .all()
     )
 
-    current_roles = {role.name for role in current_user.roles}
+    current_roles = {role.name for role in getattr(current_user, "roles", [])}
 
     allowed = []
     if "user" in current_roles:
@@ -142,7 +212,7 @@ def request_upgrade():
         existing_pending = RoleUpgradeRequest.query.filter_by(
             user_id=current_user.id,
             requested_role=requested_role,
-            status="pending"
+            status="pending",
         ).first()
 
         if existing_pending:
@@ -153,7 +223,7 @@ def request_upgrade():
             user_id=current_user.id,
             requested_role=requested_role,
             note=note,
-            status="pending"
+            status="pending",
         )
         db.session.add(req)
         db.session.commit()
@@ -164,13 +234,13 @@ def request_upgrade():
     return render_template(
         "dashboard/request_upgrade.html",
         allowed=allowed,
-        history=history
+        history=history,
     )
+
 
 @user_dashboard_bp.route("/dietary-preferences", methods=["GET", "POST"])
 @login_required
 def dietary_preferences():
-    # ✅ Only regular users can access dietary preferences
     if not current_user.has_role("user"):
         flash("Dietary preferences are only available for regular users.", "warning")
         return redirect(url_for("user_dashboard.index"))
@@ -183,24 +253,28 @@ def dietary_preferences():
         allergies = request.form.getlist("allergies") or []
         preferred_cuisine = request.form.getlist("preferred_cuisine") or []
 
-        avoid_foods = [x.strip() for x in (request.form.get("avoid_foods") or "").split(",") if x.strip()]
-        favorite_foods = [x.strip() for x in (request.form.get("favorite_foods") or "").split(",") if x.strip()]
+        avoid_foods = [
+            x.strip() for x in (request.form.get("avoid_foods") or "").split(",") if x.strip()
+        ]
+        favorite_foods = [
+            x.strip() for x in (request.form.get("favorite_foods") or "").split(",") if x.strip()
+        ]
 
         meals_per_day_raw = request.form.get("meals_per_day") or "3"
         try:
             meals_per_day = int(meals_per_day_raw)
-        except:
+        except Exception:
             meals_per_day = 3
 
-        def to_int(v):
-            v = (v or "").strip()
-            return int(v) if v.isdigit() else None
+        def to_int(value):
+            value = (value or "").strip()
+            return int(value) if value.isdigit() else None
 
-        def to_float(v):
-            v = (v or "").strip()
+        def to_float(value):
+            value = (value or "").strip()
             try:
-                return float(v) if v else None
-            except:
+                return float(value) if value else None
+            except Exception:
                 return None
 
         calorie_goal = to_int(request.form.get("calorie_goal"))
