@@ -2,7 +2,6 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_login import UserMixin
 from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime, date
-import sqlalchemy as sa
 from sqlalchemy import func
 import uuid
 
@@ -12,38 +11,37 @@ db = SQLAlchemy()
 user_roles = db.Table(
     "user_roles",
     db.metadata,
-    db.Column("user_id", db.Integer, db.ForeignKey("users.id"),  primary_key=True),
-    db.Column("role_id", db.Integer, db.ForeignKey("roles.id"),  primary_key=True),
+    db.Column("user_id", db.Integer, db.ForeignKey("users.id"), primary_key=True),
+    db.Column("role_id", db.Integer, db.ForeignKey("roles.id"), primary_key=True),
 )
 
 
 class Role(db.Model):
     __tablename__ = "roles"
 
-    id          = db.Column(db.Integer, primary_key=True)
-    name        = db.Column(db.String(50), unique=True, nullable=False)
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(50), unique=True, nullable=False)
     description = db.Column(db.String(200))
-    created_at  = db.Column(db.DateTime, default=datetime.utcnow)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
-    def _repr_(self):
+    def __repr__(self):
         return f"<Role {self.name}>"
 
 
 class User(UserMixin, db.Model):
     __tablename__ = "users"
 
-    id            = db.Column(db.Integer, primary_key=True)
-    username      = db.Column(db.String(80),  unique=True, nullable=False)
-    email         = db.Column(db.String(120), unique=True, nullable=False)
+    id = db.Column(db.Integer, primary_key=True)
+    username = db.Column(db.String(80), unique=True, nullable=False)
+    email = db.Column(db.String(120), unique=True, nullable=False)
     password_hash = db.Column(db.String(255), nullable=False)
 
-    first_name      = db.Column(db.String(50))
-    last_name       = db.Column(db.String(50))
+    first_name = db.Column(db.String(50))
+    last_name = db.Column(db.String(50))
     profile_picture = db.Column(db.String(200))
 
-    # provider/admin platform flags
     is_verified = db.Column(db.Boolean, default=False, nullable=False)
-    account_status = db.Column(db.String(20), default="active", nullable=False)  # active/suspended/restricted
+    account_status = db.Column(db.String(20), default="active", nullable=False)
     last_seen = db.Column(db.DateTime, default=datetime.utcnow)
 
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
@@ -82,13 +80,13 @@ class User(UserMixin, db.Model):
         cascade="all, delete-orphan"
     )
 
-    
     meal_logs = db.relationship(
         "MealLog",
         backref="user",
         lazy="dynamic",
         cascade="all, delete-orphan"
     )
+
     cart_items = db.relationship(
         "CartItem",
         backref="user",
@@ -131,7 +129,6 @@ class User(UserMixin, db.Model):
         cascade="all, delete-orphan"
     )
 
-    # Password helpers
     def set_password(self, password: str):
         self.password_hash = generate_password_hash(password)
 
@@ -163,10 +160,10 @@ class DietaryPreference(db.Model):
 
     diet_type = db.Column(db.String(50))
     food_restrictions = db.Column(db.JSON, default=list)
-    allergies         = db.Column(db.JSON, default=list)
+    allergies = db.Column(db.JSON, default=list)
     preferred_cuisine = db.Column(db.JSON, default=list)
-    avoid_foods       = db.Column(db.JSON, default=list)
-    favorite_foods    = db.Column(db.JSON, default=list)
+    avoid_foods = db.Column(db.JSON, default=list)
+    favorite_foods = db.Column(db.JSON, default=list)
 
     meals_per_day = db.Column(db.Integer, default=3)
     calorie_goal = db.Column(db.Integer)
@@ -190,15 +187,15 @@ class BMIRecord(db.Model):
     category = db.Column(db.String(50), nullable=False)
     recorded_at = db.Column(db.DateTime, default=datetime.utcnow)
 
-    def _repr_(self):
+    def __repr__(self):
         return f"<BMIRecord user_id={self.user_id} bmi={self.bmi}>"
 
 
 class FoodItem(db.Model):
     __tablename__ = "food_items"
 
-    id          = db.Column(db.Integer, primary_key=True)
-    name        = db.Column(db.String(120), nullable=False)
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(120), nullable=False)
     description = db.Column(db.Text)
     price = db.Column(db.Float, default=0)
 
@@ -250,6 +247,13 @@ class FoodItem(db.Model):
         cascade="all, delete-orphan"
     )
 
+    views = db.relationship(
+        "FoodView",
+        backref="food",
+        lazy="dynamic",
+        cascade="all, delete-orphan"
+    )
+
     @property
     def is_available(self):
         return self.availability_status == "available"
@@ -262,36 +266,20 @@ class FoodItem(db.Model):
     @property
     def rating_count(self):
         return FoodRating.query.filter_by(food_id=self.id).count()
-    # Relationship to views
-    views = db.relationship(
-        "FoodView",
-        backref="food",
-        lazy="dynamic",
-        cascade="all, delete-orphan"
-    )
 
 
-# ---------------------------
-# Food Views (Popularity Tracking)
-# ---------------------------
 class FoodView(db.Model):
     __tablename__ = "food_views"
 
-    id        = db.Column(db.Integer, primary_key=True)
-    food_id   = db.Column(db.Integer, db.ForeignKey("food_items.id"), nullable=False)
-    viewer_id = db.Column(db.Integer, db.ForeignKey("users.id"),      nullable=False)
+    id = db.Column(db.Integer, primary_key=True)
+    food_id = db.Column(db.Integer, db.ForeignKey("food_items.id"), nullable=False)
+    viewer_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
     viewed_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
 
-    def _repr_(self):
+    def __repr__(self):
         return f"<FoodView food_id={self.food_id} viewer_id={self.viewer_id}>"
 
 
-class RoleUpgradeRequest(db.Model):
-    __tablename__ = "role_upgrade_requests"
-
-# ---------------------------
-# Role Upgrade Request
-# ---------------------------
 class RoleUpgradeRequest(db.Model):
     __tablename__ = "role_upgrade_requests"
 
@@ -312,11 +300,8 @@ class RoleUpgradeRequest(db.Model):
         return f"<RoleUpgradeRequest user_id={self.user_id} role={self.requested_role} status={self.status}>"
 
 
-
-# ---------------------------
-# Meal Log (YOUR FEATURE ✅)
-# ---------------------------
 MEAL_GOAL_CHOICES = ["weight_loss", "weight_gain", "maintain_weight"]
+
 
 class MealLog(db.Model):
     __tablename__ = "meal_logs"
@@ -338,10 +323,6 @@ class MealLog(db.Model):
         return f"<MealLog user_id={self.user_id} food={self.food_name} meal_type={self.meal_type} goal={self.goal}>"
 
 
-
-# ---------------------------
-# Cart System
-# ---------------------------
 class CartItem(db.Model):
     __tablename__ = "cart_items"
 
@@ -364,10 +345,6 @@ class CartItem(db.Model):
         return round((self.food.price or 0) * self.quantity, 2)
 
 
-
-# ---------------------------
-# Orders
-# ---------------------------
 class Order(db.Model):
     __tablename__ = "orders"
 
@@ -408,10 +385,6 @@ class Order(db.Model):
         return self.status_steps.index(self.status) if self.status in self.status_steps else -1
 
 
-
-# ---------------------------
-# Order Items
-# ---------------------------
 class OrderItem(db.Model):
     __tablename__ = "order_items"
 
@@ -428,10 +401,6 @@ class OrderItem(db.Model):
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
 
-
-# ---------------------------
-# Order Timeline
-# ---------------------------
 class OrderTimeline(db.Model):
     __tablename__ = "order_timelines"
 
@@ -444,10 +413,6 @@ class OrderTimeline(db.Model):
     created_at = db.Column(db.DateTime, default=datetime.utcnow, index=True)
 
 
-
-# ---------------------------
-# Favorites
-# ---------------------------
 class FavoriteFood(db.Model):
     __tablename__ = "favorite_foods"
 
@@ -462,10 +427,6 @@ class FavoriteFood(db.Model):
     )
 
 
-
-# ---------------------------
-# Food Images
-# ---------------------------
 class FoodImage(db.Model):
     __tablename__ = "food_images"
 
@@ -478,10 +439,6 @@ class FoodImage(db.Model):
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
 
-
-# ---------------------------
-# Ratings
-# ---------------------------
 class FoodRating(db.Model):
     __tablename__ = "food_ratings"
 
@@ -499,10 +456,6 @@ class FoodRating(db.Model):
     )
 
 
-
-# ---------------------------
-# Recently Viewed
-# ---------------------------
 class RecentlyViewed(db.Model):
     __tablename__ = "recently_viewed"
 

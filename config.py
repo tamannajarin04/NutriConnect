@@ -7,7 +7,7 @@ class Config:
     SECRET_KEY = os.environ.get("SECRET_KEY") or "dev-secret-key-change-in-production"
 
     SQLALCHEMY_DATABASE_URI = os.environ.get("DATABASE_URL") or \
-        "postgresql+psycopg://nutrition_user:1234@localhost/nutrition_db"
+        "postgresql+psycopg://nutrition_user:nutrition_pass@localhost/nutrition_db"
 
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     PERMANENT_SESSION_LIFETIME = timedelta(days=7)
