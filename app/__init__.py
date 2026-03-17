@@ -38,21 +38,33 @@ def create_app(config_name="default"):
     from .routes.user_dashboard import user_dashboard_bp
     from .routes.bmi import bmi_bp
     from .routes.admin import admin_bp
-    from .routes.food import food_bp, food_search_bp
-    from .routes.orders import orders_bp
-    from .routes.provider_dashboard import provider_bp
-    from .routes.analytics import analytics_bp
+# Imports
+from app.routes.food import food_bp, food_search_bp
+from app.routes.meal_log import meal_log_bp
 
-    app.register_blueprint(main_bp)
-    app.register_blueprint(auth_bp, url_prefix="/auth")
-    app.register_blueprint(user_dashboard_bp, url_prefix="/dashboard")
-    app.register_blueprint(bmi_bp, url_prefix="/dashboard")
-    app.register_blueprint(admin_bp, url_prefix="/admin")
-    app.register_blueprint(food_bp, url_prefix="/provider")
-    app.register_blueprint(food_search_bp, url_prefix="/food")
-    app.register_blueprint(orders_bp)
-    app.register_blueprint(provider_bp, url_prefix="/provider")
-    app.register_blueprint(analytics_bp, url_prefix="/admin")
+from app.routes.orders import orders_bp
+from app.routes.provider_dashboard import provider_bp
+from app.routes.analytics import analytics_bp
+
+
+# Register Blueprints
+app.register_blueprint(main_bp)
+app.register_blueprint(auth_bp, url_prefix="/auth")
+app.register_blueprint(user_dashboard_bp, url_prefix="/dashboard")
+app.register_blueprint(bmi_bp, url_prefix="/dashboard")
+app.register_blueprint(admin_bp, url_prefix="/admin")
+
+# Food + Search
+app.register_blueprint(food_bp, url_prefix="/provider")
+app.register_blueprint(food_search_bp, url_prefix="/food")
+
+# Meal Log (from your module_2 branch)
+app.register_blueprint(meal_log_bp, url_prefix="/dashboard/meal-log")
+
+# Other features (from main branch)
+app.register_blueprint(orders_bp)
+app.register_blueprint(provider_bp, url_prefix="/provider")
+app.register_blueprint(analytics_bp, url_prefix="/admin")
 
     with app.app_context():
         create_roles_if_ready()
