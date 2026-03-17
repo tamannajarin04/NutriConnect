@@ -2,24 +2,31 @@
 {% block title %}Receipt · NutriConnect{% endblock %}
 
 {% block content %}
+{% set status_text = (order.status or 'pending')|lower %}
 <style>
 .rc {
-  --surf:     var(--nc-surface);
-  --s2:       var(--nc-surface-2);
-  --s3:       var(--nc-surface-3);
-  --bdr:      var(--nc-border);
-  --bdr2:     var(--nc-border-2);
-  --txt:      var(--nc-text);
-  --txt2:     var(--nc-text-2);
-  --mu:       var(--nc-text-muted);
-  --fa:       var(--nc-text-faint);
-  --brand:    var(--nc-brand);
-  --brand-d:  var(--nc-brand-d);
-  --brand-l:  var(--nc-brand-l);
+  --surf:     var(--nc-surface, #f8fafc);
+  --s2:       var(--nc-surface-2, #f1f5f9);
+  --s3:       var(--nc-surface-3, #e2e8f0);
+  --bdr:      var(--nc-border, #dbe3ee);
+  --bdr2:     var(--nc-border-2, #cbd5e1);
+  --txt:      var(--nc-text, #0f172a);
+  --txt2:     var(--nc-text-2, #1e293b);
+  --mu:       var(--nc-text-muted, #475569);
+  --fa:       var(--nc-text-faint, #64748b);
+  --brand:    var(--nc-brand, #0ea5e9);
+  --brand-d:  var(--nc-brand-d, #0369a1);
+  --brand-l:  var(--nc-brand-l, rgba(14,165,233,.12));
   --em:       #10b981;
   --em-l:     rgba(16,185,129,.12);
+  --am:       #f59e0b;
+  --am-l:     rgba(245,158,11,.12);
+  --rose:     #e11d48;
+  --rose-l:   rgba(225,29,72,.12);
+  --slate:    #334155;
   --r: 20px;
   font-family: 'Sora', sans-serif;
+  color: var(--txt);
 }
 
 .rc-page {
@@ -32,7 +39,7 @@
   position: relative;
   overflow: hidden;
   border-radius: var(--r);
-  padding: 1.85rem 2rem;
+  padding: 1.9rem 2rem;
   background:
     radial-gradient(circle at 12% 20%, rgba(56,189,248,.16), transparent 28%),
     radial-gradient(circle at 90% 12%, rgba(52,211,153,.12), transparent 24%),
@@ -48,22 +55,35 @@
   background-size: 28px 28px;
   pointer-events: none;
 }
-.rc-hero > * { position: relative; z-index: 1; }
+.rc-hero > * {
+  position: relative;
+  z-index: 1;
+}
 
 .rc-badge {
   display: inline-flex;
   align-items: center;
-  gap: .45rem;
-  padding: .28rem .82rem;
+  gap: .55rem;
+  padding: .32rem .88rem;
   border-radius: 999px;
-  background: rgba(255,255,255,.08);
-  border: 1px solid rgba(255,255,255,.14);
-  color: rgba(255,255,255,.88);
-  font-size: .69rem;
+  background: rgba(255,255,255,.1);
+  border: 1px solid rgba(255,255,255,.16);
+  color: rgba(255,255,255,.95);
+  font-size: .7rem;
   font-weight: 800;
   letter-spacing: .08em;
   text-transform: uppercase;
-  margin-bottom: .85rem;
+  margin-bottom: .95rem;
+}
+
+.rc-brand-mark {
+  width: 18px;
+  height: 18px;
+  border-radius: 5px;
+  object-fit: cover;
+  display: block;
+  background: #fff;
+  padding: 2px;
 }
 
 .rc-hero-row {
@@ -74,18 +94,56 @@
   flex-wrap: wrap;
 }
 
+.rc-title-wrap {
+  display: flex;
+  align-items: center;
+  gap: .9rem;
+}
+
+.rc-title-mark {
+  width: 52px;
+  height: 52px;
+  border-radius: 16px;
+  background: rgba(255,255,255,.12);
+  border: 1px solid rgba(255,255,255,.16);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(10px);
+  flex-shrink: 0;
+}
+.rc-title-mark img {
+  width: 30px;
+  height: 30px;
+  object-fit: contain;
+  display: block;
+}
+
 .rc-title {
   margin: 0;
   color: #fff;
-  font-size: clamp(1.55rem, 4vw, 2.3rem);
+  font-size: clamp(1.55rem, 4vw, 2.35rem);
   font-weight: 800;
   letter-spacing: -.04em;
 }
+.rc-title span {
+  background: linear-gradient(135deg, #7dd3fc 0%, #38bdf8 40%, #67e8f9 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
 .rc-sub {
-  margin-top: .45rem;
-  color: rgba(255,255,255,.68);
-  font-size: .9rem;
+  margin-top: .35rem;
+  color: rgba(255,255,255,.82);
+  font-size: .96rem;
   line-height: 1.6;
+  font-weight: 700;
+}
+.rc-sub-small {
+  margin-top: .18rem;
+  color: rgba(255,255,255,.72);
+  font-size: .84rem;
+  line-height: 1.55;
 }
 
 .rc-actions {
@@ -130,11 +188,11 @@
 }
 
 .rc-card {
-  background: var(--nc-card-bg);
-  border: 1px solid var(--nc-card-border);
+  background: var(--nc-card-bg, #ffffff);
+  border: 1px solid var(--nc-card-border, #dbe3ee);
   border-radius: var(--r);
   overflow: hidden;
-  box-shadow: var(--nc-card-shadow);
+  box-shadow: var(--nc-card-shadow, 0 10px 30px rgba(15,23,42,.06));
 }
 
 .rc-head {
@@ -149,33 +207,41 @@
 .rc-head-left {
   display: flex;
   align-items: center;
-  gap: .65rem;
+  gap: .75rem;
 }
+
 .rc-icon {
-  width: 34px;
-  height: 34px;
-  border-radius: 10px;
+  width: 38px;
+  height: 38px;
+  border-radius: 12px;
   display: flex;
   align-items: center;
   justify-content: center;
   background: var(--brand-l);
-  color: var(--brand-d);
-  font-size: .8rem;
+  border: 1px solid rgba(14,165,233,.12);
+  flex-shrink: 0;
+}
+.rc-icon img {
+  width: 22px;
+  height: 22px;
+  object-fit: contain;
+  display: block;
 }
 [data-theme="dark"] .rc-icon {
   background: rgba(14,165,233,.12);
-  color: #38bdf8;
 }
+
 .rc-head-title {
-  font-size: .92rem;
+  font-size: .96rem;
   font-weight: 800;
   color: var(--txt);
   letter-spacing: -.02em;
 }
 .rc-head-sub {
-  font-size: .7rem;
+  font-size: .76rem;
   color: var(--mu);
-  margin-top: .04rem;
+  margin-top: .08rem;
+  font-weight: 600;
 }
 
 .rc-body {
@@ -201,38 +267,69 @@
   padding: .95rem 1rem;
 }
 .rc-meta-label {
-  font-size: .66rem;
+  font-size: .68rem;
   font-weight: 800;
-  color: var(--fa);
+  color: var(--slate);
   text-transform: uppercase;
   letter-spacing: .08em;
-  margin-bottom: .28rem;
+  margin-bottom: .3rem;
 }
 .rc-meta-value {
-  font-size: .86rem;
+  font-size: .92rem;
   font-weight: 700;
   color: var(--txt);
-  line-height: 1.55;
+  line-height: 1.6;
   word-break: break-word;
 }
 
 .rc-status {
   display: inline-flex;
   align-items: center;
-  gap: .34rem;
-  padding: .22rem .7rem;
+  gap: .4rem;
+  padding: .28rem .78rem;
   border-radius: 999px;
-  background: var(--em-l);
-  color: #065f46;
-  border: 1px solid rgba(16,185,129,.2);
-  font-size: .68rem;
+  font-size: .7rem;
   font-weight: 800;
   text-transform: uppercase;
   letter-spacing: .06em;
+  border: 1px solid transparent;
+  white-space: nowrap;
 }
-[data-theme="dark"] .rc-status {
-  background: rgba(16,185,129,.12);
+
+.rc-status--pending {
+  background: var(--am-l);
+  color: #92400e;
+  border-color: rgba(245,158,11,.22);
+}
+.rc-status--delivered,
+.rc-status--completed {
+  background: var(--em-l);
+  color: #065f46;
+  border-color: rgba(16,185,129,.2);
+}
+.rc-status--cancelled {
+  background: var(--rose-l);
+  color: #9f1239;
+  border-color: rgba(225,29,72,.2);
+}
+.rc-status--default {
+  background: var(--brand-l);
+  color: var(--brand-d);
+  border-color: rgba(14,165,233,.2);
+}
+
+[data-theme="dark"] .rc-status--pending {
+  color: #fbbf24;
+}
+[data-theme="dark"] .rc-status--delivered,
+[data-theme="dark"] .rc-status--completed {
   color: #34d399;
+}
+[data-theme="dark"] .rc-status--cancelled {
+  color: #fb7185;
+}
+[data-theme="dark"] .rc-status--default {
+  color: #38bdf8;
 }
 
 .rc-table-wrap {
@@ -248,20 +345,21 @@
 }
 .rc-table thead th {
   background: var(--s2);
-  color: var(--mu);
-  font-size: .68rem;
+  color: var(--txt2);
+  font-size: .7rem;
   font-weight: 800;
   text-transform: uppercase;
   letter-spacing: .08em;
-  padding: .9rem 1rem;
+  padding: .92rem 1rem;
   border-bottom: 1px solid var(--bdr);
   text-align: left;
 }
 .rc-table tbody td {
-  padding: .95rem 1rem;
+  padding: .98rem 1rem;
   border-bottom: 1px solid var(--bdr);
-  font-size: .84rem;
+  font-size: .88rem;
   color: var(--txt);
+  font-weight: 600;
 }
 .rc-table tbody tr:last-child td {
   border-bottom: none;
@@ -290,9 +388,9 @@
   gap: 1rem;
 }
 .rc-total-label {
-  font-size: .72rem;
+  font-size: .74rem;
   font-weight: 800;
-  color: var(--mu);
+  color: var(--txt2);
   text-transform: uppercase;
   letter-spacing: .08em;
 }
@@ -304,6 +402,11 @@
 }
 
 @media print {
+  @page {
+    size: auto;
+    margin: 14mm;
+  }
+
   .nc-navbar,
   .nc-footer,
   .theme-fab,
@@ -311,11 +414,53 @@
     display: none !important;
   }
 
+  html,
   body,
   .container,
-  main {
-    background: #fff !important;
-    color: #000 !important;
+  main,
+  .rc,
+  .rc-page {
+    background: #ffffff !important;
+    color: #111827 !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  .rc-hero {
+    background: #ffffff !important;
+    border: 1px solid #cbd5e1 !important;
+    box-shadow: none !important;
+  }
+  .rc-hero::after {
+    display: none !important;
+  }
+
+  .rc-badge {
+    background: #eff6ff !important;
+    border: 1px solid #bfdbfe !important;
+    color: #0f172a !important;
+  }
+
+  .rc-title,
+  .rc-title span,
+  .rc-sub,
+  .rc-sub-small,
+  .rc-head-title,
+  .rc-head-sub,
+  .rc-meta-label,
+  .rc-meta-value,
+  .rc-table thead th,
+  .rc-table tbody td,
+  .rc-total-label,
+  .rc-total-value {
+    color: #111827 !important;
+    -webkit-text-fill-color: #111827 !important;
+  }
+
+  .rc-title-mark,
+  .rc-icon {
+    background: #f8fafc !important;
+    border: 1px solid #cbd5e1 !important;
   }
 
   .rc-card,
@@ -323,30 +468,40 @@
   .rc-total-box,
   .rc-table-wrap {
     box-shadow: none !important;
-    border-color: #d1d5db !important;
-    background: #fff !important;
+    border-color: #cbd5e1 !important;
+    background: #ffffff !important;
   }
 
   .rc-head,
-  .rc-table thead th {
+  .rc-table thead th,
+  .rc-meta-box,
+  .rc-total-box {
     background: #f8fafc !important;
-    color: #111827 !important;
   }
 
-  .rc-title,
-  .rc-sub,
-  .rc-badge {
-    color: #111827 !important;
+  .rc-status {
+    border-width: 1px !important;
   }
-
-  .rc-hero {
-    background: #fff !important;
-    border: 1px solid #d1d5db !important;
-    box-shadow: none !important;
+  .rc-status--pending {
+    background: #fef3c7 !important;
+    color: #92400e !important;
+    border-color: #fcd34d !important;
   }
-
-  .rc-hero::after {
-    display: none !important;
+  .rc-status--delivered,
+  .rc-status--completed {
+    background: #d1fae5 !important;
+    color: #065f46 !important;
+    border-color: #6ee7b7 !important;
+  }
+  .rc-status--cancelled {
+    background: #ffe4e6 !important;
+    color: #9f1239 !important;
+    border-color: #fda4af !important;
+  }
+  .rc-status--default {
+    background: #e0f2fe !important;
+    color: #075985 !important;
+    border-color: #7dd3fc !important;
   }
 }
 </style>
@@ -356,13 +511,22 @@
 
     <div class="rc-hero">
       <div class="rc-badge">
-        <i class="fas fa-receipt"></i> Payment Record
+        <img src="{{ url_for('static', filename='favicon.ico') }}" alt="NutriConnect" class="rc-brand-mark">
+        Payment Record
       </div>
 
       <div class="rc-hero-row">
         <div>
-          <h1 class="rc-title">Receipt</h1>
-          <div class="rc-sub">Order ID: {{ order.order_number }}</div>
+          <div class="rc-title-wrap">
+            <div class="rc-title-mark">
+              <img src="{{ url_for('static', filename='favicon.ico') }}" alt="NutriConnect">
+            </div>
+            <div>
+              <h1 class="rc-title"><span>NutriConnect</span> Receipt</h1>
+              <div class="rc-sub">Order ID: {{ order.order_number }}</div>
+              <div class="rc-sub-small">Clean summary of your placed order and billing details.</div>
+            </div>
+          </div>
         </div>
 
         <div class="rc-actions">
@@ -379,13 +543,28 @@
     <div class="rc-card">
       <div class="rc-head">
         <div class="rc-head-left">
-          <div class="rc-icon"><i class="fas fa-file-invoice-dollar"></i></div>
+          <div class="rc-icon">
+            <img src="{{ url_for('static', filename='favicon.ico') }}" alt="NutriConnect">
+          </div>
           <div>
             <div class="rc-head-title">Receipt Details</div>
-            <div class="rc-head-sub">Clear summary for your completed order</div>
+            <div class="rc-head-sub">High-contrast summary for your order</div>
           </div>
         </div>
-        <span class="rc-status"><i class="fas fa-circle-check"></i> {{ order.status.title() }}</span>
+
+        <span class="rc-status
+          {% if status_text == 'pending' %}
+            rc-status--pending
+          {% elif status_text in ['delivered', 'completed'] %}
+            rc-status--delivered
+          {% elif status_text == 'cancelled' %}
+            rc-status--cancelled
+          {% else %}
+            rc-status--default
+          {% endif %}
+        ">
+          <i class="fas fa-circle-check"></i> {{ order.status.title() }}
+        </span>
       </div>
 
       <div class="rc-body">
@@ -394,14 +573,17 @@
             <div class="rc-meta-label">Date</div>
             <div class="rc-meta-value">{{ order.created_at.strftime("%d %b %Y, %I:%M %p") if order.created_at else "—" }}</div>
           </div>
+
           <div class="rc-meta-box">
             <div class="rc-meta-label">Phone</div>
             <div class="rc-meta-value">{{ order.phone or "Not provided" }}</div>
           </div>
+
           <div class="rc-meta-box">
             <div class="rc-meta-label">Delivery Address</div>
             <div class="rc-meta-value">{{ order.delivery_address or "Not provided" }}</div>
           </div>
+
           <div class="rc-meta-box">
             <div class="rc-meta-label">Notes</div>
             <div class="rc-meta-value">{{ order.notes or "No delivery note added." }}</div>

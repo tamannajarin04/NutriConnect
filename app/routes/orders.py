@@ -22,6 +22,18 @@ def require_regular_user():
     return True
 
 
+def get_cart_provider_id(user_id):
+    first_item = (
+        CartItem.query
+        .filter_by(user_id=user_id)
+        .join(FoodItem)
+        .first()
+    )
+    if first_item and first_item.food:
+        return first_item.food.provider_id
+    return None
+
+
 def get_user_orders_paginated(page=1, per_page=10, status_filter="", sort_by="date_desc"):
     query = Order.query.filter_by(user_id=current_user.id)
 
@@ -86,7 +98,25 @@ def add_to_cart(food_id):
     food = FoodItem.query.get_or_404(food_id)
 
     if not food.is_available:
+        if request.headers.get("X-Requested-With") == "XMLHttpRequest":
+            return jsonify({"success": False, "message": "This item is out of stock right now."}), 400
+
         flash("This item is out of stock right now.", "warning")
+        return redirect(request.referrer or url_for("food_search.search_foods"))
+
+    cart_provider_id = get_cart_provider_id(current_user.id)
+    if cart_provider_id is not None and cart_provider_id != food.provider_id:
+        message = "Your cart already contains items from another provider. Please complete or clear that cart first."
+
+        if request.headers.get("X-Requested-With") == "XMLHttpRequest":
+            count = CartItem.query.filter_by(user_id=current_user.id).count()
+            return jsonify({
+                "success": False,
+                "message": message,
+                "cart_count": count
+            }), 400
+
+        flash(message, "warning")
         return redirect(request.referrer or url_for("food_search.search_foods"))
 
     qty = request.form.get("quantity", 1, type=int)
@@ -165,22 +195,28 @@ def checkout():
         flash("Your cart is empty.", "warning")
         return redirect(url_for("orders.cart"))
 
-    grouped = {}
-    for item in items:
-        if not item.food or not item.food.is_available:
-            continue
+    available_items = [item for item in items if item.food and item.food.is_available]
 
-        pid = item.food.provider_id
-        grouped.setdefault(pid, {
-            "provider": item.food.provider,
-            "items": [],
-            "subtotal": 0
-        })
-        grouped[pid]["items"].append(item)
-        grouped[pid]["subtotal"] += item.subtotal
+    if not available_items:
+        flash("No available items found in your cart.", "warning")
+        return redirect(url_for("orders.cart"))
 
-    total = round(sum(group["subtotal"] for group in grouped.values()), 2)
-    return render_template("orders/checkout.html", grouped=grouped, total=total)
+    provider_ids = {item.food.provider_id for item in available_items}
+    if len(provider_ids) > 1:
+        flash("Your cart contains items from multiple providers. Please keep items from only one provider at a time.", "warning")
+        return redirect(url_for("orders.cart"))
+
+    provider = available_items[0].food.provider
+    total = round(sum(item.subtotal for item in available_items), 2)
+    total_qty = sum(item.quantity for item in available_items)
+
+    return render_template(
+        "orders/checkout.html",
+        items=available_items,
+        provider=provider,
+        total=total,
+        total_qty=total_qty
+    )
 
 
 @orders_bp.route("/checkout/place", methods=["POST"])
@@ -199,62 +235,60 @@ def place_order():
     phone = (request.form.get("phone") or "").strip()
     notes = (request.form.get("notes") or "").strip()
 
-    grouped = {}
-    for item in items:
-        if not item.food or not item.food.is_available:
-            continue
-        grouped.setdefault(item.food.provider_id, [])
-        grouped[item.food.provider_id].append(item)
+    if not delivery_address or not phone:
+        flash("Delivery address and phone are required.", "warning")
+        return redirect(url_for("orders.checkout"))
 
-    if not grouped:
+    available_items = [item for item in items if item.food and item.food.is_available]
+
+    if not available_items:
         flash("No available items found in your cart.", "warning")
         return redirect(url_for("orders.cart"))
 
-    created_orders = []
+    provider_ids = {item.food.provider_id for item in available_items}
+    if len(provider_ids) > 1:
+        flash("Your cart contains items from multiple providers. Please keep items from only one provider at a time.", "warning")
+        return redirect(url_for("orders.cart"))
 
-    for provider_id, cart_items in grouped.items():
-        total = round(sum(ci.subtotal for ci in cart_items), 2)
+    provider_id = available_items[0].food.provider_id
+    total = round(sum(item.subtotal for item in available_items), 2)
 
-        order = Order(
-            order_number=Order.generate_order_number(),
-            user_id=current_user.id,
-            provider_id=provider_id,
-            status="pending",
-            total_price=total,
-            delivery_address=delivery_address,
-            phone=phone,
-            notes=notes,
-        )
-        db.session.add(order)
-        db.session.flush()
+    order = Order(
+        order_number=Order.generate_order_number(),
+        user_id=current_user.id,
+        provider_id=provider_id,
+        status="pending",
+        total_price=total,
+        delivery_address=delivery_address,
+        phone=phone,
+        notes=notes,
+    )
+    db.session.add(order)
+    db.session.flush()
 
-        for ci in cart_items:
-            db.session.add(OrderItem(
-                order_id=order.id,
-                food_id=ci.food_id,
-                food_name=ci.food.name,
-                food_price=ci.food.price or 0,
-                quantity=ci.quantity,
-                subtotal=ci.subtotal,
-            ))
-            ci.food.order_count = (ci.food.order_count or 0) + ci.quantity
-
-        db.session.add(OrderTimeline(
+    for ci in available_items:
+        db.session.add(OrderItem(
             order_id=order.id,
-            status="pending",
-            note="Order placed"
+            food_id=ci.food_id,
+            food_name=ci.food.name,
+            food_price=ci.food.price or 0,
+            quantity=ci.quantity,
+            subtotal=ci.subtotal,
         ))
+        ci.food.order_count = (ci.food.order_count or 0) + ci.quantity
 
-        created_orders.append(order)
+    db.session.add(OrderTimeline(
+        order_id=order.id,
+        status="pending",
+        note="Order placed"
+    ))
 
-    CartItem.query.filter_by(user_id=current_user.id).delete()
+    for ci in available_items:
+        db.session.delete(ci)
+
     db.session.commit()
 
-    if len(created_orders) == 1:
-        return redirect(url_for("orders.receipt", order_id=created_orders[0].id))
-
-    flash("Your orders were placed successfully.", "success")
-    return redirect(url_for("orders.cart"))
+    return redirect(url_for("orders.receipt", order_id=order.id))
 
 
 # ---------------- ORDERS ----------------
@@ -349,6 +383,11 @@ def reorder(order_id):
 
     if order.user_id != current_user.id:
         flash("Access denied.", "danger")
+        return redirect(url_for("orders.cart"))
+
+    cart_provider_id = get_cart_provider_id(current_user.id)
+    if cart_provider_id is not None and cart_provider_id != order.provider_id:
+        flash("Your cart already contains items from another provider. Please complete or clear that cart first.", "warning")
         return redirect(url_for("orders.cart"))
 
     added_any = False
