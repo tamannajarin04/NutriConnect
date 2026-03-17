@@ -1,9 +1,10 @@
 import os
 from flask import Flask
-from flask_login import LoginManager
+from flask_login import LoginManager, current_user
 from flask_migrate import Migrate
 from config import config
 from app.models import db, User
+from datetime import datetime
 
 login_manager = LoginManager()
 migrate = Migrate()
@@ -26,24 +27,44 @@ def create_app(config_name="default"):
     def load_user(user_id):
         return User.query.get(int(user_id))
 
+    @app.before_request
+    def update_last_seen():
+        if current_user.is_authenticated:
+            current_user.last_seen = datetime.utcnow()
+            db.session.commit()
+
     from .routes.main import main_bp
     from .routes.auth import auth_bp
     from .routes.user_dashboard import user_dashboard_bp
     from .routes.bmi import bmi_bp
     from .routes.admin import admin_bp
-    from app.routes.food import food_bp, food_search_bp       # ← updated
-    from app.routes.meal_log import meal_log_bp
+# Imports
+from app.routes.food import food_bp, food_search_bp
+from app.routes.meal_log import meal_log_bp
 
-    
+from app.routes.orders import orders_bp
+from app.routes.provider_dashboard import provider_bp
+from app.routes.analytics import analytics_bp
 
-    app.register_blueprint(main_bp)
-    app.register_blueprint(auth_bp,            url_prefix="/auth")
-    app.register_blueprint(user_dashboard_bp,  url_prefix="/dashboard")
-    app.register_blueprint(bmi_bp,             url_prefix="/dashboard")
-    app.register_blueprint(admin_bp,           url_prefix="/admin")
-    app.register_blueprint(food_bp,            url_prefix="/provider")  # unchanged ✅
-    app.register_blueprint(food_search_bp,     url_prefix="/food")      # new ✅
-    app.register_blueprint(meal_log_bp, url_prefix="/dashboard/meal-log")
+
+# Register Blueprints
+app.register_blueprint(main_bp)
+app.register_blueprint(auth_bp, url_prefix="/auth")
+app.register_blueprint(user_dashboard_bp, url_prefix="/dashboard")
+app.register_blueprint(bmi_bp, url_prefix="/dashboard")
+app.register_blueprint(admin_bp, url_prefix="/admin")
+
+# Food + Search
+app.register_blueprint(food_bp, url_prefix="/provider")
+app.register_blueprint(food_search_bp, url_prefix="/food")
+
+# Meal Log (from your module_2 branch)
+app.register_blueprint(meal_log_bp, url_prefix="/dashboard/meal-log")
+
+# Other features (from main branch)
+app.register_blueprint(orders_bp)
+app.register_blueprint(provider_bp, url_prefix="/provider")
+app.register_blueprint(analytics_bp, url_prefix="/admin")
 
     with app.app_context():
         create_roles_if_ready()
@@ -57,14 +78,13 @@ def create_roles_if_ready():
     from app.models import Role
 
     inspector = inspect(db.engine)
-
     if "roles" not in inspector.get_table_names():
         return
 
     roles_data = [
-        {"name": "user",          "description": "Regular user"},
+        {"name": "user", "description": "Regular user"},
         {"name": "food_provider", "description": "Food Provider"},
-        {"name": "admin",         "description": "Administrator"},
+        {"name": "admin", "description": "Administrator"},
     ]
 
     changed = False
@@ -90,9 +110,9 @@ def seed_admins_if_ready():
     if os.environ.get("SEED_ADMINS", "0") != "1":
         return
 
-    email    = (os.environ.get("ADMIN1_EMAIL")    or "").strip().lower()
+    email = (os.environ.get("ADMIN1_EMAIL") or "").strip().lower()
     username = (os.environ.get("ADMIN1_USERNAME") or "Admin").strip()
-    password =  os.environ.get("ADMIN1_PASSWORD") or "Admin@12345"
+    password = os.environ.get("ADMIN1_PASSWORD") or "Admin@12345"
 
     if not email:
         return

@@ -4,10 +4,6 @@
 {% block extra_css %}
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet">
 <style>
-
-/* ══════════════════════════════════════════════════════
-   ROOT + KEYFRAMES
-══════════════════════════════════════════════════════ */
 .fs {
   --sky:    #0ea5e9;
   --sky-d:  #0284c7;
@@ -39,9 +35,7 @@
 }
 
 @keyframes up   { from{opacity:0;transform:translateY(16px)} to{opacity:1;transform:translateY(0)} }
-@keyframes pop  { from{opacity:0;transform:scale(.94)} to{opacity:1;transform:scale(1)} }
 @keyframes glow { 0%,100%{opacity:.5} 50%{opacity:1} }
-@keyframes spin { to{transform:rotate(360deg)} }
 @keyframes skel { 0%,100%{opacity:.35} 50%{opacity:.7} }
 @keyframes livepulse {
   0%   { box-shadow: 0 0 0 0 rgba(14,165,233,.7); }
@@ -49,22 +43,17 @@
   100% { box-shadow: 0 0 0 0 rgba(14,165,233,0); }
 }
 
-/* ══════════════════════════════════════════════════════
-   HERO BANNER — compact
-══════════════════════════════════════════════════════ */
 .fs-hero {
   position: relative;
   overflow: hidden;
   border-radius: 16px;
   margin-bottom: 1.25rem;
   padding: 1.25rem 1.75rem 1.4rem;
-
   background:
     radial-gradient(ellipse 70% 80% at 90% -10%, rgba(56,189,248,.35) 0%, transparent 55%),
     radial-gradient(ellipse 60% 60% at -10% 110%, rgba(99,102,241,.3) 0%, transparent 55%),
     radial-gradient(ellipse 50% 50% at 50% 120%, rgba(14,165,233,.2) 0%, transparent 60%),
     linear-gradient(145deg, #060d1f 0%, #0a1628 40%, #0d1e3a 70%, #050e1c 100%);
-
   border: 1px solid rgba(56,189,248,.15);
   box-shadow:
     0 0 0 1px rgba(56,189,248,.08),
@@ -95,7 +84,6 @@
   flex-wrap: wrap;
 }
 
-/* Floating orbs */
 .fs-orb {
   position: absolute; border-radius: 50%;
   filter: blur(60px); pointer-events: none;
@@ -113,7 +101,6 @@
 }
 .fs-orb--c { display: none; }
 
-/* Left block: title + subtitle */
 .fs-hero__left {
   flex: 1; min-width: 200px;
   animation: up .5s cubic-bezier(.16,1,.3,1) both;
@@ -150,13 +137,11 @@
   margin: 0;
 }
 
-/* Right block: search + stats stacked */
 .fs-hero__right {
   flex: 2; min-width: 280px; display: flex; flex-direction: column; gap: .75rem;
   animation: up .5s cubic-bezier(.16,1,.3,1) .1s both;
 }
 
-/* Search bar */
 .fs-hero__searchbar { position: relative; }
 .fs-hero__searchbar-ico {
   position: absolute; left: 1rem; top: 50%;
@@ -198,7 +183,6 @@
   font-size: .58rem; font-weight: 700; color: rgba(255,255,255,.35);
 }
 
-/* Hero stats — inline, compact */
 .fs-hero__stats {
   display: flex; flex-wrap: wrap; gap: 0;
 }
@@ -217,9 +201,6 @@
   letter-spacing: .09em; color: rgba(255,255,255,.32); margin-top: .18rem;
 }
 
-/* ══════════════════════════════════════════════════════
-   LAYOUT
-══════════════════════════════════════════════════════ */
 .fs-body {
   display: grid;
   grid-template-columns: 256px 1fr;
@@ -230,9 +211,6 @@
   .fs-body { grid-template-columns: 1fr; }
 }
 
-/* ══════════════════════════════════════════════════════
-   SIDEBAR
-══════════════════════════════════════════════════════ */
 .fs-sidebar {
   position: sticky; top: 80px;
   animation: up .5s cubic-bezier(.16,1,.3,1) .2s both;
@@ -317,7 +295,7 @@
 .fs-rval {
   font-family: 'JetBrains Mono', monospace;
   font-size: .69rem; font-weight: 700; color: var(--nc-brand);
-  min-width: 54px; text-align: right; white-space: nowrap;
+  min-width: 72px; text-align: right; white-space: nowrap;
 }
 
 .fs-chips {
@@ -339,9 +317,6 @@
 [data-theme="dark"] .fs-chip:hover { background: rgba(14,165,233,.2); }
 .fs-chip i { font-size: .5rem; opacity: .6; }
 
-/* ══════════════════════════════════════════════════════
-   RESULTS
-══════════════════════════════════════════════════════ */
 .fs-results { display: flex; flex-direction: column; gap: 1.1rem; }
 
 .fs-meta {
@@ -379,9 +354,6 @@
 }
 .fs-ssel:focus { border-color: var(--nc-brand); }
 
-/* ══════════════════════════════════════════════════════
-   FOOD GRID
-══════════════════════════════════════════════════════ */
 #foodGrid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(248px, 1fr));
@@ -478,18 +450,12 @@
 .fc-prov { display: flex; align-items: center; gap: .45rem; padding-top: .44rem; border-top: 1px solid var(--nc-border); font-size: .71rem; color: var(--nc-text-faint); font-weight: 700; }
 .fc-pav { width: 22px; height: 22px; border-radius: 50%; flex-shrink: 0; background: linear-gradient(135deg, var(--nc-brand) 0%, #38bdf8 100%); display: flex; align-items: center; justify-content: center; font-size: .58rem; font-weight: 900; color: #fff; }
 
-/* ══════════════════════════════════════════════════════
-   EMPTY STATE
-══════════════════════════════════════════════════════ */
 .fs-empty { grid-column: 1 / -1; display: flex; flex-direction: column; align-items: center; text-align: center; padding: 4rem 2rem; gap: .85rem; }
 .fs-empty__icon { width: 72px; height: 72px; border-radius: 20px; background: var(--nc-brand-l); color: var(--nc-brand); display: flex; align-items: center; justify-content: center; font-size: 1.7rem; box-shadow: 0 0 0 10px var(--nc-brand-l); }
 [data-theme="dark"] .fs-empty__icon { background: rgba(14,165,233,.1); box-shadow: 0 0 0 10px rgba(14,165,233,.06); }
 .fs-empty h4 { font-size: 1rem; font-weight: 900; color: var(--nc-text); margin: 0; letter-spacing: -.025em; }
 .fs-empty p  { font-size: .83rem; color: var(--nc-text-muted); margin: 0; max-width: 240px; line-height: 1.65; font-weight: 500; }
 
-/* ══════════════════════════════════════════════════════
-   SKELETON
-══════════════════════════════════════════════════════ */
 .fs-skel-g { display: grid; grid-template-columns: repeat(auto-fill, minmax(248px, 1fr)); gap: 1rem; }
 .fs-sk { background: var(--nc-card-bg); border: 1px solid var(--nc-card-border); border-radius: 18px; overflow: hidden; animation: skel 1.5s ease-in-out infinite; }
 .sk-img  { height: 175px; background: var(--nc-surface-2); }
@@ -499,9 +465,6 @@
 .sk-ft   { display: flex; gap: .32rem; padding-top: .42rem; border-top: 1px solid var(--nc-border); }
 .sk-nb   { height: 38px; width: 48px; border-radius: 9px; background: var(--nc-surface-2); }
 
-/* ══════════════════════════════════════════════════════
-   PAGINATION
-══════════════════════════════════════════════════════ */
 .fs-pages { display: flex; justify-content: center; align-items: center; gap: .4rem; flex-wrap: wrap; padding-top: .25rem; }
 .pg-btn { display: inline-flex; align-items: center; gap: .3rem; background: var(--nc-card-bg); color: var(--nc-text-muted); border: 1.5px solid var(--nc-border); border-radius: 10px; padding: .5rem .9rem; font-size: .79rem; font-weight: 700; font-family: 'Plus Jakarta Sans', sans-serif; text-decoration: none; transition: all .14s; }
 .pg-btn:hover { border-color: var(--nc-brand); color: var(--nc-brand); background: var(--nc-brand-l); }
@@ -509,9 +472,186 @@
 .pg-btn.ellipsis { opacity: .35; pointer-events: none; }
 [data-theme="dark"] .pg-btn:hover { background: rgba(14,165,233,.1); }
 
-/* ══════════════════════════════════════════════════════
-   RESPONSIVE
-══════════════════════════════════════════════════════ */
+.fs-bottom-sections{
+  margin-top: 1.4rem;
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:1rem;
+}
+@media (max-width: 900px) {
+  .fs-bottom-sections{ grid-template-columns:1fr; }
+}
+
+.fs-qcard{
+  background: var(--nc-card-bg);
+  border: 1px solid var(--nc-card-border);
+  border-radius: 18px;
+  overflow: hidden;
+  box-shadow: var(--nc-card-shadow);
+}
+.fs-qhead{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:1rem;
+  padding: .95rem 1.1rem;
+  background: var(--nc-surface-2);
+  border-bottom: 1px solid var(--nc-border);
+}
+.fs-qhead-left{
+  display:flex;
+  align-items:center;
+  gap:.6rem;
+}
+.fs-qico{
+  width:34px;
+  height:34px;
+  border-radius:10px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:.8rem;
+}
+.fs-qico.heart{ background: rgba(225,29,72,.12); color:#e11d48; }
+.fs-qico.eye{ background: rgba(245,158,11,.12); color:#d97706; }
+[data-theme="dark"] .fs-qico.heart{ background: rgba(225,29,72,.14); color:#fb7185; }
+[data-theme="dark"] .fs-qico.eye{ background: rgba(245,158,11,.14); color:#fcd34d; }
+
+.fs-qtitle{
+  font-size:.84rem;
+  font-weight:900;
+  color:var(--nc-text);
+  letter-spacing:-.02em;
+}
+.fs-qsub{
+  font-size:.7rem;
+  color:var(--nc-text-muted);
+  margin-top:.05rem;
+}
+.fs-qbtn{
+  display:inline-flex;
+  align-items:center;
+  gap:.35rem;
+  padding:.42rem .75rem;
+  border-radius:10px;
+  border:1px solid var(--nc-border);
+  background:var(--nc-card-bg);
+  color:var(--nc-text-2);
+  text-decoration:none;
+  font-size:.72rem;
+  font-weight:800;
+  transition:all .14s ease;
+}
+.fs-qbtn:hover{
+  background:var(--nc-brand-l);
+  border-color:rgba(14,165,233,.2);
+  color:var(--nc-brand-d);
+}
+
+.fs-qbody{
+  padding: .95rem 1.1rem 1rem;
+}
+.fs-qlist{
+  display:flex;
+  flex-direction:column;
+  gap:.7rem;
+}
+.fs-qitem{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:.8rem;
+  padding:.75rem .82rem;
+  background:var(--nc-surface-2);
+  border:1px solid var(--nc-border);
+  border-radius:14px;
+  transition:all .14s ease;
+}
+.fs-qitem:hover{
+  background:var(--nc-surface-3);
+  border-color:var(--nc-border-2);
+}
+.fs-qitem-left{
+  display:flex;
+  align-items:center;
+  gap:.72rem;
+  min-width:0;
+  flex:1;
+}
+.fs-qthumb{
+  width:48px;
+  height:48px;
+  border-radius:12px;
+  overflow:hidden;
+  background:var(--nc-surface-3);
+  border:1px solid var(--nc-border);
+  flex-shrink:0;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  color:var(--nc-text-faint);
+}
+.fs-qthumb img{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+}
+.fs-qmeta{
+  min-width:0;
+}
+.fs-qname{
+  font-size:.8rem;
+  font-weight:800;
+  color:var(--nc-text);
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+.fs-qdesc{
+  font-size:.7rem;
+  color:var(--nc-text-muted);
+  margin-top:.15rem;
+}
+.fs-qgo{
+  width:34px;
+  height:34px;
+  border-radius:10px;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  text-decoration:none;
+  border:1px solid var(--nc-border);
+  background:var(--nc-card-bg);
+  color:var(--nc-text-2);
+  transition:all .14s ease;
+}
+.fs-qgo:hover{
+  background:var(--nc-brand-l);
+  color:var(--nc-brand-d);
+  border-color:rgba(14,165,233,.2);
+}
+.fs-qempty{
+  text-align:center;
+  padding:1.3rem .8rem 1rem;
+}
+.fs-qempty i{
+  font-size:1.2rem;
+  color:var(--nc-text-faint);
+  margin-bottom:.55rem;
+}
+.fs-qempty h4{
+  font-size:.85rem;
+  font-weight:900;
+  color:var(--nc-text);
+  margin:0 0 .25rem;
+}
+.fs-qempty p{
+  font-size:.74rem;
+  color:var(--nc-text-muted);
+  margin:0;
+  line-height:1.55;
+}
+
 @media (max-width: 768px) {
   .fs-hero { padding: 1rem 1.25rem 1.2rem; border-radius: 14px; }
   .fs-hero__inner { flex-direction: column; gap: .85rem; }
@@ -525,141 +665,234 @@
   .fs-hero__h1 { font-size: 1.2rem; }
 }
 
-/* ══════════════════════════════════════════════════════
-   FOOD DETAIL MODAL
-══════════════════════════════════════════════════════ */
-.fd-overlay {
-  position: fixed; inset: 0; z-index: 9000;
-  background: rgba(0,0,0,.65);
-  backdrop-filter: blur(6px);
-  display: flex; align-items: center; justify-content: center;
-  padding: 1rem;
-  opacity: 0; pointer-events: none;
-  transition: opacity .22s;
-}
-.fd-overlay.open {
-  opacity: 1; pointer-events: auto;
-}
-.fd-modal {
-  background: var(--nc-surface);
-  border: 1px solid var(--nc-border);
-  border-radius: 20px;
-  width: 100%; max-width: 520px;
-  max-height: 90vh; overflow-y: auto;
-  box-shadow: 0 24px 80px rgba(0,0,0,.4), 0 0 0 1px rgba(56,189,248,.1);
-  transform: scale(.94) translateY(12px);
-  transition: transform .25s cubic-bezier(.16,1,.3,1);
-  position: relative;
-}
-.fd-overlay.open .fd-modal {
-  transform: scale(1) translateY(0);
-}
-.fd-modal-img {
-  width: 100%; height: 220px; object-fit: cover;
-  border-radius: 20px 20px 0 0;
-  display: block;
-}
-.fd-modal-img-ph {
-  width: 100%; height: 180px;
-  background: var(--nc-surface-2);
-  border-radius: 20px 20px 0 0;
-  display: flex; flex-direction: column;
-  align-items: center; justify-content: center; gap: .5rem;
-  color: var(--nc-text-faint);
-}
-.fd-modal-img-ph i { font-size: 2.5rem; }
-.fd-modal-img-ph span { font-size: .65rem; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; }
-
-.fd-modal-body { padding: 1.4rem 1.6rem 1.8rem; }
-.fd-modal-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem; margin-bottom: .85rem; }
-.fd-modal-name { font-size: 1.25rem; font-weight: 900; color: var(--nc-text); letter-spacing: -.03em; line-height: 1.2; margin: 0; }
-.fd-modal-close {
-  width: 32px; height: 32px; border-radius: 8px; flex-shrink: 0;
-  background: var(--nc-surface-2); border: 1px solid var(--nc-border);
-  color: var(--nc-text-muted); cursor: pointer;
-  display: flex; align-items: center; justify-content: center;
-  font-size: .8rem; transition: background .14s, color .14s;
-}
-.fd-modal-close:hover { background: var(--nc-surface-3); color: var(--nc-text); }
-
-.fd-modal-meta { display: flex; flex-wrap: wrap; align-items: center; gap: .45rem; margin-bottom: 1rem; }
-.fd-modal-diet {
-  display: inline-flex; align-items: center; gap: .28rem;
-  background: rgba(16,185,129,.1); color: #34d399;
-  border: 1px solid rgba(52,211,153,.25);
-  border-radius: 99px; padding: .22rem .75rem;
-  font-size: .68rem; font-weight: 700;
-}
-.fd-modal-price {
-  font-family: 'JetBrains Mono', monospace;
-  font-size: .85rem; font-weight: 700;
-  color: var(--nc-brand);
-  background: var(--nc-brand-l);
-  border: 1px solid rgba(14,165,233,.2);
-  border-radius: 99px; padding: .22rem .75rem;
+/* Quick view modal */
+.fqv-backdrop{
+  position:fixed;
+  inset:0;
+  z-index:9000;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:1.5rem;
+  background:rgba(3,8,18,.72);
+  backdrop-filter:blur(14px);
+  -webkit-backdrop-filter:blur(14px);
+  opacity:0;
+  pointer-events:none;
+  transition:opacity .22s ease;
 }
 
-.fd-modal-desc {
-  font-size: .84rem; color: var(--nc-text-muted); line-height: 1.7;
-  margin-bottom: 1.1rem;
+.fqv-backdrop.open{
+  opacity:1;
+  pointer-events:auto;
 }
 
-.fd-modal-nutr-title {
-  font-size: .62rem; font-weight: 900; text-transform: uppercase;
-  letter-spacing: .1em; color: var(--nc-text-faint); margin-bottom: .6rem;
+.fqv-modal{
+  width:100%;
+  max-width:520px;
+  border-radius:22px;
+  overflow:hidden;
+  background:linear-gradient(180deg, rgba(18,25,39,.98), rgba(16,22,34,.98));
+  border:1px solid rgba(80,110,160,.25);
+  box-shadow:0 32px 90px rgba(0,0,0,.45);
+  transform:translateY(16px) scale(.97);
+  transition:transform .22s ease;
 }
-.fd-modal-nutr {
-  display: grid; grid-template-columns: repeat(4, 1fr);
-  gap: .5rem; margin-bottom: 1.1rem;
-}
-.fd-modal-nb {
-  background: var(--nc-surface-2); border: 1px solid var(--nc-border);
-  border-radius: 12px; padding: .65rem .5rem;
-  display: flex; flex-direction: column; align-items: center; gap: .2rem;
-  text-align: center;
-}
-.fd-modal-nb b {
-  font-family: 'JetBrains Mono', monospace;
-  font-size: .92rem; font-weight: 700; line-height: 1;
-}
-.fd-modal-nb span { font-size: .55rem; font-weight: 800; text-transform: uppercase; letter-spacing: .07em; color: var(--nc-text-faint); }
-.fd-modal-nb.kcal b { color: #f97316; }
-.fd-modal-nb.prot b { color: #06b6d4; }
-.fd-modal-nb.carb b { color: #a78bfa; }
-.fd-modal-nb.fat  b { color: #ec4899; }
 
-.fd-modal-provider {
-  display: flex; align-items: center; gap: .6rem;
-  padding-top: .85rem; border-top: 1px solid var(--nc-border);
-  font-size: .78rem; color: var(--nc-text-muted); font-weight: 600;
+.fqv-backdrop.open .fqv-modal{
+  transform:translateY(0) scale(1);
 }
-.fd-modal-pav {
-  width: 28px; height: 28px; border-radius: 50%; flex-shrink: 0;
-  background: linear-gradient(135deg, var(--nc-brand) 0%, #38bdf8 100%);
-  display: flex; align-items: center; justify-content: center;
-  font-size: .72rem; font-weight: 900; color: #fff;
+
+.fqv-image{
+  position:relative;
+  height:260px;
+  background:var(--nc-surface-3);
+  overflow:hidden;
 }
-.fd-modal-views {
-  margin-left: auto;
-  display: inline-flex; align-items: center; gap: .3rem;
-  font-size: .68rem; font-weight: 700; color: var(--nc-text-faint);
+
+.fqv-image img{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  display:block;
 }
-.fd-modal-views i { font-size: .6rem; }
+
+.fqv-image-placeholder{
+  width:100%;
+  height:100%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  color:var(--nc-text-faint);
+  font-size:2rem;
+}
+
+.fqv-close{
+  position:absolute;
+  top:14px;
+  right:14px;
+  width:36px;
+  height:36px;
+  border-radius:10px;
+  border:1px solid rgba(255,255,255,.12);
+  background:rgba(20,27,40,.78);
+  color:#cbd5e1;
+  cursor:pointer;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+
+.fqv-body{
+  padding:1.15rem 1.2rem 1.2rem;
+}
+
+.fqv-title{
+  font-size:1.55rem;
+  font-weight:900;
+  color:#f8fafc;
+  letter-spacing:-.03em;
+  margin:0 0 .85rem;
+}
+
+.fqv-meta{
+  display:flex;
+  align-items:center;
+  gap:.55rem;
+  flex-wrap:wrap;
+  margin-bottom:.9rem;
+}
+
+.fqv-pill{
+  display:inline-flex;
+  align-items:center;
+  gap:.35rem;
+  border-radius:999px;
+  padding:.3rem .78rem;
+  font-size:.78rem;
+  font-weight:800;
+}
+
+.fqv-pill.diet{
+  background:rgba(16,185,129,.12);
+  color:#34d399;
+  border:1px solid rgba(16,185,129,.18);
+}
+
+.fqv-pill.price{
+  background:rgba(14,165,233,.14);
+  color:#38bdf8;
+  border:1px solid rgba(14,165,233,.22);
+  font-family:'JetBrains Mono', monospace;
+}
+
+.fqv-rating{
+  display:flex;
+  align-items:center;
+  gap:.55rem;
+  flex-wrap:wrap;
+  margin-bottom:1rem;
+  padding-bottom:1rem;
+  border-bottom:1px solid rgba(148,163,184,.16);
+}
+
+.fqv-stars{
+  display:flex;
+  align-items:center;
+  gap:.08rem;
+  color:#fbbf24;
+  font-size:.9rem;
+}
+
+.fqv-rating-value{
+  font-family:'JetBrains Mono', monospace;
+  font-size:.86rem;
+  font-weight:800;
+  color:#f8fafc;
+}
+
+.fqv-rating-count{
+  font-size:.78rem;
+  font-weight:700;
+  color:#94a3b8;
+}
+
+.fqv-desc{
+  color:#94a3b8;
+  font-size:.95rem;
+  line-height:1.7;
+  margin:0 0 1rem;
+}
+
+.fqv-footer{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:.75rem;
+  padding-top:1rem;
+  border-top:1px solid rgba(148,163,184,.16);
+}
+
+.fqv-provider{
+  display:flex;
+  align-items:center;
+  gap:.65rem;
+  min-width:0;
+}
+
+.fqv-provider-avatar{
+  width:34px;
+  height:34px;
+  border-radius:999px;
+  background:#38bdf8;
+  color:#fff;
+  font-weight:800;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  flex-shrink:0;
+}
+
+.fqv-provider-name{
+  color:#94a3b8;
+  font-size:.84rem;
+  font-weight:700;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+
+.fqv-review-btn{
+  display:inline-flex;
+  align-items:center;
+  gap:.42rem;
+  background:linear-gradient(135deg, var(--nc-brand-d), var(--nc-brand));
+  color:#fff;
+  border:none;
+  text-decoration:none;
+  border-radius:12px;
+  padding:.7rem 1rem;
+  font-size:.82rem;
+  font-weight:800;
+  white-space:nowrap;
+}
+
+.fqv-review-btn:hover{
+  color:#fff;
+  filter:brightness(1.05);
+}
 </style>
 {% endblock %}
 
 {% block content %}
 <div class="fs">
 
-<!-- ══ HERO ══ -->
 <div class="fs-hero">
   <div class="fs-orb fs-orb--a"></div>
   <div class="fs-orb fs-orb--b"></div>
   <div class="fs-orb fs-orb--c"></div>
 
   <div class="fs-hero__inner">
-
-    <!-- Left: branding -->
     <div class="fs-hero__left">
       <div class="fs-hero__badge">
         <span class="fs-hero__badge-dot"></span>
@@ -667,21 +900,20 @@
       </div>
       <h1 class="fs-hero__h1">
         {% if current_user.is_food_provider() %}
-        Explore meals from <span class="grad">other providers</span>
+        Browse <span class="grad">your foods and other providers’ foods</span>
         {% else %}
         Find your next <span class="grad">perfect meal</span>
         {% endif %}
       </h1>
       <p class="fs-hero__sub">
         {% if current_user.is_food_provider() %}
-        Browse dishes listed by other NutriConnect providers
+        Explore the full food catalog across NutriConnect, including your own items, with ratings and nutrition details.
         {% else %}
-        Search dishes from all NutriConnect providers
+        Search dishes from all NutriConnect providers.
         {% endif %}
       </p>
     </div>
 
-    <!-- Right: search + stats -->
     <div class="fs-hero__right">
       <div class="fs-hero__searchbar">
         <i class="fas fa-magnifying-glass fs-hero__searchbar-ico"></i>
@@ -706,25 +938,21 @@
           <div class="fs-hstat__lbl">Providers</div>
         </div>
         <div class="fs-hstat">
-          <div class="fs-hstat__val">9</div>
-          <div class="fs-hstat__lbl">Categories</div>
+          <div class="fs-hstat__val">{{ favorite_count or 0 }}</div>
+          <div class="fs-hstat__lbl">{% if current_user.is_food_provider() %}Ratings Ready{% else %}Saved Foods{% endif %}</div>
         </div>
       </div>
     </div>
-
   </div>
 </div>
 
-<!-- ══ BODY ══ -->
 <div class="fs-body">
 
-  <!-- ── SIDEBAR ── -->
   <aside class="fs-sidebar">
     <form id="filterForm">
       <input type="hidden" id="hiddenQ" name="q" value="{{ q }}">
 
       <div class="fs-panel">
-
         <div class="fs-panel__hd">
           <div class="fs-panel__title"><i class="fas fa-sliders"></i> Filters</div>
           <button type="button" class="fs-btn-reset" id="clearBtn">
@@ -732,7 +960,6 @@
           </button>
         </div>
 
-        <!-- Diet -->
         <div class="fs-fsec">
           <div class="fs-flbl"><i class="fas fa-leaf"></i> Diet Type</div>
           <div class="fs-pills">
@@ -746,7 +973,6 @@
           <input type="hidden" id="dietInput" name="diet_type" value="{{ diet_type or '' }}">
         </div>
 
-        <!-- Calories -->
         <div class="fs-fsec">
           <div class="fs-flbl"><i class="fas fa-fire-flame-curved"></i> Max Calories</div>
           <div class="fs-rrow">
@@ -758,7 +984,6 @@
           <input type="hidden" id="calInput" name="max_cal" value="{{ max_cal or '' }}">
         </div>
 
-        <!-- Protein -->
         <div class="fs-fsec">
           <div class="fs-flbl"><i class="fas fa-drumstick-bite"></i> Min Protein</div>
           <div class="fs-rrow">
@@ -770,28 +995,23 @@
           <input type="hidden" id="protInput" name="min_protein" value="{{ min_pro or '' }}">
         </div>
 
-        <!-- Price -->
         <div class="fs-fsec">
           <div class="fs-flbl"><i class="fas fa-tag"></i> Max Price</div>
           <div class="fs-rrow">
             <input type="range" class="fs-range" id="priceRange"
-                   min="0" max="100" step="0.5"
-                   value="{{ max_price or 100 }}" oninput="onRange('price')">
+                   min="0" max="1000" step="10"
+                   value="{{ max_price or 1000 }}" oninput="onRange('price')">
             <span class="fs-rval" id="priceVal">{% if max_price %}${{ max_price }}{% else %}Any{% endif %}</span>
           </div>
           <input type="hidden" id="priceInput" name="max_price" value="{{ max_price or '' }}">
         </div>
 
-        <!-- Active chips -->
         <div class="fs-chips" id="activeChips"></div>
-
       </div>
     </form>
   </aside>
 
-  <!-- ── RESULTS ── -->
   <section class="fs-results">
-
     <div class="fs-meta">
       <div class="fs-cblock">
         <div class="fs-cdot"></div>
@@ -840,14 +1060,158 @@
       {% endif %}
     </div>
     {% endif %}
-
   </section>
 </div>
 
-<!-- ══ FOOD DETAIL MODAL ══ -->
-<div class="fd-overlay" id="fdOverlay">
-  <div class="fd-modal" id="fdModal">
-    <div id="fdModalContent"></div>
+{% if not current_user.is_food_provider() %}
+<div class="fs-bottom-sections">
+
+  <div class="fs-qcard">
+    <div class="fs-qhead">
+      <div class="fs-qhead-left">
+        <div class="fs-qico heart"><i class="fas fa-heart"></i></div>
+        <div>
+          <div class="fs-qtitle">Favourite Foods</div>
+          <div class="fs-qsub">{{ favorite_count or 0 }} saved item{{ '' if (favorite_count or 0) == 1 else 's' }}</div>
+        </div>
+      </div>
+      <a href="{{ url_for('orders.favorites') }}" class="fs-qbtn">
+        <i class="fas fa-heart"></i> View All
+      </a>
+    </div>
+
+    <div class="fs-qbody">
+      {% if favorite_items %}
+      <div class="fs-qlist">
+        {% for fav in favorite_items %}
+          {% if fav.food %}
+          <div class="fs-qitem">
+            <div class="fs-qitem-left">
+              <div class="fs-qthumb">
+                {% if fav.food.image %}
+                  <img src="{{ url_for('static', filename='uploads/' ~ fav.food.image) }}" alt="{{ fav.food.name }}">
+                {% else %}
+                  <i class="fas fa-utensils"></i>
+                {% endif %}
+              </div>
+              <div class="fs-qmeta">
+                <div class="fs-qname">{{ fav.food.name }}</div>
+                <div class="fs-qdesc">
+                  {% if fav.food.price is not none %}${{ "%.2f"|format(fav.food.price) }}{% else %}Price unavailable{% endif %}
+                </div>
+              </div>
+            </div>
+            <a href="{{ url_for('food_search.food_detail', food_id=fav.food.id) }}" class="fs-qgo">
+              <i class="fas fa-arrow-right"></i>
+            </a>
+          </div>
+          {% endif %}
+        {% endfor %}
+      </div>
+      {% else %}
+      <div class="fs-qempty">
+        <i class="fas fa-heart-crack"></i>
+        <h4>No favourites yet</h4>
+        <p>Save foods you like and they will appear here for quick access.</p>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+
+  <div class="fs-qcard">
+    <div class="fs-qhead">
+      <div class="fs-qhead-left">
+        <div class="fs-qico eye"><i class="fas fa-eye"></i></div>
+        <div>
+          <div class="fs-qtitle">Recently Viewed</div>
+          <div class="fs-qsub">{{ recent_view_count or 0 }} recent visit{{ '' if (recent_view_count or 0) == 1 else 's' }}</div>
+        </div>
+      </div>
+      <a href="{{ url_for('food_search.search_foods') }}" class="fs-qbtn">
+        <i class="fas fa-compass"></i> Explore
+      </a>
+    </div>
+
+    <div class="fs-qbody">
+      {% if recent_views %}
+      <div class="fs-qlist">
+        {% for item in recent_views %}
+          {% if item.food %}
+          <div class="fs-qitem">
+            <div class="fs-qitem-left">
+              <div class="fs-qthumb">
+                {% if item.food.image %}
+                  <img src="{{ url_for('static', filename='uploads/' ~ item.food.image) }}" alt="{{ item.food.name }}">
+                {% else %}
+                  <i class="fas fa-utensils"></i>
+                {% endif %}
+              </div>
+              <div class="fs-qmeta">
+                <div class="fs-qname">{{ item.food.name }}</div>
+                <div class="fs-qdesc">
+                  Viewed {{ item.viewed_at.strftime('%d %b %Y, %I:%M %p') if item.viewed_at else 'Recently' }}
+                </div>
+              </div>
+            </div>
+            <a href="{{ url_for('food_search.food_detail', food_id=item.food.id) }}" class="fs-qgo">
+              <i class="fas fa-arrow-right"></i>
+            </a>
+          </div>
+          {% endif %}
+        {% endfor %}
+      </div>
+      {% else %}
+      <div class="fs-qempty">
+        <i class="fas fa-clock-rotate-left"></i>
+        <h4>No recent views yet</h4>
+        <p>Foods you open from the catalog will show up here automatically.</p>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+
+</div>
+{% endif %}
+
+<div class="fqv-backdrop" id="foodQuickView" aria-hidden="true">
+  <div class="fqv-modal" role="dialog" aria-modal="true" aria-labelledby="fqvTitle">
+    <div class="fqv-image" id="fqvImageWrap">
+      <button type="button" class="fqv-close" id="fqvCloseBtn" aria-label="Close">
+        <i class="fas fa-xmark"></i>
+      </button>
+      <div class="fqv-image-placeholder" id="fqvImagePlaceholder">
+        <i class="fas fa-utensils"></i>
+      </div>
+      <img id="fqvImage" alt="" style="display:none;">
+    </div>
+
+    <div class="fqv-body">
+      <h3 class="fqv-title" id="fqvTitle">Food Item</h3>
+
+      <div class="fqv-meta">
+        <span class="fqv-pill diet" id="fqvDiet" style="display:none;"></span>
+        <span class="fqv-pill price" id="fqvPrice" style="display:none;"></span>
+      </div>
+
+      <div class="fqv-rating">
+        <div class="fqv-stars" id="fqvStars"></div>
+        <span class="fqv-rating-value" id="fqvRatingValue">0.0</span>
+        <span class="fqv-rating-count" id="fqvRatingCount">0 reviews</span>
+      </div>
+
+      <p class="fqv-desc" id="fqvDesc">No description available.</p>
+
+      <div class="fqv-footer">
+        <div class="fqv-provider">
+          <div class="fqv-provider-avatar" id="fqvProviderInitial">P</div>
+          <div class="fqv-provider-name" id="fqvProviderName">Unknown Provider</div>
+        </div>
+
+        <a href="#" class="fqv-review-btn" id="fqvReviewBtn">
+          <i class="fas fa-star"></i> Submit Review
+        </a>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -887,8 +1251,9 @@
   const RC = {
     cal:   { r:'calRange',   v:'calVal',   i:'calInput',   fmt:x=>x>=2000?'Any':`${x} kcal`, none:x=>x>=2000 },
     prot:  { r:'protRange',  v:'protVal',  i:'protInput',  fmt:x=>x<=0?'Any':`${x}g`,        none:x=>x<=0   },
-    price: { r:'priceRange', v:'priceVal', i:'priceInput', fmt:x=>x>=100?'Any':`$${x}`,      none:x=>x>=100 },
+    price: { r:'priceRange', v:'priceVal', i:'priceInput', fmt:x=>x>=1000?'Any':`$${x}`,     none:x=>x>=1000 },
   };
+
   window.onRange = type => {
     const c = RC[type], raw = parseFloat($(c.r).value);
     $(c.v).textContent = c.fmt(raw);
@@ -900,7 +1265,9 @@
     const fd = new FormData(form);
     fd.set('sort', sortSel.value);
     const p = new URLSearchParams();
-    for (const [k,v] of fd.entries()) { if (v.trim()) p.append(k, v.trim()); }
+    for (const [k,v] of fd.entries()) {
+      if (v.trim()) p.append(k, v.trim());
+    }
     return p;
   }
 
@@ -910,21 +1277,26 @@
     min_protein: v => `💪 ≥ ${v}g protein`,
     max_price:   v => `🏷 ≤ $${v}`,
   };
+
   function renderChips() {
     chipsRow.innerHTML = '';
     for (const [k,v] of params().entries()) {
-      if (k==='q'||k==='sort') continue;
+      if (k === 'q' || k === 'sort') continue;
       const el = document.createElement('span');
       el.className = 'fs-chip';
-      el.innerHTML = `${CL[k]?CL[k](v):v} <i class="fas fa-xmark"></i>`;
+      el.innerHTML = `${CL[k] ? CL[k](v) : v} <i class="fas fa-xmark"></i>`;
       el.onclick = () => clearOne(k);
       chipsRow.appendChild(el);
     }
   }
+
   function clearOne(key) {
     const el = form.querySelector(`[name="${key}"]`);
     if (el) el.value = '';
-    if (key==='diet_type') { diet=''; document.querySelectorAll('.fs-pill').forEach(p=>p.classList.remove('on')); }
+    if (key === 'diet_type') {
+      diet = '';
+      document.querySelectorAll('.fs-pill').forEach(p => p.classList.remove('on'));
+    }
     go();
   }
 
@@ -942,7 +1314,9 @@
 
   function fetch_(push=true) {
     const p = params();
-    skeleton(); renderChips();
+    skeleton();
+    renderChips();
+
     fetch(`{{ url_for('food_search.search_foods') }}?${p}`, {
       headers: { 'X-Requested-With': 'XMLHttpRequest' }
     })
@@ -950,10 +1324,10 @@
     .then(d => {
       gridWrap.innerHTML = `<div id="foodGrid">${d.html}</div>`;
       counter.textContent = heroCount.textContent = d.total;
+
       document.querySelectorAll('.food-card').forEach((c,i) => {
         c.style.animationDelay = `${i*.05}s`;
       });
-      attachCardClicks();
 
       if (push) history.pushState({}, '', `?${p}`);
     })
@@ -966,109 +1340,169 @@
   }
 
   $('clearBtn').addEventListener('click', () => {
-    form.reset(); diet = '';
-    document.querySelectorAll('.fs-pill').forEach(p=>p.classList.remove('on'));
+    form.reset();
+    diet = '';
+    document.querySelectorAll('.fs-pill').forEach(p => p.classList.remove('on'));
     $('dietInput').value = '';
-    $('calVal').textContent = $('protVal').textContent = $('priceVal').textContent = 'Any';
+    $('hiddenQ').value = '';
+    $('searchInput').value = '';
+    $('calVal').textContent = 'Any';
+    $('protVal').textContent = 'Any';
+    $('priceVal').textContent = 'Any';
     go();
   });
 
   form.addEventListener('submit', e => e.preventDefault());
 
   document.addEventListener('keydown', e => {
-    if ((e.metaKey||e.ctrlKey) && e.key==='k') {
-      e.preventDefault(); $('searchInput').focus(); $('searchInput').select();
+    if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+      e.preventDefault();
+      $('searchInput').focus();
+      $('searchInput').select();
     }
   });
 
   window.addEventListener('popstate', () => fetch_(false));
   renderChips();
 
+  const quickView = document.getElementById('foodQuickView');
+  const closeBtn = document.getElementById('fqvCloseBtn');
+  const imageEl = document.getElementById('fqvImage');
+  const imagePlaceholder = document.getElementById('fqvImagePlaceholder');
+  const titleEl = document.getElementById('fqvTitle');
+  const dietEl = document.getElementById('fqvDiet');
+  const priceEl = document.getElementById('fqvPrice');
+  const starsEl = document.getElementById('fqvStars');
+  const ratingValueEl = document.getElementById('fqvRatingValue');
+  const ratingCountEl = document.getElementById('fqvRatingCount');
+  const descEl = document.getElementById('fqvDesc');
+  const providerInitialEl = document.getElementById('fqvProviderInitial');
+  const providerNameEl = document.getElementById('fqvProviderName');
+  const reviewBtnEl = document.getElementById('fqvReviewBtn');
 
-  /* ── Food Detail Modal ── */
-  const overlay = document.getElementById('fdOverlay');
-  const modalContent = document.getElementById('fdModalContent');
+  function renderStars(rating) {
+    let html = '';
+    const value = Number(rating) || 0;
 
-  function openFoodModal(card) {
-    const id       = card.dataset.id;
-    const name     = card.dataset.name;
-    const desc     = card.dataset.desc;
-    const img      = card.dataset.img;
-    const price    = card.dataset.price;
-    const diet     = card.dataset.diet;
-    const cal      = card.dataset.cal;
-    const prot     = card.dataset.prot;
-    const carb     = card.dataset.carb;
-    const fat      = card.dataset.fat;
-    const provider = card.dataset.provider;
-    const views    = card.dataset.views || '—';
-
-    modalContent.innerHTML = `
-      ${img
-        ? `<img class="fd-modal-img" src="/static/uploads/${img}" alt="${name}">`
-        : `<div class="fd-modal-img-ph"><i class="fas fa-utensils"></i><span>No photo</span></div>`
+    for (let i = 0; i < 5; i += 1) {
+      if (value >= i + 1) {
+        html += '<i class="fas fa-star"></i>';
+      } else if (value >= i + 0.5) {
+        html += '<i class="fas fa-star-half-stroke"></i>';
+      } else {
+        html += '<i class="far fa-star" style="color:var(--nc-text-faint);"></i>';
       }
-      <div class="fd-modal-body">
-        <div class="fd-modal-top">
-          <h2 class="fd-modal-name">${name}</h2>
-          <button class="fd-modal-close" onclick="closeFoodModal()"><i class="fas fa-xmark"></i></button>
-        </div>
-        <div class="fd-modal-meta">
-          ${diet ? `<span class="fd-modal-diet"><i class="fas fa-leaf" style="font-size:.55rem"></i> ${diet}</span>` : ''}
-          ${price ? `<span class="fd-modal-price">$${price}</span>` : ''}
-        </div>
-        ${desc ? `<p class="fd-modal-desc">${desc}</p>` : ''}
-        ${(cal || prot || carb || fat) ? `
-        <div class="fd-modal-nutr-title">Nutrition per serving</div>
-        <div class="fd-modal-nutr">
-          ${cal  ? `<div class="fd-modal-nb kcal"><b>${cal}</b><span>kcal</span></div>` : ''}
-          ${prot ? `<div class="fd-modal-nb prot"><b>${prot}g</b><span>protein</span></div>` : ''}
-          ${carb ? `<div class="fd-modal-nb carb"><b>${carb}g</b><span>carbs</span></div>` : ''}
-          ${fat  ? `<div class="fd-modal-nb fat"><b>${fat}g</b><span>fat</span></div>` : ''}
-        </div>` : ''}
-        <div class="fd-modal-provider">
-          <div class="fd-modal-pav">${provider ? provider[0].toUpperCase() : '?'}</div>
-          <span>by ${provider || 'Unknown'}</span>
-          <div class="fd-modal-views"><i class="fas fa-eye"></i> ${views} views</div>
-        </div>
-      </div>
-    `;
+    }
 
-    overlay.classList.add('open');
+    return html;
+  }
+
+  function closeQuickView() {
+    quickView.classList.remove('open');
+    quickView.setAttribute('aria-hidden', 'true');
+    document.body.style.overflow = '';
+  }
+
+  function openQuickView(card) {
+    if (!card) return;
+
+    const data = card.dataset;
+    const imagePath = data.img ? `/static/uploads/${data.img}` : '';
+    const rating = parseFloat(data.rating || '0') || 0;
+    const reviewCount = parseInt(data.reviewCount || '0', 10) || 0;
+    const foodId = data.id;
+
+    titleEl.textContent = data.name || 'Food Item';
+    descEl.textContent = data.desc || 'No description available.';
+    providerNameEl.textContent = data.provider || 'Unknown Provider';
+    providerInitialEl.textContent = (data.providerInitial || 'P').charAt(0).toUpperCase();
+    ratingValueEl.textContent = rating.toFixed(1);
+    ratingCountEl.textContent = `${reviewCount} review${reviewCount === 1 ? '' : 's'}`;
+    starsEl.innerHTML = renderStars(rating);
+    reviewBtnEl.href = data.detailUrl || '#';
+
+    if (data.diet) {
+      dietEl.style.display = 'inline-flex';
+      dietEl.innerHTML = `<i class="fas fa-leaf"></i> ${data.diet}`;
+    } else {
+      dietEl.style.display = 'none';
+      dietEl.innerHTML = '';
+    }
+
+    if (data.price) {
+      priceEl.style.display = 'inline-flex';
+      priceEl.textContent = `$${data.price}`;
+    } else {
+      priceEl.style.display = 'none';
+      priceEl.textContent = '';
+    }
+
+    if (imagePath) {
+      imageEl.src = imagePath;
+      imageEl.alt = data.name || 'Food image';
+      imageEl.style.display = 'block';
+      imagePlaceholder.style.display = 'none';
+    } else {
+      imageEl.removeAttribute('src');
+      imageEl.style.display = 'none';
+      imagePlaceholder.style.display = 'flex';
+    }
+
+    quickView.classList.add('open');
+    quickView.setAttribute('aria-hidden', 'false');
     document.body.style.overflow = 'hidden';
 
-    // Track view — only once per session
-    const key = `viewed_${id}`;
-    if (!sessionStorage.getItem(key)) {
-      fetch(`/food/view/${id}`, { method: 'POST' });
-      sessionStorage.setItem(key, '1');
+    if (foodId) {
+      const key = `viewed_${foodId}`;
+      if (!sessionStorage.getItem(key)) {
+        fetch(`/food/view/${foodId}`, { method: 'POST' }).catch(() => {});
+        sessionStorage.setItem(key, '1');
+      }
     }
   }
 
-  window.closeFoodModal = function() {
-    overlay.classList.remove('open');
-    document.body.style.overflow = '';
-  };
+  document.addEventListener('click', function (event) {
+    const reviewLink = event.target.closest('.js-review-link');
+    if (reviewLink) {
+      closeQuickView();
+      return;
+    }
 
-  overlay.addEventListener('click', e => {
-    if (e.target === overlay) closeFoodModal();
+    const blockedAction = event.target.closest('.food-footer, form, button, .btn-view');
+    if (blockedAction) {
+      return;
+    }
+
+    const imageTrigger = event.target.closest('.food-card .fc-img');
+    if (!imageTrigger) {
+      return;
+    }
+
+    const card = imageTrigger.closest('.food-card');
+    openQuickView(card);
   });
 
-  document.addEventListener('keydown', e => {
-    if (e.key === 'Escape') closeFoodModal();
+  quickView.addEventListener('click', function (event) {
+    if (event.target === quickView) {
+      closeQuickView();
+    }
   });
 
-  // Attach click to food cards (called after render too)
-  function attachCardClicks() {
-    document.querySelectorAll('.food-card[data-id]').forEach(card => {
-      card.style.cursor = 'pointer';
-      card.onclick = () => openFoodModal(card);
-    });
-  }
-  attachCardClicks();
+  closeBtn.addEventListener('click', closeQuickView);
 
+  reviewBtnEl.addEventListener('click', function () {
+    closeQuickView();
+  });
 
+  document.addEventListener('keydown', function (event) {
+    if (event.key === 'Escape') {
+      closeQuickView();
+    }
+  });
 
+  window.addEventListener('pageshow', function () {
+    closeQuickView();
+  });
 })();
 </script>
 {% endblock %}

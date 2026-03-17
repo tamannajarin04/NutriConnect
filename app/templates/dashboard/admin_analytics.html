@@ -1,0 +1,872 @@
+{% extends "base.html" %}
+{% block title %}Admin Analytics · NutriConnect{% endblock %}
+
+{% block content %}
+<style>
+.admin-analytics {
+  --surf: var(--nc-surface);
+  --s2: var(--nc-surface-2);
+  --s3: var(--nc-surface-3);
+  --bdr: var(--nc-border);
+  --bdr2: var(--nc-border-2);
+  --txt: var(--nc-text);
+  --txt2: var(--nc-text-2);
+  --mu: var(--nc-text-muted);
+  --fa: var(--nc-text-faint);
+  --brand: var(--nc-brand);
+  --brand-d: var(--nc-brand-d);
+  --brand-l: var(--nc-brand-l);
+
+  --cyan: #38bdf8;
+  --emerald: #10b981;
+  --amber: #f59e0b;
+  --violet: #8b5cf6;
+  --rose: #f43f5e;
+  --indigo: #6366f1;
+
+  --cyan-l: rgba(56, 189, 248, .12);
+  --emerald-l: rgba(16, 185, 129, .12);
+  --amber-l: rgba(245, 158, 11, .12);
+  --violet-l: rgba(139, 92, 246, .12);
+  --rose-l: rgba(244, 63, 94, .12);
+  --indigo-l: rgba(99, 102, 241, .12);
+
+  --r: 18px;
+  --r-lg: 22px;
+  font-family: 'Sora', sans-serif;
+}
+
+.analytics-wrap {
+  max-width: 1180px;
+  margin: 0 auto;
+}
+
+.analytics-hero {
+  position: relative;
+  overflow: hidden;
+  border-radius: var(--r-lg);
+  padding: 1.9rem 2rem;
+  margin-bottom: 1.15rem;
+  background:
+    radial-gradient(circle at 12% 20%, rgba(255,255,255,.10), transparent 24%),
+    radial-gradient(circle at 86% 18%, rgba(255,255,255,.08), transparent 22%),
+    linear-gradient(135deg, #101827 0%, #0f2740 45%, #113b61 100%);
+  border: 1px solid rgba(56, 189, 248, .16);
+  box-shadow: var(--nc-card-shadow);
+}
+
+.analytics-hero > * {
+  position: relative;
+  z-index: 1;
+}
+
+.hero-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: .45rem;
+  padding: .34rem .82rem;
+  border-radius: 999px;
+  background: rgba(255,255,255,.08);
+  border: 1px solid rgba(255,255,255,.14);
+  color: rgba(255,255,255,.9);
+  font-size: .71rem;
+  font-weight: 800;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  margin-bottom: .9rem;
+}
+
+.hero-title {
+  margin: 0;
+  font-size: clamp(1.8rem, 4vw, 2.55rem);
+  font-weight: 900;
+  letter-spacing: -.05em;
+  color: #fff;
+}
+
+.hero-title .hl {
+  background: linear-gradient(135deg, #38bdf8 0%, #34d399 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.hero-sub {
+  margin-top: .55rem;
+  max-width: 720px;
+  color: rgba(255,255,255,.78);
+  font-size: .94rem;
+  line-height: 1.65;
+}
+
+.hero-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .75rem;
+  margin-top: 1.15rem;
+}
+
+.hero-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: .45rem;
+  text-decoration: none;
+  border-radius: 12px;
+  padding: .72rem 1.08rem;
+  font-size: .84rem;
+  font-weight: 800;
+  transition: all .18s ease;
+}
+
+.hero-btn-primary {
+  background: #fff;
+  color: #0f172a;
+}
+
+.hero-btn-primary:hover {
+  color: #020617;
+  transform: translateY(-1px);
+}
+
+.hero-btn-soft {
+  background: rgba(255,255,255,.08);
+  color: #fff;
+  border: 1px solid rgba(255,255,255,.14);
+}
+
+.hero-btn-soft:hover {
+  background: rgba(255,255,255,.14);
+  color: #fff;
+}
+
+.metric-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1rem;
+  margin-bottom: 1.15rem;
+}
+
+@media (max-width: 980px) {
+  .metric-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 560px) {
+  .metric-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.metric-card {
+  background: var(--surf);
+  border: 1px solid var(--bdr);
+  border-radius: var(--r);
+  padding: 1.1rem 1.1rem 1rem;
+  box-shadow: var(--nc-card-shadow);
+}
+
+.metric-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: .9rem;
+}
+
+.metric-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 13px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: .95rem;
+}
+
+.mi-brand   { background: var(--brand-l);   color: var(--brand-d); }
+.mi-amber   { background: var(--amber-l);   color: var(--amber); }
+.mi-cyan    { background: var(--cyan-l);    color: var(--cyan); }
+.mi-emerald { background: var(--emerald-l); color: var(--emerald); }
+
+.metric-value {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 1.65rem;
+  font-weight: 800;
+  line-height: 1;
+  color: var(--txt);
+}
+
+.metric-label {
+  margin-top: .45rem;
+  color: var(--mu);
+  font-size: .72rem;
+  font-weight: 800;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+
+.analytics-grid {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  gap: 1rem;
+}
+
+.span-7 { grid-column: span 7; }
+.span-5 { grid-column: span 5; }
+.span-6 { grid-column: span 6; }
+.span-12 { grid-column: span 12; }
+
+@media (max-width: 1040px) {
+  .span-7,
+  .span-5,
+  .span-6,
+  .span-12 {
+    grid-column: span 12;
+  }
+}
+
+.panel {
+  background: var(--surf);
+  border: 1px solid var(--bdr);
+  border-radius: var(--r);
+  overflow: hidden;
+  box-shadow: var(--nc-card-shadow);
+}
+
+.panel-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1rem 1.15rem;
+  border-bottom: 1px solid var(--bdr);
+  background: var(--s2);
+}
+
+.panel-head-left {
+  display: flex;
+  align-items: center;
+  gap: .75rem;
+}
+
+.panel-icon {
+  width: 38px;
+  height: 38px;
+  border-radius: 11px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: .88rem;
+}
+
+.pi-brand   { background: var(--brand-l);   color: var(--brand-d); }
+.pi-cyan    { background: var(--cyan-l);    color: var(--cyan); }
+.pi-violet  { background: var(--violet-l);  color: var(--violet); }
+.pi-emerald { background: var(--emerald-l); color: var(--emerald); }
+
+.panel-title {
+  font-size: .94rem;
+  font-weight: 800;
+  letter-spacing: -.02em;
+  color: var(--txt);
+}
+
+.panel-sub {
+  margin-top: .08rem;
+  font-size: .73rem;
+  color: var(--mu);
+}
+
+.panel-body {
+  padding: 1rem 1.15rem 1.15rem;
+}
+
+.chart-box {
+  position: relative;
+  height: 320px;
+}
+
+.chart-box.chart-sm {
+  height: 250px;
+}
+
+.empty {
+  padding: 2rem 1rem;
+  text-align: center;
+  color: var(--fa);
+  font-size: .86rem;
+}
+
+.provider-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: .8rem;
+  margin-bottom: 1rem;
+}
+
+@media (max-width: 520px) {
+  .provider-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.provider-stat {
+  border: 1px solid var(--bdr);
+  background: var(--s2);
+  border-radius: 14px;
+  padding: .95rem 1rem;
+}
+
+.provider-label {
+  font-size: .72rem;
+  font-weight: 800;
+  color: var(--mu);
+  text-transform: uppercase;
+  letter-spacing: .08em;
+}
+
+.provider-value {
+  margin-top: .45rem;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 1.32rem;
+  font-weight: 800;
+  color: var(--txt);
+}
+
+.provider-footnote {
+  margin-top: .9rem;
+  padding-top: .85rem;
+  border-top: 1px solid var(--bdr);
+  font-size: .78rem;
+  color: var(--mu);
+  line-height: 1.6;
+}
+
+.recent-list {
+  display: flex;
+  flex-direction: column;
+  gap: .75rem;
+}
+
+.recent-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: .9rem 1rem;
+  border: 1px solid var(--bdr);
+  background: var(--s2);
+  border-radius: 14px;
+}
+
+.recent-left {
+  display: flex;
+  align-items: center;
+  gap: .8rem;
+  min-width: 0;
+}
+
+.recent-avatar {
+  width: 38px;
+  height: 38px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--brand-l);
+  color: var(--brand-d);
+  font-size: .84rem;
+  font-weight: 800;
+  flex-shrink: 0;
+}
+
+.recent-name {
+  font-size: .84rem;
+  font-weight: 800;
+  color: var(--txt);
+}
+
+.recent-meta {
+  margin-top: .12rem;
+  font-size: .73rem;
+  color: var(--mu);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 320px;
+}
+
+.user-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: .32rem;
+  padding: .28rem .7rem;
+  border-radius: 999px;
+  border: 1px solid var(--bdr);
+  background: var(--s3);
+  color: var(--txt2);
+  font-size: .69rem;
+  font-weight: 800;
+  flex-shrink: 0;
+}
+
+.table-wrap {
+  overflow-x: auto;
+}
+
+.analytics-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.analytics-table th,
+.analytics-table td {
+  padding: .95rem .8rem;
+  border-bottom: 1px solid var(--bdr);
+  text-align: left;
+  vertical-align: middle;
+}
+
+.analytics-table th {
+  font-size: .74rem;
+  font-weight: 800;
+  color: var(--mu);
+  text-transform: uppercase;
+  letter-spacing: .08em;
+}
+
+.analytics-table td {
+  font-size: .84rem;
+  color: var(--txt2);
+}
+
+.analytics-table tbody tr:hover {
+  background: var(--s2);
+}
+
+.food-name {
+  font-size: .85rem;
+  font-weight: 800;
+  color: var(--txt);
+}
+
+.food-meta {
+  margin-top: .12rem;
+  font-size: .72rem;
+  color: var(--mu);
+}
+
+.muted-note {
+  font-size: .78rem;
+  color: var(--mu);
+}
+
+.small-note {
+  margin-top: .25rem;
+  font-size: .72rem;
+  color: var(--fa);
+}
+</style>
+
+<div class="admin-analytics">
+  <div class="analytics-wrap">
+
+    <div class="analytics-hero">
+      <div class="hero-badge">
+        <i class="fas fa-chart-pie"></i> Unified Admin Analytics
+      </div>
+      <h1 class="hero-title">Admin <span class="hl">Analytics</span></h1>
+      <div class="hero-sub">
+        A cleaner overview of orders, foods, providers, and user growth — without repeating the same information across multiple sections.
+      </div>
+
+      <div class="hero-actions">
+        <a href="{{ url_for('admin.provider_management') }}" class="hero-btn hero-btn-primary">
+          <i class="fas fa-user-shield"></i> Manage Providers
+        </a>
+        <a href="{{ url_for('admin.role_requests') }}" class="hero-btn hero-btn-soft">
+          <i class="fas fa-clipboard-check"></i> Role Requests
+        </a>
+      </div>
+    </div>
+
+    <div class="metric-grid">
+      <div class="metric-card">
+        <div class="metric-top">
+          <div class="metric-icon mi-brand"><i class="fas fa-users"></i></div>
+        </div>
+        <div class="metric-value">{{ total_users or 0 }}</div>
+        <div class="metric-label">Total Users</div>
+      </div>
+
+      <div class="metric-card">
+        <div class="metric-top">
+          <div class="metric-icon mi-amber"><i class="fas fa-bag-shopping"></i></div>
+        </div>
+        <div class="metric-value">{{ total_orders or 0 }}</div>
+        <div class="metric-label">Total Orders</div>
+      </div>
+
+      <div class="metric-card">
+        <div class="metric-top">
+          <div class="metric-icon mi-cyan"><i class="fas fa-utensils"></i></div>
+        </div>
+        <div class="metric-value">{{ total_foods or 0 }}</div>
+        <div class="metric-label">Food Items</div>
+      </div>
+
+      <div class="metric-card">
+        <div class="metric-top">
+          <div class="metric-icon mi-emerald"><i class="fas fa-star"></i></div>
+        </div>
+        <div class="metric-value">{{ "%.1f"|format(avg_rating or 0) }}</div>
+        <div class="metric-label">Average Rating</div>
+      </div>
+    </div>
+
+    <div class="analytics-grid">
+      <div class="panel span-6">
+        <div class="panel-head">
+          <div class="panel-head-left">
+            <div class="panel-icon pi-brand"><i class="fas fa-chart-pie"></i></div>
+            <div>
+              <div class="panel-title">Orders by Status</div>
+              <div class="panel-sub">Current order mix across the platform</div>
+            </div>
+          </div>
+        </div>
+        <div class="panel-body">
+          <div class="chart-box" id="ordersStatusChartWrap">
+            <canvas id="ordersStatusChart"></canvas>
+          </div>
+          <div class="empty" id="ordersStatusEmpty" style="display:none;">No order status data available yet.</div>
+        </div>
+      </div>
+
+      <div class="panel span-6">
+        <div class="panel-head">
+          <div class="panel-head-left">
+            <div class="panel-icon pi-cyan"><i class="fas fa-fire"></i></div>
+            <div>
+              <div class="panel-title">Popular Foods</div>
+              <div class="panel-sub">Top items by order count</div>
+            </div>
+          </div>
+        </div>
+        <div class="panel-body">
+          <div class="chart-box" id="popularFoodsChartWrap">
+            <canvas id="popularFoodsChart"></canvas>
+          </div>
+          <div class="empty" id="popularFoodsEmpty" style="display:none;">No food analytics available yet.</div>
+        </div>
+      </div>
+
+      <div class="panel span-5">
+        <div class="panel-head">
+          <div class="panel-head-left">
+            <div class="panel-icon pi-violet"><i class="fas fa-user-shield"></i></div>
+            <div>
+              <div class="panel-title">Provider Overview</div>
+              <div class="panel-sub">Verification and access status in one compact section</div>
+            </div>
+          </div>
+        </div>
+        <div class="panel-body">
+          <div class="provider-grid">
+            <div class="provider-stat">
+              <div class="provider-label">Active</div>
+              <div class="provider-value">{{ active_providers or 0 }}</div>
+            </div>
+            <div class="provider-stat">
+              <div class="provider-label">Verified</div>
+              <div class="provider-value">{{ verified_providers or 0 }}</div>
+            </div>
+            <div class="provider-stat">
+              <div class="provider-label">Restricted</div>
+              <div class="provider-value">{{ restricted_providers or 0 }}</div>
+            </div>
+            <div class="provider-stat">
+              <div class="provider-label">Suspended</div>
+              <div class="provider-value">{{ suspended_providers or 0 }}</div>
+            </div>
+          </div>
+
+          <div class="chart-box chart-sm" id="providerStatusChartWrap">
+            <canvas id="providerStatusChart"></canvas>
+          </div>
+          <div class="empty" id="providerStatusEmpty" style="display:none;">No provider data available yet.</div>
+
+          <div class="provider-footnote">
+            Use <strong>Manage Providers</strong> to verify accounts and update provider status to active, restricted, or suspended.
+          </div>
+        </div>
+      </div>
+
+      <div class="panel span-7">
+        <div class="panel-head">
+          <div class="panel-head-left">
+            <div class="panel-icon pi-emerald"><i class="fas fa-user-plus"></i></div>
+            <div>
+              <div class="panel-title">Recent Users</div>
+              <div class="panel-sub">Newest members who joined the platform</div>
+            </div>
+          </div>
+        </div>
+        <div class="panel-body">
+          {% if recent_users %}
+            <div class="recent-list">
+              {% for user in recent_users[:6] %}
+              <div class="recent-item">
+                <div class="recent-left">
+                  <div class="recent-avatar">{{ (user.username or 'U')[0]|upper }}</div>
+                  <div style="min-width:0;">
+                    <div class="recent-name">{{ user.username }}</div>
+                    <div class="recent-meta">
+                      {{ user.email or 'No email' }} · {{ user.created_at.strftime("%b %d, %Y") if user.created_at else "Recently joined" }}
+                    </div>
+                  </div>
+                </div>
+                <span class="user-chip"><i class="fas fa-user"></i> User</span>
+              </div>
+              {% endfor %}
+            </div>
+            {% if recent_users|length > 6 %}
+            <div class="small-note">Showing the 6 most recent users.</div>
+            {% endif %}
+          {% else %}
+            <div class="empty">No recent users found.</div>
+          {% endif %}
+        </div>
+      </div>
+
+      <div class="panel span-12">
+        <div class="panel-head">
+          <div class="panel-head-left">
+            <div class="panel-icon pi-cyan"><i class="fas fa-table"></i></div>
+            <div>
+              <div class="panel-title">Top Popular Foods</div>
+              <div class="panel-sub">Orders, views, and pricing overview</div>
+            </div>
+          </div>
+        </div>
+        <div class="panel-body">
+          {% if popular_foods %}
+            <div class="table-wrap">
+              <table class="analytics-table">
+                <thead>
+                  <tr>
+                    <th>Food</th>
+                    <th>Orders</th>
+                    <th>Views</th>
+                    <th>Price</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for food in popular_foods[:8] %}
+                  <tr>
+                    <td>
+                      <div class="food-name">{{ food.name }}</div>
+                      <div class="food-meta">Rating {{ food.average_rating or 0 }}</div>
+                    </td>
+                    <td>{{ food.order_count or 0 }}</td>
+                    <td>{{ food.view_count or 0 }}</td>
+                    <td>${{ "%.2f"|format(food.price or 0) }}</td>
+                  </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+            {% if popular_foods|length > 8 %}
+            <div class="small-note">Showing the top 8 foods.</div>
+            {% endif %}
+          {% else %}
+            <div class="empty">No food data available.</div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+  const ordersByStatus = {{ (orders_by_status or {}) | tojson }};
+
+  const popularFoods = [
+    {% for food in popular_foods[:6] %}
+      {
+        name: {{ (food.name or "") | tojson }},
+        order_count: {{ food.order_count or 0 }}
+      }{% if not loop.last %},{% endif %}
+    {% endfor %}
+  ];
+
+  const providerStatusData = {
+    active: {{ active_providers or 0 }},
+    restricted: {{ restricted_providers or 0 }},
+    suspended: {{ suspended_providers or 0 }}
+  };
+
+  const tickColor = getComputedStyle(document.documentElement).getPropertyValue('--nc-text-muted').trim() || '#94a3b8';
+  const gridColor = getComputedStyle(document.documentElement).getPropertyValue('--nc-border').trim() || 'rgba(148,163,184,.18)';
+  const legendColor = getComputedStyle(document.documentElement).getPropertyValue('--nc-text-2').trim() || '#cbd5e1';
+
+  const commonLegend = {
+    labels: {
+      color: legendColor,
+      usePointStyle: true,
+      boxWidth: 10,
+      padding: 16,
+      font: {
+        family: 'Sora',
+        size: 12,
+        weight: '600'
+      }
+    }
+  };
+
+  const orderLabels = Object.keys(ordersByStatus);
+  const orderValues = Object.values(ordersByStatus);
+
+  const ordersStatusWrap = document.getElementById("ordersStatusChartWrap");
+  const ordersStatusEmpty = document.getElementById("ordersStatusEmpty");
+
+  if (orderValues.length && orderValues.some(v => v > 0)) {
+    new Chart(document.getElementById("ordersStatusChart"), {
+      type: "doughnut",
+      data: {
+        labels: orderLabels.map(label => label.charAt(0).toUpperCase() + label.slice(1)),
+        datasets: [{
+          data: orderValues,
+          backgroundColor: [
+            "#f59e0b",
+            "#38bdf8",
+            "#8b5cf6",
+            "#06b6d4",
+            "#10b981",
+            "#f43f5e"
+          ],
+          borderWidth: 0,
+          hoverOffset: 6
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        cutout: "68%",
+        plugins: {
+          legend: {
+            position: "bottom",
+            ...commonLegend
+          }
+        }
+      }
+    });
+  } else {
+    ordersStatusWrap.style.display = "none";
+    ordersStatusEmpty.style.display = "block";
+  }
+
+  const popularFoodsWrap = document.getElementById("popularFoodsChartWrap");
+  const popularFoodsEmpty = document.getElementById("popularFoodsEmpty");
+
+  if (popularFoods.length && popularFoods.some(food => food.order_count > 0)) {
+    new Chart(document.getElementById("popularFoodsChart"), {
+      type: "bar",
+      data: {
+        labels: popularFoods.map(food => food.name),
+        datasets: [{
+          label: "Orders",
+          data: popularFoods.map(food => food.order_count),
+          backgroundColor: [
+            "#38bdf8",
+            "#22c55e",
+            "#8b5cf6",
+            "#f59e0b",
+            "#06b6d4",
+            "#f43f5e"
+          ],
+          borderRadius: 10,
+          borderSkipped: false,
+          maxBarThickness: 42
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: {
+            display: false
+          }
+        },
+        scales: {
+          x: {
+            ticks: {
+              color: tickColor,
+              font: {
+                family: 'Sora',
+                size: 11,
+                weight: '600'
+              }
+            },
+            grid: {
+              display: false
+            }
+          },
+          y: {
+            beginAtZero: true,
+            ticks: {
+              precision: 0,
+              color: tickColor,
+              font: {
+                family: 'JetBrains Mono',
+                size: 11
+              }
+            },
+            grid: {
+              color: gridColor
+            }
+          }
+        }
+      }
+    });
+  } else {
+    popularFoodsWrap.style.display = "none";
+    popularFoodsEmpty.style.display = "block";
+  }
+
+  const providerValues = Object.values(providerStatusData);
+  const providerStatusWrap = document.getElementById("providerStatusChartWrap");
+  const providerStatusEmpty = document.getElementById("providerStatusEmpty");
+
+  if (providerValues.some(v => v > 0)) {
+    new Chart(document.getElementById("providerStatusChart"), {
+      type: "doughnut",
+      data: {
+        labels: ["Active", "Restricted", "Suspended"],
+        datasets: [{
+          data: providerValues,
+          backgroundColor: ["#10b981", "#f59e0b", "#f43f5e"],
+          borderWidth: 0,
+          hoverOffset: 6
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        cutout: "64%",
+        plugins: {
+          legend: {
+            position: "bottom",
+            ...commonLegend
+          }
+        }
+      }
+    });
+  } else {
+    providerStatusWrap.style.display = "none";
+    providerStatusEmpty.style.display = "block";
+  }
+</script>
+{% endblock %}
