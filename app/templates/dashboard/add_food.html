@@ -466,7 +466,7 @@
                   <option value="dairy-free"  {% if request.form.get('diet_type')=='dairy-free'  %}selected{% endif %}>🥛 Dairy-Free</option>
                   <option value="halal"       {% if request.form.get('diet_type')=='halal'       %}selected{% endif %}>☪️ Halal</option>
                   <option value="low-carb"    {% if request.form.get('diet_type')=='low-carb'    %}selected{% endif %}>📉 Low-Carb</option>
-                  <option value="high-protein"{% if request.form.get('diet_type')=='high-protein'%}selected{% endif %}>💪 High-Protein</option>
+                  <option value="high-protein" {% if request.form.get('diet_type') == 'high-protein' %}selected{% endif %}>💪 High-Protein</option>
                 </select>
               </div>
             </div>

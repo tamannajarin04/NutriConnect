@@ -4,7 +4,7 @@ from flask import Blueprint, render_template, request, redirect, url_for, flash
 from flask_login import login_required, current_user
 from sqlalchemy import func
 
-from app.models import db, Order, OrderTimeline, FoodItem, FoodRating
+from app.models import db, Order, OrderTimeline, FoodItem, FoodRating, FoodView
 
 provider_bp = Blueprint("provider", __name__)
 
@@ -23,13 +23,17 @@ def protect_provider_routes():
 
 
 def get_food_views_count(food):
-    for attr_name in ("view_count", "total_views", "views_count"):
-        value = getattr(food, attr_name, None)
-        if value is not None:
-            try:
-                return int(value or 0)
-            except (TypeError, ValueError):
-                pass
+    """
+    Prefer computed display value from FoodView table.
+    Fallback to relation count.
+    Fallback to stored column only at the end.
+    """
+    display_value = getattr(food, "total_views_display", None)
+    if display_value is not None:
+        try:
+            return int(display_value or 0)
+        except (TypeError, ValueError):
+            pass
 
     views_rel = getattr(food, "views", None)
     if views_rel is not None:
@@ -41,28 +45,59 @@ def get_food_views_count(food):
             except TypeError:
                 pass
 
+    for attr_name in ("view_count", "total_views", "views_count"):
+        value = getattr(food, attr_name, None)
+        if value is not None:
+            try:
+                return int(value or 0)
+            except (TypeError, ValueError):
+                pass
+
     return 0
 
 
 def get_provider_foods_with_ratings():
+    """
+    Build provider foods with:
+    - average rating
+    - rating count
+    - exact popularity views from FoodView table
+    """
+    view_counts_subquery = (
+        db.session.query(
+            FoodView.food_id.label("food_id"),
+            func.count(FoodView.id).label("view_total"),
+        )
+        .group_by(FoodView.food_id)
+        .subquery()
+    )
+
     rows = (
         db.session.query(
             FoodItem,
             func.coalesce(func.avg(FoodRating.rating), 0).label("avg_rating"),
-            func.count(FoodRating.id).label("rating_total"),
+            func.count(func.distinct(FoodRating.id)).label("rating_total"),
+            func.coalesce(view_counts_subquery.c.view_total, 0).label("view_total"),
         )
         .outerjoin(FoodRating, FoodRating.food_id == FoodItem.id)
+        .outerjoin(view_counts_subquery, view_counts_subquery.c.food_id == FoodItem.id)
         .filter(FoodItem.provider_id == current_user.id)
-        .group_by(FoodItem.id)
+        .group_by(FoodItem.id, view_counts_subquery.c.view_total)
         .order_by(FoodItem.created_at.desc())
         .all()
     )
 
     foods = []
-    for food, avg_rating, rating_total in rows:
+    for food, avg_rating, rating_total, view_total in rows:
         food.average_rating_display = round(float(avg_rating or 0), 1)
         food.rating_count_display = int(rating_total or 0)
-        food.total_views_display = get_food_views_count(food)
+
+        # exact views from FoodView table
+        food.total_views_display = int(view_total or 0)
+
+        # optional sync so old templates using food.view_count still show correct value
+        food.view_count = int(view_total or 0)
+
         foods.append(food)
 
     return foods
