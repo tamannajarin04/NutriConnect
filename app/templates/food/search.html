@@ -265,17 +265,28 @@
 
 .fs-pills { display: flex; flex-wrap: wrap; gap: .34rem; }
 .fs-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  appearance: none;
+  -webkit-appearance: none;
   background: var(--nc-surface-2);
   border: 1.5px solid var(--nc-border);
-  border-radius: 99px; padding: .23rem .68rem;
-  font-size: .71rem; font-weight: 700;
+  border-radius: 99px;
+  padding: .23rem .68rem;
+  font-size: .71rem;
+  font-weight: 700;
   color: var(--nc-text-muted);
-  cursor: pointer; user-select: none;
+  cursor: pointer;
+  user-select: none;
   font-family: 'Plus Jakarta Sans', sans-serif;
   transition: all .13s;
+  line-height: 1.2;
+  outline: none;
 }
 .fs-pill:hover { border-color: var(--nc-brand); color: var(--nc-brand); background: var(--nc-brand-l); }
 .fs-pill.on { background: var(--nc-brand-l); border-color: var(--nc-brand); color: var(--nc-brand-d); font-weight: 800; }
+.fs-pill:focus-visible { box-shadow: 0 0 0 3px rgba(14,165,233,.14); }
 [data-theme="dark"] .fs-pill.on { color: #38bdf8; }
 
 .fs-rrow { display: flex; align-items: center; gap: .55rem; }
@@ -827,7 +838,7 @@
 .fqv-footer{
   display:flex;
   align-items:center;
-  justify-content:space-between;
+  justify-content:flex-start;
   gap:.75rem;
   padding-top:1rem;
   border-top:1px solid rgba(148,163,184,.16);
@@ -860,26 +871,6 @@
   white-space:nowrap;
   overflow:hidden;
   text-overflow:ellipsis;
-}
-
-.fqv-review-btn{
-  display:inline-flex;
-  align-items:center;
-  gap:.42rem;
-  background:linear-gradient(135deg, var(--nc-brand-d), var(--nc-brand));
-  color:#fff;
-  border:none;
-  text-decoration:none;
-  border-radius:12px;
-  padding:.7rem 1rem;
-  font-size:.82rem;
-  font-weight:800;
-  white-space:nowrap;
-}
-
-.fqv-review-btn:hover{
-  color:#fff;
-  filter:brightness(1.05);
 }
 </style>
 {% endblock %}
@@ -964,10 +955,15 @@
           <div class="fs-flbl"><i class="fas fa-leaf"></i> Diet Type</div>
           <div class="fs-pills">
             {% for dt in ['vegan','vegetarian','keto','paleo','gluten-free','dairy-free','halal','low-carb','high-protein'] %}
-              <span class="fs-pill {{ 'on' if diet_type == dt else '' }}"
-                    data-val="{{ dt }}" onclick="toggleDiet(this)">
+              <button
+                type="button"
+                class="fs-pill {{ 'on' if diet_type == dt else '' }}"
+                data-val="{{ dt }}"
+                aria-pressed="{{ 'true' if diet_type == dt else 'false' }}"
+                onclick="toggleDiet(this)"
+              >
                 {{ dt.replace('-',' ').title() }}
-              </span>
+              </button>
             {% endfor %}
           </div>
           <input type="hidden" id="dietInput" name="diet_type" value="{{ diet_type or '' }}">
@@ -1206,10 +1202,6 @@
           <div class="fqv-provider-avatar" id="fqvProviderInitial">P</div>
           <div class="fqv-provider-name" id="fqvProviderName">Unknown Provider</div>
         </div>
-
-        <a href="#" class="fqv-review-btn" id="fqvReviewBtn">
-          <i class="fas fa-star"></i> Submit Review
-        </a>
       </div>
     </div>
   </div>
@@ -1222,66 +1214,129 @@
 <script>
 (function () {
   const $ = id => document.getElementById(id);
-  const form      = $('filterForm');
-  const gridWrap  = $('gridWrap');
-  const counter   = $('resultCount');
+
+  const form = $('filterForm');
+  const gridWrap = $('gridWrap');
+  const counter = $('resultCount');
   const heroCount = $('heroCount');
-  const chipsRow  = $('activeChips');
-  const sortSel   = $('sortSelect');
+  const chipsRow = $('activeChips');
+  const sortSel = $('sortSelect');
+  const paginationWrap = $('paginationWrap');
+
   let timer = null;
-  let diet  = $('dietInput').value || '';
+  let diet = $('dietInput').value || '';
+  let activeController = null;
+  let activeRequestId = 0;
 
-  $('searchInput').addEventListener('input', () => {
-    $('hiddenQ').value = $('searchInput').value;
-    deb(fetch_);
-  });
-
-  function deb(fn, ms=380) { clearTimeout(timer); timer = setTimeout(fn, ms); }
-  window.go = () => deb(fetch_, 0);
-
-  window.toggleDiet = el => {
-    const v = el.dataset.val;
-    document.querySelectorAll('.fs-pill').forEach(p => p.classList.remove('on'));
-    diet = (diet === v) ? '' : v;
-    if (diet) el.classList.add('on');
-    $('dietInput').value = diet;
-    go();
+  const DEFAULTS = {
+    q: '',
+    diet_type: '',
+    max_cal: 2000,
+    min_protein: 0,
+    max_price: 1000,
+    sort: 'name'
   };
 
   const RC = {
-    cal:   { r:'calRange',   v:'calVal',   i:'calInput',   fmt:x=>x>=2000?'Any':`${x} kcal`, none:x=>x>=2000 },
-    prot:  { r:'protRange',  v:'protVal',  i:'protInput',  fmt:x=>x<=0?'Any':`${x}g`,        none:x=>x<=0   },
-    price: { r:'priceRange', v:'priceVal', i:'priceInput', fmt:x=>x>=1000?'Any':`$${x}`,     none:x=>x>=1000 },
+    cal: {
+      r: 'calRange',
+      v: 'calVal',
+      i: 'calInput',
+      def: DEFAULTS.max_cal,
+      fmt: x => x >= 2000 ? 'Any' : `${x} kcal`,
+      none: x => x >= 2000
+    },
+    prot: {
+      r: 'protRange',
+      v: 'protVal',
+      i: 'protInput',
+      def: DEFAULTS.min_protein,
+      fmt: x => x <= 0 ? 'Any' : `${x}g`,
+      none: x => x <= 0
+    },
+    price: {
+      r: 'priceRange',
+      v: 'priceVal',
+      i: 'priceInput',
+      def: DEFAULTS.max_price,
+      fmt: x => x >= 1000 ? 'Any' : `$${x}`,
+      none: x => x >= 1000
+    }
   };
 
-  window.onRange = type => {
-    const c = RC[type], raw = parseFloat($(c.r).value);
-    $(c.v).textContent = c.fmt(raw);
-    $(c.i).value = c.none(raw) ? '' : raw;
-    deb(fetch_);
+  const CL = {
+    diet_type:   v => `🥗 ${v.replace('-', ' ').replace(/\b\w/g, c => c.toUpperCase())}`,
+    max_cal:     v => `🔥 ≤ ${v} kcal`,
+    min_protein: v => `💪 ≥ ${v}g protein`,
+    max_price:   v => `🏷 ≤ $${v}`
   };
+
+  function deb(fn, ms = 380) {
+    clearTimeout(timer);
+    timer = setTimeout(fn, ms);
+  }
+
+  function setDietUI(value) {
+    diet = (value || '').trim();
+    $('dietInput').value = diet;
+
+    document.querySelectorAll('.fs-pill').forEach(btn => {
+      const on = btn.dataset.val === diet;
+      btn.classList.toggle('on', on);
+      btn.setAttribute('aria-pressed', on ? 'true' : 'false');
+    });
+  }
+
+  function setRangeState(type, value) {
+    const c = RC[type];
+    const num = Number.isFinite(Number(value)) ? Number(value) : c.def;
+
+    $(c.r).value = num;
+    $(c.v).textContent = c.fmt(num);
+    $(c.i).value = c.none(num) ? '' : num;
+  }
+
+  function setSearchState(value) {
+    const text = value || '';
+    $('hiddenQ').value = text;
+    $('searchInput').value = text;
+  }
+
+  function setSortState(value) {
+    sortSel.value = value || DEFAULTS.sort;
+  }
+
+  function syncFromUrl() {
+    const sp = new URLSearchParams(window.location.search);
+
+    setSearchState(sp.get('q') || DEFAULTS.q);
+    setDietUI(sp.get('diet_type') || DEFAULTS.diet_type);
+    setRangeState('cal', sp.get('max_cal') || DEFAULTS.max_cal);
+    setRangeState('prot', sp.get('min_protein') || DEFAULTS.min_protein);
+    setRangeState('price', sp.get('max_price') || DEFAULTS.max_price);
+    setSortState(sp.get('sort') || DEFAULTS.sort);
+  }
 
   function params() {
     const fd = new FormData(form);
     fd.set('sort', sortSel.value);
+
     const p = new URLSearchParams();
-    for (const [k,v] of fd.entries()) {
-      if (v.trim()) p.append(k, v.trim());
+    for (const [k, v] of fd.entries()) {
+      const value = String(v).trim();
+      if (value) {
+        p.append(k, value);
+      }
     }
     return p;
   }
 
-  const CL = {
-    diet_type:   v => `🥗 ${v.replace('-',' ').replace(/\b\w/g,c=>c.toUpperCase())}`,
-    max_cal:     v => `🔥 ≤ ${v} kcal`,
-    min_protein: v => `💪 ≥ ${v}g protein`,
-    max_price:   v => `🏷 ≤ $${v}`,
-  };
-
   function renderChips() {
     chipsRow.innerHTML = '';
-    for (const [k,v] of params().entries()) {
-      if (k === 'q' || k === 'sort') continue;
+
+    for (const [k, v] of params().entries()) {
+      if (k === 'q' || k === 'sort' || k === 'page') continue;
+
       const el = document.createElement('span');
       el.className = 'fs-chip';
       el.innerHTML = `${CL[k] ? CL[k](v) : v} <i class="fas fa-xmark"></i>`;
@@ -1291,17 +1346,24 @@
   }
 
   function clearOne(key) {
-    const el = form.querySelector(`[name="${key}"]`);
-    if (el) el.value = '';
     if (key === 'diet_type') {
-      diet = '';
-      document.querySelectorAll('.fs-pill').forEach(p => p.classList.remove('on'));
+      setDietUI('');
+    } else if (key === 'max_cal') {
+      setRangeState('cal', RC.cal.def);
+    } else if (key === 'min_protein') {
+      setRangeState('prot', RC.prot.def);
+    } else if (key === 'max_price') {
+      setRangeState('price', RC.price.def);
+    } else {
+      const el = form.querySelector(`[name="${key}"]`);
+      if (el) el.value = '';
     }
+
     go();
   }
 
   function skeleton() {
-    gridWrap.innerHTML = `<div class="fs-skel-g">${Array.from({length:6}).map(()=>`
+    gridWrap.innerHTML = `<div class="fs-skel-g">${Array.from({length: 6}).map(() => `
       <div class="fs-sk">
         <div class="sk-img"></div>
         <div class="sk-body">
@@ -1312,57 +1374,120 @@
       </div>`).join('')}</div>`;
   }
 
-  function fetch_(push=true) {
+  function buildUrl() {
     const p = params();
+    const qs = p.toString();
+    const base = `{{ url_for('food_search.search_foods') }}`;
+    return {
+      params: p,
+      url: qs ? `${base}?${qs}` : base
+    };
+  }
+
+  function fetch_(push = true) {
+    const { params: p, url } = buildUrl();
+    const requestId = ++activeRequestId;
+
+    if (activeController) {
+      activeController.abort();
+    }
+
+    activeController = new AbortController();
+
     skeleton();
     renderChips();
 
-    fetch(`{{ url_for('food_search.search_foods') }}?${p}`, {
-      headers: { 'X-Requested-With': 'XMLHttpRequest' }
+    fetch(url, {
+      headers: { 'X-Requested-With': 'XMLHttpRequest' },
+      signal: activeController.signal
     })
     .then(r => r.json())
     .then(d => {
-      gridWrap.innerHTML = `<div id="foodGrid">${d.html}</div>`;
-      counter.textContent = heroCount.textContent = d.total;
+      if (requestId !== activeRequestId) return;
 
-      document.querySelectorAll('.food-card').forEach((c,i) => {
-        c.style.animationDelay = `${i*.05}s`;
+      gridWrap.innerHTML = `<div id="foodGrid">${d.html}</div>`;
+      counter.textContent = d.total;
+      heroCount.textContent = d.total;
+
+      document.querySelectorAll('.food-card').forEach((c, i) => {
+        c.style.animationDelay = `${i * 0.05}s`;
       });
 
-      if (push) history.pushState({}, '', `?${p}`);
+      if (paginationWrap) {
+        paginationWrap.style.display = 'none';
+      }
+
+      if (push) {
+        const nextUrl = url.replace(window.location.origin, '');
+        const currentUrl = window.location.pathname + window.location.search;
+        if (nextUrl !== currentUrl) {
+          history.pushState({}, '', nextUrl);
+        }
+      }
     })
-    .catch(() => {
+    .catch(err => {
+      if (err.name === 'AbortError') return;
+
       gridWrap.innerHTML = `<div id="foodGrid"><div class="fs-empty">
         <div class="fs-empty__icon"><i class="fas fa-triangle-exclamation"></i></div>
-        <h4>Something went wrong</h4><p>Please refresh and try again.</p>
+        <h4>Something went wrong</h4>
+        <p>Please refresh and try again.</p>
       </div></div>`;
+
+      if (paginationWrap) {
+        paginationWrap.style.display = 'none';
+      }
     });
   }
 
+  window.go = () => deb(fetch_, 0);
+
+  window.toggleDiet = el => {
+    const v = el.dataset.val;
+    setDietUI(diet === v ? '' : v);
+    go();
+  };
+
+  window.onRange = type => {
+    const c = RC[type];
+    const raw = parseFloat($(c.r).value);
+    $(c.v).textContent = c.fmt(raw);
+    $(c.i).value = c.none(raw) ? '' : raw;
+    deb(fetch_);
+  };
+
+  $('searchInput').addEventListener('input', () => {
+    $('hiddenQ').value = $('searchInput').value;
+    deb(fetch_);
+  });
+
   $('clearBtn').addEventListener('click', () => {
     form.reset();
-    diet = '';
-    document.querySelectorAll('.fs-pill').forEach(p => p.classList.remove('on'));
-    $('dietInput').value = '';
-    $('hiddenQ').value = '';
-    $('searchInput').value = '';
-    $('calVal').textContent = 'Any';
-    $('protVal').textContent = 'Any';
-    $('priceVal').textContent = 'Any';
+    setSearchState('');
+    setDietUI('');
+    setRangeState('cal', RC.cal.def);
+    setRangeState('prot', RC.prot.def);
+    setRangeState('price', RC.price.def);
+    setSortState(DEFAULTS.sort);
     go();
   });
 
   form.addEventListener('submit', e => e.preventDefault());
 
   document.addEventListener('keydown', e => {
-    if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+    if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
       e.preventDefault();
       $('searchInput').focus();
       $('searchInput').select();
     }
   });
 
-  window.addEventListener('popstate', () => fetch_(false));
+  window.addEventListener('popstate', () => {
+    syncFromUrl();
+    fetch_(false);
+  });
+
+  syncFromUrl();
   renderChips();
 
   const quickView = document.getElementById('foodQuickView');
@@ -1378,7 +1503,6 @@
   const descEl = document.getElementById('fqvDesc');
   const providerInitialEl = document.getElementById('fqvProviderInitial');
   const providerNameEl = document.getElementById('fqvProviderName');
-  const reviewBtnEl = document.getElementById('fqvReviewBtn');
 
   function renderStars(rating) {
     let html = '';
@@ -1403,6 +1527,15 @@
     document.body.style.overflow = '';
   }
 
+  function countFoodView(foodId) {
+    if (!foodId) return;
+
+    fetch(`/food/view/${foodId}`, {
+      method: 'POST',
+      headers: { 'X-Requested-With': 'XMLHttpRequest' }
+    }).catch(() => {});
+  }
+
   function openQuickView(card) {
     if (!card) return;
 
@@ -1419,7 +1552,6 @@
     ratingValueEl.textContent = rating.toFixed(1);
     ratingCountEl.textContent = `${reviewCount} review${reviewCount === 1 ? '' : 's'}`;
     starsEl.innerHTML = renderStars(rating);
-    reviewBtnEl.href = data.detailUrl || '#';
 
     if (data.diet) {
       dietEl.style.display = 'inline-flex';
@@ -1452,13 +1584,7 @@
     quickView.setAttribute('aria-hidden', 'false');
     document.body.style.overflow = 'hidden';
 
-    if (foodId) {
-      const key = `viewed_${foodId}`;
-      if (!sessionStorage.getItem(key)) {
-        fetch(`/food/view/${foodId}`, { method: 'POST' }).catch(() => {});
-        sessionStorage.setItem(key, '1');
-      }
-    }
+    countFoodView(foodId);
   }
 
   document.addEventListener('click', function (event) {
@@ -1473,12 +1599,11 @@
       return;
     }
 
-    const imageTrigger = event.target.closest('.food-card .fc-img');
-    if (!imageTrigger) {
+    const card = event.target.closest('.food-card');
+    if (!card) {
       return;
     }
 
-    const card = imageTrigger.closest('.food-card');
     openQuickView(card);
   });
 
@@ -1489,10 +1614,6 @@
   });
 
   closeBtn.addEventListener('click', closeQuickView);
-
-  reviewBtnEl.addEventListener('click', function () {
-    closeQuickView();
-  });
 
   document.addEventListener('keydown', function (event) {
     if (event.key === 'Escape') {
