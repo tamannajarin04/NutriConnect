@@ -24,732 +24,308 @@
   .af-anim-5 { animation: af-slide .5s cubic-bezier(.16,1,.3,1) .25s both; }
 
   .af-crumb {
-    display: flex;
-    align-items: center;
-    gap: .5rem;
-    font-size: .73rem;
-    font-weight: 600;
-    color: var(--nc-text-faint);
+    display: flex; align-items: center; gap: .5rem;
+    font-size: .73rem; font-weight: 600; color: var(--nc-text-faint);
     margin-bottom: 1.5rem;
   }
-  .af-crumb a {
-    color: var(--nc-text-muted);
-    text-decoration: none;
-    transition: color .15s;
-  }
+  .af-crumb a { color: var(--nc-text-muted); text-decoration: none; transition: color .15s; }
   .af-crumb a:hover { color: var(--nc-brand); }
-  .af-crumb__sep {
-    font-size: .5rem;
-    color: var(--nc-border-2);
-  }
+  .af-crumb__sep { font-size: .5rem; color: var(--nc-border-2); }
 
   .af-hero {
-    position: relative;
-    overflow: hidden;
+    position: relative; overflow: hidden;
     background: linear-gradient(135deg, #0a1628 0%, #0c2340 50%, #0a1f3a 100%);
-    border-radius: var(--af-radius);
-    padding: 2rem 2.25rem;
-    margin-bottom: var(--af-gap);
-    display: flex;
-    align-items: center;
-    gap: 1.5rem;
+    border-radius: var(--af-radius); padding: 2rem 2.25rem;
+    margin-bottom: var(--af-gap); display: flex; align-items: center; gap: 1.5rem;
     border: 1px solid rgba(14,165,233,.15);
   }
   .af-hero::before {
-    content: '';
-    position: absolute;
-    inset: 0;
+    content: ''; position: absolute; inset: 0;
     background:
       radial-gradient(ellipse 60% 80% at 90% 50%, rgba(14,165,233,.12) 0%, transparent 70%),
       radial-gradient(ellipse 30% 60% at 10% 80%, rgba(6,182,212,.08) 0%, transparent 70%);
   }
   .af-hero::after {
-    content: '';
-    position: absolute;
-    inset: 0;
+    content: ''; position: absolute; inset: 0;
     background-image:
       linear-gradient(rgba(255,255,255,.03) 1px, transparent 1px),
       linear-gradient(90deg, rgba(255,255,255,.03) 1px, transparent 1px);
     background-size: 28px 28px;
   }
   .af-hero__icon {
-    position: relative;
-    z-index: 1;
-    width: 58px;
-    height: 58px;
-    border-radius: 18px;
-    flex-shrink: 0;
+    position: relative; z-index: 1; width: 58px; height: 58px; border-radius: 18px; flex-shrink: 0;
     background: linear-gradient(135deg, rgba(14,165,233,.3), rgba(6,182,212,.2));
-    border: 1px solid rgba(14,165,233,.35);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 1.55rem;
-    box-shadow: 0 0 0 6px rgba(14,165,233,.06), inset 0 1px 0 rgba(255,255,255,.1);
+    border: 1px solid rgba(14,165,233,.35); display: flex; align-items: center; justify-content: center;
+    font-size: 1.55rem; box-shadow: 0 0 0 6px rgba(14,165,233,.06), inset 0 1px 0 rgba(255,255,255,.1);
     backdrop-filter: blur(8px);
   }
   .af-hero__content { position: relative; z-index: 1; }
   .af-hero__title {
-    font-size: 1.65rem;
-    font-weight: 800;
-    letter-spacing: -.045em;
-    color: #fff;
-    margin: 0 0 .3rem;
-    line-height: 1.15;
+    font-size: 1.65rem; font-weight: 800; letter-spacing: -.045em; color: #fff; margin: 0 0 .3rem; line-height: 1.15;
   }
   .af-hero__title span {
     background: linear-gradient(135deg, #38bdf8, #06b6d4);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
   }
-  .af-hero__sub {
-    font-size: .83rem;
-    color: rgba(255,255,255,.55);
-    font-weight: 500;
-    margin: 0;
-  }
+  .af-hero__sub { font-size: .83rem; color: rgba(255,255,255,.55); font-weight: 500; margin: 0; }
   .af-hero__badge {
-    position: relative;
-    z-index: 1;
-    margin-left: auto;
-    flex-shrink: 0;
-    display: flex;
-    flex-direction: column;
-    align-items: flex-end;
-    gap: .45rem;
+    position: relative; z-index: 1; margin-left: auto; flex-shrink: 0;
+    display: flex; flex-direction: column; align-items: flex-end; gap: .45rem;
   }
   .af-hero__pill {
-    display: inline-flex;
-    align-items: center;
-    gap: .35rem;
-    background: rgba(14,165,233,.15);
-    color: #7dd3fc;
-    border: 1px solid rgba(14,165,233,.25);
-    border-radius: 99px;
-    padding: .22rem .75rem;
-    font-size: .7rem;
-    font-weight: 700;
-    white-space: nowrap;
+    display: inline-flex; align-items: center; gap: .35rem;
+    background: rgba(14,165,233,.15); color: #7dd3fc; border: 1px solid rgba(14,165,233,.25);
+    border-radius: 99px; padding: .22rem .75rem; font-size: .7rem; font-weight: 700; white-space: nowrap;
   }
   .af-hero__pill i { font-size: .6rem; }
 
   .af-tracker {
-    display: flex;
-    align-items: center;
-    background: var(--nc-card-bg);
-    border: 1px solid var(--nc-card-border);
-    border-radius: var(--af-radius);
-    box-shadow: var(--nc-card-shadow);
-    padding: 1rem 1.75rem;
-    margin-bottom: var(--af-gap);
-    gap: 0;
+    display: flex; align-items: center; background: var(--nc-card-bg);
+    border: 1px solid var(--nc-card-border); border-radius: var(--af-radius);
+    box-shadow: var(--nc-card-shadow); padding: 1rem 1.75rem; margin-bottom: var(--af-gap); gap: 0;
   }
-  .af-track-step {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: .38rem;
-    position: relative;
-  }
+  .af-track-step { flex: 1; display: flex; flex-direction: column; align-items: center; gap: .38rem; position: relative; }
   .af-track-step + .af-track-step::before {
-    content: '';
-    position: absolute;
-    right: 50%;
-    left: -50%;
-    top: 13px;
-    height: 2px;
-    background: var(--nc-border);
-    z-index: 0;
+    content: ''; position: absolute; right: 50%; left: -50%; top: 13px; height: 2px; background: var(--nc-border); z-index: 0;
   }
   .af-track-dot {
-    width: 26px;
-    height: 26px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: .65rem;
-    font-weight: 800;
-    border: 2px solid var(--nc-border);
-    background: var(--nc-surface-2);
-    color: var(--nc-text-faint);
-    position: relative;
-    z-index: 1;
+    width: 26px; height: 26px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+    font-size: .65rem; font-weight: 800; border: 2px solid var(--nc-border); background: var(--nc-surface-2);
+    color: var(--nc-text-faint); position: relative; z-index: 1;
   }
   .ts-active .af-track-dot {
-    background: var(--nc-brand);
-    border-color: var(--nc-brand);
-    color: #fff;
-    box-shadow: 0 0 0 4px rgba(14,165,233,.18);
+    background: var(--nc-brand); border-color: var(--nc-brand); color: #fff; box-shadow: 0 0 0 4px rgba(14,165,233,.18);
   }
   .af-track-label {
-    font-size: .65rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: .06em;
-    color: var(--nc-text-faint);
-    white-space: nowrap;
+    font-size: .65rem; font-weight: 700; text-transform: uppercase; letter-spacing: .06em;
+    color: var(--nc-text-faint); white-space: nowrap;
   }
   .ts-active .af-track-label { color: var(--nc-brand); }
 
-  .af-body {
-    display: grid;
-    grid-template-columns: 1fr 296px;
-    gap: var(--af-gap);
-  }
-  .af-left, .af-right {
-    display: flex;
-    flex-direction: column;
-    gap: var(--af-gap);
-  }
+  .af-body { display: grid; grid-template-columns: 1fr 296px; gap: var(--af-gap); }
+  .af-left, .af-right { display: flex; flex-direction: column; gap: var(--af-gap); }
 
   .af-section {
-    background: var(--nc-card-bg);
-    border: 1px solid var(--nc-card-border);
-    border-radius: var(--af-radius);
-    box-shadow: var(--nc-card-shadow);
-    overflow: hidden;
-    transition: box-shadow .2s;
+    background: var(--nc-card-bg); border: 1px solid var(--nc-card-border);
+    border-radius: var(--af-radius); box-shadow: var(--nc-card-shadow); overflow: hidden; transition: box-shadow .2s;
   }
-  .af-section:focus-within {
-    box-shadow: var(--nc-card-shadow), 0 0 0 3px rgba(14,165,233,.08);
-  }
+  .af-section:focus-within { box-shadow: var(--nc-card-shadow), 0 0 0 3px rgba(14,165,233,.08); }
 
   .af-sec-head {
-    display: flex;
-    align-items: center;
-    gap: .7rem;
-    padding: .85rem 1.5rem;
-    border-bottom: 1px solid var(--nc-border);
-    background: var(--nc-surface-2);
+    display: flex; align-items: center; gap: .7rem; padding: .85rem 1.5rem;
+    border-bottom: 1px solid var(--nc-border); background: var(--nc-surface-2);
   }
-  .af-sec-icon {
-    width: 30px;
-    height: 30px;
-    border-radius: 9px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: .8rem;
-    flex-shrink: 0;
-  }
-  .si-blue { background: rgba(14,165,233,.12); color: var(--nc-brand); }
-  .si-amber { background: rgba(245,158,11,.12); color: #f59e0b; }
+  .af-sec-icon { width: 30px; height: 30px; border-radius: 9px; display: flex; align-items: center; justify-content: center; font-size: .8rem; flex-shrink: 0; }
+  .si-blue   { background: rgba(14,165,233,.12); color: var(--nc-brand); }
+  .si-amber  { background: rgba(245,158,11,.12); color: #f59e0b; }
   .si-violet { background: rgba(124,58,237,.12); color: #7c3aed; }
-  .si-teal { background: rgba(13,148,136,.12); color: #0d9488; }
+  .si-teal   { background: rgba(13,148,136,.12); color: #0d9488; }
 
-  .af-sec-title {
-    font-size: .72rem;
-    font-weight: 800;
-    text-transform: uppercase;
-    letter-spacing: .1em;
-    color: var(--nc-text-muted);
-  }
+  .af-sec-title { font-size: .72rem; font-weight: 800; text-transform: uppercase; letter-spacing: .1em; color: var(--nc-text-muted); }
   .af-sec-badge {
-    margin-left: auto;
-    border-radius: 99px;
-    padding: .12rem .65rem;
-    font-size: .63rem;
-    font-weight: 800;
-    letter-spacing: .04em;
-    text-transform: uppercase;
-    border: 1.5px solid transparent;
+    margin-left: auto; border-radius: 99px; padding: .12rem .65rem; font-size: .63rem; font-weight: 800;
+    letter-spacing: .04em; text-transform: uppercase; border: 1.5px solid transparent;
   }
-  .sb-req { background: rgba(14,165,233,.1); color: var(--nc-brand); border-color: rgba(14,165,233,.2); }
-  .sb-opt { background: rgba(100,116,139,.08); color: var(--nc-text-faint); border-color: var(--nc-border); }
-  .sb-serv { background: rgba(245,158,11,.1); color: #d97706; border-color: rgba(245,158,11,.2); }
+  .sb-req  { background: rgba(14,165,233,.1);  color: var(--nc-brand); border-color: rgba(14,165,233,.2); }
+  .sb-opt  { background: rgba(100,116,139,.08); color: var(--nc-text-faint); border-color: var(--nc-border); }
+  .sb-serv { background: rgba(245,158,11,.1);  color: #d97706; border-color: rgba(245,158,11,.2); }
 
   .af-sec-body { padding: 1.5rem; }
 
-  .af-field {
-    display: flex;
-    flex-direction: column;
-    gap: .42rem;
-  }
+  .af-field { display: flex; flex-direction: column; gap: .42rem; }
   .af-field + .af-field { margin-top: 1.1rem; }
 
-  .af-label {
-    display: flex;
-    align-items: center;
-    gap: .45rem;
-    font-size: .74rem;
-    font-weight: 700;
-    color: var(--nc-text-2);
-    letter-spacing: .01em;
-  }
+  .af-label { display: flex; align-items: center; gap: .45rem; font-size: .74rem; font-weight: 700; color: var(--nc-text-2); letter-spacing: .01em; }
   .af-label .af-lbl-icon {
-    width: 18px;
-    height: 18px;
-    border-radius: 5px;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    font-size: .58rem;
-    background: var(--nc-surface-3);
-    color: var(--nc-text-faint);
-    flex-shrink: 0;
+    width: 18px; height: 18px; border-radius: 5px; display: inline-flex; align-items: center; justify-content: center;
+    font-size: .58rem; background: var(--nc-surface-3); color: var(--nc-text-faint); flex-shrink: 0;
   }
   .af-label .req { color: #f43f5e; font-size: .85rem; }
   .af-label .opt {
-    margin-left: auto;
-    font-size: .63rem;
-    font-weight: 600;
-    color: var(--nc-text-faint);
-    background: var(--nc-surface-3);
-    border-radius: 4px;
-    padding: .05rem .4rem;
+    margin-left: auto; font-size: .63rem; font-weight: 600; color: var(--nc-text-faint);
+    background: var(--nc-surface-3); border-radius: 4px; padding: .05rem .4rem;
   }
 
   .af-inp, .af-sel, .af-ta {
-    width: 100%;
-    background: var(--nc-surface-2) !important;
-    border: 1.5px solid var(--nc-border) !important;
-    border-radius: var(--af-radius-sm) !important;
-    color: var(--nc-text) !important;
-    font-family: 'Sora', sans-serif !important;
-    font-size: .875rem !important;
-    font-weight: 500 !important;
-    padding: .68rem 1rem !important;
-    outline: none !important;
+    width: 100%; background: var(--nc-surface-2) !important; border: 1.5px solid var(--nc-border) !important;
+    border-radius: var(--af-radius-sm) !important; color: var(--nc-text) !important;
+    font-family: 'Sora', sans-serif !important; font-size: .875rem !important; font-weight: 500 !important;
+    padding: .68rem 1rem !important; outline: none !important;
     transition: border-color .18s, box-shadow .18s, background .18s !important;
   }
   .af-inp:focus, .af-sel:focus, .af-ta:focus {
-    border-color: var(--nc-brand) !important;
-    background: var(--nc-surface) !important;
+    border-color: var(--nc-brand) !important; background: var(--nc-surface) !important;
     box-shadow: 0 0 0 3px rgba(14,165,233,.13) !important;
   }
-  .af-ta {
-    resize: vertical !important;
-    line-height: 1.6 !important;
-    min-height: 88px !important;
-  }
+  .af-ta { resize: vertical !important; line-height: 1.6 !important; min-height: 88px !important; }
 
   .af-inp-group { position: relative; }
   .af-inp-group .af-inp { padding-left: 2.6rem !important; }
   .af-inp-pre {
-    position: absolute;
-    left: .9rem;
-    top: 50%;
-    transform: translateY(-50%);
-    font-size: .72rem;
-    color: var(--nc-text-faint);
-    pointer-events: none;
-    transition: color .18s;
+    position: absolute; left: .9rem; top: 50%; transform: translateY(-50%);
+    font-size: .72rem; color: var(--nc-text-faint); pointer-events: none; transition: color .18s;
   }
   .af-inp-group:focus-within .af-inp-pre { color: var(--nc-brand); }
 
-  .af-row-2 {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: .9rem;
-  }
+  .af-row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: .9rem; }
 
-  .af-select-wrap {
-    position: relative;
-  }
-  .af-select-wrap .af-sel {
-    padding-left: 2.65rem !important;
-  }
+  .af-select-wrap { position: relative; }
+  .af-select-wrap .af-sel { padding-left: 2.65rem !important; }
   .af-select-icon {
-    position: absolute;
-    left: .95rem;
-    top: 50%;
-    transform: translateY(-50%);
-    font-size: .78rem;
-    color: var(--nc-text-faint);
-    pointer-events: none;
-    transition: color .18s;
+    position: absolute; left: .95rem; top: 50%; transform: translateY(-50%);
+    font-size: .78rem; color: var(--nc-text-faint); pointer-events: none; transition: color .18s;
   }
-  .af-select-wrap:focus-within .af-select-icon {
-    color: var(--nc-brand);
-  }
+  .af-select-wrap:focus-within .af-select-icon { color: var(--nc-brand); }
 
-  .af-nut-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: .75rem;
-  }
+  .af-nut-grid { display: grid; grid-template-columns: 1fr 1fr; gap: .75rem; }
   .af-nut {
-    border-radius: 14px;
-    padding: 1rem 1.1rem;
-    border: 1.5px solid var(--nc-border);
-    background: var(--nc-surface-2);
-    transition: border-color .18s, box-shadow .18s, background .18s;
-    cursor: text;
+    border-radius: 14px; padding: 1rem 1.1rem; border: 1.5px solid var(--nc-border);
+    background: var(--nc-surface-2); transition: border-color .18s, box-shadow .18s, background .18s; cursor: text;
   }
-  .af-nut:focus-within {
-    background: var(--nc-surface);
-    border-color: var(--nc-brand);
-    box-shadow: 0 0 0 3px rgba(14,165,233,.1);
-  }
-  .af-nut-top {
-    display: flex;
-    align-items: center;
-    gap: .4rem;
-    margin-bottom: .55rem;
-  }
-  .af-nut-bar {
-    height: 3px;
-    border-radius: 99px;
-    flex: 1;
-    opacity: .35;
-    transition: opacity .18s;
-  }
+  .af-nut:focus-within { background: var(--nc-surface); border-color: var(--nc-brand); box-shadow: 0 0 0 3px rgba(14,165,233,.1); }
+  .af-nut-top { display: flex; align-items: center; gap: .4rem; margin-bottom: .55rem; }
+  .af-nut-bar { height: 3px; border-radius: 99px; flex: 1; opacity: .35; transition: opacity .18s; }
   .af-nut:focus-within .af-nut-bar { opacity: 1; }
-  .af-nut-name {
-    font-size: .63rem;
-    font-weight: 800;
-    text-transform: uppercase;
-    letter-spacing: .1em;
-  }
+  .af-nut-name { font-size: .63rem; font-weight: 800; text-transform: uppercase; letter-spacing: .1em; }
   .af-nut-val {
-    width: 100%;
-    background: transparent !important;
-    border: none !important;
-    outline: none !important;
-    font-family: 'JetBrains Mono', monospace !important;
-    font-size: 1.35rem !important;
-    font-weight: 700 !important;
-    color: var(--nc-text) !important;
-    padding: 0 !important;
-    line-height: 1.2;
+    width: 100%; background: transparent !important; border: none !important; outline: none !important;
+    font-family: 'JetBrains Mono', monospace !important; font-size: 1.35rem !important; font-weight: 700 !important;
+    color: var(--nc-text) !important; padding: 0 !important; line-height: 1.2;
   }
-  .af-nut-unit {
-    font-size: .65rem;
-    font-weight: 700;
-    color: var(--nc-text-faint);
-    margin-top: .2rem;
-    font-family: 'JetBrains Mono', monospace;
-  }
+  .af-nut-unit { font-size: .65rem; font-weight: 700; color: var(--nc-text-faint); margin-top: .2rem; font-family: 'JetBrains Mono', monospace; }
 
-  .an-cal .af-nut-bar { background: #f59e0b; }
-  .an-cal .af-nut-name { color: #b45309; }
-  .an-pro .af-nut-bar { background: #10b981; }
-  .an-pro .af-nut-name { color: #065f46; }
-  .an-car .af-nut-bar { background: #8b5cf6; }
-  .an-car .af-nut-name { color: #5b21b6; }
-  .an-fat .af-nut-bar { background: #f43f5e; }
-  .an-fat .af-nut-name { color: #be123c; }
+  .an-cal .af-nut-bar { background: #f59e0b; } .an-cal .af-nut-name { color: #b45309; }
+  .an-pro .af-nut-bar { background: #10b981; } .an-pro .af-nut-name { color: #065f46; }
+  .an-car .af-nut-bar { background: #8b5cf6; } .an-car .af-nut-name { color: #5b21b6; }
+  .an-fat .af-nut-bar { background: #f43f5e; } .an-fat .af-nut-name { color: #be123c; }
 
+  /* ════ UPLOAD ZONE ════ */
   .af-upload-zone {
-    position: relative;
-    border: 2px dashed var(--nc-border-2);
-    border-radius: 16px;
-    padding: 1.75rem 1rem;
-    text-align: center;
-    cursor: pointer;
-    background: var(--nc-surface-2);
+    position: relative; border: 2px dashed var(--nc-border-2); border-radius: 16px;
+    padding: 1.75rem 1rem; text-align: center; cursor: pointer; background: var(--nc-surface-2);
     transition: border-color .2s, background .2s, transform .15s;
   }
-  .af-upload-zone:hover {
-    border-color: var(--nc-brand);
-    background: var(--nc-brand-l);
-    transform: translateY(-1px);
-  }
-  .af-upload-zone input {
-    position: absolute;
-    inset: 0;
-    opacity: 0;
-    cursor: pointer;
-    width: 100%;
-    height: 100%;
+  .af-upload-zone:hover { border-color: var(--nc-brand); background: var(--nc-brand-l); transform: translateY(-1px); }
+  /* The real file input — hidden, covers whole zone for click/drop */
+  .af-upload-zone input[type="file"] {
+    position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%;
   }
   .af-upload-ico {
-    width: 48px;
-    height: 48px;
-    border-radius: 14px;
-    background: var(--nc-surface);
-    border: 1px solid var(--nc-border);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 1.15rem;
-    color: var(--nc-brand);
-    margin: 0 auto .85rem;
-    box-shadow: 0 2px 8px rgba(0,0,0,.06);
+    width: 48px; height: 48px; border-radius: 14px; background: var(--nc-surface); border: 1px solid var(--nc-border);
+    display: flex; align-items: center; justify-content: center; font-size: 1.15rem; color: var(--nc-brand);
+    margin: 0 auto .85rem; box-shadow: 0 2px 8px rgba(0,0,0,.06);
   }
-  .af-upload-heading {
-    font-size: .84rem;
-    font-weight: 700;
-    color: var(--nc-text-2);
-    margin-bottom: .2rem;
-  }
-  .af-upload-sub {
-    font-size: .7rem;
-    color: var(--nc-text-faint);
-    font-weight: 500;
-    line-height: 1.6;
-  }
-  .af-upload-types {
-    display: flex;
-    justify-content: center;
-    gap: .35rem;
-    margin-top: .65rem;
-  }
+  .af-upload-heading { font-size: .84rem; font-weight: 700; color: var(--nc-text-2); margin-bottom: .2rem; }
+  .af-upload-sub { font-size: .7rem; color: var(--nc-text-faint); font-weight: 500; line-height: 1.6; }
+  .af-upload-types { display: flex; justify-content: center; gap: .35rem; margin-top: .65rem; }
   .af-type-pill {
-    font-size: .6rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: .06em;
-    padding: .15rem .5rem;
-    border-radius: 5px;
-    background: var(--nc-surface);
-    border: 1px solid var(--nc-border);
-    color: var(--nc-text-faint);
+    font-size: .6rem; font-weight: 700; text-transform: uppercase; letter-spacing: .06em;
+    padding: .15rem .5rem; border-radius: 5px; background: var(--nc-surface); border: 1px solid var(--nc-border); color: var(--nc-text-faint);
   }
 
   #af-preview-wrap {
-    display: none;
-    margin-top: .85rem;
-    border-radius: 12px;
-    overflow: hidden;
-    border: 1px solid var(--nc-border);
-    box-shadow: 0 2px 8px rgba(0,0,0,.06);
+    display: none; margin-top: .85rem; border-radius: 12px; overflow: hidden;
+    border: 1px solid var(--nc-border); box-shadow: 0 2px 8px rgba(0,0,0,.06);
   }
-  #af-preview-img {
-    width: 100%;
-    height: 148px;
-    object-fit: cover;
-    display: block;
-  }
+  #af-preview-img { width: 100%; height: 148px; object-fit: cover; display: block; }
   .af-preview-footer {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: .5rem .75rem;
-    background: var(--nc-surface-2);
-    border-top: 1px solid var(--nc-border);
+    display: flex; align-items: center; justify-content: space-between; padding: .5rem .75rem;
+    background: var(--nc-surface-2); border-top: 1px solid var(--nc-border);
   }
   .af-preview-name {
-    font-size: .72rem;
-    font-weight: 700;
-    color: var(--nc-text-muted);
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    max-width: 150px;
+    font-size: .72rem; font-weight: 700; color: var(--nc-text-muted);
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 150px;
   }
   .af-preview-rm {
-    display: inline-flex;
-    align-items: center;
-    gap: .3rem;
-    background: none;
-    border: none;
-    cursor: pointer;
-    font-family: 'Sora', sans-serif;
-    font-size: .7rem;
-    font-weight: 700;
-    color: #f43f5e;
+    display: inline-flex; align-items: center; gap: .3rem; background: none; border: none; cursor: pointer;
+    font-family: 'Sora', sans-serif; font-size: .7rem; font-weight: 700; color: #f43f5e;
   }
 
-  .af-summary {
-    background: var(--nc-surface-2);
-    border: 1px solid var(--nc-border);
-    border-radius: 14px;
-    overflow: hidden;
+  /* ════ GALLERY UPLOAD — fully styled, no browser default ════ */
+  .af-gallery-zone {
+    border: 1.5px dashed var(--nc-border-2); border-radius: 12px; padding: .85rem 1rem;
+    background: var(--nc-surface-2); cursor: not-allowed; opacity: .55;
+    display: flex; align-items: center; gap: .75rem;
   }
+  .af-gallery-ico {
+    width: 34px; height: 34px; border-radius: 9px; flex-shrink: 0;
+    background: var(--nc-surface-3); border: 1px solid var(--nc-border);
+    display: flex; align-items: center; justify-content: center;
+    font-size: .8rem; color: var(--nc-text-faint);
+  }
+  .af-gallery-text { flex: 1; min-width: 0; }
+  .af-gallery-title { font-size: .78rem; font-weight: 700; color: var(--nc-text-muted); margin-bottom: .1rem; }
+  .af-gallery-sub { font-size: .65rem; color: var(--nc-text-faint); line-height: 1.5; }
+  .af-gallery-badge {
+    flex-shrink: 0; font-size: .58rem; font-weight: 800; text-transform: uppercase; letter-spacing: .06em;
+    padding: .18rem .55rem; border-radius: 99px;
+    background: var(--nc-surface-3); border: 1px solid var(--nc-border); color: var(--nc-text-faint);
+  }
+  /* hidden real input — keep for form but visually gone */
+  .af-gallery-input-hidden { display: none !important; }
+
+  .af-summary { background: var(--nc-surface-2); border: 1px solid var(--nc-border); border-radius: 14px; overflow: hidden; }
   .af-summary-head {
-    padding: .65rem 1rem;
-    background: var(--nc-surface-3);
-    border-bottom: 1px solid var(--nc-border);
-    font-size: .65rem;
-    font-weight: 800;
-    text-transform: uppercase;
-    letter-spacing: .1em;
-    color: var(--nc-text-faint);
-    display: flex;
-    align-items: center;
-    gap: .4rem;
+    padding: .65rem 1rem; background: var(--nc-surface-3); border-bottom: 1px solid var(--nc-border);
+    font-size: .65rem; font-weight: 800; text-transform: uppercase; letter-spacing: .1em; color: var(--nc-text-faint);
+    display: flex; align-items: center; gap: .4rem;
   }
-  .af-summary-head::before {
-    content: '';
-    width: 6px;
-    height: 6px;
-    border-radius: 50%;
-    background: #10b981;
-    box-shadow: 0 0 0 3px rgba(16,185,129,.2);
-  }
+  .af-summary-head::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: #10b981; box-shadow: 0 0 0 3px rgba(16,185,129,.2); }
   .af-sum-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: .5rem 1rem;
-    border-bottom: 1px dashed var(--nc-border);
-    font-size: .77rem;
+    display: flex; justify-content: space-between; align-items: center;
+    padding: .5rem 1rem; border-bottom: 1px dashed var(--nc-border); font-size: .77rem;
   }
   .af-sum-row:last-child { border-bottom: none; }
-  .af-sum-key {
-    color: var(--nc-text-muted);
-    font-weight: 600;
-  }
+  .af-sum-key { color: var(--nc-text-muted); font-weight: 600; }
   .af-sum-val {
-    font-weight: 700;
-    color: var(--nc-text);
-    font-family: 'JetBrains Mono', monospace;
-    font-size: .73rem;
-    text-align: right;
-    max-width: 140px;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+    font-weight: 700; color: var(--nc-text); font-family: 'JetBrains Mono', monospace; font-size: .73rem;
+    text-align: right; max-width: 140px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
   }
   .af-sum-val.af-filled { color: var(--nc-brand); }
-  .af-sum-val.af-empty {
-    color: var(--nc-text-faint);
-    font-family: 'Sora', sans-serif;
-    font-weight: 500;
-    font-size: .72rem;
-  }
+  .af-sum-val.af-empty { color: var(--nc-text-faint); font-family: 'Sora', sans-serif; font-weight: 500; font-size: .72rem; }
 
-  .af-macro-row {
-    padding: .65rem 1rem;
-    border-top: 1px solid var(--nc-border);
-  }
-  .af-macro-title {
-    font-size: .63rem;
-    font-weight: 800;
-    text-transform: uppercase;
-    letter-spacing: .08em;
-    color: var(--nc-text-faint);
-    margin-bottom: .5rem;
-  }
-  .af-macro-bar-row {
-    display: flex;
-    align-items: center;
-    gap: .5rem;
-    margin-bottom: .3rem;
-  }
+  .af-macro-row { padding: .65rem 1rem; border-top: 1px solid var(--nc-border); }
+  .af-macro-title { font-size: .63rem; font-weight: 800; text-transform: uppercase; letter-spacing: .08em; color: var(--nc-text-faint); margin-bottom: .5rem; }
+  .af-macro-bar-row { display: flex; align-items: center; gap: .5rem; margin-bottom: .3rem; }
   .af-macro-bar-row:last-child { margin-bottom: 0; }
-  .af-macro-lbl {
-    font-size: .62rem;
-    font-weight: 700;
-    width: 50px;
-    color: var(--nc-text-muted);
-    flex-shrink: 0;
-  }
-  .af-macro-track {
-    flex: 1;
-    height: 5px;
-    border-radius: 99px;
-    background: var(--nc-surface-3);
-    overflow: hidden;
-  }
-  .af-macro-fill {
-    height: 100%;
-    border-radius: 99px;
-    width: 0%;
-    transition: width .4s cubic-bezier(.34,1.56,.64,1);
-  }
-  .mf-pro { background: #10b981; }
-  .mf-car { background: #8b5cf6; }
-  .mf-fat { background: #f43f5e; }
-  .af-macro-num {
-    font-size: .62rem;
-    font-weight: 700;
-    color: var(--nc-text-faint);
-    width: 28px;
-    text-align: right;
-    flex-shrink: 0;
-    font-family: 'JetBrains Mono', monospace;
-  }
+  .af-macro-lbl { font-size: .62rem; font-weight: 700; width: 50px; color: var(--nc-text-muted); flex-shrink: 0; }
+  .af-macro-track { flex: 1; height: 5px; border-radius: 99px; background: var(--nc-surface-3); overflow: hidden; }
+  .af-macro-fill { height: 100%; border-radius: 99px; width: 0%; transition: width .4s cubic-bezier(.34,1.56,.64,1); }
+  .mf-pro { background: #10b981; } .mf-car { background: #8b5cf6; } .mf-fat { background: #f43f5e; }
+  .af-macro-num { font-size: .62rem; font-weight: 700; color: var(--nc-text-faint); width: 28px; text-align: right; flex-shrink: 0; font-family: 'JetBrains Mono', monospace; }
 
   .af-insight {
-    border-radius: 14px;
-    padding: .9rem 1rem;
+    border-radius: 14px; padding: .9rem 1rem;
     background: linear-gradient(135deg, rgba(14,165,233,.06), rgba(6,182,212,.04));
-    border: 1px solid rgba(14,165,233,.18);
-    display: flex;
-    gap: .65rem;
-    align-items: flex-start;
+    border: 1px solid rgba(14,165,233,.18); display: flex; gap: .65rem; align-items: flex-start;
   }
   .af-insight-icon {
-    width: 30px;
-    height: 30px;
-    border-radius: 9px;
-    flex-shrink: 0;
-    background: rgba(14,165,233,.12);
-    color: var(--nc-brand);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: .75rem;
+    width: 30px; height: 30px; border-radius: 9px; flex-shrink: 0;
+    background: rgba(14,165,233,.12); color: var(--nc-brand); display: flex; align-items: center; justify-content: center; font-size: .75rem;
   }
-  .af-insight-text {
-    font-size: .74rem;
-    color: var(--nc-text-muted);
-    line-height: 1.6;
-    font-weight: 500;
-  }
+  .af-insight-text { font-size: .74rem; color: var(--nc-text-muted); line-height: 1.6; font-weight: 500; }
   .af-insight-text strong { color: var(--nc-brand); }
 
   .af-action-bar {
-    background: var(--nc-card-bg);
-    border: 1px solid var(--nc-card-border);
-    border-radius: var(--af-radius);
-    box-shadow: var(--nc-card-shadow);
-    overflow: hidden;
-    margin-top: var(--af-gap);
+    background: var(--nc-card-bg); border: 1px solid var(--nc-card-border);
+    border-radius: var(--af-radius); box-shadow: var(--nc-card-shadow); overflow: hidden; margin-top: var(--af-gap);
   }
-  .af-action-inner {
-    display: flex;
-    align-items: center;
-    gap: .75rem;
-    padding: 1rem 1.5rem;
-    border-top: 3px solid var(--nc-brand);
-  }
+  .af-action-inner { display: flex; align-items: center; gap: .75rem; padding: 1rem 1.5rem; border-top: 3px solid var(--nc-brand); }
   .af-btn-pub {
-    display: inline-flex;
-    align-items: center;
-    gap: .5rem;
-    background: var(--nc-brand);
-    color: #fff;
-    border: none;
-    border-radius: 12px;
-    padding: .72rem 1.65rem;
-    font-family: 'Sora', sans-serif;
-    font-size: .88rem;
-    font-weight: 700;
-    cursor: pointer;
-    box-shadow: 0 4px 14px rgba(14,165,233,.4);
+    display: inline-flex; align-items: center; gap: .5rem; background: var(--nc-brand); color: #fff; border: none;
+    border-radius: 12px; padding: .72rem 1.65rem; font-family: 'Sora', sans-serif; font-size: .88rem; font-weight: 700;
+    cursor: pointer; box-shadow: 0 4px 14px rgba(14,165,233,.4);
   }
   .af-btn-cancel {
-    display: inline-flex;
-    align-items: center;
-    gap: .4rem;
-    background: var(--nc-surface-2);
-    border: 1.5px solid var(--nc-border);
-    border-radius: 12px;
-    padding: .7rem 1.2rem;
-    font-family: 'Sora', sans-serif;
-    font-size: .85rem;
-    font-weight: 600;
-    color: var(--nc-text-muted);
-    text-decoration: none;
+    display: inline-flex; align-items: center; gap: .4rem; background: var(--nc-surface-2);
+    border: 1.5px solid var(--nc-border); border-radius: 12px; padding: .7rem 1.2rem;
+    font-family: 'Sora', sans-serif; font-size: .85rem; font-weight: 600; color: var(--nc-text-muted); text-decoration: none;
   }
-  .af-shortcut {
-    margin-left: auto;
-    font-size: .73rem;
-    font-weight: 600;
-    color: var(--nc-text-faint);
-    display: flex;
-    align-items: center;
-    gap: .4rem;
-  }
+  .af-shortcut { margin-left: auto; font-size: .73rem; font-weight: 600; color: var(--nc-text-faint); display: flex; align-items: center; gap: .4rem; }
   .af-kbd {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    background: var(--nc-surface-2);
-    border: 1px solid var(--nc-border);
-    border-bottom-width: 2px;
-    border-radius: 5px;
-    padding: .1rem .45rem;
-    font-size: .65rem;
-    font-weight: 700;
-    font-family: 'JetBrains Mono', monospace;
-    color: var(--nc-text-muted);
+    display: inline-flex; align-items: center; justify-content: center; background: var(--nc-surface-2);
+    border: 1px solid var(--nc-border); border-bottom-width: 2px; border-radius: 5px; padding: .1rem .45rem;
+    font-size: .65rem; font-weight: 700; font-family: 'JetBrains Mono', monospace; color: var(--nc-text-muted);
   }
 
   @media (max-width: 800px) {
@@ -758,7 +334,6 @@
     .af-tracker { display: none; }
     .af-hero__badge { display: none; }
   }
-
   @media (max-width: 520px) {
     .af-row-2 { grid-template-columns: 1fr; }
     .af-action-inner { flex-wrap: wrap; }
@@ -816,13 +391,13 @@
 
       <div class="af-left af-anim-4">
 
+        <!-- Basic Information -->
         <div class="af-section">
           <div class="af-sec-head">
             <div class="af-sec-icon si-blue"><i class="fas fa-circle-info"></i></div>
             <span class="af-sec-title">Basic Information</span>
             <span class="af-sec-badge sb-req">Required</span>
           </div>
-
           <div class="af-sec-body">
 
             <div class="af-field">
@@ -832,10 +407,8 @@
               </label>
               <div class="af-inp-group">
                 <i class="fas fa-utensils af-inp-pre"></i>
-                <input type="text" name="name" id="af-name"
-                       class="af-inp form-control"
-                       placeholder="e.g. Grilled Chicken Bowl"
-                       required autocomplete="off"
+                <input type="text" name="name" id="af-name" class="af-inp form-control"
+                       placeholder="e.g. Grilled Chicken Bowl" required autocomplete="off"
                        value="{{ request.form.get('name', '') }}">
               </div>
             </div>
@@ -843,11 +416,9 @@
             <div class="af-field">
               <label class="af-label" for="af-desc">
                 <span class="af-lbl-icon"><i class="fas fa-align-left"></i></span>
-                Description
-                <span class="opt">optional</span>
+                Description <span class="opt">optional</span>
               </label>
-              <textarea name="description" id="af-desc"
-                        class="af-ta form-control"
+              <textarea name="description" id="af-desc" class="af-ta form-control"
                         placeholder="A short, appetising description that helps users choose this item…"
                         rows="3">{{ request.form.get('description', '') }}</textarea>
             </div>
@@ -857,27 +428,22 @@
                 <div>
                   <label class="af-label" for="af-price">
                     <span class="af-lbl-icon"><i class="fas fa-tag"></i></span>
-                    Price
-                    <span class="opt">optional</span>
+                    Price <span class="opt">optional</span>
                   </label>
                   <div class="af-inp-group">
                     <i class="fas fa-dollar-sign af-inp-pre"></i>
-                    <input type="number" name="price" id="af-price"
-                           class="af-inp form-control"
-                           step="0.01" min="0" placeholder="0.00"
-                           value="{{ request.form.get('price', '') }}">
+                    <input type="number" name="price" id="af-price" class="af-inp form-control"
+                           step="0.01" min="0" placeholder="0.00" value="{{ request.form.get('price', '') }}">
                   </div>
                 </div>
-
                 <div>
                   <label class="af-label" for="af-availability">
                     <span class="af-lbl-icon"><i class="fas fa-box-open"></i></span>
-                    Availability
-                    <span class="req">*</span>
+                    Availability <span class="req">*</span>
                   </label>
                   <select name="availability_status" id="af-availability" class="af-sel form-select">
-                    <option value="available" {% if request.form.get('availability_status', 'available') == 'available' %}selected{% endif %}>Available</option>
-                    <option value="out_of_stock" {% if request.form.get('availability_status') == 'out_of_stock' %}selected{% endif %}>Out of Stock</option>
+                    <option value="available" {% if request.form.get('availability_status','available')=='available' %}selected{% endif %}>Available</option>
+                    <option value="out_of_stock" {% if request.form.get('availability_status')=='out_of_stock' %}selected{% endif %}>Out of Stock</option>
                   </select>
                 </div>
               </div>
@@ -886,23 +452,21 @@
             <div class="af-field">
               <label class="af-label" for="af-diet-type">
                 <span class="af-lbl-icon"><i class="fas fa-leaf"></i></span>
-                Diet Type
-                <span class="opt">single</span>
+                Diet Type <span class="opt">single</span>
               </label>
-
               <div class="af-select-wrap">
                 <i class="fas fa-leaf af-select-icon"></i>
                 <select name="diet_type" id="af-diet-type" class="af-sel form-select">
                   <option value="" {% if not request.form.get('diet_type') %}selected{% endif %}>All / No type</option>
-                  <option value="vegan" {% if request.form.get('diet_type') == 'vegan' %}selected{% endif %}>🌱 Vegan</option>
-                  <option value="vegetarian" {% if request.form.get('diet_type') == 'vegetarian' %}selected{% endif %}>🥦 Vegetarian</option>
-                  <option value="keto" {% if request.form.get('diet_type') == 'keto' %}selected{% endif %}>🥑 Keto</option>
-                  <option value="paleo" {% if request.form.get('diet_type') == 'paleo' %}selected{% endif %}>🍖 Paleo</option>
-                  <option value="gluten-free" {% if request.form.get('diet_type') == 'gluten-free' %}selected{% endif %}>🌾 Gluten-Free</option>
-                  <option value="dairy-free" {% if request.form.get('diet_type') == 'dairy-free' %}selected{% endif %}>🥛 Dairy-Free</option>
-                  <option value="halal" {% if request.form.get('diet_type') == 'halal' %}selected{% endif %}>☪️ Halal</option>
-                  <option value="low-carb" {% if request.form.get('diet_type') == 'low-carb' %}selected{% endif %}>📉 Low-Carb</option>
-                  <option value="high-protein" {% if request.form.get('diet_type') == 'high-protein' %}selected{% endif %}>💪 High-Protein</option>
+                  <option value="vegan"       {% if request.form.get('diet_type')=='vegan'       %}selected{% endif %}>🌱 Vegan</option>
+                  <option value="vegetarian"  {% if request.form.get('diet_type')=='vegetarian'  %}selected{% endif %}>🥦 Vegetarian</option>
+                  <option value="keto"        {% if request.form.get('diet_type')=='keto'        %}selected{% endif %}>🥑 Keto</option>
+                  <option value="paleo"       {% if request.form.get('diet_type')=='paleo'       %}selected{% endif %}>🍖 Paleo</option>
+                  <option value="gluten-free" {% if request.form.get('diet_type')=='gluten-free' %}selected{% endif %}>🌾 Gluten-Free</option>
+                  <option value="dairy-free"  {% if request.form.get('diet_type')=='dairy-free'  %}selected{% endif %}>🥛 Dairy-Free</option>
+                  <option value="halal"       {% if request.form.get('diet_type')=='halal'       %}selected{% endif %}>☪️ Halal</option>
+                  <option value="low-carb"    {% if request.form.get('diet_type')=='low-carb'    %}selected{% endif %}>📉 Low-Carb</option>
+                  <option value="high-protein"{% if request.form.get('diet_type')=='high-protein'%}selected{% endif %}>💪 High-Protein</option>
                 </select>
               </div>
             </div>
@@ -910,6 +474,7 @@
           </div>
         </div>
 
+        <!-- Nutrition Facts -->
         <div class="af-section">
           <div class="af-sec-head">
             <div class="af-sec-icon si-amber"><i class="fas fa-fire-flame-curved"></i></div>
@@ -918,43 +483,26 @@
           </div>
           <div class="af-sec-body">
             <div class="af-nut-grid">
-
               <div class="af-nut an-cal">
-                <div class="af-nut-top">
-                  <span class="af-nut-name">Calories</span>
-                  <div class="af-nut-bar"></div>
-                </div>
-                <input type="number" name="calories" id="af-cal" class="af-nut-val" step="0.1" min="0" placeholder="0" value="{{ request.form.get('calories', '') }}">
+                <div class="af-nut-top"><span class="af-nut-name">Calories</span><div class="af-nut-bar"></div></div>
+                <input type="number" name="calories" id="af-cal" class="af-nut-val" step="0.1" min="0" placeholder="0" value="{{ request.form.get('calories','') }}">
                 <div class="af-nut-unit">kcal / serving</div>
               </div>
-
               <div class="af-nut an-pro">
-                <div class="af-nut-top">
-                  <span class="af-nut-name">Protein</span>
-                  <div class="af-nut-bar"></div>
-                </div>
-                <input type="number" name="protein" id="af-pro" class="af-nut-val" step="0.1" min="0" placeholder="0" value="{{ request.form.get('protein', '') }}">
+                <div class="af-nut-top"><span class="af-nut-name">Protein</span><div class="af-nut-bar"></div></div>
+                <input type="number" name="protein" id="af-pro" class="af-nut-val" step="0.1" min="0" placeholder="0" value="{{ request.form.get('protein','') }}">
                 <div class="af-nut-unit">grams / serving</div>
               </div>
-
               <div class="af-nut an-car">
-                <div class="af-nut-top">
-                  <span class="af-nut-name">Carbs</span>
-                  <div class="af-nut-bar"></div>
-                </div>
-                <input type="number" name="carbs" id="af-car" class="af-nut-val" step="0.1" min="0" placeholder="0" value="{{ request.form.get('carbs', '') }}">
+                <div class="af-nut-top"><span class="af-nut-name">Carbs</span><div class="af-nut-bar"></div></div>
+                <input type="number" name="carbs" id="af-car" class="af-nut-val" step="0.1" min="0" placeholder="0" value="{{ request.form.get('carbs','') }}">
                 <div class="af-nut-unit">grams / serving</div>
               </div>
-
               <div class="af-nut an-fat">
-                <div class="af-nut-top">
-                  <span class="af-nut-name">Fat</span>
-                  <div class="af-nut-bar"></div>
-                </div>
-                <input type="number" name="fat" id="af-fat" class="af-nut-val" step="0.1" min="0" placeholder="0" value="{{ request.form.get('fat', '') }}">
+                <div class="af-nut-top"><span class="af-nut-name">Fat</span><div class="af-nut-bar"></div></div>
+                <input type="number" name="fat" id="af-fat" class="af-nut-val" step="0.1" min="0" placeholder="0" value="{{ request.form.get('fat','') }}">
                 <div class="af-nut-unit">grams / serving</div>
               </div>
-
             </div>
           </div>
         </div>
@@ -963,6 +511,7 @@
 
       <div class="af-right af-anim-5">
 
+        <!-- Food Photo -->
         <div class="af-section">
           <div class="af-sec-head">
             <div class="af-sec-icon si-violet"><i class="fas fa-image"></i></div>
@@ -971,11 +520,12 @@
           </div>
           <div class="af-sec-body" style="padding-top:1.1rem;">
 
+            <!-- Upload dropzone — real input hidden inside, covers whole zone -->
             <div class="af-upload-zone" id="af-upload-zone">
               <input type="file" name="image" id="af-img-input" accept="image/*" onchange="handleImg(this)">
               <div class="af-upload-ico"><i class="fas fa-cloud-arrow-up"></i></div>
               <div class="af-upload-heading">Upload a photo</div>
-              <div class="af-upload-sub">Drag & drop or click to browse</div>
+              <div class="af-upload-sub">Drag & drop or click anywhere here</div>
               <div class="af-upload-types">
                 <span class="af-type-pill">PNG</span>
                 <span class="af-type-pill">JPG</span>
@@ -984,6 +534,7 @@
               </div>
             </div>
 
+            <!-- Preview (shown after file selected) -->
             <div id="af-preview-wrap">
               <img id="af-preview-img" src="" alt="Preview">
               <div class="af-preview-footer">
@@ -994,50 +545,46 @@
               </div>
             </div>
 
+            <!-- Gallery — styled locked state, NO browser file input visible -->
             <div class="af-field" style="margin-top:1rem;">
-              <label class="af-label" for="af-gallery">
+              <label class="af-label">
                 <span class="af-lbl-icon"><i class="fas fa-images"></i></span>
                 Gallery Images
                 <span class="opt">later</span>
               </label>
-              <input type="file" id="af-gallery" name="gallery_images" class="af-inp form-control" multiple disabled>
-              <small class="text-muted">Gallery upload becomes available after creating the food item from the edit page.</small>
+
+              <!-- Hidden real input (keeps form field, never shown) -->
+              <input type="file" id="af-gallery" name="gallery_images" class="af-gallery-input-hidden" multiple disabled>
+
+              <!-- Fully styled locked UI replacing the ugly browser button -->
+              <div class="af-gallery-zone">
+                <div class="af-gallery-ico"><i class="fas fa-images"></i></div>
+                <div class="af-gallery-text">
+                  <div class="af-gallery-title">Gallery upload</div>
+                  <div class="af-gallery-sub">Available after saving the food item from the edit page</div>
+                </div>
+                <span class="af-gallery-badge">Locked</span>
+              </div>
             </div>
 
           </div>
         </div>
 
+        <!-- Live Preview -->
         <div class="af-section">
           <div class="af-sec-head">
             <div class="af-sec-icon si-teal"><i class="fas fa-eye"></i></div>
             <span class="af-sec-title">Live Preview</span>
           </div>
           <div style="padding-bottom:0;">
-
             <div class="af-summary">
               <div class="af-summary-head">Live summary</div>
-              <div class="af-sum-row">
-                <span class="af-sum-key">Name</span>
-                <span class="af-sum-val af-empty" id="sum-name">Not set</span>
-              </div>
-              <div class="af-sum-row">
-                <span class="af-sum-key">Price</span>
-                <span class="af-sum-val af-empty" id="sum-price">—</span>
-              </div>
-              <div class="af-sum-row">
-                <span class="af-sum-key">Diet Type</span>
-                <span class="af-sum-val af-empty" id="sum-diet">—</span>
-              </div>
-              <div class="af-sum-row">
-                <span class="af-sum-key">Availability</span>
-                <span class="af-sum-val af-filled" id="sum-availability">Available</span>
-              </div>
-              <div class="af-sum-row">
-                <span class="af-sum-key">Calories</span>
-                <span class="af-sum-val af-empty" id="sum-cal">—</span>
-              </div>
+              <div class="af-sum-row"><span class="af-sum-key">Name</span><span class="af-sum-val af-empty" id="sum-name">Not set</span></div>
+              <div class="af-sum-row"><span class="af-sum-key">Price</span><span class="af-sum-val af-empty" id="sum-price">—</span></div>
+              <div class="af-sum-row"><span class="af-sum-key">Diet Type</span><span class="af-sum-val af-empty" id="sum-diet">—</span></div>
+              <div class="af-sum-row"><span class="af-sum-key">Availability</span><span class="af-sum-val af-filled" id="sum-availability">Available</span></div>
+              <div class="af-sum-row"><span class="af-sum-key">Calories</span><span class="af-sum-val af-empty" id="sum-cal">—</span></div>
             </div>
-
             <div class="af-macro-row">
               <div class="af-macro-title">Macro breakdown</div>
               <div class="af-macro-bar-row">
@@ -1056,7 +603,6 @@
                 <span class="af-macro-num" id="num-fat">0g</span>
               </div>
             </div>
-
           </div>
         </div>
 
@@ -1087,7 +633,6 @@
     </div>
 
   </form>
-
 </div>
 {% endblock %}
 
@@ -1116,13 +661,8 @@
   function sv(id, val, cls = 'af-filled') {
     const el = document.getElementById(id);
     if (!el) return;
-    if (val) {
-      el.textContent = val;
-      el.className = 'af-sum-val ' + cls;
-    } else {
-      el.textContent = '—';
-      el.className = 'af-sum-val af-empty';
-    }
+    if (val) { el.textContent = val; el.className = 'af-sum-val ' + cls; }
+    else { el.textContent = '—'; el.className = 'af-sum-val af-empty'; }
   }
 
   function updateMacroBar(barId, numId, val, max) {
@@ -1159,18 +699,13 @@
     updateMacroBar('bar-fat', 'num-fat', fat, total);
   }
 
-  ['af-name', 'af-price', 'af-availability', 'af-diet-type', 'af-cal', 'af-pro', 'af-car', 'af-fat'].forEach(id => {
+  ['af-name','af-price','af-availability','af-diet-type','af-cal','af-pro','af-car','af-fat'].forEach(id => {
     const el = document.getElementById(id);
-    if (el) {
-      el.addEventListener('input', update);
-      el.addEventListener('change', update);
-    }
+    if (el) { el.addEventListener('input', update); el.addEventListener('change', update); }
   });
 
   document.addEventListener('keydown', e => {
-    if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
-      document.getElementById('addFoodForm').requestSubmit();
-    }
+    if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') document.getElementById('addFoodForm').requestSubmit();
   });
 
   document.getElementById('addFoodForm').addEventListener('submit', () => {

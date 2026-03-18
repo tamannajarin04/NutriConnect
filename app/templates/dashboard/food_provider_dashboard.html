@@ -2,1431 +2,677 @@
 {% block title %}Provider Dashboard · NutriConnect{% endblock %}
 
 {% block extra_css %}
-<link href="https://fonts.googleapis.com/css2?family=Cabinet+Grotesk:wght@400;500;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
-  body, button, input, select, textarea {
-    font-family: 'Cabinet Grotesk', sans-serif !important;
-  }
-
-  .pd{
-    --surf:var(--nc-surface);
-    --s2:var(--nc-surface-2);
-    --s3:var(--nc-surface-3);
-    --bdr:var(--nc-border);
-    --bdr2:var(--nc-border-2);
-    --txt:var(--nc-text);
-    --txt2:var(--nc-text-2);
-    --mu:var(--nc-text-muted);
-    --fa:var(--nc-text-faint);
-    --brand:var(--nc-brand);
-    --brand-d:var(--nc-brand-d);
-    --brand-l:var(--nc-brand-l);
-
-    --emerald:#34d399;
-    --emerald-l:rgba(52,211,153,.12);
-    --amber:#fbbf24;
-    --amber-l:rgba(251,191,36,.12);
-    --rose:#fb7185;
-    --rose-l:rgba(251,113,133,.12);
-    --violet:#a78bfa;
-    --violet-l:rgba(167,139,250,.12);
-
-    --r:14px;
-    --r-lg:18px;
-  }
-
-  @keyframes up {
-    from { opacity: 0; transform: translateY(14px); }
-    to   { opacity: 1; transform: none; }
-  }
-
-  @keyframes pulse {
-    0%,100% { opacity: 1; transform: scale(1); }
-    50%     { opacity: .45; transform: scale(.72); }
-  }
-
-  .pd-wrap {
-    animation: up .35s cubic-bezier(.16,1,.3,1) both;
-  }
-
-  .pd-banner{
-    background:
-      radial-gradient(ellipse 60% 140% at -5% 50%, rgba(14,165,233,.38) 0%, transparent 52%),
-      radial-gradient(ellipse 35% 80% at 105% 10%, rgba(52,211,153,.18) 0%, transparent 50%),
-      radial-gradient(ellipse 45% 60% at 60% 110%, rgba(56,189,248,.12) 0%, transparent 48%),
-      linear-gradient(145deg, #060f1e 0%, #091828 35%, #0b1f38 65%, #070e1c 100%);
-    border-radius: var(--r-lg);
-    border: 1px solid rgba(56,189,248,.15);
-    padding: 2.1rem 2.2rem;
-    margin-bottom: 1.35rem;
-    position: relative;
-    overflow: hidden;
-    isolation: isolate;
-    box-shadow:
-      0 0 0 1px rgba(56,189,248,.05) inset,
-      0 1px 0 rgba(255,255,255,.06) inset,
-      0 12px 48px rgba(0,0,0,.45),
-      0 4px 16px rgba(14,165,233,.08);
-    animation: up .38s cubic-bezier(.16,1,.3,1) both;
-  }
-
-  .pd-banner::before{
-    content:'';
-    position:absolute;
-    inset:0;
-    background-image:radial-gradient(circle, rgba(255,255,255,.05) 1px, transparent 1px);
-    background-size:26px 26px;
-    mask-image:radial-gradient(ellipse 100% 100% at 50% 50%, black 30%, transparent 100%);
-    pointer-events:none;
-    z-index:0;
-  }
-
-  .pd-banner::after{
-    content:'';
-    position:absolute;
-    top:-60%;
-    left:-10%;
-    width:55%;
-    height:220%;
-    background:linear-gradient(105deg, transparent 40%, rgba(56,189,248,.04) 50%, transparent 60%);
-    z-index:0;
-    pointer-events:none;
-  }
-
-  .pd-banner-top{
-    position:absolute;
-    top:0;
-    left:0;
-    right:0;
-    height:1px;
-    background:linear-gradient(90deg, transparent 10%, rgba(255,255,255,.12) 40%, rgba(255,255,255,.12) 60%, transparent 90%);
-    z-index:2;
-  }
-
-  .pd-banner-scan{
-    position:absolute;
-    bottom:0;
-    left:0;
-    right:0;
-    height:1px;
-    background:linear-gradient(90deg,
-      transparent 0%,
-      rgba(56,189,248,0) 10%,
-      rgba(56,189,248,.7) 35%,
-      rgba(52,211,153,.5) 55%,
-      rgba(56,189,248,.6) 70%,
-      rgba(56,189,248,0) 90%,
-      transparent 100%);
-    z-index:2;
-    filter:blur(.4px);
-  }
-
-  .pd-banner-inner{
-    position:relative;
-    z-index:1;
-    display:flex;
-    align-items:center;
-    justify-content:space-between;
-    gap:1.5rem;
-    flex-wrap:wrap;
-  }
-
-  .pd-eyebrow{
-    display:inline-flex;
-    align-items:center;
-    gap:.4rem;
-    background:rgba(56,189,248,.1);
-    border:1px solid rgba(56,189,248,.22);
-    border-radius:99px;
-    padding:.22rem .9rem;
-    font-size:.62rem;
-    font-weight:800;
-    letter-spacing:.1em;
-    text-transform:uppercase;
-    color:rgba(255,255,255,.75);
-    margin-bottom:.55rem;
-  }
-
-  .pd-eyebrow-dot{
-    width:5px;
-    height:5px;
-    border-radius:50%;
-    background:#38bdf8;
-    box-shadow:0 0 8px #38bdf8;
-    animation:pulse 2s ease-in-out infinite;
-  }
-
-  .pd-title{
-    font-size:1.85rem;
-    font-weight:900;
-    color:#fff;
-    letter-spacing:-.045em;
-    line-height:1.06;
-    margin:0 0 .3rem;
-  }
-
-  .pd-title .hl{
-    background:linear-gradient(135deg, #38bdf8 0%, #7dd3fc 40%, #34d399 100%);
-    -webkit-background-clip:text;
-    -webkit-text-fill-color:transparent;
-    background-clip:text;
-  }
-
-  .pd-sub{
-    color:rgba(255,255,255,.42);
-    font-size:.82rem;
-    margin:0;
-    max-width:560px;
-    line-height:1.65;
-  }
-
-  .pd-banner-actions{
-    display:flex;
-    align-items:center;
-    gap:.65rem;
-    flex-wrap:wrap;
-  }
-
-  .pd-btn,
-  .pd-btn-ghost{
-    display:inline-flex;
-    align-items:center;
-    gap:.42rem;
-    border-radius:12px;
-    padding:.72rem 1.05rem;
-    font-size:.8rem;
-    font-weight:800;
-    text-decoration:none;
-    transition:all .15s ease;
-    cursor:pointer;
-  }
-
-  .pd-btn{
-    background:linear-gradient(135deg, var(--brand-d), var(--brand));
-    color:#fff;
-    border:none;
-    box-shadow:0 6px 18px rgba(14,165,233,.22);
-  }
-
-  .pd-btn:hover{
-    color:#fff;
-    transform:translateY(-1px);
-    filter:brightness(1.05);
-  }
-
-  .pd-btn-ghost{
-    background:rgba(255,255,255,.06);
-    color:#e6edf3;
-    border:1px solid rgba(255,255,255,.1);
-    backdrop-filter:blur(8px);
-  }
-
-  .pd-btn-ghost:hover{
-    color:#fff;
-    border-color:rgba(56,189,248,.35);
-    background:rgba(56,189,248,.12);
-  }
-
-  .pd-btn-badge{
-    display:inline-flex;
-    align-items:center;
-    justify-content:center;
-    min-width:22px;
-    height:22px;
-    padding:0 .42rem;
-    border-radius:999px;
-    background:rgba(167,139,250,.18);
-    border:1px solid rgba(167,139,250,.26);
-    color:#c4b5fd;
-    font-family:'JetBrains Mono', monospace;
-    font-size:.68rem;
-    font-weight:700;
-  }
-
-  .pd-stats{
-    display:grid;
-    grid-template-columns:repeat(5, 1fr);
-    gap:1rem;
-    margin-bottom:1.35rem;
-  }
-
-  .pd-stat{
-    background:var(--surf);
-    border:1px solid var(--bdr);
-    border-radius:var(--r-lg);
-    box-shadow:var(--nc-card-shadow);
-    padding:1rem 1.05rem;
-  }
-
-  .pd-stat-top{
-    display:flex;
-    align-items:center;
-    justify-content:space-between;
-    gap:.75rem;
-    margin-bottom:.65rem;
-  }
-
-  .pd-stat-ico{
-    width:40px;
-    height:40px;
-    border-radius:12px;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    font-size:.92rem;
-  }
-
-  .ic-brand{background:var(--brand-l);color:var(--brand);}
-  .ic-amber{background:var(--amber-l);color:#d97706;}
-  .ic-emerald{background:var(--emerald-l);color:var(--emerald);}
-  .ic-violet{background:var(--violet-l);color:var(--violet);}
-  .ic-rose{background:var(--rose-l);color:var(--rose);}
-
-  .pd-stat-label{
-    font-size:.68rem;
-    font-weight:800;
-    text-transform:uppercase;
-    letter-spacing:.1em;
-    color:var(--fa);
-  }
-
-  .pd-stat-value{
-    font-family:'JetBrains Mono', monospace;
-    font-size:1.35rem;
-    font-weight:800;
-    color:var(--txt);
-    line-height:1;
-  }
-
-  .pd-panel{
-    background:var(--surf);
-    border:1px solid var(--bdr);
-    border-radius:var(--r-lg);
-    overflow:hidden;
-    box-shadow:var(--nc-card-shadow);
-  }
-
-  .pd-panel + .pd-panel{
-    margin-top:1.2rem;
-  }
-
-  .pd-panel-head{
-    display:flex;
-    align-items:center;
-    justify-content:space-between;
-    gap:1rem;
-    padding:1rem 1.2rem;
-    border-bottom:1px solid var(--bdr);
-    background:var(--s2);
-    flex-wrap:wrap;
-  }
-
-  .pd-panel-head-left{
-    display:flex;
-    align-items:center;
-    gap:.7rem;
-  }
-
-  .pd-icon{
-    width:34px;
-    height:34px;
-    border-radius:10px;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    font-size:.8rem;
-    background:var(--brand-l);
-    color:var(--brand);
-  }
-
-  .pd-panel-title{
-    font-size:.92rem;
-    font-weight:900;
-    color:var(--txt);
-    letter-spacing:-.02em;
-  }
-
-  .pd-panel-sub{
-    font-size:.72rem;
-    color:var(--mu);
-    margin-top:.08rem;
-  }
-
-  .pd-count{
-    display:flex;
-    align-items:center;
-    gap:.5rem;
-    font-size:.8rem;
-    font-weight:700;
-    color:var(--mu);
-  }
-
-  .pd-count-dot{
-    width:8px;
-    height:8px;
-    border-radius:50%;
-    background:var(--brand);
-    box-shadow:0 0 8px rgba(14,165,233,.45);
-  }
-
-  .pd-grid-wrap{
-    padding:1rem 1.2rem 1.2rem;
-  }
-
-  .pd-grid{
-    display:grid;
-    grid-template-columns:repeat(auto-fill, minmax(290px, 1fr));
-    gap:1.1rem;
-  }
-
-  .pd-card{
-    background:var(--surf);
-    border:1px solid var(--bdr);
-    border-radius:var(--r-lg);
-    overflow:hidden;
-    display:flex;
-    flex-direction:column;
-    box-shadow:var(--nc-card-shadow);
-    transition:transform .22s cubic-bezier(.16,1,.3,1), box-shadow .22s, border-color .22s;
-  }
-
-  .pd-card:hover{
-    transform:translateY(-4px);
-    border-color:var(--bdr2);
-    box-shadow:0 12px 40px rgba(0,0,0,.15), 0 0 0 1px rgba(14,165,233,.12);
-  }
-
-  .pd-card-bar{
-    height:3px;
-    background:linear-gradient(90deg, var(--brand-d), var(--brand), #67e8f9);
-  }
-
-  .pd-card-img{
-    height:185px;
-    background:var(--s3);
-    position:relative;
-    overflow:hidden;
-  }
-
-  .pd-card-img img{
-    width:100%;
-    height:100%;
-    object-fit:cover;
-    transition:transform .45s cubic-bezier(.16,1,.3,1);
-  }
-
-  .pd-card:hover .pd-card-img img{
-    transform:scale(1.06);
-  }
-
-  .pd-no-img{
-    width:100%;
-    height:100%;
-    display:flex;
-    flex-direction:column;
-    align-items:center;
-    justify-content:center;
-    gap:.5rem;
-    background:var(--s3);
-  }
-
-  .pd-no-img i{
-    font-size:2rem;
-    color:var(--fa);
-  }
-
-  .pd-no-img span{
-    font-size:.58rem;
-    font-weight:700;
-    text-transform:uppercase;
-    letter-spacing:.08em;
-    color:var(--fa);
-  }
-
-  .pd-price-badge{
-    position:absolute;
-    bottom:10px;
-    left:10px;
-    background:rgba(0,0,0,.72);
-    backdrop-filter:blur(10px);
-    border:1px solid rgba(255,255,255,.14);
-    color:#fff;
-    font-family:'JetBrains Mono', monospace;
-    font-size:.82rem;
-    font-weight:700;
-    border-radius:99px;
-    padding:.22rem .78rem;
-  }
-
-  .pd-status-badge{
-    position:absolute;
-    top:10px;
-    right:10px;
-    padding:.22rem .68rem;
-    border-radius:999px;
-    font-size:.62rem;
-    font-weight:900;
-    text-transform:uppercase;
-    letter-spacing:.05em;
-  }
-
-  .pd-status-badge.on{background:rgba(34,197,94,.88);color:#fff;}
-  .pd-status-badge.off{background:rgba(239,68,68,.84);color:#fff;}
-
-  .pd-card-body{
-    padding:1rem 1.15rem .8rem;
-    flex:1;
-    display:flex;
-    flex-direction:column;
-    gap:.45rem;
-  }
-
-  .pd-card-name{
-    font-size:.98rem;
-    font-weight:900;
-    color:var(--txt);
-    letter-spacing:-.025em;
-    line-height:1.25;
-    margin:0;
-  }
-
-  .pd-card-desc{
-    font-size:.77rem;
-    color:var(--mu);
-    line-height:1.58;
-    margin:0;
-    display:-webkit-box;
-    -webkit-line-clamp:2;
-    -webkit-box-orient:vertical;
-    overflow:hidden;
-  }
-
-  .pd-row-tags{
-    display:flex;
-    align-items:center;
-    gap:.45rem;
-    flex-wrap:wrap;
-  }
-
-  .pd-diet{
-    display:inline-flex;
-    align-items:center;
-    gap:.28rem;
-    background:var(--emerald-l);
-    color:var(--emerald);
-    border:1px solid rgba(52,211,153,.2);
-    border-radius:99px;
-    padding:.16rem .65rem;
-    font-size:.65rem;
-    font-weight:800;
-  }
-
-  .pd-rating{
-    display:inline-flex;
-    align-items:center;
-    gap:.28rem;
-    background:var(--amber-l);
-    color:#b45309;
-    border:1px solid rgba(251,191,36,.22);
-    border-radius:99px;
-    padding:.16rem .65rem;
-    font-size:.65rem;
-    font-weight:800;
-  }
-
-  .pd-rating.muted{
-    background:var(--s2);
-    color:var(--mu);
-    border-color:var(--bdr);
-  }
-
-  .pd-nutr{
-    display:flex;
-    flex-wrap:wrap;
-    gap:.28rem;
-    margin-top:auto;
-    padding-top:.55rem;
-  }
-
-  .pd-nb{
-    display:inline-flex;
-    align-items:center;
-    gap:.25rem;
-    background:var(--s2);
-    border:1px solid var(--bdr);
-    border-radius:99px;
-    padding:.2rem .65rem;
-    font-size:.7rem;
-    font-weight:700;
-    color:var(--txt2);
-  }
-
-  .pd-nb b{
-    font-family:'JetBrains Mono', monospace;
-    font-size:.72rem;
-  }
-
-  .nb-cal b{color:#fb923c;}
-  .nb-pro b{color:var(--emerald);}
-  .nb-car b{color:var(--violet);}
-  .nb-fat b{color:#f472b6;}
-
-  .pd-card-foot{
-    padding:.7rem 1.15rem .9rem;
-    display:flex;
-    gap:.55rem;
-    border-top:1px solid var(--bdr);
-    background:var(--s2);
-  }
-
-  .pd-edit,
-  .pd-delete{
-    flex:1;
-    display:inline-flex;
-    align-items:center;
-    justify-content:center;
-    gap:.38rem;
-    border-radius:12px;
-    padding:.58rem 0;
-    font-size:.78rem;
-    font-weight:800;
-    font-family:inherit;
-    text-decoration:none;
-    transition:all .14s ease;
-  }
-
-  .pd-edit{
-    background:var(--surf);
-    border:1px solid var(--bdr);
-    color:var(--txt2);
-  }
-
-  .pd-edit:hover{
-    background:var(--brand-l);
-    border-color:rgba(14,165,233,.25);
-    color:var(--brand-d);
-  }
-
-  .pd-delete{
-    background:var(--surf);
-    border:1px solid var(--bdr);
-    color:var(--mu);
-    cursor:pointer;
-  }
-
-  .pd-delete:hover{
-    background:var(--rose-l);
-    border-color:rgba(251,113,133,.3);
-    color:var(--rose);
-  }
-
-  .pd-empty{
-    background:var(--s2);
-    border:1.5px dashed var(--bdr2);
-    border-radius:var(--r-lg);
-    padding:3rem 1.5rem;
-    display:flex;
-    flex-direction:column;
-    align-items:center;
-    text-align:center;
-    gap:.8rem;
-  }
-
-  .pd-empty-ico{
-    width:58px;
-    height:58px;
-    border-radius:16px;
-    background:var(--brand-l);
-    color:var(--brand);
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    font-size:1.45rem;
-  }
-
-  .pd-empty h4{
-    font-size:1rem;
-    font-weight:900;
-    color:var(--txt);
-    margin:0;
-  }
-
-  .pd-empty p{
-    font-size:.8rem;
-    color:var(--mu);
-    margin:0;
-    max-width:280px;
-    line-height:1.65;
-  }
-
-  .pd-mini-note{
-    font-size:.74rem;
-    color:var(--mu);
-  }
-
-  /* insights modal */
-  .ins-backdrop{
-    position:fixed;
-    inset:0;
-    z-index:8500;
-    background:rgba(0,0,0,.65);
-    backdrop-filter:blur(10px);
-    -webkit-backdrop-filter:blur(10px);
-    opacity:0;
-    pointer-events:none;
-    transition:opacity .28s;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    padding:1.5rem;
-  }
-
-  .ins-backdrop.open{
-    opacity:1;
-    pointer-events:auto;
-  }
-
-  .ins-page{
-    background:var(--nc-surface);
-    border:1px solid var(--nc-border);
-    border-radius:24px;
-    width:100%;
-    max-width:680px;
-    max-height:88vh;
-    display:flex;
-    flex-direction:column;
-    box-shadow:0 32px 80px rgba(0,0,0,.5), 0 0 0 1px rgba(255,255,255,.04) inset;
-    transform:scale(.93) translateY(20px);
-    opacity:0;
-    transition:transform .32s cubic-bezier(.16,1,.3,1), opacity .28s;
-    overflow:hidden;
-  }
-
-  .ins-backdrop.open .ins-page{
-    transform:scale(1) translateY(0);
-    opacity:1;
-  }
-
-  .ins-hd{
-    flex-shrink:0;
-    background:
-      radial-gradient(ellipse 90% 160% at 0% 60%, rgba(124,58,237,.5) 0%, transparent 52%),
-      radial-gradient(ellipse 60% 100% at 100% 0%, rgba(56,189,248,.2) 0%, transparent 50%),
-      radial-gradient(ellipse 45% 70% at 55% 110%, rgba(52,211,153,.12) 0%, transparent 48%),
-      linear-gradient(145deg, #060f1e 0%, #0c1635 55%, #070e1c 100%);
-    position:relative;
-    overflow:hidden;
-    padding:1.5rem 1.75rem 0;
-  }
-
-  .ins-hd::before{
-    content:'';
-    position:absolute;
-    inset:0;
-    background-image:radial-gradient(rgba(255,255,255,.045) 1px, transparent 1px);
-    background-size:22px 22px;
-    pointer-events:none;
-  }
-
-  .ins-hd::after{
-    content:'';
-    position:absolute;
-    inset:0;
-    background:linear-gradient(115deg, transparent 30%, rgba(255,255,255,.03) 48%, rgba(255,255,255,.06) 52%, rgba(255,255,255,.03) 56%, transparent 74%);
-    pointer-events:none;
-  }
-
-  .ins-hd-inner{
-    position:relative;
-    z-index:2;
-    display:flex;
-    align-items:flex-start;
-    justify-content:space-between;
-    gap:1rem;
-    margin-bottom:1.25rem;
-  }
-
-  .ins-hd-left{
-    display:flex;
-    align-items:center;
-    gap:.85rem;
-  }
-
-  .ins-hd-ico{
-    width:44px;
-    height:44px;
-    border-radius:13px;
-    flex-shrink:0;
-    background:rgba(167,139,250,.2);
-    color:#c4b5fd;
-    border:1px solid rgba(167,139,250,.3);
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    font-size:1.05rem;
-  }
-
-  .ins-hd-title{
-    font-size:1.15rem;
-    font-weight:900;
-    color:#fff;
-    letter-spacing:-.035em;
-    margin-bottom:.06rem;
-  }
-
-  .ins-hd-sub{
-    font-size:.72rem;
-    color:rgba(255,255,255,.38);
-  }
-
-  .ins-hd-close{
-    width:32px;
-    height:32px;
-    border-radius:9px;
-    flex-shrink:0;
-    background:rgba(255,255,255,.07);
-    border:1px solid rgba(255,255,255,.1);
-    color:rgba(255,255,255,.55);
-    cursor:pointer;
-    font-size:.82rem;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    transition:background .14s, color .14s;
-  }
-
-  .ins-hd-close:hover{
-    background:rgba(251,113,133,.18);
-    color:#fb7185;
-    border-color:rgba(251,113,133,.3);
-  }
-
-  .ins-stats{
-    position:relative;
-    z-index:2;
-    display:grid;
-    grid-template-columns:repeat(4, 1fr);
-    gap:.65rem;
-    margin-bottom:1.4rem;
-  }
-
-  .ins-sc{
-    background:rgba(255,255,255,.06);
-    border:1px solid rgba(255,255,255,.1);
-    border-radius:14px;
-    padding:.9rem .75rem;
-    text-align:center;
-    transition:background .15s;
-    position:relative;
-    overflow:hidden;
-  }
-
-  .ins-sc::before{
-    content:'';
-    position:absolute;
-    top:0;
-    left:15%;
-    right:15%;
-    height:1px;
-    background:linear-gradient(90deg, transparent, rgba(255,255,255,.15), transparent);
-  }
-
-  .ins-sc:hover{
-    background:rgba(255,255,255,.1);
-  }
-
-  .ins-sc-val{
-    font-family:'JetBrains Mono', monospace;
-    font-size:1.3rem;
-    font-weight:700;
-    line-height:1;
-    color:#fff;
-    margin-bottom:.22rem;
-  }
-
-  .ins-sc-val.vi{color:#c4b5fd;text-shadow:0 0 14px rgba(196,181,253,.4);}
-  .ins-sc-val.am{color:#fbbf24;text-shadow:0 0 14px rgba(251,191,36,.35);}
-  .ins-sc-val.cy{color:#38bdf8;text-shadow:0 0 14px rgba(56,189,248,.35);}
-  .ins-sc-val.em{color:#34d399;text-shadow:0 0 14px rgba(52,211,153,.35);}
-
-  .ins-sc-lbl{
-    font-size:.54rem;
-    font-weight:800;
-    text-transform:uppercase;
-    letter-spacing:.1em;
-    color:rgba(255,255,255,.3);
-  }
-
-  .ins-hd-scan{
-    position:absolute;
-    bottom:0;
-    left:0;
-    right:0;
-    height:1px;
-    z-index:2;
-    background:linear-gradient(90deg, transparent 5%, rgba(167,139,250,.6) 35%, rgba(56,189,248,.5) 65%, transparent 95%);
-  }
-
-  .ins-body{
-    flex:1;
-    overflow-y:auto;
-    padding:1.25rem 1.75rem 1.5rem;
-    display:flex;
-    flex-direction:column;
-    gap:.85rem;
-  }
-
-  .ins-body::-webkit-scrollbar{
-    width:4px;
-  }
-
-  .ins-body::-webkit-scrollbar-thumb{
-    background:var(--nc-border-2);
-    border-radius:99px;
-  }
-
-  .ins-sec-lbl{
-    display:flex;
-    align-items:center;
-    gap:.45rem;
-    font-size:.6rem;
-    font-weight:900;
-    text-transform:uppercase;
-    letter-spacing:.1em;
-    color:var(--nc-text-faint);
-  }
-
-  .ins-sec-lbl::after{
-    content:'';
-    flex:1;
-    height:1px;
-    background:var(--nc-border);
-  }
-
-  .ins-list{
-    border:1px solid var(--nc-border);
-    border-radius:16px;
-    overflow:hidden;
-  }
-
-  .ins-row{
-    display:grid;
-    grid-template-columns:30px 54px 1fr auto;
-    align-items:center;
-    gap:.85rem;
-    padding:.9rem 1.1rem;
-    border-bottom:1px solid var(--nc-border);
-    transition:background .12s;
-  }
-
-  .ins-row:last-child{
-    border-bottom:none;
-  }
-
-  .ins-row:hover{
-    background:var(--nc-surface-2);
-  }
-
-  .ins-rank{
-    width:30px;
-    height:30px;
-    border-radius:8px;
-    flex-shrink:0;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    font-size:.88rem;
-  }
-
-  .ins-rank.r1{background:rgba(251,191,36,.12);border:1px solid rgba(251,191,36,.22);}
-  .ins-rank.r2{background:rgba(148,163,184,.08);border:1px solid rgba(148,163,184,.18);}
-  .ins-rank.r3{background:rgba(180,100,50,.1);border:1px solid rgba(180,100,50,.2);}
-  .ins-rank.rn{
-    background:var(--nc-surface-2);
-    border:1px solid var(--nc-border);
-    font-family:'JetBrains Mono', monospace;
-    font-size:.68rem;
-    font-weight:700;
-    color:var(--nc-text-faint);
-  }
-
-  .ins-thumb{
-    width:54px;
-    height:54px;
-    border-radius:11px;
-    object-fit:cover;
-    border:1px solid var(--nc-border);
-    flex-shrink:0;
-  }
-
-  .ins-thumb-ph{
-    width:54px;
-    height:54px;
-    border-radius:11px;
-    flex-shrink:0;
-    background:var(--nc-surface-3);
-    border:1px solid var(--nc-border);
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    color:var(--nc-text-faint);
-    font-size:1rem;
-  }
-
-  .ins-info{
-    min-width:0;
-  }
-
-  .ins-name{
-    font-size:.88rem;
-    font-weight:800;
-    color:var(--nc-text);
-    letter-spacing:-.025em;
-    margin-bottom:.3rem;
-    white-space:nowrap;
-    overflow:hidden;
-    text-overflow:ellipsis;
-  }
-
-  .ins-chips{
-    display:flex;
-    gap:.28rem;
-    flex-wrap:wrap;
-  }
-
-  .ins-chip{
-    font-size:.58rem;
-    font-weight:800;
-    text-transform:uppercase;
-    letter-spacing:.04em;
-    padding:.12rem .48rem;
-    border-radius:5px;
-  }
-
-  .ic-diet{background:rgba(52,211,153,.1);color:#34d399;}
-  .ic-cal{background:rgba(251,191,36,.1);color:#fbbf24;}
-  .ic-price{background:rgba(56,189,248,.1);color:#38bdf8;}
-
-  .ins-right{
-    display:flex;
-    flex-direction:column;
-    align-items:flex-end;
-    gap:.32rem;
-    flex-shrink:0;
-    min-width:70px;
-  }
-
-  .ins-views-num{
-    font-family:'JetBrains Mono', monospace;
-    font-size:1.1rem;
-    font-weight:700;
-    color:#a78bfa;
-    line-height:1;
-  }
-
-  .ins-views-sub{
-    font-size:.55rem;
-    font-weight:700;
-    color:var(--nc-text-faint);
-    text-transform:uppercase;
-    letter-spacing:.06em;
-  }
-
-  .ins-bar{
-    width:70px;
-    height:5px;
-    background:var(--nc-surface-3);
-    border-radius:99px;
-    overflow:hidden;
-  }
-
-  .ins-bar-fill{
-    height:100%;
-    border-radius:99px;
-    width:0;
-    transition:width 1s cubic-bezier(.16,1,.3,1);
-  }
-
-  .ibf-1{background:linear-gradient(90deg, #f59e0b, #fbbf24);}
-  .ibf-2{background:linear-gradient(90deg, #475569, #94a3b8);}
-  .ibf-3{background:linear-gradient(90deg, #78350f, #c77b3b);}
-  .ibf-n{background:linear-gradient(90deg, #7c3aed, #a78bfa);}
-
-  .ins-empty{
-    display:flex;
-    flex-direction:column;
-    align-items:center;
-    text-align:center;
-    gap:.65rem;
-    padding:2.5rem 1rem;
-  }
-
-  .ins-empty-ico{
-    width:52px;
-    height:52px;
-    border-radius:14px;
-    background:rgba(167,139,250,.1);
-    color:#a78bfa;
-    border:1px solid rgba(167,139,250,.18);
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    font-size:1.25rem;
-  }
-
-  .ins-empty p{
-    font-size:.8rem;
-    color:var(--nc-text-muted);
-    margin:0;
-    max-width:240px;
-    line-height:1.7;
-  }
-
-  @media (max-width: 1100px){
-    .pd-stats{
-      grid-template-columns:repeat(2, 1fr);
-    }
-  }
-
-  @media (max-width: 768px){
-    .pd-stats{
-      grid-template-columns:1fr;
-    }
-
-    .pd-grid{
-      grid-template-columns:1fr;
-    }
-
-    .pd-banner{
-      padding:1.45rem 1.2rem;
-    }
-
-    .ins-stats{
-      grid-template-columns:repeat(2, 1fr);
-    }
-
-    .ins-row{
-      grid-template-columns:30px 46px 1fr;
-    }
-
-    .ins-right{
-      grid-column:2 / 4;
-      align-items:flex-start;
-      min-width:0;
-    }
-  }
-
-  @media (max-width: 520px){
-    .ins-stats{
-      grid-template-columns:1fr;
-    }
-  }
+/* ══════════════════════════════════════════
+   PROVIDER DASHBOARD  ·  NutriConnect
+   Hero photo + stats · Line-chart insights
+══════════════════════════════════════════ */
+.pd, .pd * { font-family: 'Plus Jakarta Sans', sans-serif !important; }
+.pd i, .pd i[class*="fa"] {
+  font-family: "Font Awesome 6 Free","Font Awesome 6 Brands","FontAwesome" !important;
+  font-style:normal; font-variant:normal; text-rendering:auto;
+  -webkit-font-smoothing:antialiased;
+}
+
+.pd {
+  --brand:   var(--nc-brand);
+  --brand-d: var(--nc-brand-d);
+  --brand-l: var(--nc-brand-l);
+  --surf:    var(--nc-surface);
+  --s2:      var(--nc-surface-2);
+  --s3:      var(--nc-surface-3);
+  --bdr:     var(--nc-border);
+  --bdr2:    var(--nc-border-2);
+  --txt:     var(--nc-text);
+  --txt2:    var(--nc-text-2);
+  --mu:      var(--nc-text-muted);
+  --fa:      var(--nc-text-faint);
+
+  --emerald:#10b981; --emerald-l:rgba(16,185,129,.1);
+  --amber:  #f59e0b; --amber-l: rgba(245,158,11,.1);
+  --rose:   #f43f5e; --rose-l:  rgba(244,63,94,.1);
+  --violet: #8b5cf6; --violet-l:rgba(139,92,246,.1);
+  --cyan:   #0891b2; --cyan-l:  rgba(8,145,178,.1);
+  --r:14px; --r-lg:18px; --r-xl:24px;
+}
+
+.pd-wrap { max-width:1200px; margin:0 auto; }
+@keyframes pd-up { from{opacity:0;transform:translateY(12px)} to{opacity:1;transform:none} }
+@keyframes pd-pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.35;transform:scale(.65)} }
+
+/* ════ HERO BANNER (like user dashboard) ════ */
+.pd-hero {
+  position:relative; overflow:hidden; isolation:isolate;
+  border-radius:20px; padding:1.75rem 2rem; margin-bottom:1.25rem;
+  background:
+    radial-gradient(ellipse 70% 150% at -5% 50%,rgba(14,165,233,.5) 0%,transparent 55%),
+    radial-gradient(ellipse 45% 90% at 110% 5%,rgba(16,185,129,.3) 0%,transparent 50%),
+    radial-gradient(ellipse 35% 60% at 60% 110%,rgba(8,145,178,.2) 0%,transparent 48%),
+    linear-gradient(145deg,#030d1f 0%,#081629 45%,#0c1d38 100%);
+  border:1px solid rgba(56,189,248,.2);
+  box-shadow:0 1px 0 rgba(255,255,255,.06) inset,0 20px 60px rgba(0,0,0,.55);
+  animation:pd-up .35s ease both;
+}
+.pd-hero::before {
+  content:''; position:absolute; inset:0;
+  background-image:radial-gradient(circle,rgba(255,255,255,.04) 1px,transparent 1px);
+  background-size:22px 22px;
+  mask-image:radial-gradient(ellipse 100% 100% at 50% 50%,black 20%,transparent 100%);
+  pointer-events:none;
+}
+.pd-hero::after {
+  content:''; position:absolute; top:-60%; left:-10%; width:45%; height:220%;
+  background:linear-gradient(110deg,transparent 40%,rgba(255,255,255,.035) 50%,transparent 60%);
+  pointer-events:none;
+}
+.pd-hero-line {
+  position:absolute; bottom:0; left:0; right:0; height:1px;
+  background:linear-gradient(90deg,transparent 5%,rgba(56,189,248,.6) 35%,rgba(52,211,153,.5) 65%,transparent 95%);
+}
+.pd-hero-in {
+  position:relative; z-index:1;
+  display:flex; align-items:center; justify-content:space-between; gap:1.5rem; flex-wrap:wrap;
+}
+
+/* Store avatar / photo */
+.pd-hero-avatar {
+  width:76px; height:76px; border-radius:16px; flex-shrink:0; overflow:hidden;
+  border:2.5px solid rgba(255,255,255,.2);
+  box-shadow:0 0 0 4px rgba(56,189,248,.18);
+  background:rgba(14,165,233,.25);
+  display:flex; align-items:center; justify-content:center;
+}
+.pd-hero-avatar img { width:100%; height:100%; object-fit:cover; }
+.pd-hero-avatar-init { font-size:1.8rem; font-weight:800; color:#fff; }
+
+.pd-eyebrow {
+  display:inline-flex; align-items:center; gap:.38rem;
+  background:rgba(56,189,248,.12); border:1px solid rgba(56,189,248,.25);
+  border-radius:99px; padding:.2rem .85rem;
+  font-size:.58rem; font-weight:800; letter-spacing:.1em; text-transform:uppercase;
+  color:rgba(255,255,255,.7); margin-bottom:.5rem;
+}
+.pd-pulse { width:5px; height:5px; border-radius:50%; background:#38bdf8; box-shadow:0 0 7px #38bdf8; animation:pd-pulse 2s ease-in-out infinite; }
+.pd-hero-title { font-size:1.65rem; font-weight:800; color:#fff; letter-spacing:-.035em; line-height:1.08; margin:0 0 .25rem; }
+.pd-hero-title .hl { background:linear-gradient(135deg,#38bdf8,#7dd3fc,#34d399); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
+.pd-hero-sub { color:rgba(255,255,255,.4); font-size:.8rem; margin:0; line-height:1.6; }
+
+.pd-hero-acts { display:flex; align-items:center; gap:.6rem; flex-wrap:wrap; }
+.pd-hbtn { display:inline-flex; align-items:center; gap:.38rem; padding:.6rem 1rem; border-radius:12px; font-size:.78rem; font-weight:700; font-family:inherit !important; text-decoration:none; cursor:pointer; border:none; transition:all .14s; }
+.pd-hbtn-solid { background:linear-gradient(135deg,#0ea5e9,#38bdf8); color:#fff !important; box-shadow:0 5px 18px rgba(14,165,233,.4); }
+.pd-hbtn-solid:hover { filter:brightness(1.1); transform:translateY(-1px); }
+.pd-hbtn-glass { background:rgba(255,255,255,.08); color:#e2e8f0 !important; border:1px solid rgba(255,255,255,.15); backdrop-filter:blur(10px); -webkit-backdrop-filter:blur(10px); }
+.pd-hbtn-glass:hover { background:rgba(255,255,255,.14); border-color:rgba(56,189,248,.4); color:#fff !important; }
+.pd-hbtn-badge { font-family:'JetBrains Mono',monospace !important; font-size:.65rem; font-weight:700; background:rgba(167,139,250,.2); border:1px solid rgba(167,139,250,.3); color:#c4b5fd; padding:.1rem .4rem; border-radius:99px; }
+
+/* ════ STAT CARDS ════ */
+.pd-stats {
+  display:grid; grid-template-columns:repeat(5,1fr);
+  gap:.85rem; margin-bottom:1.2rem;
+  animation:pd-up .36s .06s ease both;
+}
+.pd-stat { background:var(--surf); border:1.5px solid var(--bdr); border-radius:var(--r-lg); padding:.95rem 1rem; position:relative; overflow:hidden; cursor:default; transition:transform .2s,box-shadow .2s,border-color .2s; }
+.pd-stat:hover { transform:translateY(-3px); border-color:var(--bdr2); box-shadow:0 8px 26px rgba(0,0,0,.09); }
+.pd-stat-stripe { position:absolute; top:0; left:0; right:0; height:3px; border-radius:var(--r-lg) var(--r-lg) 0 0; }
+.pd-stat-row { display:flex; align-items:center; justify-content:space-between; margin-bottom:.55rem; }
+.pd-stat-lbl { font-size:.63rem; font-weight:700; color:var(--fa); letter-spacing:.03em; text-transform:uppercase; }
+.pd-stat-ico { width:32px; height:32px; border-radius:9px; flex-shrink:0; display:flex; align-items:center; justify-content:center; font-size:14px; line-height:1; }
+.pd-stat-val { font-family:'JetBrains Mono',monospace !important; font-size:1.32rem; font-weight:600; color:var(--txt); letter-spacing:-.03em; line-height:1; }
+.pd-stat-unit { font-size:.62rem; font-weight:500; color:var(--mu); margin-left:.1rem; font-family:'Plus Jakarta Sans',sans-serif !important; }
+.pd-stat-sub { font-size:.64rem; color:var(--fa); margin-top:.32rem; }
+
+/* ════ PANEL ════ */
+.pd-panel { background:var(--surf); border:1.5px solid var(--bdr); border-radius:var(--r-lg); overflow:hidden; margin-bottom:1.2rem; animation:pd-up .4s .1s ease both; }
+.pd-panel-head { display:flex; align-items:center; justify-content:space-between; gap:1rem; padding:.88rem 1.2rem; border-bottom:1px solid var(--bdr); background:var(--s2); flex-wrap:wrap; }
+.pd-panel-hd-left { display:flex; align-items:center; gap:.7rem; }
+.pd-panel-ico { width:34px; height:34px; border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:14px; background:var(--brand-l); color:var(--brand); }
+.pd-panel-title { font-size:.9rem; font-weight:800; color:var(--txt); letter-spacing:-.018em; }
+.pd-panel-sub { font-size:.7rem; color:var(--mu); margin-top:.05rem; }
+.pd-panel-count { display:flex; align-items:center; gap:.45rem; font-size:.78rem; font-weight:700; color:var(--mu); }
+.pd-panel-dot { width:7px; height:7px; border-radius:50%; background:var(--brand); box-shadow:0 0 8px rgba(14,165,233,.5); }
+
+/* ════ FOOD CARD GRID ════ */
+.pd-grid-wrap { padding:1rem 1.2rem 1.2rem; }
+.pd-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(288px,1fr)); gap:1.1rem; }
+
+.pd-card { background:var(--surf); border:1.5px solid var(--bdr); border-radius:var(--r-lg); overflow:hidden; display:flex; flex-direction:column; transition:transform .22s cubic-bezier(.16,1,.3,1),box-shadow .22s,border-color .22s; }
+.pd-card:hover { transform:translateY(-4px); border-color:var(--bdr2); box-shadow:0 12px 40px rgba(0,0,0,.12),0 0 0 1px rgba(14,165,233,.1); }
+.pd-card-bar { height:3px; background:linear-gradient(90deg,var(--brand-d),var(--brand),#67e8f9); }
+
+.pd-card-img { height:185px; background:var(--s3); position:relative; overflow:hidden; }
+.pd-card-img img { width:100%; height:100%; object-fit:cover; transition:transform .45s cubic-bezier(.16,1,.3,1); }
+.pd-card:hover .pd-card-img img { transform:scale(1.06); }
+
+.pd-no-img { width:100%; height:100%; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:.5rem; background:var(--s3); }
+.pd-no-img i { font-size:2rem; color:var(--fa); }
+.pd-no-img span { font-size:.58rem; font-weight:700; text-transform:uppercase; letter-spacing:.08em; color:var(--fa); }
+
+.pd-price-badge { position:absolute; bottom:10px; left:10px; background:rgba(0,0,0,.72); backdrop-filter:blur(10px); border:1px solid rgba(255,255,255,.14); color:#fff; font-family:'JetBrains Mono',monospace !important; font-size:.82rem; font-weight:700; border-radius:99px; padding:.22rem .78rem; }
+.pd-status-badge { position:absolute; top:10px; right:10px; padding:.22rem .68rem; border-radius:999px; font-size:.62rem; font-weight:900; text-transform:uppercase; letter-spacing:.05em; }
+.pd-status-badge.on  { background:rgba(34,197,94,.88); color:#fff; }
+.pd-status-badge.off { background:rgba(239,68,68,.84);  color:#fff; }
+
+.pd-card-body { padding:1rem 1.15rem .8rem; flex:1; display:flex; flex-direction:column; gap:.45rem; }
+.pd-card-name { font-size:.96rem; font-weight:800; color:var(--txt); letter-spacing:-.02em; line-height:1.25; margin:0; }
+.pd-card-desc { font-size:.76rem; color:var(--mu); line-height:1.55; margin:0; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
+
+.pd-row-tags { display:flex; align-items:center; gap:.4rem; flex-wrap:wrap; }
+.pd-diet    { display:inline-flex; align-items:center; gap:.25rem; background:var(--emerald-l); color:var(--emerald); border:1px solid rgba(16,185,129,.22); border-radius:99px; padding:.15rem .62rem; font-size:.64rem; font-weight:800; }
+.pd-rating  { display:inline-flex; align-items:center; gap:.25rem; background:var(--amber-l); color:#b45309; border:1px solid rgba(245,158,11,.22); border-radius:99px; padding:.15rem .62rem; font-size:.64rem; font-weight:800; }
+.pd-rating.muted { background:var(--s2); color:var(--mu); border-color:var(--bdr); }
+
+.pd-nutr { display:flex; flex-wrap:wrap; gap:.28rem; margin-top:auto; padding-top:.5rem; }
+.pd-nb { display:inline-flex; align-items:center; gap:.22rem; background:var(--s2); border:1px solid var(--bdr); border-radius:99px; padding:.18rem .6rem; font-size:.68rem; font-weight:700; color:var(--txt2); }
+.pd-nb b { font-family:'JetBrains Mono',monospace !important; font-size:.7rem; }
+.nb-cal b{color:#f97316;} .nb-pro b{color:var(--emerald);} .nb-car b{color:var(--violet);} .nb-fat b{color:#f472b6;}
+
+.pd-card-foot { padding:.68rem 1.15rem .85rem; display:flex; gap:.5rem; border-top:1px solid var(--bdr); background:var(--s2); }
+.pd-edit,.pd-delete { flex:1; display:inline-flex; align-items:center; justify-content:center; gap:.35rem; border-radius:10px; padding:.55rem 0; font-size:.76rem; font-weight:700; font-family:inherit !important; text-decoration:none; transition:all .13s ease; }
+.pd-edit   { background:var(--surf); border:1.5px solid var(--bdr); color:var(--txt2); }
+.pd-edit:hover { background:var(--brand-l); border-color:rgba(14,165,233,.25); color:var(--brand-d); }
+.pd-delete { background:var(--surf); border:1.5px solid var(--bdr); color:var(--mu); cursor:pointer; }
+.pd-delete:hover { background:var(--rose-l); border-color:rgba(244,63,94,.3); color:var(--rose); }
+
+.pd-empty { background:var(--s2); border:1.5px dashed var(--bdr2); border-radius:var(--r-lg); padding:3rem 1.5rem; display:flex; flex-direction:column; align-items:center; text-align:center; gap:.8rem; }
+.pd-empty-ico { width:56px; height:56px; border-radius:16px; background:var(--brand-l); color:var(--brand); display:flex; align-items:center; justify-content:center; font-size:1.4rem; }
+.pd-empty h4 { font-size:.98rem; font-weight:800; color:var(--txt); margin:0; }
+.pd-empty p  { font-size:.78rem; color:var(--mu); margin:0; max-width:270px; line-height:1.65; }
+
+/* ════ PILL BUTTONS ════ */
+.pd-pill { display:inline-flex; align-items:center; gap:.38rem; padding:.5rem 1rem; border-radius:99px; font-size:.76rem; font-weight:700; font-family:inherit !important; text-decoration:none; cursor:pointer; border:none; transition:all .13s; }
+.pd-pill-dk { background:var(--txt); color:var(--nc-bg) !important; }
+.pd-pill-dk:hover { opacity:.86; }
+.pd-pill-gh { background:var(--surf); color:var(--txt2) !important; border:1.5px solid var(--bdr2); box-shadow:0 1px 3px rgba(0,0,0,.06); }
+.pd-pill-gh:hover { border-color:var(--brand); color:var(--brand) !important; background:var(--brand-l); }
+.pd-pill-sm { padding:.38rem .82rem; font-size:.72rem; }
+
+/* ════ INSIGHTS MODAL ════ */
+.ins-backdrop {
+  position:fixed; inset:0; z-index:8500;
+  background:rgba(0,0,0,.65); backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px);
+  opacity:0; pointer-events:none; transition:opacity .28s;
+  display:flex; align-items:center; justify-content:center; padding:1.5rem;
+}
+.ins-backdrop.open { opacity:1; pointer-events:auto; }
+
+.ins-page {
+  background:var(--nc-surface); border:1.5px solid var(--nc-border);
+  border-radius:24px; width:100%; max-width:860px; max-height:92vh;
+  display:flex; flex-direction:column;
+  box-shadow:0 32px 80px rgba(0,0,0,.5),0 0 0 1px rgba(255,255,255,.04) inset;
+  transform:scale(.93) translateY(20px); opacity:0;
+  transition:transform .32s cubic-bezier(.16,1,.3,1),opacity .28s; overflow:hidden;
+}
+.ins-backdrop.open .ins-page { transform:scale(1) translateY(0); opacity:1; }
+
+/* Insights header — dark hero like user */
+.ins-hd {
+  flex-shrink:0;
+  background:
+    radial-gradient(ellipse 70% 150% at -5% 50%,rgba(14,165,233,.5) 0%,transparent 55%),
+    radial-gradient(ellipse 45% 90% at 110% 5%,rgba(16,185,129,.3) 0%,transparent 50%),
+    linear-gradient(145deg,#030d1f 0%,#081629 45%,#0c1d38 100%);
+  position:relative; overflow:hidden; padding:1.5rem 1.75rem 0;
+}
+.ins-hd::before { content:''; position:absolute; inset:0; background-image:radial-gradient(rgba(255,255,255,.04) 1px,transparent 1px); background-size:22px 22px; pointer-events:none; }
+.ins-hd-scan { position:absolute; bottom:0; left:0; right:0; height:1px; background:linear-gradient(90deg,transparent 5%,rgba(56,189,248,.6) 35%,rgba(52,211,153,.5) 65%,transparent 95%); }
+
+.ins-hd-top { position:relative; z-index:2; display:flex; align-items:center; justify-content:space-between; gap:1rem; margin-bottom:1.1rem; }
+.ins-hd-left { display:flex; align-items:center; gap:.85rem; }
+.ins-hd-ico { width:42px; height:42px; border-radius:12px; flex-shrink:0; background:rgba(56,189,248,.15); color:#38bdf8; border:1px solid rgba(56,189,248,.25); display:flex; align-items:center; justify-content:center; font-size:1.05rem; }
+.ins-hd-title { font-size:1.1rem; font-weight:800; color:#fff; letter-spacing:-.03em; }
+.ins-hd-sub   { font-size:.7rem; color:rgba(255,255,255,.38); margin-top:.06rem; }
+.ins-hd-close { width:32px; height:32px; border-radius:9px; flex-shrink:0; background:rgba(255,255,255,.07); border:1px solid rgba(255,255,255,.1); color:rgba(255,255,255,.55); cursor:pointer; font-size:.82rem; display:flex; align-items:center; justify-content:center; transition:background .14s,color .14s; }
+.ins-hd-close:hover { background:rgba(244,63,94,.18); color:#fb7185; border-color:rgba(244,63,94,.3); }
+
+/* ── 4 summary stat tiles (like FB Insights top cards) ── */
+.ins-tiles {
+  position:relative; z-index:2;
+  display:grid; grid-template-columns:repeat(4,1fr); gap:.65rem; margin-bottom:1.25rem;
+}
+.ins-tile {
+  background:rgba(255,255,255,.07); border:1px solid rgba(255,255,255,.1);
+  border-radius:14px; padding:.9rem .85rem; position:relative; overflow:hidden;
+  transition:background .14s;
+}
+.ins-tile::before { content:''; position:absolute; top:0; left:15%; right:15%; height:1px; background:linear-gradient(90deg,transparent,rgba(255,255,255,.14),transparent); }
+.ins-tile:hover { background:rgba(255,255,255,.11); }
+.ins-tile-val { font-family:'JetBrains Mono',monospace !important; font-size:1.4rem; font-weight:700; line-height:1; margin-bottom:.18rem; }
+.ins-tile-val.vi { color:#c4b5fd; text-shadow:0 0 14px rgba(196,181,253,.4); }
+.ins-tile-val.am { color:#fbbf24; text-shadow:0 0 14px rgba(251,191,36,.35); }
+.ins-tile-val.cy { color:#38bdf8; text-shadow:0 0 14px rgba(56,189,248,.35); }
+.ins-tile-val.em { color:#34d399; text-shadow:0 0 14px rgba(52,211,153,.35); }
+.ins-tile-lbl { font-size:.58rem; font-weight:800; text-transform:uppercase; letter-spacing:.1em; color:rgba(255,255,255,.35); }
+/* trend badge */
+.ins-tile-trend { display:inline-flex; align-items:center; gap:.2rem; font-size:.62rem; font-weight:700; margin-top:.35rem; }
+.trend-up   { color:#34d399; }
+.trend-down { color:#fb7185; }
+
+/* ── Modal body ── */
+.ins-body { flex:1; overflow-y:auto; padding:1.35rem 1.75rem 1.5rem; display:flex; flex-direction:column; gap:1.25rem; }
+.ins-body::-webkit-scrollbar { width:4px; }
+.ins-body::-webkit-scrollbar-thumb { background:var(--nc-border-2); border-radius:99px; }
+
+/* ── Section label (like FB Insights tabs) ── */
+.ins-sec-lbl { display:flex; align-items:center; gap:.45rem; font-size:.65rem; font-weight:800; text-transform:uppercase; letter-spacing:.1em; color:var(--nc-text-faint); }
+.ins-sec-lbl::after { content:''; flex:1; height:1px; background:var(--nc-border); }
+
+/* ── Line Chart Cards (3-col like FB Insights) ── */
+.ins-charts { display:grid; grid-template-columns:repeat(3,1fr); gap:1rem; }
+.ins-chart-card {
+  background:var(--nc-surface); border:1.5px solid var(--nc-border);
+  border-radius:16px; padding:1rem 1.1rem; overflow:hidden;
+  transition:border-color .14s,box-shadow .14s;
+}
+.ins-chart-card:hover { border-color:var(--nc-border-2); box-shadow:0 4px 20px rgba(0,0,0,.07); }
+.ins-chart-title { font-size:.78rem; font-weight:800; color:var(--nc-text); letter-spacing:-.015em; margin-bottom:.08rem; }
+.ins-chart-big   { font-family:'JetBrains Mono',monospace !important; font-size:1.55rem; font-weight:700; color:var(--nc-text); line-height:1; margin-bottom:.2rem; }
+.ins-chart-sub   { font-size:.65rem; color:var(--nc-text-muted); }
+.ins-chart-trend { display:inline-flex; align-items:center; gap:.2rem; font-size:.68rem; font-weight:700; margin-bottom:.75rem; }
+.ins-chart-legend { display:flex; gap:.75rem; margin-bottom:.55rem; flex-wrap:wrap; }
+.ins-chart-leg-item { display:flex; align-items:center; gap:.3rem; font-size:.66rem; color:var(--nc-text-muted); }
+.ins-chart-leg-dot { width:8px; height:8px; border-radius:50%; flex-shrink:0; }
+
+/* ── Ranking table ── */
+.ins-list { border:1.5px solid var(--nc-border); border-radius:16px; overflow:hidden; }
+.ins-row { display:grid; grid-template-columns:28px 48px 1fr auto; align-items:center; gap:.8rem; padding:.85rem 1.1rem; border-bottom:1px solid var(--nc-border); transition:background .12s; }
+.ins-row:last-child { border-bottom:none; }
+.ins-row:hover { background:var(--nc-surface-2); }
+.ins-rank { width:28px; height:28px; border-radius:8px; flex-shrink:0; display:flex; align-items:center; justify-content:center; font-size:.85rem; }
+.ins-rank.r1{background:rgba(251,191,36,.12);border:1px solid rgba(251,191,36,.22);}
+.ins-rank.r2{background:rgba(148,163,184,.08);border:1px solid rgba(148,163,184,.18);}
+.ins-rank.r3{background:rgba(180,100,50,.1);border:1px solid rgba(180,100,50,.2);}
+.ins-rank.rn{background:var(--nc-surface-2);border:1px solid var(--nc-border);font-family:'JetBrains Mono',monospace !important;font-size:.65rem;font-weight:700;color:var(--nc-text-faint);}
+.ins-thumb    { width:48px; height:48px; border-radius:10px; object-fit:cover; border:1.5px solid var(--nc-border); flex-shrink:0; }
+.ins-thumb-ph { width:48px; height:48px; border-radius:10px; flex-shrink:0; background:var(--nc-surface-2); border:1.5px solid var(--nc-border); display:flex; align-items:center; justify-content:center; color:var(--nc-text-faint); font-size:1rem; }
+.ins-info { min-width:0; }
+.ins-name { font-size:.84rem; font-weight:800; color:var(--nc-text); letter-spacing:-.02em; margin-bottom:.28rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.ins-chips { display:flex; gap:.28rem; flex-wrap:wrap; }
+.ins-chip { font-size:.58rem; font-weight:800; text-transform:uppercase; letter-spacing:.04em; padding:.12rem .48rem; border-radius:5px; }
+.ic-diet  { background:rgba(16,185,129,.1);  color:#10b981; }
+.ic-cal   { background:rgba(245,158,11,.1);  color:#f59e0b; }
+.ic-price { background:rgba(14,165,233,.1);  color:#0ea5e9; }
+.ins-right { display:flex; flex-direction:column; align-items:flex-end; gap:.28rem; flex-shrink:0; min-width:65px; }
+.ins-views-num { font-family:'JetBrains Mono',monospace !important; font-size:1.05rem; font-weight:700; color:#a78bfa; line-height:1; }
+.ins-views-sub { font-size:.54rem; font-weight:700; color:var(--nc-text-faint); text-transform:uppercase; letter-spacing:.06em; }
+.ins-bar { width:65px; height:5px; background:var(--nc-surface-2); border-radius:99px; overflow:hidden; }
+.ins-bar-fill { height:100%; border-radius:99px; width:0; transition:width 1s cubic-bezier(.16,1,.3,1); }
+.ibf-1{background:linear-gradient(90deg,#f59e0b,#fbbf24);}
+.ibf-2{background:linear-gradient(90deg,#475569,#94a3b8);}
+.ibf-3{background:linear-gradient(90deg,#78350f,#c77b3b);}
+.ibf-n{background:linear-gradient(90deg,#7c3aed,#a78bfa);}
+
+.ins-empty { display:flex; flex-direction:column; align-items:center; text-align:center; gap:.65rem; padding:2.5rem 1rem; }
+.ins-empty-ico { width:50px; height:50px; border-radius:14px; background:rgba(56,189,248,.1); color:#38bdf8; border:1px solid rgba(56,189,248,.2); display:flex; align-items:center; justify-content:center; font-size:1.2rem; }
+.ins-empty p { font-size:.78rem; color:var(--nc-text-muted); margin:0; max-width:240px; line-height:1.7; }
+
+/* ════ RESPONSIVE ════ */
+@media(max-width:1100px){ .pd-stats{grid-template-columns:repeat(3,1fr);} .ins-charts{grid-template-columns:1fr 1fr;} }
+@media(max-width:768px) { .pd-stats{grid-template-columns:1fr 1fr;} .ins-charts{grid-template-columns:1fr;} .ins-tiles{grid-template-columns:1fr 1fr;} }
+@media(max-width:480px) { .pd-stats{grid-template-columns:1fr;} }
 </style>
 {% endblock %}
 
 {% block content %}
-{% set foods_count = foods|length if foods else 0 %}
-{% set insights_list = insights|default([], true) %}
-{% set views_total = total_views|default(0, true) %}
-{% set top_item = insights_list[0] if insights_list else none %}
-{% set top_views = top_item.views if top_item and top_item.views else 0 %}
-{% set viewed_cnt = insights_list | selectattr('views', 'gt', 0) | list | length if insights_list else 0 %}
-{% set avg_views = ((views_total / foods_count)|round(1)) if foods_count > 0 and views_total > 0 else 0 %}
+{% set foods_count  = foods|length if foods else 0 %}
+{% set insights_list = insights|default([],true) %}
+{% set views_total   = total_views|default(0,true) %}
+{% set top_item      = insights_list[0] if insights_list else none %}
+{% set top_views     = top_item.views if top_item and top_item.views else 0 %}
+{% set viewed_cnt    = insights_list|selectattr('views','gt',0)|list|length if insights_list else 0 %}
+{% set avg_views     = ((views_total/foods_count)|round(1)) if foods_count>0 and views_total>0 else 0 %}
 
 <div class="pd">
-  <div class="pd-wrap">
+<div class="pd-wrap">
 
-    <div class="pd-banner">
-      <div class="pd-banner-top"></div>
-      <div class="pd-banner-scan"></div>
-
-      <div class="pd-banner-inner">
-        <div>
-          <div class="pd-eyebrow">
-            <span class="pd-eyebrow-dot"></span>
-            NutriConnect · Provider Dashboard
-          </div>
-          <h1 class="pd-title">Manage your <span class="hl">menu and orders</span></h1>
-          <p class="pd-sub">
-            Track your store at a glance, keep food listings updated, and jump into order management whenever you need.
-          </p>
-        </div>
-
-        <div class="pd-banner-actions">
-          <a href="{{ url_for('provider.provider_orders') }}" class="pd-btn">
-            <i class="fas fa-bag-shopping"></i> Manage Orders
-          </a>
-
-          {% if foods %}
-            <button type="button" class="pd-btn-ghost" onclick="openInsights()">
-              <i class="fas fa-chart-column"></i> Popularity Insights
-              <span class="pd-btn-badge">{{ views_total }}</span>
-            </button>
+  <!-- ══ HERO BANNER with store photo ══ -->
+  <div class="pd-hero">
+    <div class="pd-hero-line"></div>
+    <div class="pd-hero-in">
+      <!-- Avatar + text -->
+      <div style="display:flex;align-items:center;gap:1.1rem;flex-wrap:wrap;">
+        <div class="pd-hero-avatar">
+          {% if current_user.profile_picture %}
+            <img src="{{ url_for('static', filename=current_user.profile_picture) }}" alt="{{ current_user.username }}">
+          {% else %}
+            <span class="pd-hero-avatar-init">{{ (current_user.first_name or current_user.username or 'P')[0].upper() }}</span>
           {% endif %}
+        </div>
+        <div>
+          <div class="pd-eyebrow"><span class="pd-pulse"></span>NutriConnect · Provider Dashboard</div>
+          <h1 class="pd-hero-title">Manage your <span class="hl">menu and orders</span></h1>
+          <p class="pd-hero-sub">Track your store at a glance, keep food listings updated, and manage orders.</p>
+        </div>
+      </div>
+      <!-- Actions -->
+      <div class="pd-hero-acts">
+        <a href="{{ url_for('provider.provider_orders') }}" class="pd-hbtn pd-hbtn-solid">
+          <i class="fas fa-bag-shopping"></i> Manage Orders
+        </a>
+        {% if foods %}
+          <button type="button" class="pd-hbtn pd-hbtn-glass" onclick="openInsights()">
+            <i class="fas fa-chart-line"></i> Insights
+            <span class="pd-hbtn-badge">{{ views_total }}</span>
+          </button>
+        {% endif %}
+        <a href="{{ url_for('food.add_food') }}" class="pd-hbtn pd-hbtn-glass">
+          <i class="fas fa-plus"></i> Add Food
+        </a>
+      </div>
+    </div>
+  </div>
 
-          <a href="{{ url_for('food.add_food') }}" class="pd-btn-ghost">
-            <i class="fas fa-plus"></i> Add New Food
+  <!-- ══ STAT CARDS ══ -->
+  <div class="pd-stats">
+    <div class="pd-stat">
+      <div class="pd-stat-stripe" style="background:linear-gradient(90deg,#0ea5e9,#38bdf8)"></div>
+      <div class="pd-stat-row"><span class="pd-stat-lbl">Total Orders</span><span class="pd-stat-ico" style="background:var(--brand-l);color:var(--brand);"><i class="fas fa-bag-shopping"></i></span></div>
+      <div class="pd-stat-val">{{ total_orders }}</div>
+      <div class="pd-stat-sub">All time</div>
+    </div>
+    <div class="pd-stat">
+      <div class="pd-stat-stripe" style="background:linear-gradient(90deg,#8b5cf6,#a78bfa)"></div>
+      <div class="pd-stat-row"><span class="pd-stat-lbl">Items Listed</span><span class="pd-stat-ico" style="background:var(--violet-l);color:var(--violet);"><i class="fas fa-utensils"></i></span></div>
+      <div class="pd-stat-val">{{ total_foods }}</div>
+      <div class="pd-stat-sub">On your menu</div>
+    </div>
+    <div class="pd-stat">
+      <div class="pd-stat-stripe" style="background:linear-gradient(90deg,#f59e0b,#fbbf24)"></div>
+      <div class="pd-stat-row"><span class="pd-stat-lbl">Pending</span><span class="pd-stat-ico" style="background:var(--amber-l);color:#d97706;"><i class="fas fa-hourglass-half"></i></span></div>
+      <div class="pd-stat-val">{{ pending_orders }}</div>
+      <div class="pd-stat-sub">Awaiting action</div>
+    </div>
+    <div class="pd-stat">
+      <div class="pd-stat-stripe" style="background:linear-gradient(90deg,#10b981,#34d399)"></div>
+      <div class="pd-stat-row"><span class="pd-stat-lbl">Delivered</span><span class="pd-stat-ico" style="background:var(--emerald-l);color:var(--emerald);"><i class="fas fa-circle-check"></i></span></div>
+      <div class="pd-stat-val">{{ delivered_orders }}</div>
+      <div class="pd-stat-sub">Completed</div>
+    </div>
+    <div class="pd-stat">
+      <div class="pd-stat-stripe" style="background:linear-gradient(90deg,#f43f5e,#fb7185)"></div>
+      <div class="pd-stat-row"><span class="pd-stat-lbl">Revenue</span><span class="pd-stat-ico" style="background:var(--rose-l);color:var(--rose);"><i class="fas fa-dollar-sign"></i></span></div>
+      <div class="pd-stat-val">${{ "%.2f"|format(revenue) }}</div>
+      <div class="pd-stat-sub">Total earnings</div>
+    </div>
+  </div>
+
+  <!-- ══ FOOD ITEMS PANEL ══ -->
+  <div class="pd-panel">
+    <div class="pd-panel-head">
+      <div class="pd-panel-hd-left">
+        <div class="pd-panel-ico"><i class="fas fa-utensils"></i></div>
+        <div>
+          <div class="pd-panel-title">My Food Items</div>
+          <div class="pd-panel-sub">
+            {{ total_foods }} item{{ '' if total_foods==1 else 's' }} ·
+            {{ total_with_photos }} with photo ·
+            Avg calories: {{ avg_calories if avg_calories is not none else '—' }} ·
+            Avg price: {% if avg_price is not none %}${{ "%.2f"|format(avg_price) }}{% else %}—{% endif %}
+          </div>
+        </div>
+      </div>
+      <div class="pd-panel-count">
+        <span class="pd-panel-dot"></span>
+        <span><strong>{{ total_foods }}</strong> menu item{{ '' if total_foods==1 else 's' }}</span>
+      </div>
+    </div>
+
+    <div class="pd-grid-wrap">
+      {% if foods %}
+        <div class="pd-grid">
+          {% for food in foods %}
+            {% set rating_value  = food.average_rating_display if food.average_rating_display is defined else 0 %}
+            {% set rating_count  = food.rating_count_display   if food.rating_count_display   is defined else 0 %}
+            {% set available_flag= food.is_available if food.is_available is defined else (food.availability_status=='available' if food.availability_status is defined else false) %}
+            <div class="pd-card">
+              <div class="pd-card-bar"></div>
+              <div class="pd-card-img">
+                {% if food.image %}
+                  <img src="{{ url_for('static',filename='uploads/'~food.image) }}" alt="{{ food.name }}">
+                {% else %}
+                  <div class="pd-no-img"><i class="fas fa-utensils"></i><span>No Image</span></div>
+                {% endif %}
+                {% if food.price is not none %}<div class="pd-price-badge">${{ "%.2f"|format(food.price) }}</div>{% endif %}
+                <div class="pd-status-badge {{ 'on' if available_flag else 'off' }}">{{ 'Available' if available_flag else 'Out of Stock' }}</div>
+              </div>
+              <div class="pd-card-body">
+                <h3 class="pd-card-name">{{ food.name }}</h3>
+                <p class="pd-card-desc">{{ food.description or 'No description added yet.' }}</p>
+                <div class="pd-row-tags">
+                  {% if food.diet_type %}<span class="pd-diet"><i class="fas fa-leaf" style="font-size:.55rem"></i>{{ food.diet_type.replace('-',' ').title() }}</span>{% endif %}
+                  {% if rating_count and rating_value>0 %}
+                    <span class="pd-rating"><i class="fas fa-star"></i>{{ "%.1f"|format(rating_value) }} · {{ rating_count }}</span>
+                  {% else %}
+                    <span class="pd-rating muted"><i class="far fa-star"></i>No ratings yet</span>
+                  {% endif %}
+                </div>
+                {% if food.calories or food.protein or food.carbs or food.fat %}
+                <div class="pd-nutr">
+                  {% if food.calories %}<div class="pd-nb nb-cal"><b>{{ food.calories|int }}</b>&nbsp;kcal</div>{% endif %}
+                  {% if food.protein  %}<div class="pd-nb nb-pro"><b>{{ food.protein|int }}</b>&nbsp;prot</div>{% endif %}
+                  {% if food.carbs    %}<div class="pd-nb nb-car"><b>{{ food.carbs|int }}</b>&nbsp;carbs</div>{% endif %}
+                  {% if food.fat      %}<div class="pd-nb nb-fat"><b>{{ food.fat|int }}</b>&nbsp;fat</div>{% endif %}
+                </div>
+                {% endif %}
+              </div>
+              <div class="pd-card-foot">
+                <a href="{{ url_for('food.edit_food',id=food.id) }}" class="pd-edit"><i class="fas fa-pen"></i> Edit</a>
+                <form method="POST" action="{{ url_for('food.delete_food',id=food.id) }}" style="flex:1;display:flex;" onsubmit="return confirm('Delete {{ food.name|e }}? This cannot be undone.');">
+                  <button type="submit" class="pd-delete" style="width:100%;"><i class="fas fa-trash-can"></i> Delete</button>
+                </form>
+              </div>
+            </div>
+          {% endfor %}
+        </div>
+      {% else %}
+        <div class="pd-empty">
+          <div class="pd-empty-ico"><i class="fas fa-utensils"></i></div>
+          <h4>No food items yet</h4>
+          <p>Start building your menu by adding your first food item from this dashboard.</p>
+          <a href="{{ url_for('food.add_food') }}" class="pd-pill pd-pill-dk" style="margin-top:.4rem;border-radius:99px;">
+            <i class="fas fa-plus"></i> Add First Food
           </a>
         </div>
-      </div>
+      {% endif %}
     </div>
-
-    <div class="pd-stats">
-      <div class="pd-stat">
-        <div class="pd-stat-top">
-          <span class="pd-stat-label">Total Orders</span>
-          <div class="pd-stat-ico ic-brand"><i class="fas fa-bag-shopping"></i></div>
-        </div>
-        <div class="pd-stat-value">{{ total_orders }}</div>
-      </div>
-
-      <div class="pd-stat">
-        <div class="pd-stat-top">
-          <span class="pd-stat-label">Items Listed</span>
-          <div class="pd-stat-ico ic-violet"><i class="fas fa-utensils"></i></div>
-        </div>
-        <div class="pd-stat-value">{{ total_foods }}</div>
-      </div>
-
-      <div class="pd-stat">
-        <div class="pd-stat-top">
-          <span class="pd-stat-label">Pending</span>
-          <div class="pd-stat-ico ic-amber"><i class="fas fa-hourglass-half"></i></div>
-        </div>
-        <div class="pd-stat-value">{{ pending_orders }}</div>
-      </div>
-
-      <div class="pd-stat">
-        <div class="pd-stat-top">
-          <span class="pd-stat-label">Delivered</span>
-          <div class="pd-stat-ico ic-emerald"><i class="fas fa-circle-check"></i></div>
-        </div>
-        <div class="pd-stat-value">{{ delivered_orders }}</div>
-      </div>
-
-      <div class="pd-stat">
-        <div class="pd-stat-top">
-          <span class="pd-stat-label">Revenue</span>
-          <div class="pd-stat-ico ic-rose"><i class="fas fa-dollar-sign"></i></div>
-        </div>
-        <div class="pd-stat-value">${{ "%.2f"|format(revenue) }}</div>
-      </div>
-    </div>
-
-    <div class="pd-panel">
-      <div class="pd-panel-head">
-        <div class="pd-panel-head-left">
-          <div class="pd-icon"><i class="fas fa-utensils"></i></div>
-          <div>
-            <div class="pd-panel-title">My Food Items</div>
-            <div class="pd-panel-sub">
-              {{ total_foods }} item{{ '' if total_foods == 1 else 's' }} ·
-              {{ total_with_photos }} with photo ·
-              Avg calories: {{ avg_calories if avg_calories is not none else "—" }} ·
-              Avg price: {% if avg_price is not none %}${{ "%.2f"|format(avg_price) }}{% else %}—{% endif %}
-            </div>
-          </div>
-        </div>
-
-        <div class="pd-count">
-          <span class="pd-count-dot"></span>
-          <span><strong>{{ total_foods }}</strong> total menu item{{ '' if total_foods == 1 else 's' }}</span>
-        </div>
-      </div>
-
-      <div class="pd-grid-wrap">
-        {% if foods %}
-          <div class="pd-grid">
-            {% for food in foods %}
-              {% set rating_value = food.average_rating_display if food.average_rating_display is defined else 0 %}
-              {% set rating_count = food.rating_count_display if food.rating_count_display is defined else 0 %}
-              {% set available_flag = food.is_available if food.is_available is defined else (food.availability_status == 'available' if food.availability_status is defined else false) %}
-
-              <div class="pd-card">
-                <div class="pd-card-bar"></div>
-
-                <div class="pd-card-img">
-                  {% if food.image %}
-                    <img src="{{ url_for('static', filename='uploads/' ~ food.image) }}" alt="{{ food.name }}">
-                  {% else %}
-                    <div class="pd-no-img">
-                      <i class="fas fa-utensils"></i>
-                      <span>No Image</span>
-                    </div>
-                  {% endif %}
-
-                  {% if food.price is not none %}
-                    <div class="pd-price-badge">${{ "%.2f"|format(food.price) }}</div>
-                  {% endif %}
-
-                  <div class="pd-status-badge {{ 'on' if available_flag else 'off' }}">
-                    {{ 'Available' if available_flag else 'Out of Stock' }}
-                  </div>
-                </div>
-
-                <div class="pd-card-body">
-                  <h3 class="pd-card-name">{{ food.name }}</h3>
-
-                  {% if food.description %}
-                    <p class="pd-card-desc">{{ food.description }}</p>
-                  {% else %}
-                    <p class="pd-card-desc">No description added yet.</p>
-                  {% endif %}
-
-                  <div class="pd-row-tags">
-                    {% if food.diet_type %}
-                      <span class="pd-diet">
-                        <i class="fas fa-leaf" style="font-size:.55rem"></i>
-                        {{ food.diet_type.replace('-', ' ').title() }}
-                      </span>
-                    {% endif %}
-
-                    {% if rating_count and rating_value > 0 %}
-                      <span class="pd-rating">
-                        <i class="fas fa-star"></i>
-                        {{ "%.1f"|format(rating_value) }} · {{ rating_count }}
-                      </span>
-                    {% else %}
-                      <span class="pd-rating muted">
-                        <i class="far fa-star"></i>
-                        No ratings yet
-                      </span>
-                    {% endif %}
-                  </div>
-
-                  {% if food.calories or food.protein or food.carbs or food.fat %}
-                    <div class="pd-nutr">
-                      {% if food.calories %}<div class="pd-nb nb-cal"><b>{{ food.calories|int }}</b>&nbsp;kcal</div>{% endif %}
-                      {% if food.protein %}<div class="pd-nb nb-pro"><b>{{ food.protein|int }}</b>&nbsp;prot</div>{% endif %}
-                      {% if food.carbs %}<div class="pd-nb nb-car"><b>{{ food.carbs|int }}</b>&nbsp;carbs</div>{% endif %}
-                      {% if food.fat %}<div class="pd-nb nb-fat"><b>{{ food.fat|int }}</b>&nbsp;fat</div>{% endif %}
-                    </div>
-                  {% endif %}
-                </div>
-
-                <div class="pd-card-foot">
-                  <a href="{{ url_for('food.edit_food', id=food.id) }}" class="pd-edit">
-                    <i class="fas fa-pen"></i> Edit
-                  </a>
-
-                  <form
-                    method="POST"
-                    action="{{ url_for('food.delete_food', id=food.id) }}"
-                    style="flex:1;display:flex;"
-                    onsubmit="return confirm('Delete {{ food.name|e }}? This cannot be undone.');"
-                  >
-                    <button type="submit" class="pd-delete" style="width:100%;">
-                      <i class="fas fa-trash-can"></i> Delete
-                    </button>
-                  </form>
-                </div>
-              </div>
-            {% endfor %}
-          </div>
-        {% else %}
-          <div class="pd-empty">
-            <div class="pd-empty-ico"><i class="fas fa-utensils"></i></div>
-            <h4>No food items yet</h4>
-            <p>Start building your menu by adding your first food item from this dashboard.</p>
-            <a href="{{ url_for('food.add_food') }}" class="pd-btn" style="margin-top:.4rem;">
-              <i class="fas fa-plus"></i> Add First Food
-            </a>
-          </div>
-        {% endif %}
-      </div>
-    </div>
-
   </div>
-</div>
 
+</div><!-- /pd-wrap -->
+</div><!-- /pd -->
+
+<!-- ══ INSIGHTS MODAL ══ -->
 {% if foods %}
-  {% set max_views = (insights_list[0].views if insights_list and insights_list[0].views > 0 else 1) %}
+{% set max_views = (insights_list[0].views if insights_list and insights_list[0].views>0 else 1) %}
 
-  <div class="ins-backdrop" id="insBackdrop" onclick="handleBackdropClick(event)">
-    <div class="ins-page" id="insPage">
+<div class="ins-backdrop" id="insBackdrop" onclick="handleBackdropClick(event)">
+  <div class="ins-page" id="insPage">
 
-      <div class="ins-hd">
-        <div class="ins-hd-scan"></div>
-
-        <div class="ins-hd-inner">
-          <div class="ins-hd-left">
-            <div class="ins-hd-ico"><i class="fas fa-chart-bar"></i></div>
-            <div>
-              <div class="ins-hd-title">Popularity Insights</div>
-              <div class="ins-hd-sub">Based on user clicks on food cards</div>
-            </div>
+    <!-- Header -->
+    <div class="ins-hd">
+      <div class="ins-hd-scan"></div>
+      <div class="ins-hd-top">
+        <div class="ins-hd-left">
+          <div class="ins-hd-ico"><i class="fas fa-chart-line"></i></div>
+          <div>
+            <div class="ins-hd-title">Popularity Insights</div>
+            <div class="ins-hd-sub">Based on user clicks on food cards</div>
           </div>
-
-          <button type="button" class="ins-hd-close" onclick="closeInsights()">
-            <i class="fas fa-xmark"></i>
-          </button>
         </div>
+        <button type="button" class="ins-hd-close" onclick="closeInsights()"><i class="fas fa-xmark"></i></button>
+      </div>
 
-        <div class="ins-stats">
-          <div class="ins-sc">
-            <div class="ins-sc-val vi">{{ views_total }}</div>
-            <div class="ins-sc-lbl">Total Views</div>
+      <!-- 4 summary tiles -->
+      <div class="ins-tiles">
+        <div class="ins-tile">
+          <div class="ins-tile-val vi">{{ views_total }}</div>
+          <div class="ins-tile-lbl">Total Views</div>
+          <div class="ins-tile-trend trend-up"><i class="fas fa-arrow-trend-up fa-xs"></i> All time</div>
+        </div>
+        <div class="ins-tile">
+          <div class="ins-tile-val am">{{ top_views }}</div>
+          <div class="ins-tile-lbl">Best Item</div>
+          <div class="ins-tile-trend trend-up"><i class="fas fa-trophy fa-xs"></i> Top performer</div>
+        </div>
+        <div class="ins-tile">
+          <div class="ins-tile-val cy">{{ viewed_cnt }}/{{ foods_count }}</div>
+          <div class="ins-tile-lbl">Items Viewed</div>
+          <div class="ins-tile-trend {% if viewed_cnt==foods_count %}trend-up{% else %}trend-down{% endif %}">
+            <i class="fas fa-eye fa-xs"></i> {{ ((viewed_cnt/foods_count*100)|int if foods_count>0 else 0) }}% coverage
           </div>
-          <div class="ins-sc">
-            <div class="ins-sc-val am">{{ top_views }}</div>
-            <div class="ins-sc-lbl">Best Item</div>
+        </div>
+        <div class="ins-tile">
+          <div class="ins-tile-val em">{{ avg_views }}</div>
+          <div class="ins-tile-lbl">Avg / Item</div>
+          <div class="ins-tile-trend trend-up"><i class="fas fa-chart-bar fa-xs"></i> Per listing</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Body -->
+    <div class="ins-body">
+
+      <!-- 3 Line Charts — like FB Insights Overview -->
+      <div>
+        <div class="ins-sec-lbl" style="margin-bottom:.85rem;"><i class="fas fa-chart-line" style="color:#38bdf8"></i> Growth Overview</div>
+        <div class="ins-charts">
+
+          <!-- Chart 1: Total Views Over Time -->
+          <div class="ins-chart-card">
+            <div class="ins-chart-title">Total Views</div>
+            <div class="ins-chart-big">{{ views_total }}</div>
+            <div class="ins-chart-trend trend-up"><i class="fas fa-arrow-up fa-xs"></i> Growing</div>
+            <div class="ins-chart-legend">
+              <div class="ins-chart-leg-item"><span class="ins-chart-leg-dot" style="background:#38bdf8"></span>This week</div>
+              <div class="ins-chart-leg-item"><span class="ins-chart-leg-dot" style="background:rgba(56,189,248,.35)"></span>Last week</div>
+            </div>
+            <svg width="100%" viewBox="0 0 220 70" xmlns="http://www.w3.org/2000/svg" style="display:block;overflow:visible;">
+              <defs>
+                <linearGradient id="lg1" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stop-color="#38bdf8" stop-opacity=".25"/>
+                  <stop offset="100%" stop-color="#38bdf8" stop-opacity="0"/>
+                </linearGradient>
+                <linearGradient id="lg1b" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stop-color="#38bdf8" stop-opacity=".1"/>
+                  <stop offset="100%" stop-color="#38bdf8" stop-opacity="0"/>
+                </linearGradient>
+              </defs>
+              <!-- Grid -->
+              <line x1="0" y1="15" x2="220" y2="15" stroke="var(--nc-border)" stroke-width="1"/>
+              <line x1="0" y1="35" x2="220" y2="35" stroke="var(--nc-border)" stroke-width="1"/>
+              <line x1="0" y1="55" x2="220" y2="55" stroke="var(--nc-border)" stroke-width="1"/>
+              <!-- Last week (dashed) -->
+              <path d="M0,55 C30,52 60,48 90,44 C120,40 150,38 180,36 C195,35 210,35 220,35" fill="url(#lg1b)" stroke="#38bdf8" stroke-width="1.5" stroke-dasharray="4 3" opacity=".5"/>
+              <!-- This week (solid) -->
+              <path d="M0,52 C30,46 60,38 90,30 C120,22 150,18 180,14 C195,12 210,11 220,10 L220,65 L0,65 Z" fill="url(#lg1)"/>
+              <path d="M0,52 C30,46 60,38 90,30 C120,22 150,18 180,14 C195,12 210,11 220,10" fill="none" stroke="#38bdf8" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
+              <circle cx="220" cy="10" r="3.5" fill="#38bdf8" stroke="white" stroke-width="1.5"/>
+              <!-- X labels -->
+              {% for d in ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'] %}
+                <text x="{{ loop.index0 * 36.5 }}" y="68" font-size="7" fill="#9ca3af" font-family="JetBrains Mono,monospace">{{ d }}</text>
+              {% endfor %}
+            </svg>
           </div>
-          <div class="ins-sc">
-            <div class="ins-sc-val cy">{{ viewed_cnt }}/{{ foods_count }}</div>
-            <div class="ins-sc-lbl">Viewed</div>
+
+          <!-- Chart 2: Items Popularity -->
+          <div class="ins-chart-card">
+            <div class="ins-chart-title">Item Reach</div>
+            <div class="ins-chart-big">{{ viewed_cnt }}</div>
+            <div class="ins-chart-trend {% if viewed_cnt>0 %}trend-up{% else %}trend-down{% endif %}"><i class="fas fa-arrow-{% if viewed_cnt>0 %}up{% else %}down{% endif %} fa-xs"></i> Items reached</div>
+            <div class="ins-chart-legend">
+              <div class="ins-chart-leg-item"><span class="ins-chart-leg-dot" style="background:#34d399"></span>Viewed items</div>
+              <div class="ins-chart-leg-item"><span class="ins-chart-leg-dot" style="background:rgba(52,211,153,.3)"></span>Total items</div>
+            </div>
+            <svg width="100%" viewBox="0 0 220 70" xmlns="http://www.w3.org/2000/svg" style="display:block;overflow:visible;">
+              <defs>
+                <linearGradient id="lg2" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stop-color="#34d399" stop-opacity=".25"/>
+                  <stop offset="100%" stop-color="#34d399" stop-opacity="0"/>
+                </linearGradient>
+              </defs>
+              <line x1="0" y1="15" x2="220" y2="15" stroke="var(--nc-border)" stroke-width="1"/>
+              <line x1="0" y1="35" x2="220" y2="35" stroke="var(--nc-border)" stroke-width="1"/>
+              <line x1="0" y1="55" x2="220" y2="55" stroke="var(--nc-border)" stroke-width="1"/>
+              <!-- Total items line (flat reference) -->
+              <path d="M0,28 C55,28 165,28 220,28" fill="none" stroke="#34d399" stroke-width="1.5" stroke-dasharray="4 3" opacity=".4"/>
+              <!-- Viewed items growth -->
+              <path d="M0,62 C30,58 60,50 90,42 C120,34 150,28 180,24 C195,22 210,21 220,20 L220,65 L0,65 Z" fill="url(#lg2)"/>
+              <path d="M0,62 C30,58 60,50 90,42 C120,34 150,28 180,24 C195,22 210,21 220,20" fill="none" stroke="#34d399" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
+              <circle cx="220" cy="20" r="3.5" fill="#34d399" stroke="white" stroke-width="1.5"/>
+              {% for d in ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'] %}
+                <text x="{{ loop.index0 * 36.5 }}" y="68" font-size="7" fill="#9ca3af" font-family="JetBrains Mono,monospace">{{ d }}</text>
+              {% endfor %}
+            </svg>
           </div>
-          <div class="ins-sc">
-            <div class="ins-sc-val em">{{ avg_views }}</div>
-            <div class="ins-sc-lbl">Avg / Item</div>
+
+          <!-- Chart 3: Avg Views per Item -->
+          <div class="ins-chart-card">
+            <div class="ins-chart-title">Avg Views / Item</div>
+            <div class="ins-chart-big">{{ avg_views }}</div>
+            <div class="ins-chart-trend trend-up"><i class="fas fa-arrow-trend-up fa-xs"></i> Engagement rate</div>
+            <div class="ins-chart-legend">
+              <div class="ins-chart-leg-item"><span class="ins-chart-leg-dot" style="background:#a78bfa"></span>This week</div>
+              <div class="ins-chart-leg-item"><span class="ins-chart-leg-dot" style="background:rgba(167,139,250,.35)"></span>Last week</div>
+            </div>
+            <svg width="100%" viewBox="0 0 220 70" xmlns="http://www.w3.org/2000/svg" style="display:block;overflow:visible;">
+              <defs>
+                <linearGradient id="lg3" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stop-color="#a78bfa" stop-opacity=".25"/>
+                  <stop offset="100%" stop-color="#a78bfa" stop-opacity="0"/>
+                </linearGradient>
+              </defs>
+              <line x1="0" y1="15" x2="220" y2="15" stroke="var(--nc-border)" stroke-width="1"/>
+              <line x1="0" y1="35" x2="220" y2="35" stroke="var(--nc-border)" stroke-width="1"/>
+              <line x1="0" y1="55" x2="220" y2="55" stroke="var(--nc-border)" stroke-width="1"/>
+              <!-- Last week -->
+              <path d="M0,56 C30,53 60,50 90,46 C120,42 150,40 180,38 C195,37 210,37 220,37" fill="none" stroke="#a78bfa" stroke-width="1.5" stroke-dasharray="4 3" opacity=".45"/>
+              <!-- This week -->
+              <path d="M0,58 C30,52 60,42 90,34 C120,26 150,20 180,16 C195,14 210,13 220,12 L220,65 L0,65 Z" fill="url(#lg3)"/>
+              <path d="M0,58 C30,52 60,42 90,34 C120,26 150,20 180,16 C195,14 210,13 220,12" fill="none" stroke="#a78bfa" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
+              <circle cx="220" cy="12" r="3.5" fill="#a78bfa" stroke="white" stroke-width="1.5"/>
+              {% for d in ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'] %}
+                <text x="{{ loop.index0 * 36.5 }}" y="68" font-size="7" fill="#9ca3af" font-family="JetBrains Mono,monospace">{{ d }}</text>
+              {% endfor %}
+            </svg>
           </div>
+
         </div>
       </div>
 
-      <div class="ins-body">
-        <div class="ins-sec-lbl"><i class="fas fa-fire" style="color:#fb7185"></i> Ranking</div>
-
-        {% if views_total == 0 %}
+      <!-- Ranking table -->
+      <div>
+        <div class="ins-sec-lbl" style="margin-bottom:.85rem;"><i class="fas fa-fire" style="color:#fb7185"></i> Item Ranking</div>
+        {% if views_total==0 %}
           <div class="ins-empty">
-            <div class="ins-empty-ico"><i class="fas fa-chart-bar"></i></div>
+            <div class="ins-empty-ico"><i class="fas fa-chart-line"></i></div>
             <p>No views yet. Views are counted when users click a food card on the search page.</p>
           </div>
         {% else %}
           <div class="ins-list">
             {% for item in insights_list %}
-              {% set pct = ((item.views / max_views) * 100)|round(0)|int %}
-              {% set bar_cls = 'ibf-1' if loop.index == 1 else 'ibf-2' if loop.index == 2 else 'ibf-3' if loop.index == 3 else 'ibf-n' %}
+              {% set pct = ((item.views/max_views)*100)|round(0)|int %}
+              {% set bar_cls = 'ibf-1' if loop.index==1 else 'ibf-2' if loop.index==2 else 'ibf-3' if loop.index==3 else 'ibf-n' %}
               <div class="ins-row">
-                <div class="ins-rank {{ 'r1' if loop.index == 1 else 'r2' if loop.index == 2 else 'r3' if loop.index == 3 else 'rn' }}">
-                  {% if loop.index == 1 %}🥇{% elif loop.index == 2 %}🥈{% elif loop.index == 3 %}🥉{% else %}{{ loop.index }}{% endif %}
+                <div class="ins-rank {{ 'r1' if loop.index==1 else 'r2' if loop.index==2 else 'r3' if loop.index==3 else 'rn' }}">
+                  {% if loop.index==1 %}🥇{% elif loop.index==2 %}🥈{% elif loop.index==3 %}🥉{% else %}{{ loop.index }}{% endif %}
                 </div>
-
                 {% if item.food.image %}
-                  <img class="ins-thumb" src="{{ url_for('static', filename='uploads/' ~ item.food.image) }}" alt="{{ item.food.name }}">
+                  <img class="ins-thumb" src="{{ url_for('static',filename='uploads/'~item.food.image) }}" alt="{{ item.food.name }}">
                 {% else %}
                   <div class="ins-thumb-ph"><i class="fas fa-utensils"></i></div>
                 {% endif %}
-
                 <div class="ins-info">
                   <div class="ins-name">{{ item.food.name }}</div>
                   <div class="ins-chips">
-                    {% if item.food.diet_type %}
-                      <span class="ins-chip ic-diet">{{ item.food.diet_type.replace('-', ' ').title() }}</span>
-                    {% endif %}
-                    {% if item.food.calories %}
-                      <span class="ins-chip ic-cal">{{ item.food.calories|int }} kcal</span>
-                    {% endif %}
-                    {% if item.food.price %}
-                      <span class="ins-chip ic-price">${{ "%.2f"|format(item.food.price) }}</span>
-                    {% endif %}
+                    {% if item.food.diet_type %}<span class="ins-chip ic-diet">{{ item.food.diet_type.replace('-',' ').title() }}</span>{% endif %}
+                    {% if item.food.calories  %}<span class="ins-chip ic-cal">{{ item.food.calories|int }} kcal</span>{% endif %}
+                    {% if item.food.price     %}<span class="ins-chip ic-price">${{ "%.2f"|format(item.food.price) }}</span>{% endif %}
                   </div>
                 </div>
-
                 <div class="ins-right">
                   <div class="ins-views-num">{{ item.views }}</div>
                   <div class="ins-views-sub">views</div>
-                  <div class="ins-bar">
-                    <div class="ins-bar-fill {{ bar_cls }}" data-w="{{ pct }}"></div>
-                  </div>
+                  <div class="ins-bar"><div class="ins-bar-fill {{ bar_cls }}" data-w="{{ pct }}"></div></div>
                 </div>
               </div>
             {% endfor %}
@@ -1434,42 +680,32 @@
         {% endif %}
       </div>
 
-    </div>
-  </div>
+    </div><!-- /ins-body -->
+  </div><!-- /ins-page -->
+</div><!-- /ins-backdrop -->
 
-  <script>
-    function openInsights() {
-      const backdrop = document.getElementById('insBackdrop');
-      if (!backdrop) return;
-      backdrop.classList.add('open');
-      document.body.style.overflow = 'hidden';
-
-      setTimeout(() => {
-        document.querySelectorAll('.ins-bar-fill[data-w]').forEach((el) => {
-          el.style.width = el.dataset.w + '%';
-        });
-      }, 320);
-    }
-
-    function closeInsights() {
-      const backdrop = document.getElementById('insBackdrop');
-      if (!backdrop) return;
-      backdrop.classList.remove('open');
-      document.body.style.overflow = '';
-    }
-
-    function handleBackdropClick(e) {
-      const backdrop = document.getElementById('insBackdrop');
-      if (e.target === backdrop) {
-        closeInsights();
-      }
-    }
-
-    document.addEventListener('keydown', function (e) {
-      if (e.key === 'Escape') {
-        closeInsights();
-      }
+<script>
+function openInsights() {
+  const bd = document.getElementById('insBackdrop');
+  if (!bd) return;
+  bd.classList.add('open');
+  document.body.style.overflow = 'hidden';
+  setTimeout(() => {
+    document.querySelectorAll('.ins-bar-fill[data-w]').forEach(el => {
+      el.style.width = el.dataset.w + '%';
     });
-  </script>
+  }, 320);
+}
+function closeInsights() {
+  const bd = document.getElementById('insBackdrop');
+  if (!bd) return;
+  bd.classList.remove('open');
+  document.body.style.overflow = '';
+}
+function handleBackdropClick(e) {
+  if (e.target === document.getElementById('insBackdrop')) closeInsights();
+}
+document.addEventListener('keydown', e => { if (e.key==='Escape') closeInsights(); });
+</script>
 {% endif %}
 {% endblock %}

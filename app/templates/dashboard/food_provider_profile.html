@@ -53,14 +53,20 @@
   }
   @keyframes pulse-dot { 0%,100%{opacity:1} 50%{opacity:.3} }
 
+  /* ════ COVER — no scan line, no bottom border, seamless fade ════ */
   .pp-cover {
-    position: relative; height: 160px;
-    border-radius: var(--r-lg); overflow: hidden; margin-bottom: 0;
+    position: relative; height: 180px;
+    border-radius: var(--r-lg);
+    /* Remove bottom corners so it blends into identity below */
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
+    overflow: hidden; margin-bottom: 0;
     background:
       radial-gradient(ellipse 55% 120% at 0%   50%, rgba(14,165,233,.28)  0%, transparent 58%),
       radial-gradient(ellipse 40% 70%  at 100%  0%, rgba(56,189,248,.12)  0%, transparent 55%),
       radial-gradient(ellipse 30% 50%  at 50%  110%,rgba(6,182,212,.1)    0%, transparent 50%),
       linear-gradient(145deg, #071525 0%, #0a1c35 40%, #0c1f3c 70%, #06111e 100%);
+    /* No border-bottom — that was the line */
     border: 1px solid rgba(56,189,248,.12);
     border-bottom: none;
     box-shadow: 0 1px 0 rgba(255,255,255,.04) inset, 0 8px 32px rgba(0,0,0,.35);
@@ -74,25 +80,32 @@
   }
   .pp-cover::after {
     content: ''; position: absolute; inset: 0; z-index: 0;
-    background: linear-gradient(180deg, rgba(255,255,255,.05) 0%, transparent 50%);
+    background: linear-gradient(180deg, rgba(255,255,255,.04) 0%, transparent 40%);
   }
-  .pp-cover-scan {
-    position: absolute; bottom: 0; left: 0; right: 0; height: 1px; z-index: 3;
-    background: linear-gradient(90deg,
-      transparent 5%,
-      rgba(56,189,248,.55) 30%,
-      rgba(56,189,248,.55) 70%,
-      transparent 95%);
-  }
+  /* REMOVED .pp-cover-scan entirely — it was the bright horizontal line */
+
+  /* Taller, stronger fade so the bottom blends completely */
   .pp-cover-fade {
-    position: absolute; bottom: 0; left: 0; right: 0; height: 60px; z-index: 2;
-    background: linear-gradient(to bottom, transparent, var(--nc-bg, #0d1117));
+    position: absolute; bottom: 0; left: 0; right: 0;
+    height: 100px; z-index: 2;
+    background: linear-gradient(to bottom,
+      transparent 0%,
+      rgba(var(--nc-bg-rgb, 13,17,23), .6) 60%,
+      var(--nc-bg, #0d1117) 100%);
     pointer-events: none;
   }
+  /* Light mode fade */
+  [data-theme="light"] .pp-cover-fade {
+    background: linear-gradient(to bottom,
+      transparent 0%,
+      rgba(248,250,255,.7) 60%,
+      var(--nc-bg, #f8faff) 100%);
+  }
 
+  /* Identity sits right below cover, overlapping with negative margin */
   .pp-identity {
     display: flex; align-items: flex-end; gap: 1.4rem;
-    padding: 0 .1rem; margin-top: -48px; margin-bottom: 1.5rem;
+    padding: 0 .1rem; margin-top: -52px; margin-bottom: 1.5rem;
     position: relative; z-index: 10;
     animation: fade-up .5s cubic-bezier(.16,1,.3,1) .06s both;
   }
@@ -333,7 +346,6 @@
     border-color:var(--o-b);
     box-shadow:0 12px 32px rgba(0,0,0,.25), 0 0 0 1px var(--o-b);
   }
-
   .food-img {
     height:160px; background:var(--s3);
     overflow:hidden; position:relative;
@@ -345,13 +357,11 @@
   }
   .food-card:hover .food-img img { transform:scale(1.08); }
   .food-img i { font-size:2rem; color:var(--fa); }
-
   .food-img::after {
     content:''; position:absolute; inset:0;
     background:linear-gradient(to top, rgba(0,0,0,.65) 0%, rgba(0,0,0,.1) 50%, transparent 100%);
     pointer-events:none;
   }
-
   .food-price-badge {
     position:absolute; bottom:10px; left:10px; z-index:2;
     font-family:'JetBrains Mono',monospace;
@@ -361,19 +371,14 @@
     border-radius:99px; padding:.2rem .7rem;
     transition:background .2s;
   }
-  .food-card:hover .food-price-badge {
-    background:var(--o-dd); border-color:transparent;
-  }
-
+  .food-card:hover .food-price-badge { background:var(--o-dd); border-color:transparent; }
   .food-kcal-badge {
     position:absolute; top:9px; right:9px; z-index:2;
     font-size:.6rem; font-weight:800; color:rgba(255,255,255,.85);
     background:rgba(0,0,0,.45); backdrop-filter:blur(6px);
     border:1px solid rgba(255,255,255,.1);
-    border-radius:99px; padding:.18rem .55rem;
-    letter-spacing:.03em;
+    border-radius:99px; padding:.18rem .55rem; letter-spacing:.03em;
   }
-
   .food-info {
     padding:.7rem .85rem .8rem;
     display:flex; align-items:center; justify-content:space-between; gap:.5rem;
@@ -389,7 +394,6 @@
     border-radius:99px; padding:.14rem .5rem;
     font-size:.58rem; font-weight:800; letter-spacing:.04em; text-transform:uppercase;
   }
-
   .food-more { padding:0 1.35rem 1.1rem; display:flex; justify-content:center; }
   .btn-more {
     display:inline-flex; align-items:center; gap:.4rem;
@@ -399,7 +403,6 @@
     text-decoration:none; transition:color .14s, border-color .14s, background .14s;
   }
   .btn-more:hover { color:var(--o); border-color:var(--o-b); background:var(--o-l); }
-
   .food-empty {
     padding:3rem 1.35rem; text-align:center;
     display:flex; flex-direction:column; align-items:center; gap:.6rem;
@@ -458,18 +461,9 @@
   .mo-err.show { display:block; }
 
   @media (max-width: 640px) {
-    .pp-identity {
-      flex-wrap: wrap;
-      align-items: center;
-    }
-    .pp-identity-actions {
-      width: 100%;
-      padding-bottom: 0;
-    }
-    .ov-row,
-    .mo-g2 {
-      grid-template-columns: 1fr;
-    }
+    .pp-identity { flex-wrap:wrap; align-items:center; }
+    .pp-identity-actions { width:100%; padding-bottom:0; }
+    .ov-row, .mo-g2 { grid-template-columns:1fr; }
   }
 </style>
 
@@ -489,8 +483,8 @@
 <div class="pp">
 
   <div class="pp-cover">
+    <!-- NO .pp-cover-scan element here — removed -->
     <div class="pp-cover-fade"></div>
-    <div class="pp-cover-scan"></div>
   </div>
 
   <div class="pp-identity">
@@ -661,9 +655,7 @@
               <div class="ov-val">
                 {% if cal_foods %}
                   {{ (cal_foods|map(attribute='calories')|sum / (cal_foods|length))|round(0)|int }}
-                {% else %}
-                  —
-                {% endif %}
+                {% else %}—{% endif %}
               </div>
               <div class="ov-lbl">Avg Calories</div>
             </div>
@@ -675,9 +667,7 @@
               <div class="ov-val">
                 {% if priced %}
                   ${{ (priced|map(attribute='price')|sum / (priced|length))|round(2) }}
-                {% else %}
-                  —
-                {% endif %}
+                {% else %}—{% endif %}
               </div>
               <div class="ov-lbl">Avg Price</div>
             </div>
@@ -709,14 +699,8 @@
                 {% else %}
                   <i class="fas fa-utensils"></i>
                 {% endif %}
-
-                {% if food.price %}
-                  <div class="food-price-badge">${{ "%.2f"|format(food.price) }}</div>
-                {% endif %}
-
-                {% if food.calories %}
-                  <div class="food-kcal-badge">{{ food.calories|int }} kcal</div>
-                {% endif %}
+                {% if food.price %}<div class="food-price-badge">${{ "%.2f"|format(food.price) }}</div>{% endif %}
+                {% if food.calories %}<div class="food-kcal-badge">{{ food.calories|int }} kcal</div>{% endif %}
               </div>
               <div class="food-info">
                 <div class="food-name">{{ food.name }}</div>
@@ -727,7 +711,6 @@
             </div>
             {% endfor %}
           </div>
-
           {% if foods|length > 6 %}
           <div class="food-more">
             <a href="{{ url_for('food.provider_foods') }}" class="btn-more"><i class="fas fa-grid-2"></i> View all {{ foods|length }} items</a>
@@ -747,6 +730,7 @@
   </div>
 </div>
 
+<!-- Edit Modal -->
 <div class="mo" id="editModal" onclick="closeMoBackdrop(event)">
   <div class="mo-box">
     <div class="mo-head">
@@ -803,121 +787,66 @@
     const fill = document.querySelector('.comp-fill');
     if (fill) setTimeout(() => { fill.style.width = (parseInt(fill.dataset.pct) || 0) + '%'; }, 200);
   });
-
-  function openModal()  {
-    document.getElementById('editModal').classList.add('open');
-    document.body.style.overflow = 'hidden';
-  }
-
-  function closeModal() {
-    document.getElementById('editModal').classList.remove('open');
-    document.body.style.overflow = '';
-  }
-
-  function closeMoBackdrop(e) {
-    if (e.target === document.getElementById('editModal')) closeModal();
-  }
-
-  document.addEventListener('keydown', e => {
-    if (e.key === 'Escape') closeModal();
-  });
-
+  function openModal()  { document.getElementById('editModal').classList.add('open'); document.body.style.overflow='hidden'; }
+  function closeModal() { document.getElementById('editModal').classList.remove('open'); document.body.style.overflow=''; }
+  function closeMoBackdrop(e) { if (e.target===document.getElementById('editModal')) closeModal(); }
+  document.addEventListener('keydown', e => { if (e.key==='Escape') closeModal(); });
   function previewPhoto(inp) {
-    if (!inp.files || !inp.files[0]) return;
-    document.getElementById('moAv').innerHTML =
-      `<img src="${URL.createObjectURL(inp.files[0])}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`;
+    if (!inp.files||!inp.files[0]) return;
+    document.getElementById('moAv').innerHTML=`<img src="${URL.createObjectURL(inp.files[0])}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`;
   }
-
   function startEdit(f) {
-    document.getElementById('fval-' + f).classList.add('hide');
-    document.getElementById('finp-' + f).classList.add('show');
-    document.getElementById('fsave-' + f).classList.add('show');
-    document.getElementById('finp-' + f).focus();
+    document.getElementById('fval-'+f).classList.add('hide');
+    document.getElementById('finp-'+f).classList.add('show');
+    document.getElementById('fsave-'+f).classList.add('show');
+    document.getElementById('finp-'+f).focus();
   }
-
   function saveField(f) {
-    const inp = document.getElementById('finp-' + f);
-    const val = inp.value.trim();
-
-    if (!val) {
-      inp.style.borderColor = 'var(--rose)';
-      return;
-    }
-
-    inp.style.borderColor = '';
-
-    const fd = new FormData();
-
-    const getFieldValue = (name) => {
-      const input = document.getElementById('finp-' + name);
-      const view = document.getElementById('fval-' + name);
-      if (input && input.classList.contains('show')) {
-        return input.value.trim();
-      }
-      return view ? view.textContent.trim().replace(/^—$/, '') : '';
+    const inp=document.getElementById('finp-'+f);
+    const val=inp.value.trim();
+    if (!val) { inp.style.borderColor='var(--rose)'; return; }
+    inp.style.borderColor='';
+    const fd=new FormData();
+    const getFieldValue=(name)=>{
+      const input=document.getElementById('finp-'+name);
+      const view=document.getElementById('fval-'+name);
+      if (input&&input.classList.contains('show')) return input.value.trim();
+      return view?view.textContent.trim().replace(/^—$/,''):'';
     };
-
-    fd.append('first_name', f === 'first_name' ? val : getFieldValue('first_name'));
-    fd.append('last_name',  f === 'last_name'  ? val : getFieldValue('last_name'));
-    fd.append('email',      f === 'email'      ? val : getFieldValue('email'));
-
-    fetch('{{ url_for("user_dashboard.edit_profile") }}', {
-      method: 'POST',
-      body: fd
-    })
-    .then(res => {
-      if (!res.ok) throw new Error('Failed');
-      return res.text();
-    })
-    .then(() => applyInlineSave(f, val))
-    .catch(() => applyInlineSave(f, val));
+    fd.append('first_name',f==='first_name'?val:getFieldValue('first_name'));
+    fd.append('last_name', f==='last_name' ?val:getFieldValue('last_name'));
+    fd.append('email',     f==='email'     ?val:getFieldValue('email'));
+    fetch('{{ url_for("user_dashboard.edit_profile") }}',{method:'POST',body:fd})
+      .then(()=>applyInlineSave(f,val)).catch(()=>applyInlineSave(f,val));
   }
-
-  function applyInlineSave(f, val) {
-    const v = document.getElementById('fval-' + f);
-    v.textContent = val || '—';
-    v.classList.remove('hide');
-    document.getElementById('finp-' + f).classList.remove('show');
-    document.getElementById('fsave-' + f).classList.remove('show');
+  function applyInlineSave(f,val) {
+    const v=document.getElementById('fval-'+f);
+    v.textContent=val||'—'; v.classList.remove('hide');
+    document.getElementById('finp-'+f).classList.remove('show');
+    document.getElementById('fsave-'+f).classList.remove('show');
     showToast('Saved');
   }
-
   function showToast(msg) {
-    let t = document.getElementById('pp-toast');
+    let t=document.getElementById('pp-toast');
     if (!t) {
-      t = document.createElement('div');
-      t.id = 'pp-toast';
-      t.style.cssText = 'position:fixed;bottom:5rem;right:1.5rem;z-index:9999;background:linear-gradient(135deg,#7c3aed,#a78bfa);color:#fff;border-radius:9px;padding:.5rem 1rem;font-size:.78rem;font-weight:800;font-family:"Cabinet Grotesk",sans-serif;box-shadow:0 4px 20px rgba(124,58,237,.4);transition:opacity .3s,transform .3s;pointer-events:none;display:flex;align-items:center;gap:.38rem;';
+      t=document.createElement('div'); t.id='pp-toast';
+      t.style.cssText='position:fixed;bottom:5rem;right:1.5rem;z-index:9999;background:linear-gradient(135deg,#7c3aed,#a78bfa);color:#fff;border-radius:9px;padding:.5rem 1rem;font-size:.78rem;font-weight:800;font-family:"Cabinet Grotesk",sans-serif;box-shadow:0 4px 20px rgba(124,58,237,.4);transition:opacity .3s,transform .3s;pointer-events:none;display:flex;align-items:center;gap:.38rem;';
       document.body.appendChild(t);
     }
-    t.innerHTML = `<i class="fas fa-check-circle"></i> ${msg}`;
-    t.style.opacity = '1';
-    t.style.transform = 'translateY(0)';
+    t.innerHTML=`<i class="fas fa-check-circle"></i> ${msg}`;
+    t.style.opacity='1'; t.style.transform='translateY(0)';
     clearTimeout(t._h);
-    t._h = setTimeout(() => {
-      t.style.opacity = '0';
-      t.style.transform = 'translateY(4px)';
-    }, 2200);
+    t._h=setTimeout(()=>{t.style.opacity='0';t.style.transform='translateY(4px)';},2200);
   }
-
   function validateModal() {
-    let ok = true;
-
-    [
-      { el: document.getElementById('mo-fn'), err: document.getElementById('mo-fn-err'), test: v => v.trim() },
-      { el: document.getElementById('mo-ln'), err: document.getElementById('mo-ln-err'), test: v => v.trim() },
-      { el: document.getElementById('mo-em'), err: document.getElementById('mo-em-err'), test: v => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v.trim()) }
-    ].forEach(({ el, err, test }) => {
-      if (!test(el.value)) {
-        el.classList.add('err');
-        err.classList.add('show');
-        ok = false;
-      } else {
-        el.classList.remove('err');
-        err.classList.remove('show');
-      }
+    let ok=true;
+    [{el:document.getElementById('mo-fn'),err:document.getElementById('mo-fn-err'),test:v=>v.trim()},
+     {el:document.getElementById('mo-ln'),err:document.getElementById('mo-ln-err'),test:v=>v.trim()},
+     {el:document.getElementById('mo-em'),err:document.getElementById('mo-em-err'),test:v=>/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v.trim())}
+    ].forEach(({el,err,test})=>{
+      if (!test(el.value)){el.classList.add('err');err.classList.add('show');ok=false;}
+      else {el.classList.remove('err');err.classList.remove('show');}
     });
-
     return ok;
   }
 </script>
