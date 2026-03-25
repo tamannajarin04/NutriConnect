@@ -128,15 +128,23 @@
       {% if current_user.is_authenticated and not current_user.is_food_provider() and not current_user.is_admin() %}
         <div
           class="food-footer"
-          style="display:flex;align-items:center;justify-content:flex-end;padding:.85rem 1rem;border-top:1px solid var(--nc-border);background:var(--nc-surface-2);gap:.5rem;"
+          style="display:flex;align-items:center;justify-content:space-between;padding:.85rem 1rem;border-top:1px solid var(--nc-border);background:var(--nc-surface-2);gap:.5rem;"
         >
+          <a
+            href="{{ detail_url }}"
+            onclick="event.stopPropagation();"
+            style="flex:1;display:inline-flex;align-items:center;justify-content:center;gap:.35rem;background:transparent;color:var(--nc-text);border:1px solid var(--nc-border-2);border-radius:10px;padding:.48rem .95rem;font-size:.74rem;font-weight:800;text-decoration:none;"
+          >
+            <i class="fas fa-star"></i> Review
+          </a>
+
           {% if food.is_available %}
-            <form method="post" action="{{ url_for('orders.add_to_cart', food_id=food.id) }}" style="margin:0;" onclick="event.stopPropagation();">
+            <form method="post" action="{{ url_for('orders.add_to_cart', food_id=food.id) }}" style="margin:0;flex:1;" onclick="event.stopPropagation();">
               <input type="hidden" name="quantity" value="1">
               <button
                 type="submit"
                 onclick="event.stopPropagation();"
-                style="display:inline-flex;align-items:center;gap:.35rem;background:linear-gradient(135deg,var(--nc-brand-d),var(--nc-brand));color:#fff;border:none;border-radius:10px;padding:.48rem .95rem;font-size:.74rem;font-weight:800;cursor:pointer;"
+                style="width:100%;display:inline-flex;align-items:center;justify-content:center;gap:.35rem;background:linear-gradient(135deg,var(--nc-brand-d),var(--nc-brand));color:#fff;border:none;border-radius:10px;padding:.48rem .95rem;font-size:.74rem;font-weight:800;cursor:pointer;"
               >
                 <i class="fas fa-cart-plus"></i> Add
               </button>
@@ -146,7 +154,7 @@
               type="button"
               disabled
               onclick="event.stopPropagation();"
-              style="display:inline-flex;align-items:center;gap:.35rem;background:#9ca3af;color:#fff;border:none;border-radius:10px;padding:.48rem .95rem;font-size:.74rem;font-weight:800;cursor:not-allowed;opacity:.8;"
+              style="flex:1;display:inline-flex;align-items:center;justify-content:center;gap:.35rem;background:#9ca3af;color:#fff;border:none;border-radius:10px;padding:.48rem .95rem;font-size:.74rem;font-weight:800;cursor:not-allowed;opacity:.8;"
             >
               <i class="fas fa-ban"></i> Stock Out
             </button>

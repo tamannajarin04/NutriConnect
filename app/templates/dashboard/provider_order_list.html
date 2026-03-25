@@ -28,6 +28,8 @@
     --rose-l:rgba(251,113,133,.12);
     --violet:#a78bfa;
     --violet-l:rgba(167,139,250,.12);
+    --blue:#60a5fa;
+    --blue-l:rgba(96,165,250,.12);
 
     --r:14px;
     --r-lg:18px;
@@ -130,7 +132,8 @@
   }
 
   .po-btn,
-  .po-btn-ghost{
+  .po-btn-ghost,
+  .po-btn-soft{
     display:inline-flex;
     align-items:center;
     gap:.42rem;
@@ -159,6 +162,17 @@
     color:#fff;
     border-color:rgba(56,189,248,.35);
     background:rgba(56,189,248,.12);
+  }
+
+  .po-btn-soft{
+    background:var(--s2);
+    color:var(--txt);
+    border:1px solid var(--bdr);
+  }
+  .po-btn-soft:hover{
+    color:var(--brand-d);
+    border-color:rgba(14,165,233,.25);
+    background:var(--brand-l);
   }
 
   .po-panel{
@@ -240,14 +254,16 @@
     box-shadow:0 0 8px rgba(14,165,233,.45);
   }
 
-  .po-filter-form{
+  .po-filter-form,
+  .po-summary-form{
     display:flex;
     align-items:center;
     gap:.65rem;
     flex-wrap:wrap;
   }
 
-  .po-select{
+  .po-select,
+  .po-date-input{
     min-width:170px;
     background:var(--s2) !important;
     border:1.5px solid var(--bdr) !important;
@@ -256,6 +272,10 @@
     font-size:.82rem !important;
     font-weight:700 !important;
     padding:.72rem .95rem !important;
+  }
+
+  .po-date-input{
+    min-width:160px;
   }
 
   .po-apply{
@@ -270,6 +290,10 @@
     font-size:.82rem;
     font-weight:800;
     box-shadow:0 6px 18px rgba(14,165,233,.22);
+  }
+
+  .po-apply:hover{
+    filter:brightness(1.05);
   }
 
   .po-table-wrap{overflow-x:auto;}
@@ -400,12 +424,94 @@
     font-size:.8rem;
     color:var(--mu);
     margin:0;
-    max-width:280px;
+    max-width:320px;
     line-height:1.65;
+  }
+
+  .po-summary-top{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:1rem;
+    flex-wrap:wrap;
+    margin-bottom:1rem;
+  }
+
+  .po-summary-period{
+    display:flex;
+    flex-direction:column;
+    gap:.2rem;
+  }
+
+  .po-summary-label{
+    font-size:1rem;
+    font-weight:900;
+    color:var(--txt);
+    letter-spacing:-.02em;
+  }
+
+  .po-summary-dates{
+    font-size:.78rem;
+    color:var(--mu);
+  }
+
+  .po-mini-stats{
+    display:grid;
+    grid-template-columns:repeat(4, minmax(0, 1fr));
+    gap:.8rem;
+    margin-bottom:1rem;
+  }
+
+  .po-mini-stat{
+    background:var(--s2);
+    border:1px solid var(--bdr);
+    border-radius:14px;
+    padding:.85rem .95rem;
+  }
+
+  .po-mini-title{
+    font-size:.68rem;
+    text-transform:uppercase;
+    letter-spacing:.08em;
+    color:var(--fa);
+    font-weight:900;
+    margin-bottom:.28rem;
+  }
+
+  .po-mini-value{
+    font-size:1.12rem;
+    font-weight:900;
+    color:var(--txt);
+  }
+
+  .po-list-head{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:1rem;
+    flex-wrap:wrap;
+    margin-bottom:.9rem;
+  }
+
+  .po-list-note{
+    font-size:.8rem;
+    color:var(--mu);
+  }
+
+  .po-custom-dates{
+    display:flex;
+    align-items:center;
+    gap:.65rem;
+    flex-wrap:wrap;
+  }
+
+  @media (max-width: 1100px){
+    .po-mini-stats{grid-template-columns:repeat(2, minmax(0, 1fr));}
   }
 
   @media (max-width: 768px){
     .po-banner{padding:1.45rem 1.2rem;}
+    .po-mini-stats{grid-template-columns:1fr;}
   }
 </style>
 {% endblock %}
@@ -423,7 +529,7 @@
           </div>
           <h1 class="po-title">Manage <span class="hl">orders</span></h1>
           <p class="po-sub">
-            Review all incoming orders, filter by status, and jump into any order to update progress.
+            Review all incoming orders, filter by status, and track total orders by today, week, month, or custom date range.
           </p>
         </div>
 
@@ -457,6 +563,11 @@
           </div>
 
           <form class="po-filter-form" method="get">
+            <input type="hidden" name="summary_range" value="{{ summary_range }}">
+            <input type="hidden" name="summary_start" value="{{ summary_start }}">
+            <input type="hidden" name="summary_end" value="{{ summary_end }}">
+            <input type="hidden" name="summary_show" value="{{ summary_show }}">
+
             <select name="status" class="po-select">
               <option value="" {% if not status_filter %}selected{% endif %}>All statuses</option>
               {% for s in ['pending','confirmed','preparing','ready','delivered','cancelled'] %}
@@ -525,16 +636,97 @@
     <div class="po-panel">
       <div class="po-panel-head">
         <div class="po-panel-head-left">
-          <div class="po-icon"><i class="fas fa-clock-rotate-left"></i></div>
+          <div class="po-icon"><i class="fas fa-rectangle-list"></i></div>
           <div>
-            <div class="po-panel-title">Recent Orders</div>
-            <div class="po-panel-sub">Latest orders placed for your foods</div>
+            <div class="po-panel-title">Total Orders</div>
+            <div class="po-panel-sub">See orders by today, week, month, or custom date range</div>
           </div>
         </div>
       </div>
 
       <div class="po-content">
-        {% if recent_orders %}
+        <div class="po-summary-top">
+          <div class="po-summary-period">
+            <div class="po-summary-label">{{ order_summary.summary_label }}</div>
+            <div class="po-summary-dates">
+              {{ order_summary.start_date }} → {{ order_summary.end_date }}
+            </div>
+          </div>
+
+          <form class="po-summary-form" method="get" id="summaryFilterForm">
+            <input type="hidden" name="status" value="{{ status_filter }}">
+            <input type="hidden" name="sort" value="{{ sort_by }}">
+            <input type="hidden" name="summary_show" value="preview">
+
+            <select name="summary_range" id="summaryRange" class="po-select">
+              <option value="today" {% if summary_range == 'today' %}selected{% endif %}>Today</option>
+              <option value="week" {% if summary_range == 'week' %}selected{% endif %}>This Week</option>
+              <option value="month" {% if summary_range == 'month' %}selected{% endif %}>This Month</option>
+              <option value="custom" {% if summary_range == 'custom' %}selected{% endif %}>Custom Range</option>
+            </select>
+
+            <div class="po-custom-dates" id="customDateFields" {% if summary_range != 'custom' %}style="display:none;"{% endif %}>
+              <input type="date" name="summary_start" class="po-date-input" value="{{ summary_start }}">
+              <input type="date" name="summary_end" class="po-date-input" value="{{ summary_end }}">
+            </div>
+
+            <button class="po-apply" type="submit">
+              <i class="fas fa-calendar-check"></i> Update
+            </button>
+          </form>
+        </div>
+
+        <div class="po-mini-stats">
+          <div class="po-mini-stat">
+            <div class="po-mini-title">Total Orders</div>
+            <div class="po-mini-value">{{ order_summary.total_orders }}</div>
+          </div>
+          <div class="po-mini-stat">
+            <div class="po-mini-title">Delivered</div>
+            <div class="po-mini-value">{{ order_summary.delivered_orders }}</div>
+          </div>
+          <div class="po-mini-stat">
+            <div class="po-mini-title">Pending</div>
+            <div class="po-mini-value">{{ order_summary.pending_orders }}</div>
+          </div>
+          <div class="po-mini-stat">
+            <div class="po-mini-title">Cancelled</div>
+            <div class="po-mini-value">{{ order_summary.cancelled_orders }}</div>
+          </div>
+        </div>
+
+        <div class="po-list-head">
+          <div class="po-list-note">
+            Showing
+            <strong>{{ total_orders_list|length }}</strong>
+            of
+            <strong>{{ total_orders_count }}</strong>
+            order{{ '' if total_orders_count == 1 else 's' }}
+            for {{ order_summary.summary_label|lower }}.
+          </div>
+
+          <div style="display:flex; gap:.6rem; flex-wrap:wrap;">
+            {% if total_orders_has_more and summary_show != 'all' %}
+            <a
+              href="{{ url_for('provider.provider_orders', status=status_filter, sort=sort_by, summary_range=summary_range, summary_start=summary_start, summary_end=summary_end, summary_show='all') }}"
+              class="po-btn-soft"
+            >
+              <i class="fas fa-list"></i> All
+            </a>
+            {% endif %}
+
+            {% if summary_show == 'all' and total_orders_count > total_orders_limit %}
+            <a
+              href="{{ url_for('provider.provider_orders', status=status_filter, sort=sort_by, summary_range=summary_range, summary_start=summary_start, summary_end=summary_end, summary_show='preview') }}"
+              class="po-btn-soft"
+            >
+              <i class="fas fa-compress"></i> Show 5
+            </a>
+            {% endif %}
+          </div>
+        </div>
+
+        {% if total_orders_list %}
         <div class="po-table-wrap">
           <table class="po-table">
             <thead>
@@ -543,12 +735,12 @@
                 <th>Customer</th>
                 <th>Status</th>
                 <th>Total</th>
-                <th>Date & Time</th>
+                <th>Date</th>
                 <th>Action</th>
               </tr>
             </thead>
             <tbody>
-              {% for order in recent_orders %}
+              {% for order in total_orders_list %}
               <tr>
                 <td><span class="po-order-id">{{ order.order_number }}</span></td>
                 <td><span class="po-customer">{{ order.customer.full_name if order.customer and order.customer.full_name else (order.customer.username if order.customer else 'Unknown') }}</span></td>
@@ -558,10 +750,10 @@
                   </span>
                 </td>
                 <td><span class="po-total">${{ "%.2f"|format(order.total_price or 0) }}</span></td>
-                <td><span class="po-date">{{ order.created_at.strftime("%d %b %Y, %I:%M %p") if order.created_at else "—" }}</span></td>
+                <td><span class="po-date">{{ order.created_at.strftime("%d %b %Y") if order.created_at else "—" }}</span></td>
                 <td>
                   <a href="{{ url_for('provider.provider_order_detail', order_id=order.id) }}" class="po-view">
-                    <i class="fas fa-eye"></i> Open
+                    <i class="fas fa-eye"></i> View
                   </a>
                 </td>
               </tr>
@@ -571,9 +763,9 @@
         </div>
         {% else %}
         <div class="po-empty">
-          <div class="po-empty-ico"><i class="fas fa-clock-rotate-left"></i></div>
-          <h4>No recent orders</h4>
-          <p>Your latest provider order activity will appear here.</p>
+          <div class="po-empty-ico"><i class="fas fa-calendar-xmark"></i></div>
+          <h4>No orders in this range</h4>
+          <p>Try changing the date range to see matching orders here.</p>
         </div>
         {% endif %}
       </div>
@@ -581,4 +773,21 @@
 
   </div>
 </div>
+
+<script>
+  (function () {
+    const summaryRange = document.getElementById("summaryRange");
+    const customDateFields = document.getElementById("customDateFields");
+
+    function toggleCustomDateFields() {
+      if (!summaryRange || !customDateFields) return;
+      customDateFields.style.display = summaryRange.value === "custom" ? "flex" : "none";
+    }
+
+    if (summaryRange) {
+      summaryRange.addEventListener("change", toggleCustomDateFields);
+      toggleCustomDateFields();
+    }
+  })();
+</script>
 {% endblock %}

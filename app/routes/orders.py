@@ -52,6 +52,20 @@ def get_user_orders_paginated(page=1, per_page=10, status_filter="", sort_by="da
     return query.paginate(page=page, per_page=per_page, error_out=False)
 
 
+def user_has_delivered_food(user_id, food_id):
+    return (
+        db.session.query(OrderItem.id)
+        .join(Order, Order.id == OrderItem.order_id)
+        .filter(
+            Order.user_id == user_id,
+            OrderItem.food_id == food_id,
+            Order.status == "delivered"
+        )
+        .first()
+        is not None
+    )
+
+
 # ---------------- CART + MY ORDERS ----------------
 
 @orders_bp.route("/cart")
@@ -487,6 +501,15 @@ def toggle_favorite(food_id):
 @login_required
 def rate_food(food_id):
     food = FoodItem.query.get_or_404(food_id)
+
+    if not current_user.has_role("user"):
+        flash("Only users can submit ratings.", "danger")
+        return redirect(request.referrer or url_for("food_search.food_detail", food_id=food.id))
+
+    if not user_has_delivered_food(current_user.id, food.id):
+        flash("You can review only foods that have been delivered to you.", "danger")
+        return redirect(request.referrer or url_for("food_search.food_detail", food_id=food.id))
+
     rating_value = request.form.get("rating", type=int)
     review = (request.form.get("review") or "").strip()
 
@@ -494,7 +517,10 @@ def rate_food(food_id):
         flash("Rating must be between 1 and 5.", "danger")
         return redirect(request.referrer or url_for("food_search.food_detail", food_id=food.id))
 
-    existing = FoodRating.query.filter_by(user_id=current_user.id, food_id=food.id).first()
+    existing = FoodRating.query.filter_by(
+        user_id=current_user.id,
+        food_id=food.id
+    ).first()
 
     if existing:
         existing.rating = rating_value

@@ -15,6 +15,8 @@ from app.models import (
     RecentlyViewed,
     FoodRating,
     FoodView,
+    Order,
+    OrderItem,
 )
 
 food_bp = Blueprint("food", __name__)
@@ -114,7 +116,20 @@ def record_food_view_once_per_day(food, viewer_id):
     return True
 
 
-# ── Food Provider Dashboard Redirect ──────────────────────────────────────────
+def user_has_delivered_food(user_id, food_id):
+    return (
+        db.session.query(OrderItem.id)
+        .join(Order, Order.id == OrderItem.order_id)
+        .filter(
+            Order.user_id == user_id,
+            OrderItem.food_id == food_id,
+            Order.status == "delivered"
+        )
+        .first()
+        is not None
+    )
+
+
 @food_bp.route("/foods")
 @login_required
 @food_provider_required
@@ -122,7 +137,6 @@ def provider_foods():
     return redirect(url_for("provider.provider_dashboard"))
 
 
-# ── Track Food View (one view per user per day) ───────────────────────────────
 @food_search_bp.route("/view/<int:food_id>", methods=["POST"])
 @login_required
 def track_view(food_id):
@@ -138,7 +152,6 @@ def track_view(food_id):
     })
 
 
-# ── Add Food ──────────────────────────────────────────────────────────────────
 @food_bp.route("/foods/add", methods=["GET", "POST"])
 @login_required
 @food_provider_required
@@ -190,7 +203,6 @@ def add_food():
     return render_template("dashboard/add_food.html")
 
 
-# ── Edit Food ─────────────────────────────────────────────────────────────────
 @food_bp.route("/foods/edit/<int:id>", methods=["GET", "POST"])
 @login_required
 @food_provider_required
@@ -235,7 +247,6 @@ def edit_food(id):
     return render_template("dashboard/edit_food.html", food=food)
 
 
-# ── Upload Food Gallery ───────────────────────────────────────────────────────
 @food_bp.route("/foods/<int:id>/gallery", methods=["POST"])
 @login_required
 @food_provider_required
@@ -264,7 +275,6 @@ def upload_food_gallery(id):
     return redirect(url_for("food.edit_food", id=food.id))
 
 
-# ── Delete Food ───────────────────────────────────────────────────────────────
 @food_bp.route("/foods/delete/<int:id>", methods=["POST"])
 @login_required
 @food_provider_required
@@ -281,18 +291,13 @@ def delete_food(id):
     return redirect(url_for("provider.provider_dashboard"))
 
 
-# ── Food Detail ───────────────────────────────────────────────────────────────
 @food_search_bp.route("/<int:food_id>")
 @login_required
 def food_detail(food_id):
     food = FoodItem.query.get_or_404(food_id)
 
-    # Count popularity exactly once per user per day
     record_food_view_once_per_day(food, current_user.id)
-
-    # Keep recently viewed separate from popularity
     track_recent_view(current_user.id, food)
-
     db.session.commit()
 
     favorite = FavoriteFood.query.filter_by(
@@ -304,6 +309,10 @@ def food_detail(food_id):
         user_id=current_user.id,
         food_id=food.id
     ).first()
+
+    can_review = False
+    if current_user.has_role("user"):
+        can_review = user_has_delivered_food(current_user.id, food.id)
 
     ratings = (
         FoodRating.query
@@ -326,11 +335,11 @@ def food_detail(food_id):
         gallery=gallery,
         is_favorite=bool(favorite),
         my_rating=my_rating,
+        can_review=can_review,
         ratings=ratings
     )
 
 
-# ── Food Search (all logged-in users) ────────────────────────────────────────
 @food_search_bp.route("/search")
 @login_required
 def search_foods():
@@ -411,7 +420,7 @@ def search_foods():
             RecentlyViewed.query
             .filter_by(user_id=current_user.id)
             .order_by(RecentlyViewed.viewed_at.desc())
-            .limit(3)
+            .limit(2)
             .all()
         )
         recent_view_count = (
