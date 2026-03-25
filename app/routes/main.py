@@ -1,4 +1,4 @@
-from flask import Blueprint, redirect, url_for
+from flask import Blueprint, redirect, url_for, render_template
 from flask_login import current_user
 
 main_bp = Blueprint("main", __name__)
@@ -12,3 +12,11 @@ def home():
             return redirect(url_for("provider.provider_dashboard"))
         return redirect(url_for("user_dashboard.index"))
     return redirect(url_for("auth.login"))
+
+@main_bp.route("/privacy")
+def privacy():
+    return render_template("privacy.html")
+
+@main_bp.route("/terms")
+def terms():
+    return render_template("terms.html")

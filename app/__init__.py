@@ -11,7 +11,6 @@ from app.models import db, User
 login_manager = LoginManager()
 migrate = Migrate()
 
-
 def create_app(config_name="default"):
     app = Flask(__name__)
     app.config.from_object(config.get(config_name, config["default"]))
@@ -45,6 +44,7 @@ def create_app(config_name="default"):
     from .routes.orders import orders_bp
     from .routes.provider_dashboard import provider_bp
     from .routes.analytics import analytics_bp
+    from .routes.payment import payment_bp
 
     app.register_blueprint(main_bp)
     app.register_blueprint(auth_bp, url_prefix="/auth")
@@ -60,6 +60,7 @@ def create_app(config_name="default"):
     app.register_blueprint(orders_bp)
     app.register_blueprint(provider_bp, url_prefix="/provider")
     app.register_blueprint(analytics_bp, url_prefix="/admin")
+    app.register_blueprint(payment_bp, url_prefix="/dashboard")
 
     with app.app_context():
         create_roles_if_ready()
@@ -71,23 +72,19 @@ def create_app(config_name="default"):
 def create_roles_if_ready():
     from sqlalchemy import inspect
     from app.models import Role
-
     inspector = inspect(db.engine)
     if "roles" not in inspector.get_table_names():
         return
-
     roles_data = [
-        {"name": "user", "description": "Regular user"},
+        {"name": "user",          "description": "Regular user"},
         {"name": "food_provider", "description": "Food Provider"},
-        {"name": "admin", "description": "Administrator"},
+        {"name": "admin",         "description": "Administrator"},
     ]
-
     changed = False
     for r in roles_data:
         if not Role.query.filter_by(name=r["name"]).first():
             db.session.add(Role(**r))
             changed = True
-
     if changed:
         db.session.commit()
 
@@ -95,17 +92,14 @@ def create_roles_if_ready():
 def seed_admins_if_ready():
     from sqlalchemy import inspect
     from app.models import Role, User
-
     inspector = inspect(db.engine)
     tables = inspector.get_table_names()
-
     if not all(t in tables for t in ["users", "roles", "user_roles"]):
         return
-
     if os.environ.get("SEED_ADMINS", "0") != "1":
         return
 
-    email = (os.environ.get("ADMIN1_EMAIL") or "").strip().lower()
+    email    = (os.environ.get("ADMIN1_EMAIL") or "").strip().lower()
     username = (os.environ.get("ADMIN1_USERNAME") or "Admin").strip()
     password = os.environ.get("ADMIN1_PASSWORD") or "Admin@12345"
 
@@ -119,7 +113,6 @@ def seed_admins_if_ready():
         db.session.flush()
 
     user = User.query.filter_by(email=email).first()
-
     if not user:
         user = User(
             username=username,

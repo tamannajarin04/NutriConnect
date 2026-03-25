@@ -1,0 +1,244 @@
+{% extends "base.html" %}
+{% block title %}Terms & Conditions · NutriConnect{% endblock %}
+
+{% block extra_css %}
+<style>
+.legal-page { font-family:'Sora',sans-serif; max-width:820px; margin:0 auto; }
+@keyframes up { from{opacity:0;transform:translateY(14px)} to{opacity:1;transform:translateY(0)} }
+
+.legal-hero {
+  background: linear-gradient(135deg, #0f766e 0%, #0d9488 55%, #0891b2 100%);
+  border-radius: 20px; padding: 2.5rem 2.2rem; margin-bottom: 2rem;
+  color: #fff; animation: up .4s both;
+}
+.legal-hero-badge {
+  display:inline-flex;align-items:center;gap:.4rem;
+  background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);
+  border-radius:99px;padding:.22rem .75rem;
+  font-size:.65rem;font-weight:700;text-transform:uppercase;
+  letter-spacing:.07em;color:rgba(255,255,255,.85);margin-bottom:.85rem;
+}
+.legal-hero h1 { font-size:1.75rem;font-weight:900;letter-spacing:-.04em;margin:0 0 .4rem; }
+.legal-hero p  { font-size:.84rem;color:rgba(255,255,255,.65);margin:0; }
+.legal-hero-meta { margin-top:1.1rem;font-size:.74rem;color:rgba(255,255,255,.5);display:flex;gap:1.25rem;flex-wrap:wrap; }
+.legal-hero-meta span { display:flex;align-items:center;gap:.3rem; }
+
+.legal-card { background:var(--nc-card-bg);border:1px solid var(--nc-card-border);border-radius:20px;overflow:hidden;box-shadow:var(--nc-card-shadow);margin-bottom:1.1rem;animation:up .4s .06s both; }
+.legal-card-hd { display:flex;align-items:center;gap:.65rem;padding:1rem 1.4rem;background:var(--nc-surface-2);border-bottom:1px solid var(--nc-border); }
+.legal-card-ico { width:34px;height:34px;border-radius:9px;background:rgba(13,148,136,.1);color:#0d9488;display:flex;align-items:center;justify-content:center;font-size:.82rem;flex-shrink:0; }
+[data-theme="dark"] .legal-card-ico { background:rgba(13,148,136,.15);color:#2dd4bf; }
+.legal-card-hd-title { font-size:.88rem;font-weight:800;color:var(--nc-text); }
+.legal-card-body { padding:1.25rem 1.4rem; }
+.legal-card-body p  { font-size:.84rem;color:var(--nc-text-muted);line-height:1.78;margin:0 0 .85rem; }
+.legal-card-body p:last-child { margin:0; }
+.legal-card-body ul { padding-left:1.25rem;margin:.5rem 0 .85rem; }
+.legal-card-body ul li { font-size:.84rem;color:var(--nc-text-muted);line-height:1.75;margin-bottom:.3rem; }
+.legal-card-body strong { color:var(--nc-text);font-weight:700; }
+
+.legal-toc { background:var(--nc-surface-2);border:1px solid var(--nc-border);border-radius:14px;padding:1.1rem 1.4rem;margin-bottom:1.5rem;animation:up .4s .03s both; }
+.legal-toc-title { font-size:.72rem;font-weight:900;text-transform:uppercase;letter-spacing:.09em;color:var(--nc-text-faint);margin-bottom:.75rem; }
+.legal-toc-list  { display:flex;flex-wrap:wrap;gap:.4rem; }
+.legal-toc-item  { display:inline-flex;align-items:center;gap:.3rem;background:var(--nc-card-bg);border:1.5px solid var(--nc-border);border-radius:8px;padding:.28rem .7rem;font-size:.74rem;font-weight:600;color:var(--nc-text-muted);text-decoration:none;transition:all .13s; }
+.legal-toc-item:hover { border-color:#0d9488;color:#0d9488;background:rgba(13,148,136,.06); }
+
+/* Warning box */
+.legal-warn {
+  background: rgba(245,158,11,.08); border: 1.5px solid rgba(245,158,11,.25);
+  border-radius: 12px; padding: .9rem 1.1rem; margin-bottom: 1rem;
+  display: flex; align-items: flex-start; gap: .65rem;
+}
+.legal-warn i  { color: #d97706; font-size: .9rem; flex-shrink: 0; margin-top: .05rem; }
+.legal-warn p  { font-size: .82rem; color: var(--nc-text-muted); line-height: 1.65; margin: 0; }
+[data-theme="dark"] .legal-warn { background: rgba(245,158,11,.06); }
+
+.legal-contact { background:linear-gradient(135deg,rgba(13,148,136,.06),rgba(14,165,233,.06));border:1.5px solid rgba(13,148,136,.18);border-radius:16px;padding:1.25rem 1.4rem;margin-top:1.5rem;text-align:center;animation:up .4s .1s both; }
+.legal-contact p { font-size:.84rem;color:var(--nc-text-muted);margin:0 0 .65rem; }
+.legal-contact a { color:#0d9488;font-weight:700; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="legal-page">
+
+  <div class="legal-hero">
+    <div class="legal-hero-badge"><i class="fas fa-file-contract"></i> Legal</div>
+    <h1>Terms &amp; Conditions</h1>
+    <p>Please read these terms carefully before using NutriConnect.</p>
+    <div class="legal-hero-meta">
+      <span><i class="fas fa-calendar"></i> Effective: January 1, 2026</span>
+      <span><i class="fas fa-rotate"></i> Last Updated: March 1, 2026</span>
+      <span><i class="fas fa-globe"></i> Jurisdiction: Bangladesh</span>
+    </div>
+  </div>
+
+  <!-- TOC -->
+  <div class="legal-toc">
+    <div class="legal-toc-title"><i class="fas fa-list" style="margin-right:.3rem;"></i> Contents</div>
+    <div class="legal-toc-list">
+      <a class="legal-toc-item" href="#acceptance"><i class="fas fa-handshake"></i> Acceptance</a>
+      <a class="legal-toc-item" href="#accounts"><i class="fas fa-user"></i> Accounts</a>
+      <a class="legal-toc-item" href="#orders"><i class="fas fa-bag-shopping"></i> Orders</a>
+      <a class="legal-toc-item" href="#payments"><i class="fas fa-credit-card"></i> Payments</a>
+      <a class="legal-toc-item" href="#providers"><i class="fas fa-store"></i> Food Providers</a>
+      <a class="legal-toc-item" href="#prohibited"><i class="fas fa-ban"></i> Prohibited Use</a>
+      <a class="legal-toc-item" href="#liability"><i class="fas fa-scale-balanced"></i> Liability</a>
+      <a class="legal-toc-item" href="#changes"><i class="fas fa-pen"></i> Changes</a>
+    </div>
+  </div>
+
+  <div class="legal-warn">
+    <i class="fas fa-triangle-exclamation"></i>
+    <p>By accessing or using NutriConnect, you agree to be bound by these Terms & Conditions. If you do not agree to these terms, please do not use our platform.</p>
+  </div>
+
+  <div class="legal-card" id="acceptance">
+    <div class="legal-card-hd">
+      <div class="legal-card-ico"><i class="fas fa-handshake"></i></div>
+      <div class="legal-card-hd-title">1. Acceptance of Terms</div>
+    </div>
+    <div class="legal-card-body">
+      <p>These Terms & Conditions govern your use of the NutriConnect platform, including our website, mobile applications, and all related services. By creating an account or placing an order, you confirm that you:</p>
+      <ul>
+        <li>Are at least 18 years of age, or have parental consent.</li>
+        <li>Have read, understood, and agree to these terms.</li>
+        <li>Will comply with all applicable laws and regulations.</li>
+        <li>Provide accurate and truthful information when registering.</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="legal-card" id="accounts">
+    <div class="legal-card-hd">
+      <div class="legal-card-ico"><i class="fas fa-user"></i></div>
+      <div class="legal-card-hd-title">2. User Accounts</div>
+    </div>
+    <div class="legal-card-body">
+      <p>To use most features of NutriConnect, you must create an account. You are responsible for:</p>
+      <ul>
+        <li>Maintaining the confidentiality of your password and account credentials.</li>
+        <li>All activities that occur under your account.</li>
+        <li>Notifying us immediately of any unauthorized use of your account.</li>
+        <li>Ensuring your account information is accurate and up to date.</li>
+      </ul>
+      <p>NutriConnect reserves the right to suspend or terminate accounts that violate these terms, engage in fraudulent activity, or abuse the platform.</p>
+    </div>
+  </div>
+
+  <div class="legal-card" id="orders">
+    <div class="legal-card-hd">
+      <div class="legal-card-ico"><i class="fas fa-bag-shopping"></i></div>
+      <div class="legal-card-hd-title">3. Orders & Delivery</div>
+    </div>
+    <div class="legal-card-body">
+      <p>When you place an order on NutriConnect, you agree to the following:</p>
+      <ul>
+        <li>Orders are subject to availability and confirmation by the food provider.</li>
+        <li>Delivery times are estimated and may vary depending on provider and location.</li>
+        <li>You are responsible for providing accurate delivery address information.</li>
+        <li>Orders can only be cancelled while in <strong>Pending</strong> status. Once confirmed, cancellations may not be possible.</li>
+        <li>NutriConnect acts as a platform connecting users with food providers — we are not directly responsible for food quality or preparation.</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="legal-card" id="payments">
+    <div class="legal-card-hd">
+      <div class="legal-card-ico"><i class="fas fa-credit-card"></i></div>
+      <div class="legal-card-hd-title">4. Payments & Refunds</div>
+    </div>
+    <div class="legal-card-body">
+      <p>All payments on NutriConnect are processed securely through our payment partners.</p>
+      <ul>
+        <li>Prices are displayed in USD and are inclusive of applicable charges.</li>
+        <li>Payment is required at the time of placing an order.</li>
+        <li>Wallet top-ups are non-refundable unless required by law.</li>
+        <li>Cashback rewards are credited automatically and expire after 12 months of inactivity.</li>
+        <li>Refunds for cancelled orders (where eligible) will be processed within 5-7 business days.</li>
+        <li>NutriConnect is not responsible for payment failures caused by your bank or payment provider.</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="legal-card" id="providers">
+    <div class="legal-card-hd">
+      <div class="legal-card-ico"><i class="fas fa-store"></i></div>
+      <div class="legal-card-hd-title">5. Food Providers</div>
+    </div>
+    <div class="legal-card-body">
+      <p>Food Providers on NutriConnect agree to additional obligations:</p>
+      <ul>
+        <li>Provide accurate food descriptions, ingredients, and nutritional information.</li>
+        <li>Maintain food safety and hygiene standards in accordance with local regulations.</li>
+        <li>Fulfill orders in a timely manner and communicate delays promptly.</li>
+        <li>Not list items that are unavailable or out of stock.</li>
+        <li>Keep pricing fair and consistent with the platform listing.</li>
+      </ul>
+      <p>NutriConnect reserves the right to suspend providers who consistently fail to meet quality standards or receive excessive complaints.</p>
+    </div>
+  </div>
+
+  <div class="legal-card" id="prohibited">
+    <div class="legal-card-hd">
+      <div class="legal-card-ico"><i class="fas fa-ban"></i></div>
+      <div class="legal-card-hd-title">6. Prohibited Activities</div>
+    </div>
+    <div class="legal-card-body">
+      <p>You may not use NutriConnect for any of the following activities:</p>
+      <ul>
+        <li>Creating fake accounts or impersonating other users.</li>
+        <li>Submitting fraudulent orders or payment information.</li>
+        <li>Reverse engineering, scraping, or copying platform content.</li>
+        <li>Using the platform for spam, harassment, or abusive behavior.</li>
+        <li>Attempting to hack, exploit, or disrupt platform services.</li>
+        <li>Listing illegal, harmful, or misleading food products.</li>
+      </ul>
+      <p>Violation of these prohibitions may result in immediate account termination and potential legal action.</p>
+    </div>
+  </div>
+
+  <div class="legal-card" id="liability">
+    <div class="legal-card-hd">
+      <div class="legal-card-ico"><i class="fas fa-scale-balanced"></i></div>
+      <div class="legal-card-hd-title">7. Limitation of Liability</div>
+    </div>
+    <div class="legal-card-body">
+      <p>NutriConnect provides the platform "as is" without warranties of any kind. To the maximum extent permitted by law:</p>
+      <ul>
+        <li>NutriConnect is not liable for food quality, allergic reactions, or health issues resulting from consumed food.</li>
+        <li>We are not responsible for indirect, incidental, or consequential damages.</li>
+        <li>Our liability is limited to the amount you paid for the specific order in question.</li>
+        <li>We are not responsible for service interruptions due to maintenance, technical failures, or circumstances beyond our control.</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="legal-card" id="changes">
+    <div class="legal-card-hd">
+      <div class="legal-card-ico"><i class="fas fa-pen"></i></div>
+      <div class="legal-card-hd-title">8. Changes to These Terms</div>
+    </div>
+    <div class="legal-card-body">
+      <p>NutriConnect reserves the right to modify these Terms & Conditions at any time. When we make significant changes:</p>
+      <ul>
+        <li>We will notify registered users via email or in-app notification.</li>
+        <li>The updated terms will be posted on this page with a new effective date.</li>
+        <li>Continued use of the platform after changes constitutes acceptance of the new terms.</li>
+      </ul>
+      <p>We encourage you to review these terms periodically to stay informed about your rights and obligations.</p>
+    </div>
+  </div>
+
+  <div class="legal-contact">
+    <p><strong>Questions about these Terms?</strong><br>
+    Contact our legal team and we'll be happy to clarify anything.</p>
+    <p>
+      <i class="fas fa-envelope" style="margin-right:.3rem;color:#0d9488;"></i>
+      <a href="mailto:legal@nutriconnect.com">legal@nutriconnect.com</a>
+      &nbsp;&nbsp;
+      <i class="fas fa-globe" style="margin-right:.3rem;color:#0d9488;"></i>
+      NutriConnect · Bangladesh
+    </p>
+  </div>
+
+</div>
+{% endblock %}

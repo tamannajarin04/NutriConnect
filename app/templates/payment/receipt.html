@@ -1,0 +1,197 @@
+{% extends "base.html" %}
+{% block title %}Receipt · {{ order.order_number }} · NutriConnect{% endblock %}
+
+{% block extra_css %}
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+.rc { font-family:'Plus Jakarta Sans',sans-serif; max-width:680px; margin:0 auto; }
+@keyframes up { from{opacity:0;transform:translateY(14px)} to{opacity:1;transform:translateY(0)} }
+@keyframes pop { from{opacity:0;transform:scale(.8)} to{opacity:1;transform:scale(1)} }
+
+/* Success banner */
+.rc-success {
+  background:linear-gradient(135deg,#059669 0%,#0d9488 100%);
+  border-radius:20px;padding:2rem;text-align:center;color:#fff;
+  margin-bottom:1.25rem;animation:up .4s cubic-bezier(.16,1,.3,1) both;
+}
+.rc-check {
+  width:64px;height:64px;border-radius:50%;background:rgba(255,255,255,.2);
+  display:flex;align-items:center;justify-content:center;font-size:1.6rem;
+  margin:0 auto .85rem;animation:pop .4s cubic-bezier(.34,1.56,.64,1) .15s both;
+}
+.rc-success h2 { font-size:1.45rem;font-weight:900;letter-spacing:-.03em;margin:0 0 .3rem; }
+.rc-success p  { font-size:.88rem;opacity:.82;margin:0; }
+.rc-order-num {
+  font-family:'JetBrains Mono',monospace;font-size:.85rem;font-weight:700;
+  background:rgba(255,255,255,.15);border-radius:8px;padding:.3rem .85rem;
+  display:inline-block;margin-top:.75rem;
+}
+
+/* Panel */
+.rc-panel { background:var(--nc-card-bg);border:1px solid var(--nc-card-border);border-radius:20px;overflow:hidden;box-shadow:var(--nc-card-shadow);margin-bottom:1rem;animation:up .4s cubic-bezier(.16,1,.3,1) .08s both; }
+.rc-panel-hd { padding:.85rem 1.25rem;background:var(--nc-surface-2);border-bottom:1px solid var(--nc-border);font-size:.75rem;font-weight:900;text-transform:uppercase;letter-spacing:.09em;color:var(--nc-text-muted);display:flex;align-items:center;gap:.4rem; }
+.rc-panel-hd i { color:var(--nc-brand); }
+
+/* Items */
+.rc-item { display:flex;align-items:center;gap:.85rem;padding:.85rem 1.25rem;border-bottom:1px solid var(--nc-border); }
+.rc-item:last-child { border-bottom:none; }
+.rc-item-img { width:46px;height:46px;border-radius:10px;overflow:hidden;background:var(--nc-surface-2);flex-shrink:0; }
+.rc-item-img img { width:100%;height:100%;object-fit:cover; }
+.rc-item-img-ph { width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:1rem;color:var(--nc-text-faint); }
+.rc-item-name  { flex:1;font-size:.88rem;font-weight:800;color:var(--nc-text); }
+.rc-item-qty   { font-size:.78rem;color:var(--nc-text-faint);font-weight:600; }
+.rc-item-price { font-family:'JetBrains Mono',monospace;font-size:.88rem;font-weight:700;color:var(--nc-text); }
+
+/* Info rows */
+.rc-info-row { display:flex;justify-content:space-between;align-items:center;padding:.65rem 1.25rem;border-bottom:1px solid var(--nc-border);font-size:.84rem; }
+.rc-info-row:last-child { border-bottom:none; }
+.rc-info-lbl { font-weight:700;color:var(--nc-text-faint); }
+.rc-info-val { font-weight:700;color:var(--nc-text); }
+.rc-info-val.mono { font-family:'JetBrains Mono',monospace; }
+.rc-info-val.brand { color:var(--nc-brand); }
+.rc-info-val.green { color:#16a34a; }
+[data-theme="dark"] .rc-info-val.green { color:#86efac; }
+
+/* Cashback badge */
+.rc-cashback {
+  display:flex;align-items:center;gap:.75rem;
+  background:rgba(16,185,129,.08);border:1.5px solid rgba(16,185,129,.2);
+  border-radius:14px;padding:.85rem 1.1rem;margin-bottom:1rem;
+  animation:up .4s cubic-bezier(.16,1,.3,1) .16s both;
+}
+.rc-cashback-ico { font-size:1.5rem; }
+.rc-cashback-title { font-size:.85rem;font-weight:800;color:#059669; }
+[data-theme="dark"] .rc-cashback-title { color:#34d399; }
+.rc-cashback-sub { font-size:.74rem;color:var(--nc-text-muted);margin-top:.1rem; }
+
+/* Action buttons */
+.rc-actions { display:flex;gap:.75rem;flex-wrap:wrap;margin-top:1rem; }
+.rc-btn {
+  display:inline-flex;align-items:center;gap:.4rem;
+  padding:.65rem 1.1rem;border-radius:12px;border:none;
+  font-family:'Plus Jakarta Sans',sans-serif;font-size:.82rem;font-weight:800;
+  text-decoration:none;cursor:pointer;transition:all .15s;flex:1;justify-content:center;
+}
+.rc-btn-primary { background:var(--nc-brand);color:#fff; }
+.rc-btn-primary:hover { background:var(--nc-brand-d);color:#fff; }
+.rc-btn-outline { background:var(--nc-surface-2);border:1.5px solid var(--nc-border);color:var(--nc-text-muted); }
+.rc-btn-outline:hover { border-color:var(--nc-brand);color:var(--nc-brand); }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="rc">
+
+  <!-- Success banner -->
+  <div class="rc-success">
+    <div class="rc-check"><i class="fas fa-check"></i></div>
+    <h2>Payment Successful!</h2>
+    <p>Your order has been confirmed and is being prepared.</p>
+    <div class="rc-order-num">{{ order.order_number }}</div>
+  </div>
+
+  <!-- Cashback notification -->
+  {% set cashback = (order.total_price * 0.02)|round(2) %}
+  {% if cashback > 0 %}
+  <div class="rc-cashback">
+    <div class="rc-cashback-ico">🎉</div>
+    <div>
+      <div class="rc-cashback-title">+${{ "%.2f"|format(cashback) }} cashback added to your wallet!</div>
+      <div class="rc-cashback-sub">2% cashback reward for completing this order.</div>
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- Order items -->
+  <div class="rc-panel">
+    <div class="rc-panel-hd"><i class="fas fa-bag-shopping"></i> Items Ordered</div>
+    {% for item in items %}
+    <div class="rc-item">
+      <div class="rc-item-img">
+        {% if item.food_image %}
+          <img src="{{ url_for('static', filename='uploads/' ~ item.food_image) }}" alt="{{ item.food_name }}">
+        {% else %}
+          <div class="rc-item-img-ph"><i class="fas fa-utensils"></i></div>
+        {% endif %}
+      </div>
+      <div class="rc-item-name">{{ item.food_name }}</div>
+      <div class="rc-item-qty">×{{ item.quantity }}</div>
+      <div class="rc-item-price">${{ "%.2f"|format(item.subtotal) }}</div>
+    </div>
+    {% endfor %}
+  </div>
+
+  <!-- Payment details -->
+  <div class="rc-panel">
+    <div class="rc-panel-hd"><i class="fas fa-receipt"></i> Payment Details</div>
+    <div class="rc-info-row">
+      <span class="rc-info-lbl">Order Total</span>
+      <span class="rc-info-val mono brand">${{ "%.2f"|format(order.total_price) }}</span>
+    </div>
+    {% if txn %}
+    <div class="rc-info-row">
+      <span class="rc-info-lbl">Payment Method</span>
+      <span class="rc-info-val" style="text-transform:capitalize;">
+        {% if txn.method == 'split' %}
+          Split (Wallet + SSLCommerz)
+        {% elif txn.method == 'wallet' %}
+          Wallet
+        {% else %}
+          SSLCommerz
+          {% if txn.ssl_card_type %}· {{ txn.ssl_card_type }}{% endif %}
+        {% endif %}
+      </span>
+    </div>
+    {% if txn.method == 'split' %}
+    <div class="rc-info-row">
+      <span class="rc-info-lbl">Wallet Portion</span>
+      <span class="rc-info-val mono green">-${{ "%.2f"|format(txn.wallet_amount) }}</span>
+    </div>
+    <div class="rc-info-row">
+      <span class="rc-info-lbl">Gateway Portion</span>
+      <span class="rc-info-val mono">${{ "%.2f"|format(txn.gateway_amount) }}</span>
+    </div>
+    {% endif %}
+    <div class="rc-info-row">
+      <span class="rc-info-lbl">Transaction ID</span>
+      <span class="rc-info-val mono" style="font-size:.78rem;">{{ txn.transaction_id }}</span>
+    </div>
+    {% endif %}
+    <div class="rc-info-row">
+      <span class="rc-info-lbl">Date & Time</span>
+      <span class="rc-info-val">{{ order.created_at.strftime('%d %b %Y · %I:%M %p') }}</span>
+    </div>
+    <div class="rc-info-row">
+      <span class="rc-info-lbl">Payment Status</span>
+      <span class="rc-info-val green"><i class="fas fa-circle-check"></i> Paid</span>
+    </div>
+  </div>
+
+  <!-- Delivery info -->
+  <div class="rc-panel">
+    <div class="rc-panel-hd"><i class="fas fa-location-dot"></i> Delivery Info</div>
+    <div class="rc-info-row">
+      <span class="rc-info-lbl">Address</span>
+      <span class="rc-info-val">{{ order.delivery_address or '—' }}</span>
+    </div>
+    <div class="rc-info-row">
+      <span class="rc-info-lbl">Provider</span>
+      <span class="rc-info-val">{{ order.provider_user.full_name or order.provider_user.username }}</span>
+    </div>
+  </div>
+
+  <!-- Actions -->
+  <div class="rc-actions">
+    <a href="{{ url_for('orders.order_detail', order_id=order.id) }}" class="rc-btn rc-btn-primary">
+      <i class="fas fa-bag-shopping"></i> Track Order
+    </a>
+    <a href="{{ url_for('food_search.search_foods') }}" class="rc-btn rc-btn-outline">
+      <i class="fas fa-magnifying-glass"></i> Order More Food
+    </a>
+    <a href="{{ url_for('payment.wallet_dashboard') }}" class="rc-btn rc-btn-outline">
+      <i class="fas fa-wallet"></i> View Wallet
+    </a>
+  </div>
+
+</div>
+{% endblock %}

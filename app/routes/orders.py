@@ -300,6 +300,9 @@ def place_order():
     for ci in available_items:
         db.session.delete(ci)
 
+    # ── Redirect to payment page ──────────────────────
+    flash("Order placed! Please complete your payment.", "info")
+    return redirect(url_for("payment.pay", order_id=created_orders[0].id))
     db.session.commit()
 
     return redirect(url_for("orders.receipt", order_id=order.id))
