@@ -261,10 +261,6 @@
   box-shadow: 0 0 0 3px rgba(14,165,233,.14);
 }
 
-.co-provider-card + .co-provider-card {
-  margin-top: 1rem;
-}
-
 .co-provider-top {
   display: flex;
   justify-content: space-between;
@@ -308,22 +304,15 @@
 .co-item-name {
   font-size: .86rem;
   font-weight: 800;
-  color: var;
   color: var(--txt);
 }
-.co-item-meta,
 .co-item-price,
 .co-item-qty,
 .co-item-subtotal {
   font-size: .78rem;
-  color: var(--mu);
-}
-.co-item-price,
-.co-item-qty,
-.co-item-subtotal {
+  color: var(--txt);
   font-family: 'JetBrains Mono', monospace;
   font-weight: 700;
-  color: var(--txt);
   white-space: nowrap;
 }
 
@@ -416,7 +405,7 @@
         <div>
           <h1 class="co-title">Secure <span>Checkout</span></h1>
           <div class="co-sub">
-            Confirm your delivery information, review items grouped by provider, and place your order with a cleaner flow that matches the main NutriConnect style.
+            Confirm your delivery details, review items from a single provider, and place one clean order before moving to payment integration.
           </div>
         </div>
 
@@ -464,16 +453,15 @@
           </div>
         </div>
 
-        {% for provider_id, group in grouped.items() %}
-        <div class="co-card co-provider-card">
+        <div class="co-card">
           <div class="co-head">
             <div class="co-head-left">
               <div class="co-icon ico-violet"><i class="fas fa-store"></i></div>
               <div>
                 <div class="co-head-title">
-                  {{ group['provider'].full_name if group['provider'] and group['provider'].full_name else (group['provider'].username if group['provider'] else 'Provider') }}
+                  {{ provider.full_name if provider and provider.full_name else (provider.username if provider else 'Provider') }}
                 </div>
-                <div class="co-head-sub">Items from this provider</div>
+                <div class="co-head-sub">All checkout items are from this provider</div>
               </div>
             </div>
           </div>
@@ -481,11 +469,12 @@
           <div class="co-body">
             <div class="co-provider-top">
               <div class="co-provider-name">Order Items</div>
-              <div class="co-provider-subtotal">Subtotal: ${{ "%.2f"|format(group['subtotal'] or 0) }}</div>
+              <div class="co-provider-subtotal">Subtotal: ${{ "%.2f"|format(total or 0) }}</div>
             </div>
 
+            {% if items %}
             <div class="co-item-list">
-              {% for item in group['items'] %}
+              {% for item in items %}
               <div class="co-item">
                 <div class="co-item-name">{{ item.food.name if item.food else 'Food Item' }}</div>
                 <div class="co-item-price">${{ "%.2f"|format(item.food.price or 0) }}</div>
@@ -494,15 +483,11 @@
               </div>
               {% endfor %}
             </div>
-          </div>
-        </div>
-        {% else %}
-        <div class="co-card">
-          <div class="co-body">
+            {% else %}
             <div class="co-empty">No checkout items found.</div>
+            {% endif %}
           </div>
         </div>
-        {% endfor %}
 
       </div>
 
@@ -513,7 +498,7 @@
               <div class="co-icon ico-teal"><i class="fas fa-file-invoice"></i></div>
               <div>
                 <div class="co-head-title">Order Summary</div>
-                <div class="co-head-sub">Your final total before placing the order</div>
+                <div class="co-head-sub">One provider, one checkout, one order</div>
               </div>
             </div>
           </div>
@@ -521,20 +506,13 @@
           <div class="co-body">
             <div class="co-summary-box">
               <div class="co-summary-line">
-                <div class="co-summary-label">Providers</div>
-                <div class="co-summary-value">{{ grouped|length }}</div>
+                <div class="co-summary-label">Provider</div>
+                <div class="co-summary-value">1</div>
               </div>
+
               <div class="co-summary-line">
                 <div class="co-summary-label">Items</div>
-                <div class="co-summary-value">
-                  {% set total_qty = namespace(value=0) %}
-                  {% for provider_id, group in grouped.items() %}
-                    {% for item in group['items'] %}
-                      {% set total_qty.value = total_qty.value + item.quantity %}
-                    {% endfor %}
-                  {% endfor %}
-                  {{ total_qty.value }}
-                </div>
+                <div class="co-summary-value">{{ total_qty or 0 }}</div>
               </div>
 
               <div class="co-divider"></div>
@@ -549,7 +527,7 @@
               </button>
 
               <div class="co-note">
-                By placing the order, your available cart items will be grouped by provider and submitted together.
+                This checkout now accepts items from only one provider at a time, so placing the order will create a single order record.
               </div>
             </div>
           </div>

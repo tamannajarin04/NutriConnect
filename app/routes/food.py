@@ -2,15 +2,22 @@ from flask import Blueprint, render_template, request, redirect, url_for, flash,
 from flask_login import login_required, current_user
 from werkzeug.utils import secure_filename
 from functools import wraps
+from datetime import datetime
+from sqlalchemy import or_
 import os
 import uuid
-from sqlalchemy import or_
 
-from app.models import db, FoodItem, User, FoodImage, FavoriteFood, RecentlyViewed, FoodRating
-from sqlalchemy import or_, func
-from datetime import datetime
-
-from app.models import db, FoodItem, User, FoodView
+from app.models import (
+    db,
+    FoodItem,
+    FoodImage,
+    FavoriteFood,
+    RecentlyViewed,
+    FoodRating,
+    FoodView,
+    Order,
+    OrderItem,
+)
 
 food_bp = Blueprint("food", __name__)
 food_search_bp = Blueprint("food_search", __name__)
@@ -19,8 +26,15 @@ UPLOAD_FOLDER = "app/static/uploads"
 ALLOWED_EXTENSIONS = {"png", "jpg", "jpeg", "gif", "webp"}
 
 VALID_DIET_TYPES = {
-    "vegan", "vegetarian", "keto", "paleo",
-    "gluten-free", "dairy-free", "halal", "low-carb", "high-protein"
+    "vegan",
+    "vegetarian",
+    "keto",
+    "paleo",
+    "gluten-free",
+    "dairy-free",
+    "halal",
+    "low-carb",
+    "high-protein",
 }
 
 VALID_AVAILABILITY_STATUSES = {"available", "out_of_stock"}
@@ -35,13 +49,9 @@ def normalize_availability_status(value):
     return value if value in VALID_AVAILABILITY_STATUSES else "available"
 
 
-def normalize_diet_types(values):
-    cleaned = []
-    for value in values:
-        value = (value or "").strip().lower()
-        if value in VALID_DIET_TYPES and value not in cleaned:
-            cleaned.append(value)
-    return cleaned
+def normalize_diet_type(value):
+    value = (value or "").strip().lower()
+    return value if value in VALID_DIET_TYPES else None
 
 
 def save_uploaded_file(file_obj):
@@ -72,69 +82,76 @@ def food_provider_required(f):
 
 
 def track_recent_view(user_id, food):
-    food.view_count = (food.view_count or 0) + 1
+    existing_view = RecentlyViewed.query.filter_by(
+        user_id=user_id,
+        food_id=food.id
+    ).first()
 
-    existing_view = RecentlyViewed.query.filter_by(user_id=user_id, food_id=food.id).first()
     if existing_view:
         existing_view.viewed_at = db.func.now()
     else:
         db.session.add(RecentlyViewed(user_id=user_id, food_id=food.id))
 
 
-# ── Food Provider Dashboard Redirect ──────────────────────────────────────────
+def record_food_view_once_per_day(food, viewer_id):
+    """
+    Count exactly one popularity view per user per food per day.
+    Updates BOTH:
+    - FoodView table
+    - food.view_count column
+    """
+    today = datetime.utcnow().date()
+
+    already_viewed = FoodView.query.filter(
+        FoodView.food_id == food.id,
+        FoodView.viewer_id == viewer_id,
+        db.func.date(FoodView.viewed_at) == today
+    ).first()
+
+    if already_viewed:
+        return False
+
+    db.session.add(FoodView(food_id=food.id, viewer_id=viewer_id))
+    food.view_count = (food.view_count or 0) + 1
+    return True
+
+
+def user_has_delivered_food(user_id, food_id):
+    return (
+        db.session.query(OrderItem.id)
+        .join(Order, Order.id == OrderItem.order_id)
+        .filter(
+            Order.user_id == user_id,
+            OrderItem.food_id == food_id,
+            Order.status == "delivered"
+        )
+        .first()
+        is not None
+    )
+
+
 @food_bp.route("/foods")
 @login_required
 @food_provider_required
 def provider_foods():
     return redirect(url_for("provider.provider_dashboard"))
-    foods = FoodItem.query.filter_by(provider_id=current_user.id).all()
-
-    # Build popularity insights: view count per food item
-    view_counts = dict(
-        db.session.query(FoodView.food_id, func.count(FoodView.id))
-        .filter(FoodView.food_id.in_([f.id for f in foods]))
-        .group_by(FoodView.food_id)
-        .all()
-    ) if foods else {}
-
-    # Attach view count to each food and sort by popularity
-    insights = sorted(
-        [{"food": f, "views": view_counts.get(f.id, 0)} for f in foods],
-        key=lambda x: x["views"],
-        reverse=True
-    )
-
-    total_views = sum(view_counts.values()) if view_counts else 0
-
-    return render_template(
-        "dashboard/food_provider_dashboard.html",
-        foods=foods,
-        insights=insights,
-        total_views=total_views,
-    )
 
 
-# ── Track Food View (one view per user per day) ───────────────────────────────
 @food_search_bp.route("/view/<int:food_id>", methods=["POST"])
 @login_required
 def track_view(food_id):
-    today = datetime.utcnow().date()
+    food = FoodItem.query.get_or_404(food_id)
 
-    already_viewed = FoodView.query.filter(
-        FoodView.food_id   == food_id,
-        FoodView.viewer_id == current_user.id,
-        db.func.date(FoodView.viewed_at) == today
-    ).first()
+    counted = record_food_view_once_per_day(food, current_user.id)
+    db.session.commit()
 
-    if not already_viewed:
-        view = FoodView(food_id=food_id, viewer_id=current_user.id)
-        db.session.add(view)
-        db.session.commit()
-
-    return jsonify({"ok": True})
+    return jsonify({
+        "ok": True,
+        "counted": counted,
+        "view_count": food.view_count or 0
+    })
 
 
-# ── Add Food ──────────────────────────────────────────────────────────────────
 @food_bp.route("/foods/add", methods=["GET", "POST"])
 @login_required
 @food_provider_required
@@ -148,9 +165,7 @@ def add_food():
         carbs = request.form.get("carbs") or None
         fat = request.form.get("fat") or None
 
-        diet_types = normalize_diet_types(request.form.getlist("diet_types"))
-        diet_type_value = ",".join(diet_types) if diet_types else None
-
+        diet_type_value = normalize_diet_type(request.form.get("diet_type"))
         availability_status = normalize_availability_status(request.form.get("availability_status"))
 
         if not name:
@@ -178,6 +193,7 @@ def add_food():
             availability_status=availability_status,
             provider_id=current_user.id,
         )
+
         db.session.add(food)
         db.session.commit()
 
@@ -187,7 +203,6 @@ def add_food():
     return render_template("dashboard/add_food.html")
 
 
-# ── Edit Food ─────────────────────────────────────────────────────────────────
 @food_bp.route("/foods/edit/<int:id>", methods=["GET", "POST"])
 @login_required
 @food_provider_required
@@ -200,16 +215,14 @@ def edit_food(id):
 
     if request.method == "POST":
         name = request.form.get("name", "").strip()
+
         if not name:
             flash("Food name is required.", "danger")
             return render_template("dashboard/edit_food.html", food=food)
 
-        diet_types = normalize_diet_types(request.form.getlist("diet_types"))
-        diet_type_value = ",".join(diet_types) if diet_types else None
-
         food.name = name
         food.description = request.form.get("description", "").strip()
-        food.diet_type = diet_type_value
+        food.diet_type = normalize_diet_type(request.form.get("diet_type"))
         food.price = float(request.form["price"]) if request.form.get("price") else None
         food.calories = float(request.form["calories"]) if request.form.get("calories") else None
         food.protein = float(request.form["protein"]) if request.form.get("protein") else None
@@ -227,13 +240,13 @@ def edit_food(id):
 
         db.session.add(food)
         db.session.commit()
+
         flash("Food item updated successfully!", "success")
         return redirect(url_for("provider.provider_dashboard"))
 
     return render_template("dashboard/edit_food.html", food=food)
 
 
-# ── Upload Food Gallery ───────────────────────────────────────────────────────
 @food_bp.route("/foods/<int:id>/gallery", methods=["POST"])
 @login_required
 @food_provider_required
@@ -262,7 +275,6 @@ def upload_food_gallery(id):
     return redirect(url_for("food.edit_food", id=food.id))
 
 
-# ── Delete Food ───────────────────────────────────────────────────────────────
 @food_bp.route("/foods/delete/<int:id>", methods=["POST"])
 @login_required
 @food_provider_required
@@ -279,17 +291,28 @@ def delete_food(id):
     return redirect(url_for("provider.provider_dashboard"))
 
 
-# ── Food Detail ───────────────────────────────────────────────────────────────
 @food_search_bp.route("/<int:food_id>")
 @login_required
 def food_detail(food_id):
     food = FoodItem.query.get_or_404(food_id)
 
+    record_food_view_once_per_day(food, current_user.id)
     track_recent_view(current_user.id, food)
     db.session.commit()
 
-    favorite = FavoriteFood.query.filter_by(user_id=current_user.id, food_id=food.id).first()
-    my_rating = FoodRating.query.filter_by(user_id=current_user.id, food_id=food.id).first()
+    favorite = FavoriteFood.query.filter_by(
+        user_id=current_user.id,
+        food_id=food.id
+    ).first()
+
+    my_rating = FoodRating.query.filter_by(
+        user_id=current_user.id,
+        food_id=food.id
+    ).first()
+
+    can_review = False
+    if current_user.has_role("user"):
+        can_review = user_has_delivered_food(current_user.id, food.id)
 
     ratings = (
         FoodRating.query
@@ -312,21 +335,16 @@ def food_detail(food_id):
         gallery=gallery,
         is_favorite=bool(favorite),
         my_rating=my_rating,
+        can_review=can_review,
         ratings=ratings
     )
 
 
-# ── Food Search (all logged-in users) ────────────────────────────────────────
 @food_search_bp.route("/search")
 @login_required
 def search_foods():
     q = request.args.get("q", "").strip()
-
-    selected_diet_types = normalize_diet_types(request.args.getlist("diet_type"))
-    if not selected_diet_types:
-        single_diet = request.args.get("diet_type", "").strip().lower()
-        if single_diet in VALID_DIET_TYPES:
-            selected_diet_types = [single_diet]
+    selected_diet_type = normalize_diet_type(request.args.get("diet_type"))
 
     max_cal = request.args.get("max_cal", type=float)
     min_pro = request.args.get("min_protein", type=float)
@@ -348,16 +366,15 @@ def search_foods():
             )
         )
 
-    if selected_diet_types:
-        diet_filters = []
-        for dt in selected_diet_types:
-            diet_filters.append(FoodItem.diet_type.ilike(f"%{dt}%"))
-        query = query.filter(or_(*diet_filters))
+    if selected_diet_type:
+        query = query.filter(FoodItem.diet_type == selected_diet_type)
 
     if max_cal is not None:
         query = query.filter(FoodItem.calories <= max_cal)
+
     if min_pro is not None:
         query = query.filter(FoodItem.protein >= min_pro)
+
     if max_price is not None:
         query = query.filter(FoodItem.price <= max_price)
 
@@ -373,7 +390,7 @@ def search_foods():
     results = query.paginate(page=page, per_page=12, error_out=False)
 
     default_diet = ""
-    if not selected_diet_types and getattr(current_user, "dietary_preference", None):
+    if not selected_diet_type and getattr(current_user, "dietary_preference", None):
         pref = (current_user.dietary_preference.diet_type or "").lower()
         if pref in VALID_DIET_TYPES:
             default_diet = pref
@@ -403,7 +420,7 @@ def search_foods():
             RecentlyViewed.query
             .filter_by(user_id=current_user.id)
             .order_by(RecentlyViewed.viewed_at.desc())
-            .limit(3)
+            .limit(2)
             .all()
         )
         recent_view_count = (
@@ -421,7 +438,7 @@ def search_foods():
             "html": cards_html,
             "total": results.total,
             "has_next": results.has_next,
-            "page":     results.page,
+            "page": results.page,
             "food_ids": [f.id for f in results.items],
         })
 
@@ -429,8 +446,8 @@ def search_foods():
         "food/search.html",
         foods=results,
         q=q,
-        diet_type=selected_diet_types[0] if selected_diet_types else default_diet,
-        selected_diet_types=selected_diet_types,
+        diet_type=selected_diet_type or default_diet,
+        selected_diet_types=[selected_diet_type] if selected_diet_type else [],
         max_cal=max_cal,
         min_pro=min_pro,
         max_price=max_price,

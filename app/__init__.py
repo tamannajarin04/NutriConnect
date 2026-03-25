@@ -1,10 +1,12 @@
 import os
+from datetime import datetime
+
 from flask import Flask
 from flask_login import LoginManager, current_user
 from flask_migrate import Migrate
+
 from config import config
 from app.models import db, User
-from datetime import datetime
 
 login_manager = LoginManager()
 migrate = Migrate()
@@ -38,6 +40,7 @@ def create_app(config_name="default"):
     from .routes.bmi import bmi_bp
     from .routes.admin import admin_bp
     from .routes.food import food_bp, food_search_bp
+    from .routes.meal_log import meal_log_bp
     from .routes.orders import orders_bp
     from .routes.provider_dashboard import provider_bp
     from .routes.analytics import analytics_bp
@@ -48,8 +51,12 @@ def create_app(config_name="default"):
     app.register_blueprint(user_dashboard_bp, url_prefix="/dashboard")
     app.register_blueprint(bmi_bp, url_prefix="/dashboard")
     app.register_blueprint(admin_bp, url_prefix="/admin")
+
     app.register_blueprint(food_bp, url_prefix="/provider")
     app.register_blueprint(food_search_bp, url_prefix="/food")
+
+    app.register_blueprint(meal_log_bp, url_prefix="/dashboard/meal-log")
+
     app.register_blueprint(orders_bp)
     app.register_blueprint(provider_bp, url_prefix="/provider")
     app.register_blueprint(analytics_bp, url_prefix="/admin")

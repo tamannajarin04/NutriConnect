@@ -101,7 +101,6 @@
         </div>
       </div>
 
-      {% if current_user.has_role('user') %}
       <div class="card border-0 shadow-sm">
         <div class="card-body">
           <h5>Ratings</h5>
@@ -110,32 +109,62 @@
             <strong>{{ food.average_rating if food.average_rating is not none else 0 }}</strong> / 5
           </div>
 
+          {% if current_user.has_role('user') %}
           <form method="post"
                 action="{{ url_for('orders.rate_food', food_id=food.id) }}"
                 class="mb-4">
             <div class="mb-2">
               <label class="form-label">Your Rating</label>
-              <select name="rating" class="form-select" required>
+              <select name="rating"
+                      class="form-select"
+                      required
+                      {% if not can_review %}disabled{% endif %}>
                 <option value="">Select</option>
                 {% for i in [5,4,3,2,1] %}
-                <option value="{{ i }}" {% if my_rating and my_rating.rating == i %}selected{% endif %}>{{ i }}</option>
+                <option value="{{ i }}" {% if my_rating and my_rating.rating == i %}selected{% endif %}>
+                  {{ i }}
+                </option>
                 {% endfor %}
               </select>
             </div>
 
             <div class="mb-2">
+              <label class="form-label">Your Review</label>
               <textarea name="review"
                         class="form-control"
                         rows="3"
-                        placeholder="Write a review">{{ my_rating.review if my_rating else '' }}</textarea>
+                        placeholder="Write a review"
+                        {% if not can_review %}disabled{% endif %}>{{ my_rating.review if my_rating else '' }}</textarea>
             </div>
 
-            <button type="submit" class="btn btn-primary w-100">Submit Rating</button>
+            <button type="submit"
+                    class="btn btn-primary w-100"
+                    {% if not can_review %}disabled title="You can review only after delivery"{% endif %}>
+              {% if my_rating %}
+                Update Review
+              {% else %}
+                Submit Review
+              {% endif %}
+            </button>
           </form>
+
+          {% if not can_review %}
+          <div class="alert alert-info mb-4">
+            You can submit a review only after this food has been delivered to you.
+          </div>
+          {% endif %}
+          {% else %}
+          <div class="alert alert-secondary mb-4">
+            Only users can submit reviews.
+          </div>
+          {% endif %}
 
           {% for rating in ratings %}
           <div class="border-top pt-3 mt-3">
-            <strong>{{ rating.user.username if rating.user else 'User' }}</strong> · {{ rating.rating }}/5
+            <strong>
+              {{ rating.user.full_name if rating.user and rating.user.full_name else (rating.user.username if rating.user else 'User') }}
+            </strong>
+            · {{ rating.rating }}/5
             <p class="mb-0 text-muted">{{ rating.review or 'No review text.' }}</p>
           </div>
           {% else %}
@@ -143,7 +172,6 @@
           {% endfor %}
         </div>
       </div>
-      {% endif %}
     </div>
   </div>
 </div>

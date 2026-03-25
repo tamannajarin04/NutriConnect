@@ -4,7 +4,7 @@ from flask import Blueprint, render_template, request, redirect, url_for, flash
 from flask_login import login_required, current_user
 from sqlalchemy import func
 
-from app.models import db, Order, OrderTimeline, FoodItem, FoodRating
+from app.models import db, Order, OrderTimeline, FoodItem, FoodRating, FoodView
 
 provider_bp = Blueprint("provider", __name__)
 
@@ -22,14 +22,76 @@ def protect_provider_routes():
         return redirect(url_for("main.home"))
 
 
+def parse_date_param(value):
+    value = (value or "").strip()
+    if not value:
+        return None
+
+    try:
+        return datetime.strptime(value, "%Y-%m-%d").date()
+    except ValueError:
+        return None
+
+
+def get_summary_date_bounds(summary_range, start_date_str="", end_date_str=""):
+    today = datetime.utcnow().date()
+    summary_range = (summary_range or "today").strip().lower()
+
+    if summary_range == "week":
+        start_date = today - timedelta(days=6)
+        end_date = today
+        label = "This Week"
+
+    elif summary_range == "month":
+        start_date = today.replace(day=1)
+        end_date = today
+        label = "This Month"
+
+    elif summary_range == "custom":
+        parsed_start = parse_date_param(start_date_str)
+        parsed_end = parse_date_param(end_date_str)
+
+        if parsed_start and parsed_end:
+            start_date = min(parsed_start, parsed_end)
+            end_date = max(parsed_start, parsed_end)
+        elif parsed_start:
+            start_date = parsed_start
+            end_date = parsed_start
+        elif parsed_end:
+            start_date = parsed_end
+            end_date = parsed_end
+        else:
+            start_date = today
+            end_date = today
+
+        label = "Custom Range"
+
+    else:
+        summary_range = "today"
+        start_date = today
+        end_date = today
+        label = "Today"
+
+    start_datetime = datetime.combine(start_date, datetime.min.time())
+    end_datetime = datetime.combine(end_date + timedelta(days=1), datetime.min.time())
+
+    return {
+        "summary_range": summary_range,
+        "label": label,
+        "start_date": start_date,
+        "end_date": end_date,
+        "start_datetime": start_datetime,
+        "end_datetime": end_datetime,
+    }
+
+
 def get_food_views_count(food):
-    for attr_name in ("view_count", "total_views", "views_count"):
-        value = getattr(food, attr_name, None)
-        if value is not None:
-            try:
-                return int(value or 0)
-            except (TypeError, ValueError):
-                pass
+    display_value = getattr(food, "total_views_display", None)
+    if display_value is not None:
+        try:
+            return int(display_value or 0)
+        except (TypeError, ValueError):
+            pass
 
     views_rel = getattr(food, "views", None)
     if views_rel is not None:
@@ -41,28 +103,48 @@ def get_food_views_count(food):
             except TypeError:
                 pass
 
+    for attr_name in ("view_count", "total_views", "views_count"):
+        value = getattr(food, attr_name, None)
+        if value is not None:
+            try:
+                return int(value or 0)
+            except (TypeError, ValueError):
+                pass
+
     return 0
 
 
 def get_provider_foods_with_ratings():
+    view_counts_subquery = (
+        db.session.query(
+            FoodView.food_id.label("food_id"),
+            func.count(FoodView.id).label("view_total"),
+        )
+        .group_by(FoodView.food_id)
+        .subquery()
+    )
+
     rows = (
         db.session.query(
             FoodItem,
             func.coalesce(func.avg(FoodRating.rating), 0).label("avg_rating"),
-            func.count(FoodRating.id).label("rating_total"),
+            func.count(func.distinct(FoodRating.id)).label("rating_total"),
+            func.coalesce(view_counts_subquery.c.view_total, 0).label("view_total"),
         )
         .outerjoin(FoodRating, FoodRating.food_id == FoodItem.id)
+        .outerjoin(view_counts_subquery, view_counts_subquery.c.food_id == FoodItem.id)
         .filter(FoodItem.provider_id == current_user.id)
-        .group_by(FoodItem.id)
+        .group_by(FoodItem.id, view_counts_subquery.c.view_total)
         .order_by(FoodItem.created_at.desc())
         .all()
     )
 
     foods = []
-    for food, avg_rating, rating_total in rows:
+    for food, avg_rating, rating_total, view_total in rows:
         food.average_rating_display = round(float(avg_rating or 0), 1)
         food.rating_count_display = int(rating_total or 0)
-        food.total_views_display = get_food_views_count(food)
+        food.total_views_display = int(view_total or 0)
+        food.view_count = int(view_total or 0)
         foods.append(food)
 
     return foods
@@ -201,6 +283,110 @@ def get_provider_order_insight_data():
     }
 
 
+def get_provider_order_summary(provider_id, summary_range="today", start_date_str="", end_date_str=""):
+    bounds = get_summary_date_bounds(summary_range, start_date_str, end_date_str)
+
+    base_query = Order.query.filter(
+        Order.provider_id == provider_id,
+        Order.created_at >= bounds["start_datetime"],
+        Order.created_at < bounds["end_datetime"],
+    )
+
+    status_rows = (
+        db.session.query(Order.status, func.count(Order.id))
+        .filter(
+            Order.provider_id == provider_id,
+            Order.created_at >= bounds["start_datetime"],
+            Order.created_at < bounds["end_datetime"],
+        )
+        .group_by(Order.status)
+        .all()
+    )
+    status_map = {status: int(count or 0) for status, count in status_rows}
+
+    total_orders = int(base_query.count())
+
+    non_cancelled_total = (
+        db.session.query(func.coalesce(func.sum(Order.total_price), 0))
+        .filter(
+            Order.provider_id == provider_id,
+            Order.created_at >= bounds["start_datetime"],
+            Order.created_at < bounds["end_datetime"],
+            Order.status != "cancelled",
+        )
+        .scalar()
+    ) or 0
+
+    completed_order_count = (
+        db.session.query(func.count(Order.id))
+        .filter(
+            Order.provider_id == provider_id,
+            Order.created_at >= bounds["start_datetime"],
+            Order.created_at < bounds["end_datetime"],
+            Order.status != "cancelled",
+        )
+        .scalar()
+    ) or 0
+
+    avg_order_value = round(float(non_cancelled_total) / completed_order_count, 2) if completed_order_count else 0
+
+    return {
+        "summary_range": bounds["summary_range"],
+        "summary_label": bounds["label"],
+        "start_date": bounds["start_date"].isoformat(),
+        "end_date": bounds["end_date"].isoformat(),
+        "total_orders": total_orders,
+        "pending_orders": status_map.get("pending", 0),
+        "confirmed_orders": status_map.get("confirmed", 0),
+        "preparing_orders": status_map.get("preparing", 0),
+        "ready_orders": status_map.get("ready", 0),
+        "delivered_orders": status_map.get("delivered", 0),
+        "cancelled_orders": status_map.get("cancelled", 0),
+        "total_revenue": round(float(non_cancelled_total), 2),
+        "avg_order_value": avg_order_value,
+    }
+
+
+def get_provider_total_orders_list(
+    provider_id,
+    summary_range="today",
+    start_date_str="",
+    end_date_str="",
+    show_all=False,
+    limit=5,
+):
+    bounds = get_summary_date_bounds(summary_range, start_date_str, end_date_str)
+
+    query = (
+        Order.query
+        .filter(
+            Order.provider_id == provider_id,
+            Order.created_at >= bounds["start_datetime"],
+            Order.created_at < bounds["end_datetime"],
+        )
+        .order_by(Order.created_at.desc())
+    )
+
+    total_count = query.count()
+
+    if show_all:
+        items = query.all()
+    else:
+        items = query.limit(limit).all()
+
+    return {
+        "items": items,
+        "total_count": total_count,
+        "has_more": total_count > limit,
+        "show_all": show_all,
+        "limit": limit,
+        "summary_range": bounds["summary_range"],
+        "summary_label": bounds["label"],
+        "start_date": bounds["start_date"].isoformat(),
+        "end_date": bounds["end_date"].isoformat(),
+    }
+
+
 @provider_bp.route("/dashboard")
 @login_required
 def provider_dashboard():
@@ -257,6 +443,11 @@ def provider_orders():
     status_filter = (request.args.get("status") or "").strip()
     sort_by = request.args.get("sort", "date_desc")
 
+    summary_range = (request.args.get("summary_range") or "today").strip().lower()
+    summary_start = (request.args.get("summary_start") or "").strip()
+    summary_end = (request.args.get("summary_end") or "").strip()
+    summary_show = (request.args.get("summary_show") or "preview").strip().lower()
+
     base_query = Order.query.filter_by(provider_id=current_user.id)
 
     query = base_query
@@ -274,18 +465,36 @@ def provider_orders():
 
     orders = query.all()
 
-    recent_orders = (
-        base_query.order_by(Order.created_at.desc())
-        .limit(5)
-        .all()
+    order_summary = get_provider_order_summary(
+        provider_id=current_user.id,
+        summary_range=summary_range,
+        start_date_str=summary_start,
+        end_date_str=summary_end,
+    )
+
+    total_orders_section = get_provider_total_orders_list(
+        provider_id=current_user.id,
+        summary_range=summary_range,
+        start_date_str=summary_start,
+        end_date_str=summary_end,
+        show_all=(summary_show == "all"),
+        limit=5,
     )
 
     return render_template(
         "dashboard/provider_order_list.html",
         orders=orders,
-        recent_orders=recent_orders,
         status_filter=status_filter,
         sort_by=sort_by,
+        order_summary=order_summary,
+        summary_range=order_summary["summary_range"],
+        summary_start=order_summary["start_date"],
+        summary_end=order_summary["end_date"],
+        summary_show="all" if total_orders_section["show_all"] else "preview",
+        total_orders_list=total_orders_section["items"],
+        total_orders_count=total_orders_section["total_count"],
+        total_orders_has_more=total_orders_section["has_more"],
+        total_orders_limit=total_orders_section["limit"],
     )
 
 

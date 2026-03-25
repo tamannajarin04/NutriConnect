@@ -1,7 +1,7 @@
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import UserMixin
 from werkzeug.security import generate_password_hash, check_password_hash
-from datetime import datetime
+from datetime import datetime, date
 from sqlalchemy import func
 import uuid
 
@@ -10,6 +10,7 @@ db = SQLAlchemy()
 
 user_roles = db.Table(
     "user_roles",
+    db.metadata,
     db.Column("user_id", db.Integer, db.ForeignKey("users.id"), primary_key=True),
     db.Column("role_id", db.Integer, db.ForeignKey("roles.id"), primary_key=True),
 )
@@ -23,12 +24,14 @@ class Role(db.Model):
     description = db.Column(db.String(200))
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
+    def __repr__(self):
+        return f"<Role {self.name}>"
+
 
 class User(UserMixin, db.Model):
     __tablename__ = "users"
 
     id = db.Column(db.Integer, primary_key=True)
-
     username = db.Column(db.String(80), unique=True, nullable=False)
     email = db.Column(db.String(120), unique=True, nullable=False)
     password_hash = db.Column(db.String(255), nullable=False)
@@ -54,7 +57,19 @@ class User(UserMixin, db.Model):
 
     foods = db.relationship("FoodItem", backref="provider", lazy=True, cascade="all, delete-orphan")
 
-    cart_items = db.relationship("CartItem", backref="user", lazy="dynamic", cascade="all, delete-orphan")
+    meal_logs = db.relationship(
+        "MealLog",
+        backref="user",
+        lazy="dynamic",
+        cascade="all, delete-orphan"
+    )
+
+    cart_items = db.relationship(
+        "CartItem",
+        backref="user",
+        lazy="dynamic",
+        cascade="all, delete-orphan"
+    )
 
     orders = db.relationship("Order", foreign_keys="Order.user_id", backref="customer", lazy="dynamic")
 
@@ -156,6 +171,13 @@ class FoodItem(db.Model):
     recent_views = db.relationship("RecentlyViewed", backref="food", lazy="dynamic", cascade="all, delete-orphan")
     views = db.relationship("FoodView", backref="food", lazy="dynamic", cascade="all, delete-orphan")
 
+    views = db.relationship(
+        "FoodView",
+        backref="food",
+        lazy="dynamic",
+        cascade="all, delete-orphan"
+    )
+
     @property
     def is_available(self):
         return self.availability_status == "available"
@@ -184,14 +206,39 @@ class RoleUpgradeRequest(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
+
     requested_role = db.Column(db.String(50), nullable=False)
     status = db.Column(db.String(20), default="pending", nullable=False)
     note = db.Column(db.Text)
     admin_comment = db.Column(db.Text)
+
     created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
 
     user = db.relationship("User", back_populates="upgrade_requests")
+
+
+MEAL_GOAL_CHOICES = ["weight_loss", "weight_gain", "maintain_weight"]
+
+
+class MealLog(db.Model):
+    __tablename__ = "meal_logs"
+
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
+
+    food_name = db.Column(db.String(120), nullable=False)
+    meal_type = db.Column(db.String(20), nullable=False)
+    quantity = db.Column(db.String(50), nullable=False)
+
+    goal = db.Column(db.String(30), nullable=True, default=None)
+
+    logged_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
+    log_date = db.Column(db.Date, default=date.today, nullable=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+    def __repr__(self):
+        return f"<MealLog user_id={self.user_id} food={self.food_name} meal_type={self.meal_type} goal={self.goal}>"
 
 
 class CartItem(db.Model):
@@ -201,6 +248,7 @@ class CartItem(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False, index=True)
     food_id = db.Column(db.Integer, db.ForeignKey("food_items.id"), nullable=False)
     quantity = db.Column(db.Integer, default=1, nullable=False)
+
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
@@ -248,10 +296,7 @@ class Order(db.Model):
 
     @property
     def timeline_position(self):
-        steps = self.status_steps
-        if self.status not in steps:
-            return -1
-        return steps.index(self.status)
+        return self.status_steps.index(self.status) if self.status in self.status_steps else -1
 
 
 class OrderItem(db.Model):
@@ -259,9 +304,11 @@ class OrderItem(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     order_id = db.Column(db.Integer, db.ForeignKey("orders.id"), nullable=False, index=True)
+
     food_id = db.Column(db.Integer, db.ForeignKey("food_items.id"))
     food_name = db.Column(db.String(120), nullable=False)
     food_price = db.Column(db.Float, nullable=False)
+
     quantity = db.Column(db.Integer, nullable=False, default=1)
     subtotal = db.Column(db.Float, nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
@@ -272,8 +319,10 @@ class OrderTimeline(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     order_id = db.Column(db.Integer, db.ForeignKey("orders.id"), nullable=False, index=True)
+
     status = db.Column(db.String(20), nullable=False)
     note = db.Column(db.String(255))
+
     created_at = db.Column(db.DateTime, default=datetime.utcnow, index=True)
 
 
@@ -283,6 +332,7 @@ class FavoriteFood(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
     food_id = db.Column(db.Integer, db.ForeignKey("food_items.id"), nullable=False)
+
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
     __table_args__ = (
@@ -295,8 +345,10 @@ class FoodImage(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     food_id = db.Column(db.Integer, db.ForeignKey("food_items.id"), nullable=False)
+
     image_path = db.Column(db.String(255), nullable=False)
     sort_order = db.Column(db.Integer, default=0)
+
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
 
@@ -306,8 +358,10 @@ class FoodRating(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
     food_id = db.Column(db.Integer, db.ForeignKey("food_items.id"), nullable=False)
+
     rating = db.Column(db.Integer, nullable=False)
     review = db.Column(db.Text)
+
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
     __table_args__ = (
@@ -321,6 +375,7 @@ class RecentlyViewed(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
     food_id = db.Column(db.Integer, db.ForeignKey("food_items.id"), nullable=False)
+
     viewed_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
     __table_args__ = (
@@ -421,3 +476,4 @@ class Notification(db.Model):
     link       = db.Column(db.String(255))
     is_read    = db.Column(db.Boolean, default=False, nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow, index=True)
+    
