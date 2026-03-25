@@ -1,0 +1,205 @@
+{% extends "base.html" %}
+{% block title %}My Wallet · NutriConnect{% endblock %}
+
+{% block extra_css %}
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+.wl { font-family:'Plus Jakarta Sans',sans-serif; max-width:860px; margin:0 auto; }
+@keyframes up { from{opacity:0;transform:translateY(14px)} to{opacity:1;transform:translateY(0)} }
+
+.wl-hero {
+  background:linear-gradient(135deg,#0d9488 0%,#0284c7 60%,#7c3aed 100%);
+  border-radius:22px;padding:2rem 2.2rem;color:#fff;
+  display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem;
+  margin-bottom:1.25rem;animation:up .4s cubic-bezier(.16,1,.3,1) both;
+  position:relative;overflow:hidden;
+}
+.wl-hero::before {
+  content:'';position:absolute;inset:0;
+  background:radial-gradient(ellipse 60% 80% at 90% -10%,rgba(255,255,255,.12),transparent 55%);
+  pointer-events:none;
+}
+.wl-hero__label { font-size:.75rem;font-weight:800;text-transform:uppercase;letter-spacing:.09em;opacity:.75; }
+.wl-hero__amount { font-family:'JetBrains Mono',monospace;font-size:2.8rem;font-weight:700;letter-spacing:-.03em;line-height:1; }
+.wl-hero__sub { font-size:.82rem;opacity:.7;margin-top:.35rem; }
+.wl-hero__ico { font-size:3.5rem;opacity:.25;flex-shrink:0; }
+
+/* Top-up form */
+.wl-topup {
+  background:var(--nc-card-bg);border:1px solid var(--nc-card-border);
+  border-radius:20px;overflow:hidden;box-shadow:var(--nc-card-shadow);
+  margin-bottom:1.25rem;animation:up .4s cubic-bezier(.16,1,.3,1) .08s both;
+}
+.wl-topup-hd { padding:.9rem 1.25rem;background:var(--nc-surface-2);border-bottom:1px solid var(--nc-border);font-size:.75rem;font-weight:900;text-transform:uppercase;letter-spacing:.09em;color:var(--nc-text-muted);display:flex;align-items:center;gap:.4rem; }
+.wl-topup-hd i { color:var(--nc-brand); }
+.wl-topup-body { padding:1.15rem 1.25rem; }
+.wl-topup-grid { display:grid;grid-template-columns:repeat(4,1fr);gap:.55rem;margin-bottom:.85rem; }
+@media(max-width:560px){ .wl-topup-grid { grid-template-columns:repeat(2,1fr); } }
+.wl-quick-btn {
+  padding:.6rem;border-radius:12px;border:2px solid var(--nc-border);
+  background:var(--nc-surface-2);color:var(--nc-text);
+  font-family:'JetBrains Mono',monospace;font-size:.88rem;font-weight:700;
+  cursor:pointer;transition:all .13s;text-align:center;
+}
+.wl-quick-btn:hover { border-color:var(--nc-brand);background:var(--nc-brand-l);color:var(--nc-brand); }
+.wl-topup-row { display:flex;gap:.65rem;align-items:flex-end; }
+.wl-input-wrap { flex:1; }
+.wl-label { font-size:.72rem;font-weight:800;text-transform:uppercase;letter-spacing:.07em;color:var(--nc-text-faint);margin-bottom:.4rem; }
+.wl-input {
+  width:100%;background:var(--nc-surface-2);border:1.5px solid var(--nc-border);
+  border-radius:12px;padding:.72rem 1rem;
+  font-family:'JetBrains Mono',monospace;font-size:.95rem;font-weight:700;
+  color:var(--nc-text);outline:none;transition:border-color .15s,box-shadow .15s;
+}
+.wl-input:focus { border-color:var(--nc-brand);box-shadow:0 0 0 3px rgba(14,165,233,.12); }
+.wl-topup-btn {
+  padding:.72rem 1.3rem;border-radius:12px;border:none;
+  background:linear-gradient(135deg,#0d9488,#0ea5e9);
+  color:#fff;font-family:'Plus Jakarta Sans',sans-serif;
+  font-size:.85rem;font-weight:800;cursor:pointer;transition:opacity .13s;white-space:nowrap;
+}
+.wl-topup-btn:hover { opacity:.88; }
+
+/* Transaction list */
+.wl-panel { background:var(--nc-card-bg);border:1px solid var(--nc-card-border);border-radius:20px;overflow:hidden;box-shadow:var(--nc-card-shadow);animation:up .4s cubic-bezier(.16,1,.3,1) .12s both; }
+.wl-panel-hd { padding:.9rem 1.25rem;background:var(--nc-surface-2);border-bottom:1px solid var(--nc-border);font-size:.75rem;font-weight:900;text-transform:uppercase;letter-spacing:.09em;color:var(--nc-text-muted);display:flex;align-items:center;gap:.4rem; }
+.wl-panel-hd i { color:var(--nc-brand); }
+
+.wl-tx { display:flex;align-items:center;gap:.85rem;padding:.9rem 1.25rem;border-bottom:1px solid var(--nc-border);transition:background .13s; }
+.wl-tx:last-child { border-bottom:none; }
+.wl-tx:hover { background:var(--nc-surface-2); }
+
+.wl-tx-ico {
+  width:38px;height:38px;border-radius:50%;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;font-size:.85rem;
+}
+.wl-tx-ico.credit { background:rgba(16,185,129,.1);color:#059669; }
+.wl-tx-ico.debit  { background:rgba(239,68,68,.1);color:#dc2626; }
+[data-theme="dark"] .wl-tx-ico.credit { background:rgba(16,185,129,.15);color:#34d399; }
+[data-theme="dark"] .wl-tx-ico.debit  { background:rgba(239,68,68,.12);color:#fca5a5; }
+
+.wl-tx-info { flex:1;min-width:0; }
+.wl-tx-desc { font-size:.84rem;font-weight:700;color:var(--nc-text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis; }
+.wl-tx-date { font-size:.72rem;color:var(--nc-text-faint);font-weight:500;margin-top:.1rem; }
+.wl-tx-ref  { font-size:.68rem;font-family:'JetBrains Mono',monospace;color:var(--nc-text-faint);margin-top:.08rem; }
+
+.wl-tx-amount { font-family:'JetBrains Mono',monospace;font-size:.92rem;font-weight:700;text-align:right;flex-shrink:0; }
+.wl-tx-amount.credit { color:#059669; }
+.wl-tx-amount.debit  { color:#dc2626; }
+[data-theme="dark"] .wl-tx-amount.credit { color:#34d399; }
+[data-theme="dark"] .wl-tx-amount.debit  { color:#fca5a5; }
+.wl-tx-bal { font-size:.68rem;color:var(--nc-text-faint);font-family:'JetBrains Mono',monospace;margin-top:.1rem;text-align:right; }
+
+.wl-empty { padding:3rem 1.5rem;text-align:center; }
+.wl-empty-ico { width:60px;height:60px;border-radius:18px;background:var(--nc-brand-l);color:var(--nc-brand);display:flex;align-items:center;justify-content:center;font-size:1.4rem;margin:0 auto .85rem;box-shadow:0 0 0 10px var(--nc-brand-l); }
+[data-theme="dark"] .wl-empty-ico { background:rgba(14,165,233,.1);box-shadow:0 0 0 10px rgba(14,165,233,.06); }
+.wl-empty h4 { font-size:.95rem;font-weight:900;color:var(--nc-text);margin:0 0 .4rem; }
+.wl-empty p  { font-size:.82rem;color:var(--nc-text-muted);margin:0; }
+
+.wl-pages { display:flex;justify-content:center;gap:.4rem;flex-wrap:wrap;padding:1rem 1.25rem;border-top:1px solid var(--nc-border); }
+.pg-btn { display:inline-flex;align-items:center;gap:.3rem;background:var(--nc-card-bg);color:var(--nc-text-muted);border:1.5px solid var(--nc-border);border-radius:10px;padding:.45rem .85rem;font-size:.78rem;font-weight:700;font-family:'Plus Jakarta Sans',sans-serif;text-decoration:none;transition:all .13s; }
+.pg-btn:hover { border-color:var(--nc-brand);color:var(--nc-brand);background:var(--nc-brand-l); }
+.pg-btn.active { background:var(--nc-brand);color:#fff;border-color:var(--nc-brand); }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="wl">
+
+  <!-- Hero balance card -->
+  <div class="wl-hero">
+    <div style="position:relative;z-index:1;">
+      <div class="wl-hero__label">Wallet Balance</div>
+      <div class="wl-hero__amount">${{ "%.2f"|format(wallet.balance) }}</div>
+      <div class="wl-hero__sub">Available for payments · Earns 2% cashback on orders</div>
+    </div>
+    <div class="wl-hero__ico"><i class="fas fa-wallet"></i></div>
+  </div>
+
+  <!-- Top-up -->
+  <div class="wl-topup">
+    <div class="wl-topup-hd"><i class="fas fa-plus-circle"></i> Add Money to Wallet</div>
+    <div class="wl-topup-body">
+      <div class="wl-topup-grid">
+        {% for amt in [5, 10, 25, 50] %}
+        <button class="wl-quick-btn" onclick="setAmount({{ amt }})">+${{ amt }}</button>
+        {% endfor %}
+      </div>
+      <form method="POST" action="{{ url_for('payment.wallet_topup') }}">
+        <div class="wl-topup-row">
+          <div class="wl-input-wrap">
+            <div class="wl-label">Custom Amount (USD)</div>
+            <input class="wl-input" type="number" name="amount" id="topupAmount"
+                   min="1" max="10000" step="0.01" placeholder="Enter amount…" required>
+          </div>
+          <button class="wl-topup-btn" type="submit">
+            <i class="fas fa-arrow-up-right-dots" style="margin-right:.3rem;"></i>Top Up via SSLCommerz
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Transaction history -->
+  <div class="wl-panel">
+    <div class="wl-panel-hd"><i class="fas fa-clock-rotate-left"></i> Transaction History</div>
+
+    {% if transactions.items %}
+      {% for tx in transactions.items %}
+      <div class="wl-tx">
+        <div class="wl-tx-ico {{ tx.type }}">
+          {% if tx.type == 'credit' %}<i class="fas fa-arrow-down"></i>
+          {% else %}<i class="fas fa-arrow-up"></i>{% endif %}
+        </div>
+        <div class="wl-tx-info">
+          <div class="wl-tx-desc">{{ tx.description or 'Transaction' }}</div>
+          <div class="wl-tx-date">{{ tx.created_at.strftime('%d %b %Y · %I:%M %p') }}</div>
+          {% if tx.reference %}
+            <div class="wl-tx-ref">Ref: {{ tx.reference }}</div>
+          {% endif %}
+        </div>
+        <div>
+          <div class="wl-tx-amount {{ tx.type }}">
+            {{ '+' if tx.type == 'credit' else '-' }}${{ "%.2f"|format(tx.amount) }}
+          </div>
+          <div class="wl-tx-bal">Bal: ${{ "%.2f"|format(tx.balance_after) }}</div>
+        </div>
+      </div>
+      {% endfor %}
+
+      {% if transactions.pages > 1 %}
+      <div class="wl-pages">
+        {% if transactions.has_prev %}
+          <a class="pg-btn" href="?page={{ transactions.prev_num }}"><i class="fas fa-chevron-left"></i> Prev</a>
+        {% endif %}
+        {% for p in transactions.iter_pages(left_edge=1, right_edge=1, left_current=2, right_current=2) %}
+          {% if p %}
+            <a class="pg-btn {{ 'active' if p == transactions.page }}" href="?page={{ p }}">{{ p }}</a>
+          {% else %}
+            <span class="pg-btn" style="opacity:.35;">…</span>
+          {% endif %}
+        {% endfor %}
+        {% if transactions.has_next %}
+          <a class="pg-btn" href="?page={{ transactions.next_num }}">Next <i class="fas fa-chevron-right"></i></a>
+        {% endif %}
+      </div>
+      {% endif %}
+
+    {% else %}
+      <div class="wl-empty">
+        <div class="wl-empty-ico"><i class="fas fa-wallet"></i></div>
+        <h4>No transactions yet</h4>
+        <p>Top up your wallet or complete an order to see your transaction history here.</p>
+      </div>
+    {% endif %}
+  </div>
+
+</div>
+
+<script>
+function setAmount(val) {
+  document.getElementById('topupAmount').value = val;
+  document.getElementById('topupAmount').focus();
+}
+</script>
+{% endblock %}

@@ -250,11 +250,9 @@ def place_order():
     CartItem.query.filter_by(user_id=current_user.id).delete()
     db.session.commit()
 
-    if len(created_orders) == 1:
-        return redirect(url_for("orders.receipt", order_id=created_orders[0].id))
-
-    flash("Your orders were placed successfully.", "success")
-    return redirect(url_for("orders.cart"))
+    # ── Redirect to payment page ──────────────────────
+    flash("Order placed! Please complete your payment.", "info")
+    return redirect(url_for("payment.pay", order_id=created_orders[0].id))
 
 
 # ---------------- ORDERS ----------------
