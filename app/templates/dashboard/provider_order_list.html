@@ -120,7 +120,7 @@
     color:rgba(255,255,255,.42);
     font-size:.82rem;
     margin:0;
-    max-width:580px;
+    max-width:640px;
     line-height:1.65;
   }
 
@@ -241,6 +241,7 @@
     display:flex;
     align-items:center;
     gap:.5rem;
+    flex-wrap:wrap;
     font-size:.82rem;
     font-weight:700;
     color:var(--mu);
@@ -252,6 +253,19 @@
     border-radius:50%;
     background:var(--brand);
     box-shadow:0 0 8px rgba(14,165,233,.45);
+  }
+
+  .po-range-chip{
+    display:inline-flex;
+    align-items:center;
+    gap:.35rem;
+    padding:.28rem .72rem;
+    border-radius:999px;
+    background:var(--brand-l);
+    color:var(--brand-d);
+    border:1px solid rgba(14,165,233,.18);
+    font-size:.72rem;
+    font-weight:800;
   }
 
   .po-filter-form,
@@ -324,11 +338,23 @@
 
   .po-table tr:last-child td{border-bottom:none;}
 
+  .po-order-cell{
+    display:flex;
+    flex-direction:column;
+    gap:.18rem;
+  }
+
   .po-order-id{
     font-family:'JetBrains Mono', monospace;
     font-size:.88rem;
     font-weight:800;
     color:var(--txt);
+  }
+
+  .po-order-sub{
+    font-size:.75rem;
+    color:var(--mu);
+    font-weight:600;
   }
 
   .po-customer{
@@ -387,6 +413,52 @@
     background:var(--brand-l);
     border-color:rgba(14,165,233,.25);
     color:var(--brand-d);
+  }
+
+  .po-pagination{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:.55rem;
+    margin-top:1rem;
+    flex-wrap:wrap;
+  }
+
+  .po-page-btn{
+    min-width:34px;
+    height:34px;
+    padding:0 .85rem;
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    border-radius:10px;
+    text-decoration:none;
+    background:var(--s2);
+    color:var(--txt2);
+    border:1px solid var(--bdr);
+    font-size:.8rem;
+    font-weight:800;
+    transition:all .14s ease;
+  }
+
+  .po-page-btn:hover{
+    color:var(--brand-d);
+    border-color:rgba(14,165,233,.25);
+    background:var(--brand-l);
+  }
+
+  .po-page-btn.active{
+    background:linear-gradient(135deg, var(--brand-d), var(--brand));
+    color:#fff;
+    border-color:transparent;
+    box-shadow:0 6px 18px rgba(14,165,233,.22);
+  }
+
+  .po-page-dots{
+    color:var(--fa);
+    font-size:.9rem;
+    font-weight:800;
+    padding:0 .18rem;
   }
 
   .po-empty{
@@ -529,7 +601,7 @@
           </div>
           <h1 class="po-title">Manage <span class="hl">orders</span></h1>
           <p class="po-sub">
-            Review all incoming orders, filter by status, and track total orders by today, week, month, or custom date range.
+            Order Management shows only the recent {{ recent_order_days }} days with pagination, while Total Orders keeps your full date-range history.
           </p>
         </div>
 
@@ -550,7 +622,7 @@
           <div class="po-icon"><i class="fas fa-bag-shopping"></i></div>
           <div>
             <div class="po-panel-title">Order Management</div>
-            <div class="po-panel-sub">Your provider orders in one clean view</div>
+            <div class="po-panel-sub">Recent {{ recent_order_days }} days only · 5 orders per page</div>
           </div>
         </div>
       </div>
@@ -559,7 +631,15 @@
         <div class="po-toolbar">
           <div class="po-count">
             <span class="po-count-dot"></span>
-            <span><strong>{{ orders|length }}</strong> order{{ '' if orders|length == 1 else 's' }} found</span>
+            <span>
+              Showing <strong>{{ orders.items|length }}</strong> of
+              <strong>{{ orders.total }}</strong>
+              recent order{{ '' if orders.total == 1 else 's' }}
+            </span>
+            <span class="po-range-chip">
+              <i class="fas fa-clock"></i>
+              {{ recent_start_date }} → {{ recent_end_date }}
+            </span>
           </div>
 
           <form class="po-filter-form" method="get">
@@ -569,32 +649,31 @@
             <input type="hidden" name="summary_show" value="{{ summary_show }}">
 
             <select name="status" class="po-select">
-              <option value="" {% if not status_filter %}selected{% endif %}>All statuses</option>
+              <option value="" {% if not status_filter %}selected{% endif %}>All Status</option>
               {% for s in ['pending','confirmed','preparing','ready','delivered','cancelled'] %}
               <option value="{{ s }}" {% if status_filter == s %}selected{% endif %}>{{ s.title() }}</option>
               {% endfor %}
             </select>
 
             <select name="sort" class="po-select">
-              <option value="date_desc" {% if sort_by == 'date_desc' %}selected{% endif %}>Newest first</option>
-              <option value="date_asc" {% if sort_by == 'date_asc' %}selected{% endif %}>Oldest first</option>
+              <option value="date_desc" {% if sort_by == 'date_desc' %}selected{% endif %}>Newest</option>
+              <option value="date_asc" {% if sort_by == 'date_asc' %}selected{% endif %}>Oldest</option>
               <option value="price_desc" {% if sort_by == 'price_desc' %}selected{% endif %}>Highest total</option>
               <option value="price_asc" {% if sort_by == 'price_asc' %}selected{% endif %}>Lowest total</option>
             </select>
 
             <button class="po-apply" type="submit">
-              <i class="fas fa-filter"></i> Apply Filters
+              <i class="fas fa-filter"></i> Apply
             </button>
           </form>
         </div>
 
-        {% if orders %}
+        {% if orders.items %}
         <div class="po-table-wrap">
           <table class="po-table">
             <thead>
               <tr>
-                <th>Order ID</th>
-                <th>Customer</th>
+                <th>Order</th>
                 <th>Status</th>
                 <th>Total</th>
                 <th>Date</th>
@@ -602,17 +681,25 @@
               </tr>
             </thead>
             <tbody>
-              {% for order in orders %}
+              {% for order in orders.items %}
               <tr>
-                <td><span class="po-order-id">{{ order.order_number }}</span></td>
-                <td><span class="po-customer">{{ order.customer.full_name if order.customer and order.customer.full_name else (order.customer.username if order.customer else 'Unknown') }}</span></td>
+                <td>
+                  <div class="po-order-cell">
+                    <div class="po-order-id">{{ order.order_number }}</div>
+                    <div class="po-order-sub">Placed order</div>
+                  </div>
+                </td>
                 <td>
                   <span class="po-status st-{{ order.status }}">
                     {{ order.status.title() }}
                   </span>
                 </td>
                 <td><span class="po-total">${{ "%.2f"|format(order.total_price or 0) }}</span></td>
-                <td><span class="po-date">{{ order.created_at.strftime("%d %b %Y") if order.created_at else "—" }}</span></td>
+                <td>
+                  <span class="po-date">
+                    {{ order.created_at.strftime("%d %b %Y, %I:%M %p") if order.created_at else "—" }}
+                  </span>
+                </td>
                 <td>
                   <a href="{{ url_for('provider.provider_order_detail', order_id=order.id) }}" class="po-view">
                     <i class="fas fa-eye"></i> View
@@ -623,11 +710,71 @@
             </tbody>
           </table>
         </div>
+
+        {% if orders.pages > 1 %}
+        <div class="po-pagination">
+          {% if orders.has_prev %}
+          <a
+            class="po-page-btn"
+            href="{{ url_for('provider.provider_orders',
+              page=orders.prev_num,
+              status=status_filter,
+              sort=sort_by,
+              summary_range=summary_range,
+              summary_start=summary_start,
+              summary_end=summary_end,
+              summary_show=summary_show
+            ) }}"
+          >
+            <i class="fas fa-chevron-left"></i>
+          </a>
+          {% endif %}
+
+          {% for page_num in orders.iter_pages(left_edge=1, right_edge=1, left_current=1, right_current=1) %}
+            {% if page_num %}
+              <a
+                class="po-page-btn {% if page_num == orders.page %}active{% endif %}"
+                href="{{ url_for('provider.provider_orders',
+                  page=page_num,
+                  status=status_filter,
+                  sort=sort_by,
+                  summary_range=summary_range,
+                  summary_start=summary_start,
+                  summary_end=summary_end,
+                  summary_show=summary_show
+                ) }}"
+              >
+                {{ page_num }}
+              </a>
+            {% else %}
+              <span class="po-page-dots">…</span>
+            {% endif %}
+          {% endfor %}
+
+          {% if orders.has_next %}
+          <a
+            class="po-page-btn"
+            href="{{ url_for('provider.provider_orders',
+              page=orders.next_num,
+              status=status_filter,
+              sort=sort_by,
+              summary_range=summary_range,
+              summary_start=summary_start,
+              summary_end=summary_end,
+              summary_show=summary_show
+            ) }}"
+          >
+            <i class="fas fa-chevron-right"></i>
+          </a>
+          {% endif %}
+        </div>
+        {% endif %}
+
         {% else %}
         <div class="po-empty">
           <div class="po-empty-ico"><i class="fas fa-bag-shopping"></i></div>
-          <h4>No orders found</h4>
-          <p>Orders matching your current filters will appear here.</p>
+          <h4>No recent orders found</h4>
+          <p>Orders from the recent {{ recent_order_days }} days matching your filters will appear here.</p>
         </div>
         {% endif %}
       </div>
@@ -639,7 +786,7 @@
           <div class="po-icon"><i class="fas fa-rectangle-list"></i></div>
           <div>
             <div class="po-panel-title">Total Orders</div>
-            <div class="po-panel-sub">See orders by today, week, month, or custom date range</div>
+            <div class="po-panel-sub">See full order history by today, week, month, or custom date range</div>
           </div>
         </div>
       </div>

@@ -169,6 +169,9 @@
 </head>
 <body>
   {% set ep = request.endpoint or '' %}
+  {% set cart_flow_eps = ['payment.pay', 'payment.pay_with_wallet', 'payment.confirm_payment', 'payment.receipt'] %}
+  {% set cart_active = ep.startswith('orders.') or ep in cart_flow_eps %}
+  {% set wallet_active = ep in ['payment.wallet_dashboard', 'payment.wallet_topup'] %}
 
   <nav class="nc-navbar">
     <div class="container">
@@ -202,102 +205,27 @@
             {% if current_user.is_admin() %}
               <li><a class="nc-nav__link {% if ep.startswith('admin.') %}active{% endif %}" href="{{ url_for('admin.dashboard') }}"><i class="fas fa-table-cells-large"></i> Dashboard</a></li>
               <li><a class="nc-nav__link {% if ep.startswith('analytics.') %}active{% endif %}" href="{{ url_for('analytics.analytics_dashboard') }}"><i class="fas fa-chart-line"></i> Analytics</a></li>
-              <li><a class="nc-nav__link" href="{{ url_for('user_dashboard.view_profile') }}"><i class="fas fa-user"></i> Profile</a></li>
+              <li><a class="nc-nav__link {% if ep == 'user_dashboard.view_profile' or ep == 'user_dashboard.edit_profile' %}active{% endif %}" href="{{ url_for('user_dashboard.view_profile') }}"><i class="fas fa-user"></i> Profile</a></li>
             {% elif current_user.is_food_provider() %}
               <li><a class="nc-nav__link {% if ep == 'provider.provider_dashboard' %}active{% endif %}" href="{{ url_for('provider.provider_dashboard') }}"><i class="fas fa-table-cells-large"></i> Dashboard</a></li>
-              <li><a class="nc-nav__link {% if ep.startswith('provider.provider_order') %}active{% endif %}" href="{{ url_for('provider.provider_orders') }}"><i class="fas fa-bag-shopping"></i> Orders</a></li>
-              <li><a class="nc-nav__link" href="{{ url_for('user_dashboard.view_profile') }}"><i class="fas fa-user"></i> Profile</a></li>
+              <li><a class="nc-nav__link {% if ep.startswith('provider.provider_order') or ep == 'provider.update_order_status' %}active{% endif %}" href="{{ url_for('provider.provider_orders') }}"><i class="fas fa-bag-shopping"></i> Orders</a></li>
+              <li><a class="nc-nav__link {% if ep == 'user_dashboard.view_profile' or ep == 'user_dashboard.edit_profile' %}active{% endif %}" href="{{ url_for('user_dashboard.view_profile') }}"><i class="fas fa-user"></i> Profile</a></li>
               <li><a class="nc-nav__link {% if ep.startswith('food_search.') %}active{% endif %}" href="{{ url_for('food_search.search_foods') }}"><i class="fas fa-magnifying-glass"></i> Find Food</a></li>
             {% else %}
               <li><a class="nc-nav__link {% if ep == 'user_dashboard.index' %}active{% endif %}" href="{{ url_for('user_dashboard.index') }}"><i class="fas fa-table-cells-large"></i> Dashboard</a></li>
-              <li><a class="nc-nav__link" href="{{ url_for('user_dashboard.view_profile') }}"><i class="fas fa-user"></i> Profile</a></li>
+              <li><a class="nc-nav__link {% if ep == 'user_dashboard.view_profile' or ep == 'user_dashboard.edit_profile' %}active{% endif %}" href="{{ url_for('user_dashboard.view_profile') }}"><i class="fas fa-user"></i> Profile</a></li>
               <li><a class="nc-nav__link {% if ep.startswith('food_search.') %}active{% endif %}" href="{{ url_for('food_search.search_foods') }}"><i class="fas fa-magnifying-glass"></i> Find Food</a></li>
               <li>
-                <a class="nc-nav__link {% if ep == 'orders.cart' %}active{% endif %}" href="{{ url_for('orders.cart') }}">
+                <a class="nc-nav__link {% if cart_active %}active{% endif %}" href="{{ url_for('orders.cart') }}">
                   <i class="fas fa-cart-shopping"></i> Cart
                   {% set cart_count = current_user.cart_items.count() %}
                   {% if cart_count > 0 %}<span class="nc-cart-badge">{{ cart_count }}</span>{% endif %}
                 </a>
               </li>
-              <li><a class="nc-nav__link {% if ep.startswith('orders.') and ep != 'orders.cart' %}active{% endif %}" href="{{ url_for('orders.order_history') }}"><i class="fas fa-bag-shopping"></i> Orders</a></li>
-              <li><a class="nc-nav__link {% if ep == 'payment.wallet_dashboard' %}active{% endif %}" href="{{ url_for('payment.wallet_dashboard') }}"><i class="fas fa-wallet"></i> Wallet</a></li>
-              <li><a class="nc-nav__link {% if ep == 'user_dashboard.dietary_preferences' %}active{% endif %}" href="{{ url_for('user_dashboard.dietary_preferences') }}"><i class="fas fa-bowl-food"></i> Diet</a></li>
+              <li><a class="nc-nav__link {% if wallet_active %}active{% endif %}" href="{{ url_for('payment.wallet_dashboard') }}"><i class="fas fa-wallet"></i> Wallet</a></li>
+              <li><a class="nc-nav__link {% if ep.startswith('meal_log.') %}active{% endif %}" href="{{ url_for('meal_log.index') }}"><i class="fas fa-utensils"></i> Meal Log</a></li>
+              <li><a class="nc-nav__link {% if ep == 'user_dashboard.dietary_preferences' %}active{% endif %}" href="{{ url_for('user_dashboard.dietary_preferences') }}"><i class="fas fa-bowl-food"></i> Diet Prefs</a></li>
             {% endif %}
-{% if current_user.is_admin() %}
-  <li>
-    <a class="nc-nav__link {% if ep.startswith('admin.') %}active{% endif %}" href="{{ url_for('admin.dashboard') }}">
-      <i class="fas fa-table-cells-large"></i> Dashboard
-    </a>
-  </li>
-  <li>
-    <a class="nc-nav__link {% if ep.startswith('analytics.') %}active{% endif %}" href="{{ url_for('analytics.analytics_dashboard') }}">
-      <i class="fas fa-chart-line"></i> Analytics
-    </a>
-  </li>
-  <li>
-    <a class="nc-nav__link {% if ep.startswith('user_dashboard.') %}active{% endif %}" href="{{ url_for('user_dashboard.view_profile') }}">
-      <i class="fas fa-user"></i> Profile
-    </a>
-  </li>
-
-{% elif current_user.is_food_provider() %}
-  <li>
-    <a class="nc-nav__link {% if ep == 'provider.provider_dashboard' %}active{% endif %}" href="{{ url_for('provider.provider_dashboard') }}">
-      <i class="fas fa-table-cells-large"></i> Dashboard
-    </a>
-  </li>
-  <li>
-    <a class="nc-nav__link {% if ep.startswith('provider.provider_order') or ep == 'provider.update_order_status' %}active{% endif %}" href="{{ url_for('provider.provider_orders') }}">
-      <i class="fas fa-bag-shopping"></i> Orders
-    </a>
-  </li>
-  <li>
-    <a class="nc-nav__link {% if ep == 'user_dashboard.view_profile' or ep == 'user_dashboard.edit_profile' %}active{% endif %}" href="{{ url_for('user_dashboard.view_profile') }}">
-      <i class="fas fa-user"></i> Profile
-    </a>
-  </li>
-  <li>
-    <a class="nc-nav__link {% if ep.startswith('food_search.') %}active{% endif %}" href="{{ url_for('food_search.search_foods') }}">
-      <i class="fas fa-magnifying-glass"></i> Find Food
-    </a>
-  </li>
-
-{% else %}
-  <!-- Normal User -->
-  <li>
-    <a class="nc-nav__link {% if ep == 'user_dashboard.index' %}active{% endif %}" href="{{ url_for('user_dashboard.index') }}">
-      <i class="fas fa-table-cells-large"></i> Dashboard
-    </a>
-  </li>
-  <li>
-    <a class="nc-nav__link {% if ep == 'user_dashboard.view_profile' or ep == 'user_dashboard.edit_profile' %}active{% endif %}" href="{{ url_for('user_dashboard.view_profile') }}">
-      <i class="fas fa-user"></i> Profile
-    </a>
-  </li>
-  <li>
-    <a class="nc-nav__link {% if ep.startswith('food_search.') %}active{% endif %}" href="{{ url_for('food_search.search_foods') }}">
-      <i class="fas fa-magnifying-glass"></i> Find Food
-    </a>
-  </li>
-
-  <!-- ✅ ADD THIS (YOUR FEATURE) -->
-  <li>
-    <a class="nc-nav__link {% if ep.startswith('meal_log.') %}active{% endif %}" href="{{ url_for('meal_log.index') }}">
-      <i class="fas fa-utensils"></i> Meal Log
-    </a>
-  </li>
-
-  <li>
-    <a class="nc-nav__link {% if ep.startswith('orders.') %}active{% endif %}" href="{{ url_for('orders.order_history') }}">
-      <i class="fas fa-bag-shopping"></i> Orders
-    </a>
-  </li>
-  <li>
-    <a class="nc-nav__link {% if ep == 'user_dashboard.dietary_preferences' %}active{% endif %}" href="{{ url_for('user_dashboard.dietary_preferences') }}">
-      <i class="fas fa-bowl-food"></i> Diet Prefs
-    </a>
-  </li>
-{% endif %}
           {% else %}
             <li><a class="nc-nav__link" href="{{ url_for('auth.login') }}">Login</a></li>
           {% endif %}
@@ -349,13 +277,12 @@
                   <a class="nc-dropdown__item {% if ep == 'user_dashboard.index' %}active{% endif %}" href="{{ url_for('user_dashboard.index') }}"><i class="fas fa-chart-bar"></i> Dashboard</a>
                   <a class="nc-dropdown__item" href="{{ url_for('user_dashboard.view_profile') }}"><i class="fas fa-user"></i> Profile</a>
                   <a class="nc-dropdown__item {% if ep.startswith('food_search.') %}active{% endif %}" href="{{ url_for('food_search.search_foods') }}"><i class="fas fa-magnifying-glass"></i> Find Food</a>
-                  <a class="nc-dropdown__item {% if ep == 'orders.cart' %}active{% endif %}" href="{{ url_for('orders.cart') }}">
+                  <a class="nc-dropdown__item {% if cart_active %}active{% endif %}" href="{{ url_for('orders.cart') }}">
                     <i class="fas fa-cart-shopping"></i> Cart
                     {% set cc = current_user.cart_items.count() %}
                     {% if cc > 0 %}<span style="margin-left:auto;" class="nc-cart-badge">{{ cc }}</span>{% endif %}
                   </a>
-                  <a class="nc-dropdown__item {% if ep.startswith('orders.') and ep != 'orders.cart' %}active{% endif %}" href="{{ url_for('orders.order_history') }}"><i class="fas fa-bag-shopping"></i> Orders</a>
-                  <a class="nc-dropdown__item {% if ep == 'payment.wallet_dashboard' %}active{% endif %}" href="{{ url_for('payment.wallet_dashboard') }}"><i class="fas fa-wallet"></i> Wallet</a>
+                  <a class="nc-dropdown__item {% if wallet_active %}active{% endif %}" href="{{ url_for('payment.wallet_dashboard') }}"><i class="fas fa-wallet"></i> Wallet</a>
                   <a class="nc-dropdown__item {% if ep == 'user_dashboard.dietary_preferences' %}active{% endif %}" href="{{ url_for('user_dashboard.dietary_preferences') }}"><i class="fas fa-bowl-food"></i> Diet Prefs</a>
                 {% endif %}
                 <a class="nc-dropdown__item" href="{{ url_for('user_dashboard.edit_profile') }}"><i class="fas fa-pen-to-square"></i> Edit Profile</a>
@@ -381,11 +308,11 @@
           {% if current_user.is_admin() %}
             <a class="nc-mobile-link {% if ep.startswith('admin.') %}active{% endif %}" href="{{ url_for('admin.dashboard') }}"><i class="fas fa-table-cells-large"></i> Dashboard</a>
             <a class="nc-mobile-link {% if ep.startswith('analytics.') %}active{% endif %}" href="{{ url_for('analytics.analytics_dashboard') }}"><i class="fas fa-chart-line"></i> Analytics</a>
-            <a class="nc-mobile-link" href="{{ url_for('user_dashboard.view_profile') }}"><i class="fas fa-user"></i> Profile</a>
+            <a class="nc-mobile-link {% if ep == 'user_dashboard.view_profile' or ep == 'user_dashboard.edit_profile' %}active{% endif %}" href="{{ url_for('user_dashboard.view_profile') }}"><i class="fas fa-user"></i> Profile</a>
           {% elif current_user.is_food_provider() %}
             <a class="nc-mobile-link {% if ep == 'provider.provider_dashboard' %}active{% endif %}" href="{{ url_for('provider.provider_dashboard') }}"><i class="fas fa-table-cells-large"></i> Dashboard</a>
-            <a class="nc-mobile-link {% if ep.startswith('provider.provider_order') %}active{% endif %}" href="{{ url_for('provider.provider_orders') }}"><i class="fas fa-bag-shopping"></i> Orders</a>
-            <a class="nc-mobile-link" href="{{ url_for('user_dashboard.view_profile') }}"><i class="fas fa-user"></i> Profile</a>
+            <a class="nc-mobile-link {% if ep.startswith('provider.provider_order') or ep == 'provider.update_order_status' %}active{% endif %}" href="{{ url_for('provider.provider_orders') }}"><i class="fas fa-bag-shopping"></i> Orders</a>
+            <a class="nc-mobile-link {% if ep == 'user_dashboard.view_profile' or ep == 'user_dashboard.edit_profile' %}active{% endif %}" href="{{ url_for('user_dashboard.view_profile') }}"><i class="fas fa-user"></i> Profile</a>
             <a class="nc-mobile-link {% if ep.startswith('food_search.') %}active{% endif %}" href="{{ url_for('food_search.search_foods') }}"><i class="fas fa-magnifying-glass"></i> Find Food</a>
             <a class="nc-mobile-link {% if ep == 'payment.notifications' %}active{% endif %}" href="{{ url_for('payment.notifications') }}">
               <i class="fas fa-bell"></i> Notifications
@@ -394,67 +321,16 @@
             </a>
           {% else %}
             <a class="nc-mobile-link {% if ep == 'user_dashboard.index' %}active{% endif %}" href="{{ url_for('user_dashboard.index') }}"><i class="fas fa-table-cells-large"></i> Dashboard</a>
-            <a class="nc-mobile-link" href="{{ url_for('user_dashboard.view_profile') }}"><i class="fas fa-user"></i> Profile</a>
+            <a class="nc-mobile-link {% if ep == 'user_dashboard.view_profile' or ep == 'user_dashboard.edit_profile' %}active{% endif %}" href="{{ url_for('user_dashboard.view_profile') }}"><i class="fas fa-user"></i> Profile</a>
             <a class="nc-mobile-link {% if ep.startswith('food_search.') %}active{% endif %}" href="{{ url_for('food_search.search_foods') }}"><i class="fas fa-magnifying-glass"></i> Find Food</a>
-            <a class="nc-mobile-link {% if ep == 'orders.cart' %}active{% endif %}" href="{{ url_for('orders.cart') }}">
+            <a class="nc-mobile-link {% if cart_active %}active{% endif %}" href="{{ url_for('orders.cart') }}">
               <i class="fas fa-cart-shopping"></i> Cart
               {% set cc = current_user.cart_items.count() %}{% if cc > 0 %}<span class="nc-cart-badge">{{ cc }}</span>{% endif %}
             </a>
-            <a class="nc-mobile-link {% if ep.startswith('orders.') and ep != 'orders.cart' %}active{% endif %}" href="{{ url_for('orders.order_history') }}"><i class="fas fa-bag-shopping"></i> Orders</a>
-            <a class="nc-mobile-link {% if ep == 'payment.wallet_dashboard' %}active{% endif %}" href="{{ url_for('payment.wallet_dashboard') }}"><i class="fas fa-wallet"></i> Wallet</a>
+            <a class="nc-mobile-link {% if wallet_active %}active{% endif %}" href="{{ url_for('payment.wallet_dashboard') }}"><i class="fas fa-wallet"></i> Wallet</a>
+            <a class="nc-mobile-link {% if ep.startswith('meal_log.') %}active{% endif %}" href="{{ url_for('meal_log.index') }}"><i class="fas fa-utensils"></i> Meal Log</a>
             <a class="nc-mobile-link {% if ep == 'user_dashboard.dietary_preferences' %}active{% endif %}" href="{{ url_for('user_dashboard.dietary_preferences') }}"><i class="fas fa-bowl-food"></i> Diet Prefs</a>
           {% endif %}
-          <a class="nc-mobile-link" href="{{ url_for('user_dashboard.edit_profile') }}"><i class="fas fa-pen-to-square"></i> Edit Profile</a>
-{% if current_user.is_admin() %}
-  <a class="nc-mobile-link {% if ep.startswith('admin.') %}active{% endif %}" href="{{ url_for('admin.dashboard') }}">
-    <i class="fas fa-table-cells-large"></i> Dashboard
-  </a>
-  <a class="nc-mobile-link {% if ep.startswith('analytics.') %}active{% endif %}" href="{{ url_for('analytics.analytics_dashboard') }}">
-    <i class="fas fa-chart-line"></i> Analytics
-  </a>
-  <a class="nc-mobile-link {% if ep.startswith('user_dashboard.') %}active{% endif %}" href="{{ url_for('user_dashboard.view_profile') }}">
-    <i class="fas fa-user"></i> Profile
-  </a>
-
-{% elif current_user.is_food_provider() %}
-  <a class="nc-mobile-link {% if ep == 'provider.provider_dashboard' %}active{% endif %}" href="{{ url_for('provider.provider_dashboard') }}">
-    <i class="fas fa-table-cells-large"></i> Dashboard
-  </a>
-  <a class="nc-mobile-link {% if ep.startswith('provider.provider_order') or ep == 'provider.update_order_status' %}active{% endif %}" href="{{ url_for('provider.provider_orders') }}">
-    <i class="fas fa-bag-shopping"></i> Orders
-  </a>
-  <a class="nc-mobile-link {% if ep == 'user_dashboard.view_profile' or ep == 'user_dashboard.edit_profile' %}active{% endif %}" href="{{ url_for('user_dashboard.view_profile') }}">
-    <i class="fas fa-user"></i> Profile
-  </a>
-  <a class="nc-mobile-link {% if ep.startswith('food_search.') %}active{% endif %}" href="{{ url_for('food_search.search_foods') }}">
-    <i class="fas fa-magnifying-glass"></i> Find Food
-  </a>
-
-{% else %}
-  <!-- Normal User -->
-  <a class="nc-mobile-link {% if ep == 'user_dashboard.index' %}active{% endif %}" href="{{ url_for('user_dashboard.index') }}">
-    <i class="fas fa-table-cells-large"></i> Dashboard
-  </a>
-  <a class="nc-mobile-link {% if ep == 'user_dashboard.view_profile' or ep == 'user_dashboard.edit_profile' %}active{% endif %}" href="{{ url_for('user_dashboard.view_profile') }}">
-    <i class="fas fa-user"></i> Profile
-  </a>
-  <a class="nc-mobile-link {% if ep.startswith('food_search.') %}active{% endif %}" href="{{ url_for('food_search.search_foods') }}">
-    <i class="fas fa-magnifying-glass"></i> Find Food
-  </a>
-
-  <!-- ✅ YOUR FEATURE -->
-  <a class="nc-mobile-link {% if ep.startswith('meal_log.') %}active{% endif %}" href="{{ url_for('meal_log.index') }}">
-    <i class="fas fa-utensils"></i> Meal Log
-  </a>
-
-  <a class="nc-mobile-link {% if ep.startswith('orders.') %}active{% endif %}" href="{{ url_for('orders.order_history') }}">
-    <i class="fas fa-bag-shopping"></i> Orders
-  </a>
-  <a class="nc-mobile-link {% if ep == 'user_dashboard.dietary_preferences' %}active{% endif %}" href="{{ url_for('user_dashboard.dietary_preferences') }}">
-    <i class="fas fa-bowl-food"></i> Diet Prefs
-  </a>
-{% endif %}
-
           <a class="nc-mobile-link {% if ep == 'user_dashboard.edit_profile' %}active{% endif %}" href="{{ url_for('user_dashboard.edit_profile') }}">
             <i class="fas fa-pen-to-square"></i> Edit Profile
           </a>
