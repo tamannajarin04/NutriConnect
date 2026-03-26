@@ -1,0 +1,1172 @@
+{% extends "base.html" %}
+{% block title %}Top Up Wallet · NutriConnect{% endblock %}
+
+{% block extra_css %}
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+.wtu-page{
+  max-width:1320px;
+  margin:0 auto;
+  font-family:'Sora',sans-serif;
+  animation:wtuFadeUp .32s ease;
+}
+@keyframes wtuFadeUp{
+  from{opacity:0;transform:translateY(12px)}
+  to{opacity:1;transform:translateY(0)}
+}
+@keyframes wtuSpin{
+  to{transform:rotate(360deg)}
+}
+@keyframes wtuPop{
+  from{opacity:0;transform:scale(.97)}
+  to{opacity:1;transform:scale(1)}
+}
+
+/* hero */
+.wtu-hero{
+  position:relative;
+  overflow:hidden;
+  border-radius:24px;
+  padding:1.3rem 1.45rem;
+  margin-bottom:1rem;
+  background:
+    radial-gradient(circle at 12% 18%, rgba(56,189,248,.12), transparent 28%),
+    radial-gradient(circle at 88% 12%, rgba(52,211,153,.09), transparent 24%),
+    linear-gradient(135deg,#07111d 0%,#0c1d33 52%,#113055 100%);
+  border:1px solid rgba(125,211,252,.16);
+  box-shadow:var(--nc-card-shadow);
+}
+.wtu-hero::after{
+  content:"";
+  position:absolute;
+  inset:0;
+  background-image:radial-gradient(circle, rgba(255,255,255,.045) 1px, transparent 1px);
+  background-size:26px 26px;
+  pointer-events:none;
+}
+.wtu-hero > *{position:relative;z-index:1;}
+
+.wtu-badge{
+  display:inline-flex;
+  align-items:center;
+  gap:.45rem;
+  padding:.32rem .82rem;
+  border-radius:999px;
+  background:rgba(255,255,255,.08);
+  border:1px solid rgba(255,255,255,.14);
+  color:#fff;
+  font-size:.68rem;
+  font-weight:800;
+  text-transform:uppercase;
+  letter-spacing:.08em;
+  margin-bottom:.85rem;
+}
+.wtu-title{
+  margin:0;
+  font-size:1.55rem;
+  line-height:1.15;
+  font-weight:800;
+  letter-spacing:-.03em;
+  color:#fff;
+}
+.wtu-sub{
+  margin-top:.28rem;
+  font-size:.84rem;
+  color:rgba(255,255,255,.76);
+  line-height:1.6;
+}
+.wtu-mini{
+  display:flex;
+  flex-wrap:wrap;
+  gap:.75rem;
+  margin-top:.85rem;
+}
+.wtu-mini-chip{
+  padding:.48rem .72rem;
+  border-radius:12px;
+  background:rgba(255,255,255,.08);
+  border:1px solid rgba(255,255,255,.12);
+  color:#fff;
+  font-size:.75rem;
+  font-weight:700;
+}
+.wtu-mini-chip span{
+  opacity:.68;
+  margin-right:.32rem;
+  font-weight:600;
+}
+
+/* top aligned area */
+.wtu-top-grid{
+  display:grid;
+  grid-template-columns:minmax(0,1.55fr) minmax(300px,.8fr);
+  gap:1rem;
+  align-items:stretch;
+}
+@media(max-width:1100px){
+  .wtu-top-grid{
+    grid-template-columns:1fr;
+  }
+}
+
+.wtu-card{
+  background:var(--nc-card-bg);
+  border:1px solid var(--nc-card-border);
+  border-radius:22px;
+  overflow:hidden;
+  box-shadow:var(--nc-card-shadow);
+  min-height:100%;
+}
+
+.wtu-card-head{
+  padding:.95rem 1.1rem;
+  border-bottom:1px solid var(--nc-border);
+  background:linear-gradient(180deg, rgba(14,165,233,.05), transparent);
+  display:flex;
+  align-items:center;
+  gap:.8rem;
+}
+.wtu-card-head-icon{
+  width:40px;
+  height:40px;
+  border-radius:14px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:var(--nc-brand-l);
+  color:var(--nc-brand);
+  font-size:1rem;
+  flex-shrink:0;
+}
+.wtu-card-head-title{
+  font-size:1rem;
+  font-weight:800;
+  color:var(--nc-text);
+}
+.wtu-card-head-sub{
+  font-size:.78rem;
+  color:var(--nc-text-muted);
+  margin-top:.08rem;
+}
+
+/* methods */
+.wtu-methods-body{
+  padding:1rem;
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:.8rem;
+  align-content:start;
+  min-height:355px;
+}
+@media(max-width:760px){
+  .wtu-methods-body{
+    grid-template-columns:1fr;
+    min-height:auto;
+  }
+}
+
+.wtu-method{
+  border:1px solid var(--nc-border);
+  border-radius:18px;
+  background:linear-gradient(180deg, rgba(255,255,255,.02), transparent);
+  padding:1rem;
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap:.9rem;
+  cursor:pointer;
+  transition:.15s ease;
+  min-height:126px;
+}
+.wtu-method:hover{
+  transform:translateY(-1px);
+  border-color:rgba(14,165,233,.28);
+}
+.wtu-method.active{
+  border-color:var(--nc-brand);
+  box-shadow:0 0 0 3px rgba(14,165,233,.12);
+}
+.wtu-method.bkash.active{
+  border-color:#e2136e;
+  box-shadow:0 0 0 3px rgba(226,19,110,.12);
+}
+.wtu-method.nagad.active{
+  border-color:#f05323;
+  box-shadow:0 0 0 3px rgba(240,83,35,.12);
+}
+.wtu-method.rocket.active{
+  border-color:#8b1a7a;
+  box-shadow:0 0 0 3px rgba(139,26,122,.12);
+}
+.wtu-method.card.active{
+  border-color:#1a56db;
+  box-shadow:0 0 0 3px rgba(26,86,219,.12);
+}
+
+.wtu-method-left{
+  display:flex;
+  gap:.85rem;
+  min-width:0;
+}
+.wtu-logo{
+  width:48px;
+  height:48px;
+  border-radius:14px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  color:#fff;
+  flex-shrink:0;
+  font-size:1rem;
+  font-weight:800;
+}
+.wtu-logo.bkash{background:#e2136e;font-size:.76rem;}
+.wtu-logo.nagad{background:linear-gradient(135deg,#f05323,#f7941d);font-size:.76rem;}
+.wtu-logo.rocket{background:#8b1a7a;font-size:.76rem;}
+.wtu-logo.card{background:linear-gradient(135deg,#1a56db,#1c64f2);}
+.wtu-name{
+  font-size:.95rem;
+  font-weight:800;
+  color:var(--nc-text);
+}
+.wtu-desc{
+  margin-top:.15rem;
+  font-size:.78rem;
+  color:var(--nc-text-muted);
+  line-height:1.55;
+}
+.wtu-chip{
+  display:inline-flex;
+  margin-top:.32rem;
+  padding:.2rem .56rem;
+  border-radius:999px;
+  background:var(--nc-surface-2);
+  color:var(--nc-text-faint);
+  font-size:.64rem;
+  font-weight:800;
+  text-transform:uppercase;
+  letter-spacing:.06em;
+}
+.wtu-check{
+  width:28px;
+  height:28px;
+  border-radius:50%;
+  border:1px solid var(--nc-border);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  color:var(--nc-text-faint);
+  flex-shrink:0;
+}
+.wtu-method.active .wtu-check{
+  background:rgba(14,165,233,.12);
+  border-color:rgba(14,165,233,.24);
+  color:var(--nc-brand);
+}
+
+/* summary */
+.wtu-summary{
+  display:flex;
+  flex-direction:column;
+  min-height:100%;
+}
+.wtu-summary-head{
+  padding:.95rem 1.1rem;
+  border-bottom:1px solid var(--nc-border);
+  background:var(--nc-surface-2);
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:.8rem;
+}
+.wtu-summary-head-title{
+  font-size:.75rem;
+  font-weight:900;
+  text-transform:uppercase;
+  letter-spacing:.08em;
+  color:var(--nc-text-muted);
+}
+.wtu-summary-head-total{
+  font-family:'JetBrains Mono',monospace;
+  font-size:.95rem;
+  font-weight:700;
+  color:var(--nc-brand);
+}
+.wtu-summary-body{
+  padding:1rem;
+  display:flex;
+  flex-direction:column;
+  gap:.9rem;
+  flex:1;
+}
+.wtu-summary-box{
+  border:1px solid var(--nc-border);
+  border-radius:14px;
+  background:var(--nc-surface-2);
+  padding:.88rem .9rem;
+}
+.wtu-summary-label{
+  font-size:.64rem;
+  font-weight:800;
+  text-transform:uppercase;
+  letter-spacing:.08em;
+  color:var(--nc-text-faint);
+  margin-bottom:.24rem;
+}
+.wtu-summary-value{
+  font-size:.94rem;
+  font-weight:700;
+  color:var(--nc-text);
+}
+.wtu-summary-value.mono{
+  font-family:'JetBrains Mono',monospace;
+}
+.wtu-summary-note{
+  margin-top:auto;
+  padding-top:.9rem;
+  border-top:1px solid var(--nc-border);
+  font-size:.78rem;
+  color:var(--nc-text-muted);
+  line-height:1.65;
+}
+.wtu-summary-secure{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:.45rem;
+  font-size:.72rem;
+  color:var(--nc-text-faint);
+  text-align:center;
+}
+
+/* forms */
+.wtu-form-shell{
+  margin-top:1rem;
+}
+.wtu-select-hint{
+  background:var(--nc-card-bg);
+  border:1px dashed var(--nc-border);
+  border-radius:22px;
+  padding:2.2rem 1rem;
+  text-align:center;
+  color:var(--nc-text-faint);
+}
+.wtu-select-hint i{
+  display:block;
+  font-size:1.8rem;
+  margin-bottom:.75rem;
+  color:var(--nc-brand);
+  opacity:.65;
+}
+.wtu-select-hint strong{
+  display:block;
+  color:var(--nc-text);
+  margin-bottom:.3rem;
+  font-size:.98rem;
+}
+
+.wtu-form-panel{
+  display:none;
+  background:var(--nc-card-bg);
+  border:1px solid var(--nc-card-border);
+  border-radius:22px;
+  overflow:hidden;
+  box-shadow:var(--nc-card-shadow);
+}
+.wtu-form-head{
+  padding:.95rem 1.1rem;
+  border-bottom:1px solid var(--nc-border);
+  background:var(--nc-surface-2);
+  display:flex;
+  align-items:center;
+  gap:.85rem;
+}
+.wtu-form-logo{
+  width:42px;
+  height:42px;
+  border-radius:14px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  color:#fff;
+  font-weight:800;
+  font-size:1rem;
+  flex-shrink:0;
+}
+.wtu-form-title{
+  font-size:.98rem;
+  font-weight:800;
+  color:var(--nc-text);
+}
+.wtu-form-sub{
+  font-size:.78rem;
+  color:var(--nc-text-muted);
+  margin-top:.08rem;
+}
+.wtu-form-body{
+  padding:1rem 1.1rem 1.1rem;
+}
+.wtu-form-grid{
+  display:grid;
+  grid-template-columns:minmax(0,1.35fr) minmax(260px,.9fr);
+  gap:1rem;
+  align-items:start;
+}
+.wtu-form-grid > *{
+  min-width:0;
+}
+@media(max-width:900px){
+  .wtu-form-grid{
+    grid-template-columns:1fr;
+  }
+}
+.wtu-box{
+  border:1px solid var(--nc-border);
+  border-radius:16px;
+  background:var(--nc-surface-2);
+  padding:.95rem 1rem;
+  margin-bottom:1rem;
+}
+.wtu-box:last-child{margin-bottom:0;}
+.wtu-box-row{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:.8rem;
+}
+.wtu-box-label{
+  font-size:.78rem;
+  font-weight:700;
+  color:var(--nc-text-muted);
+}
+.wtu-box-value{
+  font-family:'JetBrains Mono',monospace;
+  font-size:1.08rem;
+  font-weight:700;
+  color:var(--nc-text);
+}
+.wtu-group{
+  margin-bottom:.95rem;
+  min-width:0;
+}
+.wtu-label{
+  display:block;
+  font-size:.72rem;
+  font-weight:800;
+  text-transform:uppercase;
+  letter-spacing:.07em;
+  color:var(--nc-text-faint);
+  margin-bottom:.42rem;
+}
+.wtu-input{
+  width:100%;
+  border:1.5px solid var(--nc-border);
+  border-radius:12px;
+  background:var(--nc-surface-2);
+  color:var(--nc-text);
+  padding:.76rem 1rem;
+  font-size:.92rem;
+  font-weight:600;
+  outline:none;
+  transition:border-color .15s, box-shadow .15s;
+  box-sizing:border-box;
+  min-width:0;
+}
+.wtu-input:focus{
+  border-color:var(--nc-brand);
+  box-shadow:0 0 0 3px rgba(14,165,233,.12);
+}
+.wtu-input.bkash:focus{
+  border-color:#e2136e;
+  box-shadow:0 0 0 3px rgba(226,19,110,.12);
+}
+.wtu-input.nagad:focus{
+  border-color:#f05323;
+  box-shadow:0 0 0 3px rgba(240,83,35,.12);
+}
+.wtu-input.rocket:focus{
+  border-color:#8b1a7a;
+  box-shadow:0 0 0 3px rgba(139,26,122,.12);
+}
+.wtu-hint{
+  font-size:.72rem;
+  color:var(--nc-text-faint);
+  margin-top:.35rem;
+  line-height:1.5;
+}
+
+/* fixed pin layout */
+.wtu-pin-row{
+  display:grid;
+  width:100%;
+  min-width:0;
+  grid-template-columns:repeat(5, minmax(0, 1fr));
+  gap:.55rem;
+  align-items:stretch;
+}
+.wtu-pin-row.pin-4{
+  grid-template-columns:repeat(4, minmax(0, 1fr));
+}
+.wtu-pin{
+  width:100%;
+  min-width:0;
+  max-width:100%;
+  box-sizing:border-box;
+  text-align:center;
+  font-size:1rem;
+  font-weight:700;
+  padding:.8rem 0;
+  border-radius:12px;
+  border:1.5px solid var(--nc-border);
+  background:var(--nc-surface-2);
+  color:var(--nc-text);
+  outline:none;
+  appearance:none;
+  -webkit-appearance:none;
+}
+.wtu-pin:focus{
+  border-color:var(--nc-brand);
+  box-shadow:0 0 0 3px rgba(14,165,233,.12);
+}
+.wtu-pin.bkash:focus{
+  border-color:#e2136e;
+  box-shadow:0 0 0 3px rgba(226,19,110,.12);
+}
+.wtu-pin.nagad:focus{
+  border-color:#f05323;
+  box-shadow:0 0 0 3px rgba(240,83,35,.12);
+}
+.wtu-pin.rocket:focus{
+  border-color:#8b1a7a;
+  box-shadow:0 0 0 3px rgba(139,26,122,.12);
+}
+
+.wtu-card-row{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:.75rem;
+}
+@media(max-width:640px){
+  .wtu-card-row{
+    grid-template-columns:1fr;
+  }
+  .wtu-pin-row{
+    gap:.45rem;
+  }
+  .wtu-pin{
+    font-size:.95rem;
+    padding:.76rem 0;
+  }
+}
+.wtu-note-card{
+  border:1px solid var(--nc-border);
+  border-radius:16px;
+  background:linear-gradient(180deg, rgba(14,165,233,.06), transparent);
+  padding:1rem;
+  min-width:0;
+}
+.wtu-note-card h4{
+  margin:0 0 .7rem;
+  font-size:.88rem;
+  font-weight:800;
+  color:var(--nc-text);
+}
+.wtu-note-list{
+  display:flex;
+  flex-direction:column;
+  gap:.7rem;
+}
+.wtu-note-item{
+  display:flex;
+  align-items:flex-start;
+  gap:.55rem;
+  font-size:.78rem;
+  color:var(--nc-text-muted);
+  line-height:1.55;
+}
+.wtu-note-item i{
+  color:var(--nc-brand);
+  margin-top:.12rem;
+}
+.wtu-submit{
+  width:100%;
+  padding:.88rem 1rem;
+  border:none;
+  border-radius:14px;
+  color:#fff;
+  font-size:.9rem;
+  font-weight:800;
+  cursor:pointer;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:.5rem;
+  transition:opacity .15s, transform .15s;
+}
+.wtu-submit:hover{
+  opacity:.92;
+  transform:translateY(-1px);
+}
+.wtu-submit.bkash{background:#e2136e;}
+.wtu-submit.nagad{background:linear-gradient(135deg,#f05323,#f7941d);}
+.wtu-submit.rocket{background:#8b1a7a;}
+.wtu-submit.card{background:linear-gradient(135deg,#1a56db,#1c64f2);}
+
+/* overlays */
+.wtu-overlay{
+  display:none;
+  position:fixed;
+  inset:0;
+  z-index:9999;
+  background:rgba(0,0,0,.58);
+  backdrop-filter:blur(6px);
+  align-items:center;
+  justify-content:center;
+}
+.wtu-overlay.show{
+  display:flex;
+}
+.wtu-overlay-box{
+  width:min(92vw, 360px);
+  background:var(--nc-card-bg);
+  border:1px solid var(--nc-card-border);
+  border-radius:24px;
+  box-shadow:0 24px 80px rgba(0,0,0,.3);
+  padding:2rem;
+  text-align:center;
+  animation:wtuPop .26s both;
+}
+.wtu-spinner{
+  width:58px;
+  height:58px;
+  margin:0 auto 1rem;
+  border-radius:50%;
+  border:4px solid var(--nc-border);
+  border-top-color:var(--nc-brand);
+  animation:wtuSpin .8s linear infinite;
+}
+.wtu-overlay-title{
+  font-size:1.04rem;
+  font-weight:900;
+  color:var(--nc-text);
+  margin-bottom:.35rem;
+}
+.wtu-overlay-sub{
+  font-size:.82rem;
+  color:var(--nc-text-muted);
+  line-height:1.6;
+}
+.wtu-success-icon{
+  width:72px;
+  height:72px;
+  border-radius:50%;
+  background:linear-gradient(135deg,#059669,#10b981);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  color:#fff;
+  font-size:2rem;
+  margin:0 auto 1rem;
+  box-shadow:0 0 0 12px rgba(16,185,129,.12);
+}
+.wtu-success-btn{
+  display:inline-flex;
+  align-items:center;
+  gap:.42rem;
+  padding:.76rem 1.2rem;
+  border-radius:12px;
+  text-decoration:none;
+  border:none;
+  color:#fff;
+  background:linear-gradient(135deg,#059669,#0ea5e9);
+  font-size:.86rem;
+  font-weight:800;
+  margin-top:1rem;
+}
+.wtu-success-btn:hover{
+  color:#fff;
+  opacity:.92;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="wtu-page">
+
+  <div class="wtu-hero">
+    <div class="wtu-badge">
+      <i class="fas fa-wallet"></i> Wallet Top-Up
+    </div>
+
+    <h1 class="wtu-title">Add Money to Wallet</h1>
+    <div class="wtu-sub">Choose a payment method first. Your balance will be updated only after successful payment confirmation.</div>
+
+    <div class="wtu-mini">
+      <div class="wtu-mini-chip"><span>Amount</span> ${{ "%.2f"|format(amount) }}</div>
+      <div class="wtu-mini-chip"><span>Current Balance</span> ${{ "%.2f"|format(wallet.balance) }}</div>
+    </div>
+  </div>
+
+  <div class="wtu-top-grid">
+    <div class="wtu-card">
+      <div class="wtu-card-head">
+        <div class="wtu-card-head-icon"><i class="fas fa-credit-card"></i></div>
+        <div>
+          <div class="wtu-card-head-title">Choose Payment Method</div>
+          <div class="wtu-card-head-sub">All payment options are presented in a consistent, standard top-up checkout layout.</div>
+        </div>
+      </div>
+
+      <div class="wtu-methods-body">
+        <div class="wtu-method bkash" onclick="selectTopupMethod('bkash', this)">
+          <div class="wtu-method-left">
+            <div class="wtu-logo bkash">bKash</div>
+            <div>
+              <div class="wtu-name">bKash</div>
+              <div class="wtu-desc">Fast wallet top-up using your bKash number and secure PIN verification.</div>
+              <div class="wtu-chip">Mobile Banking</div>
+            </div>
+          </div>
+          <div class="wtu-check"><i class="fas fa-check"></i></div>
+        </div>
+
+        <div class="wtu-method nagad" onclick="selectTopupMethod('nagad', this)">
+          <div class="wtu-method-left">
+            <div class="wtu-logo nagad">Nagad</div>
+            <div>
+              <div class="wtu-name">Nagad</div>
+              <div class="wtu-desc">Add money instantly using your Nagad account and 4-digit PIN.</div>
+              <div class="wtu-chip">Mobile Banking</div>
+            </div>
+          </div>
+          <div class="wtu-check"><i class="fas fa-check"></i></div>
+        </div>
+
+        <div class="wtu-method rocket" onclick="selectTopupMethod('rocket', this)">
+          <div class="wtu-method-left">
+            <div class="wtu-logo rocket">Rocket</div>
+            <div>
+              <div class="wtu-name">Rocket</div>
+              <div class="wtu-desc">Use your Rocket number and PIN to complete the wallet top-up securely.</div>
+              <div class="wtu-chip">DBBL Mobile</div>
+            </div>
+          </div>
+          <div class="wtu-check"><i class="fas fa-check"></i></div>
+        </div>
+
+        <div class="wtu-method card" onclick="selectTopupMethod('card', this)">
+          <div class="wtu-method-left">
+            <div class="wtu-logo card"><i class="fas fa-credit-card"></i></div>
+            <div>
+              <div class="wtu-name">Card</div>
+              <div class="wtu-desc">Use debit or credit card to add money to your wallet balance securely.</div>
+              <div class="wtu-chip">Visa / Mastercard</div>
+            </div>
+          </div>
+          <div class="wtu-check"><i class="fas fa-check"></i></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="wtu-card wtu-summary">
+      <div class="wtu-summary-head">
+        <div class="wtu-summary-head-title">Top-Up Summary</div>
+        <div class="wtu-summary-head-total">${{ "%.2f"|format(amount) }}</div>
+      </div>
+
+      <div class="wtu-summary-body">
+        <div class="wtu-summary-box">
+          <div class="wtu-summary-label">Amount to Add</div>
+          <div class="wtu-summary-value mono">${{ "%.2f"|format(amount) }}</div>
+        </div>
+
+        <div class="wtu-summary-box">
+          <div class="wtu-summary-label">Current Balance</div>
+          <div class="wtu-summary-value mono">${{ "%.2f"|format(wallet.balance) }}</div>
+        </div>
+
+        <div class="wtu-summary-box">
+          <div class="wtu-summary-label">Balance After Top-Up</div>
+          <div class="wtu-summary-value mono">${{ "%.2f"|format(wallet.balance + amount) }}</div>
+        </div>
+
+        <div class="wtu-summary-note">
+          This flow is now more logical. Money is not added instantly on button click. The wallet is credited only after successful payment verification.
+        </div>
+
+        <div class="wtu-summary-secure">
+          <i class="fas fa-shield-halved"></i> Secure top-up checkout
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="wtu-form-shell">
+    <div id="topup-select-hint" class="wtu-select-hint">
+      <i class="fas fa-hand-pointer"></i>
+      <strong>Select a payment method</strong>
+      Pick one of the options above to reveal its top-up form. The selected method will open in the same aligned checkout area.
+    </div>
+
+    <div class="wtu-form-panel" id="form-bkash">
+      <div class="wtu-form-head">
+        <div class="wtu-form-logo" style="background:#e2136e;">bKash</div>
+        <div>
+          <div class="wtu-form-title">bKash Wallet Top-Up</div>
+          <div class="wtu-form-sub">Enter your bKash number and 5-digit PIN.</div>
+        </div>
+      </div>
+      <div class="wtu-form-body">
+        <div class="wtu-form-grid">
+          <div>
+            <div class="wtu-box">
+              <div class="wtu-box-row">
+                <span class="wtu-box-label">Amount to Add</span>
+                <span class="wtu-box-value">${{ "%.2f"|format(amount) }}</span>
+              </div>
+            </div>
+
+            <div class="wtu-group">
+              <label class="wtu-label">bKash Account Number</label>
+              <input class="wtu-input bkash" type="tel" id="bkash-phone" placeholder="01XXXXXXXXX" maxlength="11">
+              <div class="wtu-hint">Enter your 11-digit bKash mobile number.</div>
+            </div>
+
+            <div class="wtu-group">
+              <label class="wtu-label">bKash PIN</label>
+              <div class="wtu-pin-row">
+                <input class="wtu-pin bkash" type="password" maxlength="1" inputmode="numeric" pattern="[0-9]*">
+                <input class="wtu-pin bkash" type="password" maxlength="1" inputmode="numeric" pattern="[0-9]*">
+                <input class="wtu-pin bkash" type="password" maxlength="1" inputmode="numeric" pattern="[0-9]*">
+                <input class="wtu-pin bkash" type="password" maxlength="1" inputmode="numeric" pattern="[0-9]*">
+                <input class="wtu-pin bkash" type="password" maxlength="1" inputmode="numeric" pattern="[0-9]*">
+              </div>
+              <div class="wtu-hint">Your PIN is encrypted and secure.</div>
+            </div>
+
+            <button class="wtu-submit bkash" type="button" onclick="processTopup('bkash')">
+              <i class="fas fa-lock"></i> Add Money with bKash
+            </button>
+          </div>
+
+          <div class="wtu-note-card">
+            <h4>Before you continue</h4>
+            <div class="wtu-note-list">
+              <div class="wtu-note-item"><i class="fas fa-circle-check"></i> Make sure your bKash wallet is active and has enough available balance.</div>
+              <div class="wtu-note-item"><i class="fas fa-circle-check"></i> Use the mobile number linked with your bKash account.</div>
+              <div class="wtu-note-item"><i class="fas fa-circle-check"></i> Your wallet will be credited only after successful payment confirmation.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="wtu-form-panel" id="form-nagad">
+      <div class="wtu-form-head">
+        <div class="wtu-form-logo" style="background:linear-gradient(135deg,#f05323,#f7941d);">Nagad</div>
+        <div>
+          <div class="wtu-form-title">Nagad Wallet Top-Up</div>
+          <div class="wtu-form-sub">Enter your Nagad number and 4-digit PIN.</div>
+        </div>
+      </div>
+      <div class="wtu-form-body">
+        <div class="wtu-form-grid">
+          <div>
+            <div class="wtu-box">
+              <div class="wtu-box-row">
+                <span class="wtu-box-label">Amount to Add</span>
+                <span class="wtu-box-value">${{ "%.2f"|format(amount) }}</span>
+              </div>
+            </div>
+
+            <div class="wtu-group">
+              <label class="wtu-label">Nagad Account Number</label>
+              <input class="wtu-input nagad" type="tel" id="nagad-phone" placeholder="01XXXXXXXXX" maxlength="11">
+              <div class="wtu-hint">Enter your 11-digit Nagad number.</div>
+            </div>
+
+            <div class="wtu-group">
+              <label class="wtu-label">Nagad PIN</label>
+              <div class="wtu-pin-row pin-4">
+                <input class="wtu-pin nagad" type="password" maxlength="1" inputmode="numeric" pattern="[0-9]*">
+                <input class="wtu-pin nagad" type="password" maxlength="1" inputmode="numeric" pattern="[0-9]*">
+                <input class="wtu-pin nagad" type="password" maxlength="1" inputmode="numeric" pattern="[0-9]*">
+                <input class="wtu-pin nagad" type="password" maxlength="1" inputmode="numeric" pattern="[0-9]*">
+              </div>
+              <div class="wtu-hint">Your PIN is encrypted and secure.</div>
+            </div>
+
+            <button class="wtu-submit nagad" type="button" onclick="processTopup('nagad')">
+              <i class="fas fa-lock"></i> Add Money with Nagad
+            </button>
+          </div>
+
+          <div class="wtu-note-card">
+            <h4>Before you continue</h4>
+            <div class="wtu-note-list">
+              <div class="wtu-note-item"><i class="fas fa-circle-check"></i> Use the same number registered to your Nagad account.</div>
+              <div class="wtu-note-item"><i class="fas fa-circle-check"></i> Double-check the amount before confirming payment.</div>
+              <div class="wtu-note-item"><i class="fas fa-circle-check"></i> Your wallet balance will update only after verification succeeds.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="wtu-form-panel" id="form-rocket">
+      <div class="wtu-form-head">
+        <div class="wtu-form-logo" style="background:#8b1a7a;">Rocket</div>
+        <div>
+          <div class="wtu-form-title">Rocket Wallet Top-Up</div>
+          <div class="wtu-form-sub">Enter your Rocket number and 4-digit PIN.</div>
+        </div>
+      </div>
+      <div class="wtu-form-body">
+        <div class="wtu-form-grid">
+          <div>
+            <div class="wtu-box">
+              <div class="wtu-box-row">
+                <span class="wtu-box-label">Amount to Add</span>
+                <span class="wtu-box-value">${{ "%.2f"|format(amount) }}</span>
+              </div>
+            </div>
+
+            <div class="wtu-group">
+              <label class="wtu-label">Rocket Account Number</label>
+              <input class="wtu-input rocket" type="tel" id="rocket-phone" placeholder="01XXXXXXXXX" maxlength="11">
+              <div class="wtu-hint">Enter your 11-digit Rocket number.</div>
+            </div>
+
+            <div class="wtu-group">
+              <label class="wtu-label">Rocket PIN</label>
+              <div class="wtu-pin-row pin-4">
+                <input class="wtu-pin rocket" type="password" maxlength="1" inputmode="numeric" pattern="[0-9]*">
+                <input class="wtu-pin rocket" type="password" maxlength="1" inputmode="numeric" pattern="[0-9]*">
+                <input class="wtu-pin rocket" type="password" maxlength="1" inputmode="numeric" pattern="[0-9]*">
+                <input class="wtu-pin rocket" type="password" maxlength="1" inputmode="numeric" pattern="[0-9]*">
+              </div>
+              <div class="wtu-hint">Your PIN is encrypted and secure.</div>
+            </div>
+
+            <button class="wtu-submit rocket" type="button" onclick="processTopup('rocket')">
+              <i class="fas fa-lock"></i> Add Money with Rocket
+            </button>
+          </div>
+
+          <div class="wtu-note-card">
+            <h4>Before you continue</h4>
+            <div class="wtu-note-list">
+              <div class="wtu-note-item"><i class="fas fa-circle-check"></i> Ensure your Rocket balance is enough to cover the top-up amount.</div>
+              <div class="wtu-note-item"><i class="fas fa-circle-check"></i> Keep your registered number ready for verification.</div>
+              <div class="wtu-note-item"><i class="fas fa-circle-check"></i> The wallet balance will not change until payment is confirmed.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="wtu-form-panel" id="form-card">
+      <div class="wtu-form-head">
+        <div class="wtu-form-logo" style="background:linear-gradient(135deg,#1a56db,#1c64f2);"><i class="fas fa-credit-card"></i></div>
+        <div>
+          <div class="wtu-form-title">Card Wallet Top-Up</div>
+          <div class="wtu-form-sub">Visa / Mastercard / American Express</div>
+        </div>
+      </div>
+      <div class="wtu-form-body">
+        <div class="wtu-form-grid">
+          <div>
+            <div class="wtu-box">
+              <div class="wtu-box-row">
+                <span class="wtu-box-label">Amount to Add</span>
+                <span class="wtu-box-value">${{ "%.2f"|format(amount) }}</span>
+              </div>
+            </div>
+
+            <div class="wtu-group">
+              <label class="wtu-label">Card Number</label>
+              <input class="wtu-input" type="text" id="card-number" placeholder="1234 5678 9012 3456" maxlength="19">
+            </div>
+
+            <div class="wtu-card-row">
+              <div class="wtu-group">
+                <label class="wtu-label">Expiry Date</label>
+                <input class="wtu-input" type="text" id="card-expiry" placeholder="MM/YY" maxlength="5">
+              </div>
+              <div class="wtu-group">
+                <label class="wtu-label">CVV</label>
+                <input class="wtu-input" type="password" id="card-cvv" placeholder="•••" maxlength="3">
+              </div>
+            </div>
+
+            <div class="wtu-group">
+              <label class="wtu-label">Cardholder Name</label>
+              <input class="wtu-input" type="text" id="card-name" placeholder="Name on card">
+            </div>
+
+            <button class="wtu-submit card" type="button" onclick="processTopup('card')">
+              <i class="fas fa-lock"></i> Add Money with Card
+            </button>
+          </div>
+
+          <div class="wtu-note-card">
+            <h4>Before you continue</h4>
+            <div class="wtu-note-list">
+              <div class="wtu-note-item"><i class="fas fa-circle-check"></i> Make sure your card details are correct before submitting payment.</div>
+              <div class="wtu-note-item"><i class="fas fa-circle-check"></i> Your card will only be charged for the amount shown in the summary.</div>
+              <div class="wtu-note-item"><i class="fas fa-circle-check"></i> The wallet is credited only after the card transaction is completed successfully.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="wtu-overlay" id="processingOverlay">
+  <div class="wtu-overlay-box">
+    <div class="wtu-spinner"></div>
+    <div class="wtu-overlay-title" id="procTitle">Processing Top-Up...</div>
+    <div class="wtu-overlay-sub">Please wait, do not close this page.</div>
+  </div>
+</div>
+
+<div class="wtu-overlay" id="successOverlay">
+  <div class="wtu-overlay-box">
+    <div class="wtu-success-icon">✓</div>
+    <div class="wtu-overlay-title">Wallet Top-Up Successful!</div>
+    <div class="wtu-overlay-sub" id="successMsg">Your wallet balance has been updated successfully.</div>
+    <a href="{{ url_for('payment.wallet_dashboard') }}" class="wtu-success-btn" id="successBtn">
+      <i class="fas fa-wallet"></i> Go to Wallet
+    </a>
+  </div>
+</div>
+
+<script>
+function selectTopupMethod(method, buttonEl) {
+  document.querySelectorAll('.wtu-method').forEach(card => card.classList.remove('active'));
+  document.querySelectorAll('.wtu-form-panel').forEach(panel => panel.style.display = 'none');
+
+  const hint = document.getElementById('topup-select-hint');
+  if (hint) hint.style.display = 'none';
+
+  if (buttonEl) buttonEl.classList.add('active');
+
+  const form = document.getElementById('form-' + method);
+  if (form) {
+    form.style.display = 'block';
+    form.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }
+}
+
+function processTopup(method) {
+  if (method === 'bkash') {
+    const phone = document.getElementById('bkash-phone').value.trim();
+    const pin = Array.from(document.querySelectorAll('#form-bkash .wtu-pin')).map(el => el.value).join('');
+    if (phone.length < 11) { alert('Please enter a valid bKash number'); return; }
+    if (pin.length < 5) { alert('Please enter your 5-digit bKash PIN'); return; }
+  }
+
+  if (method === 'nagad') {
+    const phone = document.getElementById('nagad-phone').value.trim();
+    const pin = Array.from(document.querySelectorAll('#form-nagad .wtu-pin')).map(el => el.value).join('');
+    if (phone.length < 11) { alert('Please enter a valid Nagad number'); return; }
+    if (pin.length < 4) { alert('Please enter your 4-digit Nagad PIN'); return; }
+  }
+
+  if (method === 'rocket') {
+    const phone = document.getElementById('rocket-phone').value.trim();
+    const pin = Array.from(document.querySelectorAll('#form-rocket .wtu-pin')).map(el => el.value).join('');
+    if (phone.length < 11) { alert('Please enter a valid Rocket number'); return; }
+    if (pin.length < 4) { alert('Please enter your 4-digit Rocket PIN'); return; }
+  }
+
+  if (method === 'card') {
+    const num = document.getElementById('card-number').value.replace(/\s/g, '');
+    const exp = document.getElementById('card-expiry').value.trim();
+    const cvv = document.getElementById('card-cvv').value.trim();
+    const name = document.getElementById('card-name').value.trim();
+
+    if (num.length < 16) { alert('Please enter a valid card number'); return; }
+    if (!exp.includes('/')) { alert('Please enter expiry date in MM/YY format'); return; }
+    if (cvv.length < 3) { alert('Please enter CVV'); return; }
+    if (!name) { alert('Please enter cardholder name'); return; }
+  }
+
+  document.getElementById('processingOverlay').classList.add('show');
+
+  const labels = {
+    bkash:  ['Connecting to bKash...', 'Verifying PIN...', 'Adding money to wallet...'],
+    nagad:  ['Connecting to Nagad...', 'Verifying PIN...', 'Adding money to wallet...'],
+    rocket: ['Connecting to Rocket...', 'Verifying PIN...', 'Adding money to wallet...'],
+    card:   ['Verifying card...', 'Authorizing transaction...', 'Adding money to wallet...']
+  };
+
+  let step = 0;
+  const steps = labels[method] || ['Processing...', 'Please wait...', 'Finalizing...'];
+
+  const interval = setInterval(() => {
+    if (step < steps.length) {
+      document.getElementById('procTitle').textContent = steps[step];
+      step++;
+    }
+  }, 900);
+
+  setTimeout(() => {
+    clearInterval(interval);
+
+    fetch("{{ url_for('payment.wallet_topup_confirm_ajax') }}", {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ method: method })
+    })
+    .then(r => r.json())
+    .then(data => {
+      document.getElementById('processingOverlay').classList.remove('show');
+
+      if (!data.success) {
+        alert(data.error || 'Top-up failed. Please try again.');
+        return;
+      }
+
+      document.getElementById('successMsg').innerHTML =
+        `Your wallet has been credited with <strong>$${data.amount}</strong> via <strong>${data.method_label}</strong>.<br>New balance: <strong>$${data.new_balance}</strong>.`;
+
+      const btn = document.getElementById('successBtn');
+      btn.href = data.redirect_url;
+
+      document.getElementById('successOverlay').classList.add('show');
+    })
+    .catch(() => {
+      document.getElementById('processingOverlay').classList.remove('show');
+      alert('Network error. Please try again.');
+    });
+  }, 2800);
+}
+
+document.querySelectorAll('.wtu-pin').forEach((dot) => {
+  dot.addEventListener('input', () => {
+    const siblings = Array.from(dot.parentElement.querySelectorAll('.wtu-pin'));
+    const idx = siblings.indexOf(dot);
+    if (dot.value && idx < siblings.length - 1) siblings[idx + 1].focus();
+  });
+});
+
+const topupCardInput = document.getElementById('card-number');
+if (topupCardInput) {
+  topupCardInput.addEventListener('input', e => {
+    let v = e.target.value.replace(/\D/g, '').substring(0, 16);
+    e.target.value = v.replace(/(.{4})/g, '$1 ').trim();
+  });
+}
+
+const topupExpiryInput = document.getElementById('card-expiry');
+if (topupExpiryInput) {
+  topupExpiryInput.addEventListener('input', e => {
+    let v = e.target.value.replace(/\D/g, '');
+    if (v.length >= 2) v = v.substring(0, 2) + '/' + v.substring(2, 4);
+    e.target.value = v;
+  });
+}
+</script>
+{% endblock %}

@@ -8,6 +8,9 @@ from app.models import db, Order, OrderTimeline, FoodItem, FoodRating, FoodView
 
 provider_bp = Blueprint("provider", __name__)
 
+PROVIDER_ORDERS_PER_PAGE = 5
+RECENT_ORDER_DAYS = 5
+
 
 def provider_required():
     return current_user.is_authenticated and (
@@ -83,6 +86,40 @@ def get_summary_date_bounds(summary_range, start_date_str="", end_date_str=""):
         "start_datetime": start_datetime,
         "end_datetime": end_datetime,
     }
+
+
+def get_recent_order_management_bounds(days=RECENT_ORDER_DAYS):
+    today = datetime.utcnow().date()
+    days = max(int(days or 1), 1)
+
+    # Includes today + previous (days - 1) calendar days
+    start_date = today - timedelta(days=days - 1)
+    end_date = today
+
+    start_datetime = datetime.combine(start_date, datetime.min.time())
+    end_datetime = datetime.combine(end_date + timedelta(days=1), datetime.min.time())
+
+    return {
+        "days": days,
+        "label": f"Last {days} Days",
+        "start_date": start_date,
+        "end_date": end_date,
+        "start_datetime": start_datetime,
+        "end_datetime": end_datetime,
+    }
+
+
+def apply_provider_order_sort(query, sort_by):
+    sort_by = (sort_by or "date_desc").strip().lower()
+
+    if sort_by == "price_asc":
+        return query.order_by(Order.total_price.asc(), Order.created_at.desc())
+    if sort_by == "price_desc":
+        return query.order_by(Order.total_price.desc(), Order.created_at.desc())
+    if sort_by == "date_asc":
+        return query.order_by(Order.created_at.asc())
+
+    return query.order_by(Order.created_at.desc())
 
 
 def get_food_views_count(food):
@@ -440,30 +477,36 @@ def provider_dashboard():
 @provider_bp.route("/orders")
 @login_required
 def provider_orders():
-    status_filter = (request.args.get("status") or "").strip()
-    sort_by = request.args.get("sort", "date_desc")
+    status_filter = (request.args.get("status") or "").strip().lower()
+    sort_by = (request.args.get("sort") or "date_desc").strip().lower()
+    page = request.args.get("page", 1, type=int)
 
     summary_range = (request.args.get("summary_range") or "today").strip().lower()
     summary_start = (request.args.get("summary_start") or "").strip()
     summary_end = (request.args.get("summary_end") or "").strip()
     summary_show = (request.args.get("summary_show") or "preview").strip().lower()
 
-    base_query = Order.query.filter_by(provider_id=current_user.id)
+    recent_bounds = get_recent_order_management_bounds(days=RECENT_ORDER_DAYS)
 
-    query = base_query
+    recent_orders_query = (
+        Order.query
+        .filter(
+            Order.provider_id == current_user.id,
+            Order.created_at >= recent_bounds["start_datetime"],
+            Order.created_at < recent_bounds["end_datetime"],
+        )
+    )
+
     if status_filter:
-        query = query.filter_by(status=status_filter)
+        recent_orders_query = recent_orders_query.filter(Order.status == status_filter)
 
-    if sort_by == "price_asc":
-        query = query.order_by(Order.total_price.asc())
-    elif sort_by == "price_desc":
-        query = query.order_by(Order.total_price.desc())
-    elif sort_by == "date_asc":
-        query = query.order_by(Order.created_at.asc())
-    else:
-        query = query.order_by(Order.created_at.desc())
+    recent_orders_query = apply_provider_order_sort(recent_orders_query, sort_by)
 
-    orders = query.all()
+    orders = recent_orders_query.paginate(
+        page=page,
+        per_page=PROVIDER_ORDERS_PER_PAGE,
+        error_out=False,
+    )
 
     order_summary = get_provider_order_summary(
         provider_id=current_user.id,
@@ -495,6 +538,9 @@ def provider_orders():
         total_orders_count=total_orders_section["total_count"],
         total_orders_has_more=total_orders_section["has_more"],
         total_orders_limit=total_orders_section["limit"],
+        recent_order_days=recent_bounds["days"],
+        recent_start_date=recent_bounds["start_date"].isoformat(),
+        recent_end_date=recent_bounds["end_date"].isoformat(),
     )
 
 
@@ -539,6 +585,12 @@ def update_order_status(order_id):
         flash("Access denied.", "danger")
         return redirect(url_for("provider.provider_orders"))
 
+    current_status = (order.status or "").strip().lower()
+
+    if current_status == "delivered":
+        flash("Delivered orders are locked and cannot be changed again.", "warning")
+        return redirect(url_for("provider.provider_order_detail", order_id=order.id))
+
     new_status = (request.form.get("status") or "").strip().lower()
     valid_statuses = [
         "pending",
@@ -553,7 +605,17 @@ def update_order_status(order_id):
         flash("Invalid order status.", "danger")
         return redirect(url_for("provider.provider_order_detail", order_id=order.id))
 
+    if new_status == current_status:
+        flash("Order status is already set to that value.", "info")
+        return redirect(url_for("provider.provider_order_detail", order_id=order.id))
+
     order.status = new_status
+
+    if hasattr(order, "cancelled_at"):
+        if new_status == "cancelled":
+            order.cancelled_at = datetime.utcnow()
+        elif current_status == "cancelled":
+            order.cancelled_at = None
 
     db.session.add(OrderTimeline(
         order_id=order.id,
@@ -562,5 +624,5 @@ def update_order_status(order_id):
     ))
     db.session.commit()
 
-    flash("Order status updated successfully.", "success")
+    flash(f"Order marked as {new_status.title()}.", "success")
     return redirect(url_for("provider.provider_order_detail", order_id=order.id))

@@ -5,10 +5,12 @@ from sqlalchemy import func, desc
 
 from app.models import (
     db, FoodItem, CartItem, Order, OrderItem, OrderTimeline,
-    FavoriteFood, FoodRating
+    FavoriteFood, FoodRating, PaymentTransaction
 )
 
 orders_bp = Blueprint("orders", __name__)
+
+ORDERS_PER_PAGE = 5
 
 
 def user_or_admin_owns_order(order):
@@ -34,7 +36,7 @@ def get_cart_provider_id(user_id):
     return None
 
 
-def get_user_orders_paginated(page=1, per_page=10, status_filter="", sort_by="date_desc"):
+def get_user_orders_paginated(page=1, per_page=ORDERS_PER_PAGE, status_filter="", sort_by="date_desc"):
     query = Order.query.filter_by(user_id=current_user.id)
 
     if status_filter:
@@ -88,7 +90,7 @@ def cart():
     total = sum(item.subtotal for item in items if item.food and item.food.is_available)
     orders = get_user_orders_paginated(
         page=page,
-        per_page=10,
+        per_page=ORDERS_PER_PAGE,
         status_filter=status_filter,
         sort_by=sort_by
     )
@@ -300,12 +302,10 @@ def place_order():
     for ci in available_items:
         db.session.delete(ci)
 
-    # ── Redirect to payment page ──────────────────────
-    flash("Order placed! Please complete your payment.", "info")
-    return redirect(url_for("payment.pay", order_id=created_orders[0].id))
     db.session.commit()
 
-    return redirect(url_for("orders.receipt", order_id=order.id))
+    flash("Order placed! Please complete your payment.", "info")
+    return redirect(url_for("payment.pay", order_id=order.id))
 
 
 # ---------------- ORDERS ----------------
@@ -342,7 +342,27 @@ def order_detail(order_id):
         flash("Access denied.", "danger")
         return redirect(url_for("orders.cart"))
 
-    return render_template("orders/detail.html", order=order)
+    successful_payment = (
+        PaymentTransaction.query
+        .filter_by(order_id=order.id, status="success")
+        .order_by(PaymentTransaction.created_at.desc())
+        .first()
+    )
+
+    is_paid = successful_payment is not None
+    show_pay_now = (
+        order.user_id == current_user.id
+        and order.status == "pending"
+        and not is_paid
+    )
+
+    return render_template(
+        "orders/detail.html",
+        order=order,
+        is_paid=is_paid,
+        show_pay_now=show_pay_now,
+        payment_txn=successful_payment
+    )
 
 
 @orders_bp.route("/orders/<int:order_id>/receipt")

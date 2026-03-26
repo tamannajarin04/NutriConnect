@@ -1,19 +1,31 @@
 """
 app/routes/payment.py
-Both user (payment sent) and provider (payment received) get notifications.
+Order payments + wallet top-up checkout flow.
+Wallet top-up is now staged first and only credited after payment confirmation.
 """
-import os
 from datetime import datetime
-from flask import (Blueprint, render_template, request, redirect,
-                   url_for, flash, jsonify)
+from flask import (
+    Blueprint, render_template, request, redirect,
+    url_for, flash, jsonify, session
+)
 from flask_login import login_required, current_user
 
-from app.models import (db, Order, OrderTimeline, Wallet,
-                        WalletTransaction, PaymentTransaction, Notification)
+from app.models import (
+    db, Order, OrderTimeline, Wallet,
+    WalletTransaction, PaymentTransaction, Notification
+)
 
 payment_bp = Blueprint("payment", __name__)
 
 CASHBACK_PERCENT = 2.0
+TOPUP_SESSION_KEY = "pending_wallet_topup_amount"
+
+TOPUP_METHOD_LABELS = {
+    "bkash": "bKash",
+    "nagad": "Nagad",
+    "rocket": "Rocket",
+    "card": "Card",
+}
 
 
 # ── helpers ──────────────────────────────────────────────────────────────────
@@ -29,12 +41,41 @@ def get_or_create_wallet(user_id):
 
 def is_order_paid(order):
     return PaymentTransaction.query.filter_by(
-        order_id=order.id, status="success"
+        order_id=order.id,
+        status="success"
     ).first() is not None
 
 
+def validate_topup_amount(raw_amount):
+    try:
+        amount = round(float(raw_amount or 0), 2)
+    except (TypeError, ValueError):
+        return None
+
+    if amount < 1:
+        return None
+    if amount > 10000:
+        return None
+    return amount
+
+
+def get_pending_topup_amount():
+    amount = session.get(TOPUP_SESSION_KEY)
+    if amount is None:
+        return None
+    try:
+        return round(float(amount), 2)
+    except (TypeError, ValueError):
+        session.pop(TOPUP_SESSION_KEY, None)
+        return None
+
+
+def clear_pending_topup():
+    session.pop(TOPUP_SESSION_KEY, None)
+
+
 def mark_order_paid(order, method):
-    """Confirm order, give cashback, notify BOTH user and provider."""
+    """Confirm order, give cashback, notify both user and provider."""
     order.status = "confirmed"
 
     db.session.add(OrderTimeline(
@@ -43,7 +84,6 @@ def mark_order_paid(order, method):
         note=f"Payment received via {method}"
     ))
 
-    # ── 2% cashback to buyer ──────────────────────
     cashback = round(order.total_price * CASHBACK_PERCENT / 100, 2)
     if cashback > 0:
         wallet = get_or_create_wallet(order.user_id)
@@ -61,10 +101,8 @@ def mark_order_paid(order, method):
     if more_items > 0:
         items_preview += f" +{more_items} more"
 
-    buyer_name    = order.customer.full_name or order.customer.username
-    provider_name = order.provider_user.full_name or order.provider_user.username
+    buyer_name = order.customer.full_name or order.customer.username
 
-    # ── Notify BUYER — payment sent ──────────────
     db.session.add(Notification(
         user_id=order.user_id,
         type="payment_sent",
@@ -79,7 +117,6 @@ def mark_order_paid(order, method):
         is_read=False
     ))
 
-    # ── Notify PROVIDER — payment received ───────
     db.session.add(Notification(
         user_id=order.provider_id,
         type="payment_received",
@@ -96,7 +133,7 @@ def mark_order_paid(order, method):
 
 
 # ══════════════════════════════════════════════════════
-#  PAYMENT PAGE
+#  ORDER PAYMENT PAGE
 # ══════════════════════════════════════════════════════
 
 @payment_bp.route("/pay/<int:order_id>")
@@ -114,10 +151,6 @@ def pay(order_id):
     return render_template("payment/pay.html", order=order, wallet=wallet)
 
 
-# ══════════════════════════════════════════════════════
-#  AJAX — confirm after simulated phone+PIN payment
-# ══════════════════════════════════════════════════════
-
 @payment_bp.route("/pay/<int:order_id>/confirm", methods=["POST"])
 @login_required
 def confirm_payment_ajax(order_id):
@@ -126,9 +159,9 @@ def confirm_payment_ajax(order_id):
     if is_order_paid(order):
         return jsonify({"success": True, "already_paid": True})
 
-    data   = request.get_json()
-    method = data.get("method", "unknown")
-    phone  = data.get("phone", "")
+    data = request.get_json(silent=True) or {}
+    method = (data.get("method") or "unknown").strip().lower()
+    phone = (data.get("phone") or "").strip()
 
     txn = PaymentTransaction(
         order_id=order.id,
@@ -148,10 +181,6 @@ def confirm_payment_ajax(order_id):
     return jsonify({"success": True})
 
 
-# ══════════════════════════════════════════════════════
-#  WALLET FULL PAYMENT
-# ══════════════════════════════════════════════════════
-
 @payment_bp.route("/pay/<int:order_id>/wallet", methods=["POST"])
 @login_required
 def pay_with_wallet(order_id):
@@ -164,7 +193,10 @@ def pay_with_wallet(order_id):
     wallet = get_or_create_wallet(current_user.id)
 
     if wallet.balance < order.total_price:
-        flash(f"Insufficient wallet balance. Need ${order.total_price:.2f}, have ${wallet.balance:.2f}.", "danger")
+        flash(
+            f"Insufficient wallet balance. Need ${order.total_price:.2f}, have ${wallet.balance:.2f}.",
+            "danger"
+        )
         return redirect(url_for("payment.pay", order_id=order.id))
 
     result = wallet.debit(
@@ -194,10 +226,6 @@ def pay_with_wallet(order_id):
     return redirect(url_for("payment.receipt", order_id=order.id))
 
 
-# ══════════════════════════════════════════════════════
-#  CONFIRM REDIRECT & RECEIPT
-# ══════════════════════════════════════════════════════
-
 @payment_bp.route("/pay/<int:order_id>/done")
 @login_required
 def confirm_payment(order_id):
@@ -209,8 +237,9 @@ def confirm_payment(order_id):
 def receipt(order_id):
     order = Order.query.filter_by(id=order_id, user_id=current_user.id).first_or_404()
     items = order.items.all()
-    txn   = PaymentTransaction.query.filter_by(
-        order_id=order.id, status="success"
+    txn = PaymentTransaction.query.filter_by(
+        order_id=order.id,
+        status="success"
     ).first()
     return render_template("payment/receipt.html", order=order, items=items, txn=txn)
 
@@ -224,45 +253,105 @@ def receipt(order_id):
 def wallet_dashboard():
     wallet = get_or_create_wallet(current_user.id)
     db.session.commit()
+
     page = request.args.get("page", 1, type=int)
     transactions = wallet.transactions.order_by(
         WalletTransaction.created_at.desc()
     ).paginate(page=page, per_page=15, error_out=False)
-    return render_template("payment/wallet.html", wallet=wallet, transactions=transactions)
+
+    return render_template(
+        "payment/wallet.html",
+        wallet=wallet,
+        transactions=transactions
+    )
 
 
 @payment_bp.route("/wallet/topup", methods=["POST"])
 @login_required
 def wallet_topup():
-    try:
-        amount = float(request.form.get("amount", 0))
-    except ValueError:
-        flash("Invalid amount.", "danger")
+    amount = validate_topup_amount(request.form.get("amount"))
+
+    if amount is None:
+        flash("Please enter a valid top-up amount between $1 and $10,000.", "warning")
         return redirect(url_for("payment.wallet_dashboard"))
 
-    if amount < 1:
-        flash("Minimum top-up is $1.", "warning")
-        return redirect(url_for("payment.wallet_dashboard"))
+    session[TOPUP_SESSION_KEY] = amount
+    return redirect(url_for("payment.wallet_topup_pay"))
 
-    if amount > 10000:
-        flash("Maximum top-up is $10,000.", "warning")
+
+@payment_bp.route("/wallet/topup/pay")
+@login_required
+def wallet_topup_pay():
+    amount = get_pending_topup_amount()
+    if amount is None:
+        flash("Please enter a wallet top-up amount first.", "warning")
         return redirect(url_for("payment.wallet_dashboard"))
 
     wallet = get_or_create_wallet(current_user.id)
-    wallet.credit(amount, "Manual wallet top-up", ref="TOPUP")
+    db.session.commit()
 
-    # Notify user about top-up
+    return render_template(
+        "payment/topup_pay.html",
+        amount=amount,
+        wallet=wallet
+    )
+
+
+@payment_bp.route("/wallet/topup/confirm", methods=["POST"])
+@login_required
+def wallet_topup_confirm_ajax():
+    amount = get_pending_topup_amount()
+    if amount is None:
+        return jsonify({
+            "success": False,
+            "error": "No pending wallet top-up found. Please start again."
+        }), 400
+
+    data = request.get_json(silent=True) or {}
+    method = (data.get("method") or "").strip().lower()
+
+    if method not in TOPUP_METHOD_LABELS:
+        return jsonify({
+            "success": False,
+            "error": "Invalid payment method selected."
+        }), 400
+
+    wallet = get_or_create_wallet(current_user.id)
+    wallet.credit(
+        amount,
+        f"Wallet top-up via {TOPUP_METHOD_LABELS[method]}",
+        ref=f"TOPUP-{method.upper()}"
+    )
+
     db.session.add(Notification(
         user_id=current_user.id,
         type="wallet_topup",
-        title="💳 Wallet Topped Up!",
-        message=f"${amount:.2f} has been added to your NutriConnect wallet. New balance: ${wallet.balance:.2f}.",
-        link="/dashboard/wallet",
+        title="💳 Wallet Topped Up Successfully!",
+        message=(
+            f"${amount:.2f} was added to your NutriConnect wallet via "
+            f"{TOPUP_METHOD_LABELS[method]}. New balance: ${wallet.balance:.2f}."
+        ),
+        link=url_for("payment.wallet_dashboard"),
         is_read=False
     ))
 
     db.session.commit()
-    flash(f"${amount:.2f} added to your wallet!", "success")
+    clear_pending_topup()
+
+    return jsonify({
+        "success": True,
+        "amount": f"{amount:.2f}",
+        "new_balance": f"{wallet.balance:.2f}",
+        "method_label": TOPUP_METHOD_LABELS[method],
+        "redirect_url": url_for("payment.wallet_dashboard")
+    })
+
+
+@payment_bp.route("/wallet/topup/cancel")
+@login_required
+def wallet_topup_cancel():
+    clear_pending_topup()
+    flash("Wallet top-up cancelled.", "info")
     return redirect(url_for("payment.wallet_dashboard"))
 
 
@@ -276,8 +365,10 @@ def notifications():
     notifs = current_user.notifications.order_by(
         Notification.created_at.desc()
     ).limit(50).all()
+
     current_user.notifications.filter_by(is_read=False).update({"is_read": True})
     db.session.commit()
+
     return render_template("payment/notifications.html", notifications=notifs)
 
 

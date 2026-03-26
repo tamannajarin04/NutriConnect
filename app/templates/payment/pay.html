@@ -2,576 +2,1245 @@
 {% block title %}Payment · {{ order.order_number }} · NutriConnect{% endblock %}
 
 {% block extra_css %}
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet">
 <style>
-.pay-page { font-family:'Sora',sans-serif; max-width:900px; margin:0 auto; }
-@keyframes up   { from{opacity:0;transform:translateY(14px)} to{opacity:1;transform:translateY(0)} }
-@keyframes pop  { from{opacity:0;transform:scale(.9)} to{opacity:1;transform:scale(1)} }
-@keyframes spin { to{transform:rotate(360deg)} }
+.pay-page{
+  max-width:1320px;
+  margin:0 auto;
+  font-family:'Sora',sans-serif;
+  animation:fadeUp .35s ease;
+}
+@keyframes fadeUp{
+  from{opacity:0;transform:translateY(12px)}
+  to{opacity:1;transform:translateY(0)}
+}
+@keyframes spin{
+  to{transform:rotate(360deg)}
+}
+@keyframes popIn{
+  from{opacity:0;transform:scale(.96)}
+  to{opacity:1;transform:scale(1)}
+}
 
-/* ── Header ── */
-.pay-hd { margin-bottom:1.5rem; animation:up .4s both; }
-.pay-hd h1 { font-size:1.4rem;font-weight:900;letter-spacing:-.03em;color:var(--nc-text);margin:0 0 .2rem; }
-.pay-hd-sub { font-size:.8rem;color:var(--nc-text-muted); }
-
-/* ── Layout ── */
-.pay-layout { display:grid;grid-template-columns:1fr 300px;gap:1.25rem;align-items:start; }
-@media(max-width:800px){ .pay-layout{grid-template-columns:1fr;} }
-
-/* ── Method selector ── */
-.pay-methods { display:grid;grid-template-columns:1fr 1fr;gap:.65rem;margin-bottom:1.25rem; }
-@media(max-width:500px){ .pay-methods{grid-template-columns:1fr;} }
-
-.pay-method-btn {
-  border:2px solid var(--nc-border);border-radius:16px;
-  padding:1rem;cursor:pointer;transition:all .18s;
-  background:var(--nc-card-bg);display:flex;align-items:center;gap:.85rem;
+.pay-hero{
+  position:relative;
+  overflow:hidden;
+  border-radius:24px;
+  padding:1.35rem 1.45rem;
+  margin-bottom:1rem;
+  background:
+    radial-gradient(circle at 12% 18%, rgba(56,189,248,.12), transparent 28%),
+    radial-gradient(circle at 88% 12%, rgba(125,211,252,.08), transparent 24%),
+    linear-gradient(135deg, #07111d 0%, #0c1d33 52%, #113055 100%);
+  border:1px solid rgba(125,211,252,.16);
   box-shadow:var(--nc-card-shadow);
 }
-.pay-method-btn:hover { border-color:var(--nc-brand);transform:translateY(-2px); }
-.pay-method-btn.active { border-color:var(--nc-brand);box-shadow:0 0 0 3px rgba(14,165,233,.15); }
+.pay-hero::after{
+  content:"";
+  position:absolute;
+  inset:0;
+  background-image:radial-gradient(circle, rgba(255,255,255,.045) 1px, transparent 1px);
+  background-size:26px 26px;
+  pointer-events:none;
+}
+.pay-hero > *{position:relative;z-index:1;}
 
-.pay-method-btn.bkash.active   { border-color:#e2136e;box-shadow:0 0 0 3px rgba(226,19,110,.15); }
-.pay-method-btn.nagad.active   { border-color:#f05323;box-shadow:0 0 0 3px rgba(240,83,35,.15); }
-.pay-method-btn.rocket.active  { border-color:#8b1a7a;box-shadow:0 0 0 3px rgba(139,26,122,.15); }
-.pay-method-btn.card.active    { border-color:#1a56db;box-shadow:0 0 0 3px rgba(26,86,219,.15); }
-.pay-method-btn.wallet.active  { border-color:#0d9488;box-shadow:0 0 0 3px rgba(13,148,136,.15); }
+.pay-hero-row{
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap:1rem;
+  flex-wrap:wrap;
+}
+.pay-hero-badge{
+  display:inline-flex;
+  align-items:center;
+  gap:.45rem;
+  padding:.32rem .82rem;
+  border-radius:999px;
+  background:rgba(255,255,255,.08);
+  border:1px solid rgba(255,255,255,.14);
+  color:#fff;
+  font-size:.68rem;
+  font-weight:800;
+  text-transform:uppercase;
+  letter-spacing:.08em;
+  margin-bottom:.85rem;
+}
+.pay-hero-title{
+  margin:0;
+  font-size:1.5rem;
+  line-height:1.15;
+  font-weight:800;
+  letter-spacing:-.03em;
+  color:#fff;
+}
+.pay-hero-sub{
+  margin-top:.28rem;
+  font-size:.84rem;
+  color:rgba(255,255,255,.74);
+  line-height:1.6;
+}
+.pay-hero-mini{
+  display:flex;
+  gap:.75rem;
+  flex-wrap:wrap;
+  margin-top:.85rem;
+}
+.pay-mini-chip{
+  padding:.48rem .72rem;
+  border-radius:12px;
+  background:rgba(255,255,255,.08);
+  border:1px solid rgba(255,255,255,.12);
+  color:#fff;
+  font-size:.75rem;
+  font-weight:700;
+}
+.pay-mini-chip span{
+  opacity:.68;
+  margin-right:.32rem;
+  font-weight:600;
+}
 
-.pm-logo {
-  width:48px;height:48px;border-radius:12px;
-  display:flex;align-items:center;justify-content:center;
-  font-size:1.4rem;flex-shrink:0;font-weight:900;color:#fff;
+.pay-main{
+  display:flex;
+  flex-direction:column;
+  gap:1rem;
 }
-.pm-logo.bkash  { background:#e2136e; font-size:.75rem; }
-.pm-logo.nagad  { background:linear-gradient(135deg,#f05323,#f7941d); font-size:.75rem; }
-.pm-logo.rocket { background:#8b1a7a; font-size:.75rem; }
-.pm-logo.card   { background:linear-gradient(135deg,#1a56db,#1c64f2); font-size:1.1rem; }
-.pm-logo.wallet { background:linear-gradient(135deg,#0d9488,#0ea5e9); font-size:1.1rem; }
 
-.pm-info-name { font-size:.88rem;font-weight:800;color:var(--nc-text); }
-.pm-info-desc { font-size:.68rem;color:var(--nc-text-muted);margin-top:.08rem; }
+.pay-top-grid{
+  display:grid;
+  grid-template-columns:minmax(0,1.55fr) minmax(300px,.8fr);
+  gap:1rem;
+  align-items:stretch;
+}
+@media(max-width:1100px){
+  .pay-top-grid{
+    grid-template-columns:1fr;
+  }
+}
 
-/* ── Payment form panel ── */
-.pay-form-panel {
-  background:var(--nc-card-bg);border:1px solid var(--nc-card-border);
-  border-radius:20px;overflow:hidden;box-shadow:var(--nc-card-shadow);
-  animation:up .35s both;
+.pay-card{
+  background:var(--nc-card-bg);
+  border:1px solid var(--nc-card-border);
+  border-radius:22px;
+  overflow:hidden;
+  box-shadow:var(--nc-card-shadow);
+  min-height:100%;
 }
-.pay-form-hd {
-  padding:1rem 1.25rem;border-bottom:1px solid var(--nc-border);
-  display:flex;align-items:center;gap:.75rem;
-}
-.pay-form-hd-logo {
-  width:40px;height:40px;border-radius:10px;
-  display:flex;align-items:center;justify-content:center;
-  font-size:1rem;color:#fff;font-weight:900;flex-shrink:0;
-}
-.pay-form-hd-title { font-size:.95rem;font-weight:900;color:var(--nc-text); }
-.pay-form-hd-sub   { font-size:.72rem;color:var(--nc-text-muted); }
-.pay-form-body { padding:1.25rem; }
 
-/* ── Form fields ── */
-.pf-group { margin-bottom:1rem; }
-.pf-label {
-  display:block;font-size:.72rem;font-weight:800;
-  text-transform:uppercase;letter-spacing:.07em;
-  color:var(--nc-text-faint);margin-bottom:.45rem;
+.pay-card-head{
+  padding:.95rem 1.1rem;
+  border-bottom:1px solid var(--nc-border);
+  background:linear-gradient(180deg, rgba(14,165,233,.05), transparent);
+  display:flex;
+  align-items:center;
+  gap:.8rem;
 }
-.pf-input {
-  width:100%;background:var(--nc-surface-2);
-  border:1.5px solid var(--nc-border);border-radius:12px;
-  padding:.75rem 1rem;font-family:'Sora',sans-serif;
-  font-size:.9rem;font-weight:600;color:var(--nc-text);
-  outline:none;transition:border-color .15s,box-shadow .15s;
+.pay-card-head-icon{
+  width:40px;
+  height:40px;
+  border-radius:14px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:var(--nc-brand-l);
+  color:var(--nc-brand);
+  font-size:1rem;
+  flex-shrink:0;
 }
-.pf-input:focus { border-color:var(--nc-brand);box-shadow:0 0 0 3px rgba(14,165,233,.12); }
-.pf-input.bkash:focus  { border-color:#e2136e;box-shadow:0 0 0 3px rgba(226,19,110,.12); }
-.pf-input.nagad:focus  { border-color:#f05323;box-shadow:0 0 0 3px rgba(240,83,35,.12); }
-.pf-input.rocket:focus { border-color:#8b1a7a;box-shadow:0 0 0 3px rgba(139,26,122,.12); }
+.pay-card-head-title{
+  font-size:1rem;
+  font-weight:800;
+  color:var(--nc-text);
+}
+.pay-card-head-sub{
+  font-size:.78rem;
+  color:var(--nc-text-muted);
+  margin-top:.08rem;
+}
 
-.pf-hint { font-size:.7rem;color:var(--nc-text-faint);margin-top:.35rem; }
+.pay-methods-body{
+  padding:1rem;
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:.8rem;
+  align-content:start;
+  min-height:430px;
+}
+@media(max-width:760px){
+  .pay-methods-body{
+    grid-template-columns:1fr;
+    min-height:auto;
+  }
+}
 
-/* ── PIN dots ── */
-.pin-row { display:flex;gap:.5rem; }
-.pin-dot {
-  flex:1;height:52px;background:var(--nc-surface-2);
-  border:1.5px solid var(--nc-border);border-radius:12px;
-  font-size:1.4rem;text-align:center;color:var(--nc-text);
-  font-weight:700;outline:none;transition:border-color .15s;
+.pm-card{
+  position:relative;
+  border:1px solid var(--nc-border);
+  border-radius:18px;
+  background:linear-gradient(180deg, rgba(255,255,255,.02), transparent);
+  padding:1rem;
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap:.9rem;
+  cursor:pointer;
+  transition:.15s ease;
+  min-height:124px;
 }
-.pin-dot:focus { border-color:var(--nc-brand); }
-.pin-dot.bkash:focus  { border-color:#e2136e; }
-.pin-dot.nagad:focus  { border-color:#f05323; }
-.pin-dot.rocket:focus { border-color:#8b1a7a; }
+.pm-card:hover{
+  transform:translateY(-1px);
+  border-color:rgba(14,165,233,.28);
+}
+.pm-card.active{
+  border-color:var(--nc-brand);
+  box-shadow:0 0 0 3px rgba(14,165,233,.12);
+}
+.pm-card.bkash.active{
+  border-color:#e2136e;
+  box-shadow:0 0 0 3px rgba(226,19,110,.12);
+}
+.pm-card.nagad.active{
+  border-color:#f05323;
+  box-shadow:0 0 0 3px rgba(240,83,35,.12);
+}
+.pm-card.rocket.active{
+  border-color:#8b1a7a;
+  box-shadow:0 0 0 3px rgba(139,26,122,.12);
+}
+.pm-card.card.active{
+  border-color:#1a56db;
+  box-shadow:0 0 0 3px rgba(26,86,219,.12);
+}
+.pm-card.wallet.active{
+  border-color:#0d9488;
+  box-shadow:0 0 0 3px rgba(13,148,136,.12);
+}
+.pm-card.wallet{
+  grid-column:1 / -1;
+  min-height:78px;
+  align-items:center;
+}
 
-/* ── Amount display ── */
-.pf-amount-box {
-  background:var(--nc-surface-2);border:1.5px solid var(--nc-border);
-  border-radius:12px;padding:.85rem 1rem;margin-bottom:1rem;
-  display:flex;justify-content:space-between;align-items:center;
+.pm-left{
+  display:flex;
+  gap:.85rem;
+  min-width:0;
 }
-.pf-amount-lbl { font-size:.75rem;font-weight:700;color:var(--nc-text-muted); }
-.pf-amount-val { font-family:'JetBrains Mono',monospace;font-size:1.2rem;font-weight:700;color:var(--nc-text); }
+.pm-logo{
+  width:48px;
+  height:48px;
+  border-radius:14px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  color:#fff;
+  flex-shrink:0;
+  font-size:1rem;
+  font-weight:800;
+}
+.pm-logo.bkash{background:#e2136e;font-size:.76rem;}
+.pm-logo.nagad{background:linear-gradient(135deg,#f05323,#f7941d);font-size:.76rem;}
+.pm-logo.rocket{background:#8b1a7a;font-size:.76rem;}
+.pm-logo.card{background:linear-gradient(135deg,#1a56db,#1c64f2);}
+.pm-logo.wallet{background:linear-gradient(135deg,#0d9488,#0ea5e9);}
 
-/* ── Submit button ── */
-.pf-submit {
-  width:100%;padding:.9rem;border-radius:14px;border:none;
-  font-family:'Sora',sans-serif;font-size:.92rem;font-weight:800;
-  color:#fff;cursor:pointer;transition:opacity .15s,transform .15s;
-  display:flex;align-items:center;justify-content:center;gap:.5rem;
+.pm-name{
+  font-size:.95rem;
+  font-weight:800;
+  color:var(--nc-text);
 }
-.pf-submit:hover { opacity:.9;transform:translateY(-1px); }
-.pf-submit.bkash  { background:#e2136e; }
-.pf-submit.nagad  { background:linear-gradient(135deg,#f05323,#f7941d); }
-.pf-submit.rocket { background:#8b1a7a; }
-.pf-submit.card   { background:linear-gradient(135deg,#1a56db,#1c64f2); }
-.pf-submit.wallet { background:linear-gradient(135deg,#0d9488,#0ea5e9); }
+.pm-desc{
+  margin-top:.15rem;
+  font-size:.78rem;
+  color:var(--nc-text-muted);
+  line-height:1.55;
+}
+.pm-chip{
+  display:inline-flex;
+  margin-top:.32rem;
+  padding:.2rem .56rem;
+  border-radius:999px;
+  background:var(--nc-surface-2);
+  color:var(--nc-text-faint);
+  font-size:.64rem;
+  font-weight:800;
+  text-transform:uppercase;
+  letter-spacing:.06em;
+}
+.pm-check{
+  width:28px;
+  height:28px;
+  border-radius:50%;
+  border:1px solid var(--nc-border);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  color:var(--nc-text-faint);
+  flex-shrink:0;
+}
+.pm-card.active .pm-check{
+  background:rgba(14,165,233,.12);
+  border-color:rgba(14,165,233,.24);
+  color:var(--nc-brand);
+}
 
-/* ── Processing overlay ── */
-.pay-processing {
-  display:none;position:fixed;inset:0;z-index:9999;
-  background:rgba(0,0,0,.55);backdrop-filter:blur(6px);
-  align-items:center;justify-content:center;flex-direction:column;gap:1rem;
+.pay-summary{
+  display:flex;
+  flex-direction:column;
+  min-height:100%;
 }
-.pay-processing.show { display:flex; }
-.pay-proc-box {
-  background:var(--nc-card-bg);border:1px solid var(--nc-card-border);
-  border-radius:24px;padding:2.5rem 3rem;text-align:center;
-  box-shadow:0 24px 80px rgba(0,0,0,.3);animation:pop .3s both;
-  max-width:320px;width:90%;
+.pay-summary-head{
+  padding:.95rem 1.1rem;
+  border-bottom:1px solid var(--nc-border);
+  background:var(--nc-surface-2);
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:.8rem;
 }
-.pay-proc-spinner {
-  width:56px;height:56px;border-radius:50%;border:4px solid var(--nc-border);
-  border-top-color:var(--nc-brand);animation:spin .8s linear infinite;
+.pay-summary-head-title{
+  font-size:.75rem;
+  font-weight:900;
+  text-transform:uppercase;
+  letter-spacing:.08em;
+  color:var(--nc-text-muted);
+}
+.pay-summary-head-total{
+  font-family:'JetBrains Mono',monospace;
+  font-size:.95rem;
+  font-weight:700;
+  color:var(--nc-brand);
+}
+.pay-summary-body{
+  padding:1rem;
+  display:flex;
+  flex-direction:column;
+  gap:.9rem;
+  flex:1;
+}
+.pay-summary-meta{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:.75rem;
+}
+.pay-summary-box{
+  border:1px solid var(--nc-border);
+  border-radius:14px;
+  background:var(--nc-surface-2);
+  padding:.82rem .88rem;
+}
+.pay-summary-label{
+  font-size:.64rem;
+  font-weight:800;
+  text-transform:uppercase;
+  letter-spacing:.08em;
+  color:var(--nc-text-faint);
+  margin-bottom:.25rem;
+}
+.pay-summary-value{
+  font-size:.88rem;
+  font-weight:700;
+  color:var(--nc-text);
+  word-break:break-word;
+}
+.pay-item{
+  display:flex;
+  align-items:center;
+  gap:.75rem;
+  padding:.85rem 0;
+  border-top:1px solid var(--nc-border);
+}
+.pay-item:first-of-type{
+  border-top:none;
+  padding-top:0;
+}
+.pay-item-img{
+  width:44px;
+  height:44px;
+  border-radius:12px;
+  overflow:hidden;
+  background:var(--nc-surface-2);
+  flex-shrink:0;
+}
+.pay-item-img img{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+}
+.pay-item-ph{
+  width:100%;
+  height:100%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  color:var(--nc-text-faint);
+  font-size:1rem;
+}
+.pay-item-main{
+  min-width:0;
+  flex:1;
+}
+.pay-item-name{
+  font-size:.84rem;
+  font-weight:700;
+  color:var(--nc-text);
+}
+.pay-item-sub{
+  margin-top:.12rem;
+  font-size:.72rem;
+  color:var(--nc-text-faint);
+}
+.pay-item-price{
+  font-family:'JetBrains Mono',monospace;
+  font-size:.82rem;
+  font-weight:700;
+  color:var(--nc-text);
+  white-space:nowrap;
+}
+.pay-summary-total{
+  margin-top:auto;
+  padding-top:.9rem;
+  border-top:1px solid var(--nc-border);
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:.8rem;
+}
+.pay-summary-total strong{
+  font-size:.96rem;
+  color:var(--nc-text);
+}
+.pay-summary-total span{
+  font-family:'JetBrains Mono',monospace;
+  font-size:1rem;
+  font-weight:700;
+  color:var(--nc-brand);
+}
+.pay-secure{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:.45rem;
+  font-size:.72rem;
+  color:var(--nc-text-faint);
+  text-align:center;
+}
+
+.pay-form-shell{
+  width:100%;
+}
+.pay-select-hint{
+  background:var(--nc-card-bg);
+  border:1px dashed var(--nc-border);
+  border-radius:22px;
+  padding:2.2rem 1rem;
+  text-align:center;
+  color:var(--nc-text-faint);
+}
+.pay-select-hint i{
+  display:block;
+  font-size:1.8rem;
+  margin-bottom:.75rem;
+  color:var(--nc-brand);
+  opacity:.65;
+}
+.pay-select-hint strong{
+  display:block;
+  color:var(--nc-text);
+  margin-bottom:.3rem;
+  font-size:.98rem;
+}
+
+.pay-form-panel{
+  display:none;
+  background:var(--nc-card-bg);
+  border:1px solid var(--nc-card-border);
+  border-radius:22px;
+  overflow:hidden;
+  box-shadow:var(--nc-card-shadow);
+}
+.pay-form-head{
+  padding:.95rem 1.1rem;
+  border-bottom:1px solid var(--nc-border);
+  background:var(--nc-surface-2);
+  display:flex;
+  align-items:center;
+  gap:.85rem;
+}
+.pay-form-logo{
+  width:42px;
+  height:42px;
+  border-radius:14px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  color:#fff;
+  font-weight:800;
+  font-size:1rem;
+  flex-shrink:0;
+}
+.pay-form-title{
+  font-size:.98rem;
+  font-weight:800;
+  color:var(--nc-text);
+}
+.pay-form-sub{
+  font-size:.78rem;
+  color:var(--nc-text-muted);
+  margin-top:.08rem;
+}
+.pay-form-body{
+  padding:1rem 1.1rem 1.1rem;
+}
+.pay-form-grid{
+  display:grid;
+  grid-template-columns:minmax(0,1.35fr) minmax(260px,.9fr);
+  gap:1rem;
+}
+@media(max-width:900px){
+  .pay-form-grid{
+    grid-template-columns:1fr;
+  }
+}
+.pf-box{
+  border:1px solid var(--nc-border);
+  border-radius:16px;
+  background:var(--nc-surface-2);
+  padding:.95rem 1rem;
+  margin-bottom:1rem;
+}
+.pf-box:last-child{margin-bottom:0;}
+.pf-box-row{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:.8rem;
+}
+.pf-box-label{
+  font-size:.78rem;
+  font-weight:700;
+  color:var(--nc-text-muted);
+}
+.pf-box-value{
+  font-family:'JetBrains Mono',monospace;
+  font-size:1.08rem;
+  font-weight:700;
+  color:var(--nc-text);
+}
+.pf-group{margin-bottom:.95rem;}
+.pf-label{
+  display:block;
+  font-size:.72rem;
+  font-weight:800;
+  text-transform:uppercase;
+  letter-spacing:.07em;
+  color:var(--nc-text-faint);
+  margin-bottom:.42rem;
+}
+.pf-input{
+  width:100%;
+  border:1.5px solid var(--nc-border);
+  border-radius:12px;
+  background:var(--nc-surface-2);
+  color:var(--nc-text);
+  padding:.76rem 1rem;
+  font-size:.92rem;
+  font-weight:600;
+  outline:none;
+  transition:border-color .15s, box-shadow .15s;
+}
+.pf-input:focus{
+  border-color:var(--nc-brand);
+  box-shadow:0 0 0 3px rgba(14,165,233,.12);
+}
+.pf-input.bkash:focus{
+  border-color:#e2136e;
+  box-shadow:0 0 0 3px rgba(226,19,110,.12);
+}
+.pf-input.nagad:focus{
+  border-color:#f05323;
+  box-shadow:0 0 0 3px rgba(240,83,35,.12);
+}
+.pf-input.rocket:focus{
+  border-color:#8b1a7a;
+  box-shadow:0 0 0 3px rgba(139,26,122,.12);
+}
+.pf-hint{
+  font-size:.72rem;
+  color:var(--nc-text-faint);
+  margin-top:.35rem;
+  line-height:1.5;
+}
+.pin-row{
+  display:grid;
+  grid-template-columns:repeat(5,1fr);
+  gap:.55rem;
+}
+.pin-row.pin-4{
+  grid-template-columns:repeat(4,1fr);
+}
+.pin-dot{
+  text-align:center;
+  font-size:1rem;
+  font-weight:700;
+  padding:.8rem 0;
+  border-radius:12px;
+  border:1.5px solid var(--nc-border);
+  background:var(--nc-surface-2);
+  color:var(--nc-text);
+  outline:none;
+}
+.pin-dot:focus{
+  border-color:var(--nc-brand);
+  box-shadow:0 0 0 3px rgba(14,165,233,.12);
+}
+.card-row{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:.75rem;
+}
+@media(max-width:640px){
+  .card-row{
+    grid-template-columns:1fr;
+  }
+}
+.pf-note-card{
+  border:1px solid var(--nc-border);
+  border-radius:16px;
+  background:linear-gradient(180deg, rgba(14,165,233,.06), transparent);
+  padding:1rem;
+}
+.pf-note-card h4{
+  margin:0 0 .7rem;
+  font-size:.88rem;
+  font-weight:800;
+  color:var(--nc-text);
+}
+.pf-note-list{
+  display:flex;
+  flex-direction:column;
+  gap:.7rem;
+}
+.pf-note-item{
+  display:flex;
+  align-items:flex-start;
+  gap:.55rem;
+  font-size:.78rem;
+  color:var(--nc-text-muted);
+  line-height:1.55;
+}
+.pf-note-item i{
+  color:var(--nc-brand);
+  margin-top:.12rem;
+}
+.pf-submit{
+  width:100%;
+  padding:.88rem 1rem;
+  border:none;
+  border-radius:14px;
+  color:#fff;
+  font-size:.9rem;
+  font-weight:800;
+  cursor:pointer;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:.5rem;
+  transition:opacity .15s, transform .15s;
+}
+.pf-submit:hover{
+  opacity:.92;
+  transform:translateY(-1px);
+}
+.pf-submit.bkash{background:#e2136e;}
+.pf-submit.nagad{background:linear-gradient(135deg,#f05323,#f7941d);}
+.pf-submit.rocket{background:#8b1a7a;}
+.pf-submit.card{background:linear-gradient(135deg,#1a56db,#1c64f2);}
+.pf-submit.wallet{background:linear-gradient(135deg,#0d9488,#0ea5e9);}
+
+.pay-processing,
+.pay-success{
+  display:none;
+  position:fixed;
+  inset:0;
+  z-index:9999;
+  background:rgba(0,0,0,.58);
+  backdrop-filter:blur(6px);
+  align-items:center;
+  justify-content:center;
+}
+.pay-processing.show,
+.pay-success.show{
+  display:flex;
+}
+.pay-proc-box,
+.pay-succ-box{
+  width:min(92vw, 360px);
+  background:var(--nc-card-bg);
+  border:1px solid var(--nc-card-border);
+  border-radius:24px;
+  box-shadow:0 24px 80px rgba(0,0,0,.3);
+  padding:2rem;
+  text-align:center;
+  animation:popIn .26s both;
+}
+.pay-proc-spinner{
+  width:58px;
+  height:58px;
   margin:0 auto 1rem;
+  border-radius:50%;
+  border:4px solid var(--nc-border);
+  border-top-color:var(--nc-brand);
+  animation:spin .8s linear infinite;
 }
-.pay-proc-title { font-size:1rem;font-weight:900;color:var(--nc-text);margin-bottom:.4rem; }
-.pay-proc-sub   { font-size:.8rem;color:var(--nc-text-muted); }
-
-/* ── Success overlay ── */
-.pay-success {
-  display:none;position:fixed;inset:0;z-index:9999;
-  background:rgba(0,0,0,.55);backdrop-filter:blur(6px);
-  align-items:center;justify-content:center;
+.pay-proc-title,
+.pay-succ-title{
+  font-size:1.04rem;
+  font-weight:900;
+  color:var(--nc-text);
+  margin-bottom:.35rem;
 }
-.pay-success.show { display:flex; }
-.pay-succ-box {
-  background:var(--nc-card-bg);border:1px solid var(--nc-card-border);
-  border-radius:24px;padding:2.5rem;text-align:center;
-  box-shadow:0 24px 80px rgba(0,0,0,.3);animation:pop .3s both;
-  max-width:340px;width:90%;
+.pay-proc-sub,
+.pay-succ-sub{
+  font-size:.82rem;
+  color:var(--nc-text-muted);
+  line-height:1.6;
 }
-.pay-succ-icon {
-  width:72px;height:72px;border-radius:50%;
+.pay-succ-icon{
+  width:72px;
+  height:72px;
+  border-radius:50%;
   background:linear-gradient(135deg,#059669,#10b981);
-  display:flex;align-items:center;justify-content:center;
-  font-size:2rem;color:#fff;margin:0 auto 1rem;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  color:#fff;
+  font-size:2rem;
+  margin:0 auto 1rem;
   box-shadow:0 0 0 12px rgba(16,185,129,.12);
 }
-.pay-succ-title { font-size:1.25rem;font-weight:900;color:var(--nc-text);margin-bottom:.4rem; }
-.pay-succ-sub   { font-size:.82rem;color:var(--nc-text-muted);margin-bottom:1.25rem;line-height:1.6; }
-.pay-succ-btn {
-  display:inline-flex;align-items:center;gap:.4rem;
-  padding:.75rem 1.5rem;border-radius:12px;border:none;
+.pay-succ-btn{
+  display:inline-flex;
+  align-items:center;
+  gap:.42rem;
+  padding:.76rem 1.2rem;
+  border-radius:12px;
+  text-decoration:none;
+  border:none;
+  color:#fff;
   background:linear-gradient(135deg,#059669,#0ea5e9);
-  color:#fff;font-family:'Sora',sans-serif;font-size:.88rem;
-  font-weight:800;cursor:pointer;text-decoration:none;
-  transition:opacity .15s;
+  font-size:.86rem;
+  font-weight:800;
+  margin-top:1rem;
 }
-.pay-succ-btn:hover { opacity:.9;color:#fff; }
-
-/* ── Card specific ── */
-.card-row { display:grid;grid-template-columns:1fr 1fr;gap:.75rem; }
-
-/* ── Order summary sidebar ── */
-.pay-summary {
-  background:var(--nc-card-bg);border:1px solid var(--nc-card-border);
-  border-radius:20px;overflow:hidden;box-shadow:var(--nc-card-shadow);
-  position:sticky;top:80px;animation:up .4s .08s both;
+.pay-succ-btn:hover{
+  color:#fff;
+  opacity:.92;
 }
-.pay-sum-hd { padding:.85rem 1.15rem;background:var(--nc-surface-2);border-bottom:1px solid var(--nc-border);font-size:.73rem;font-weight:900;text-transform:uppercase;letter-spacing:.09em;color:var(--nc-text-muted); }
-.pay-sum-item { display:flex;align-items:center;gap:.6rem;padding:.7rem 1.15rem;border-bottom:1px solid var(--nc-border); }
-.pay-sum-item:last-of-type { border-bottom:none; }
-.pay-sum-img { width:36px;height:36px;border-radius:8px;overflow:hidden;background:var(--nc-surface-2);flex-shrink:0; }
-.pay-sum-img img { width:100%;height:100%;object-fit:cover; }
-.pay-sum-img-ph { width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:.85rem;color:var(--nc-text-faint); }
-.pay-sum-name { font-size:.8rem;font-weight:700;color:var(--nc-text);flex:1; }
-.pay-sum-qty  { font-size:.7rem;color:var(--nc-text-faint); }
-.pay-sum-price { font-family:'JetBrains Mono',monospace;font-size:.8rem;font-weight:700;color:var(--nc-text); }
-.pay-sum-total { padding:.85rem 1.15rem;border-top:1px solid var(--nc-border);display:flex;justify-content:space-between;font-size:.95rem;font-weight:900;color:var(--nc-text); }
-.pay-sum-total span:last-child { font-family:'JetBrains Mono',monospace;color:var(--nc-brand); }
-
-.pay-secure { display:flex;align-items:center;gap:.4rem;justify-content:center;font-size:.7rem;color:var(--nc-text-faint);padding:.75rem; }
 </style>
 {% endblock %}
 
 {% block content %}
 <div class="pay-page">
 
-  <div class="pay-hd">
-    <h1><i class="fas fa-lock" style="color:var(--nc-brand);margin-right:.4rem;"></i>Complete Payment</h1>
-    <div class="pay-hd-sub">Order {{ order.order_number }} · Select your payment method below</div>
+  <div class="pay-hero">
+    <div class="pay-hero-badge">
+      <i class="fas fa-shield-halved"></i> Secure Checkout
+    </div>
+
+    <div class="pay-hero-row">
+      <div>
+        <h1 class="pay-hero-title">Complete Payment</h1>
+        <div class="pay-hero-sub">Order {{ order.order_number }} · Choose a payment method and finish checkout in one clean flow.</div>
+
+        <div class="pay-hero-mini">
+          <div class="pay-mini-chip"><span>Items</span> {{ order.items.count() }}</div>
+          <div class="pay-mini-chip"><span>Total</span> ${{ "%.2f"|format(order.total_price) }}</div>
+        </div>
+      </div>
+    </div>
   </div>
 
-  <div class="pay-layout">
-    <div>
-
-      <!-- Payment method selector -->
-      <div class="pay-methods">
-
-        <div class="pay-method-btn bkash" onclick="selectMethod('bkash')">
-          <div class="pm-logo bkash">bKash</div>
+  <div class="pay-main">
+    <div class="pay-top-grid">
+      <div class="pay-card">
+        <div class="pay-card-head">
+          <div class="pay-card-head-icon"><i class="fas fa-credit-card"></i></div>
           <div>
-            <div class="pm-info-name">bKash</div>
-            <div class="pm-info-desc">Mobile Banking</div>
+            <div class="pay-card-head-title">Choose Payment Method</div>
+            <div class="pay-card-head-sub">All payment options are shown in a more balanced, standard checkout layout.</div>
           </div>
         </div>
 
-        <div class="pay-method-btn nagad" onclick="selectMethod('nagad')">
-          <div class="pm-logo nagad">Nagad</div>
-          <div>
-            <div class="pm-info-name">Nagad</div>
-            <div class="pm-info-desc">Mobile Banking</div>
+        <div class="pay-methods-body">
+          <div class="pm-card bkash" onclick="selectMethod('bkash', this)">
+            <div class="pm-left">
+              <div class="pm-logo bkash">bKash</div>
+              <div>
+                <div class="pm-name">bKash</div>
+                <div class="pm-desc">Fast payment with your bKash number and secure PIN verification.</div>
+                <div class="pm-chip">Mobile Banking</div>
+              </div>
+            </div>
+            <div class="pm-check"><i class="fas fa-check"></i></div>
           </div>
-        </div>
 
-        <div class="pay-method-btn rocket" onclick="selectMethod('rocket')">
-          <div class="pm-logo rocket">Rocket</div>
-          <div>
-            <div class="pm-info-name">Rocket</div>
-            <div class="pm-info-desc">DBBL Mobile</div>
+          <div class="pm-card nagad" onclick="selectMethod('nagad', this)">
+            <div class="pm-left">
+              <div class="pm-logo nagad">Nagad</div>
+              <div>
+                <div class="pm-name">Nagad</div>
+                <div class="pm-desc">Pay instantly using your Nagad account and 4-digit transaction PIN.</div>
+                <div class="pm-chip">Mobile Banking</div>
+              </div>
+            </div>
+            <div class="pm-check"><i class="fas fa-check"></i></div>
           </div>
-        </div>
 
-        <div class="pay-method-btn card" onclick="selectMethod('card')">
-          <div class="pm-logo card"><i class="fas fa-credit-card"></i></div>
-          <div>
-            <div class="pm-info-name">Card</div>
-            <div class="pm-info-desc">Visa / Mastercard</div>
+          <div class="pm-card rocket" onclick="selectMethod('rocket', this)">
+            <div class="pm-left <div class="pm-left">
+              <div class="pm-logo rocket">Rocket</div>
+              <div>
+                <div class="pm-name">Rocket</div>
+                <div class="pm-desc">Use your Rocket number and PIN to confirm payment securely.</div>
+                <div class="pm-chip">DBBL Mobile</div>
+              </div>
+            </div>
+            <div class="pm-check"><i class="fas fa-check"></i></div>
           </div>
-        </div>
 
-        {% if wallet and wallet.balance >= order.total_price %}
-        <div class="pay-method-btn wallet" onclick="selectMethod('wallet')" style="grid-column:1/-1;">
-          <div class="pm-logo wallet"><i class="fas fa-wallet"></i></div>
-          <div>
-            <div class="pm-info-name">Wallet — Balance: ${{ "%.2f"|format(wallet.balance) }}</div>
-            <div class="pm-info-desc">Pay instantly from your NutriConnect wallet</div>
+          <div class="pm-card card" onclick="selectMethod('card', this)">
+            <div class="pm-left">
+              <div class="pm-logo card"><i class="fas fa-credit-card"></i></div>
+              <div>
+                <div class="pm-name">Card</div>
+                <div class="pm-desc">Pay with debit or credit card using a secure standard card flow.</div>
+                <div class="pm-chip">Visa / Mastercard</div>
+              </div>
+            </div>
+            <div class="pm-check"><i class="fas fa-check"></i></div>
           </div>
-        </div>
-        {% endif %}
 
+          {% if wallet and wallet.balance >= order.total_price %}
+          <div class="pm-card wallet" onclick="selectMethod('wallet', this)">
+            <div class="pm-left">
+              <div class="pm-logo wallet"><i class="fas fa-wallet"></i></div>
+              <div>
+                <div class="pm-name">NutriConnect Wallet</div>
+                <div class="pm-desc">Instant one-click payment from your wallet without any extra details.</div>
+                <div class="pm-chip">Balance ${{ "%.2f"|format(wallet.balance) }}</div>
+              </div>
+            </div>
+            <div class="pm-check"><i class="fas fa-check"></i></div>
+          </div>
+          {% endif %}
+        </div>
       </div>
 
-      <!-- ── bKash Form ── -->
-      <div class="pay-form-panel" id="form-bkash" style="display:none;">
-        <div class="pay-form-hd">
-          <div class="pay-form-hd-logo" style="background:#e2136e;">bKash</div>
+      <div class="pay-card pay-summary">
+        <div class="pay-summary-head">
+          <div class="pay-summary-head-title">Order Summary-summary-head-title">Order Summary</div>
+          <div class="pay-summary-head-total">${{ "%.2f"|format(order.total_price) }}</div>
+        </div>
+
+        <div class="pay-summary-body">
+          <div class="pay-summary-meta">
+            <div class="pay-summary-box">
+              <div class="pay-summary-label">Items</div>
+              <div class="pay-summary-value">{{ order.items.count() }}</div>
+            </div>
+            <div class="pay-summary-box">
+              <div class="pay-summary-label">Order</div>
+              <div class="pay-summary-value">{{ order.order_number }}</div>
+            </div>
+          </div>
+
+          {% for item in order.items.all() %}
+          <div class="pay-item">
+            <div class="pay-item-img">
+              {% if item.food and item.food.image %}
+                <img src="{{ url_for('static', filename='uploads/' ~ item.food.image) }}" alt="{{ item.food_name }}">
+              {% else %}
+                <div class="pay-item-ph"><i class="fas fa-utensils"></i></div>
+              {% endif %}
+            </div>
+            <div class="pay-item-main">
+              <div class="pay-item-name">{{ item.food_name }}</div>
+              <div class="pay-item-sub">Quantity × {{ item.quantity }}</div>
+            </div>
+            <div class="pay-item-price">${{ "%.2f"|format(item.subtotal) }}</div>
+          </div>
+          {% endfor %}
+
+          <div class="pay-summary-total">
+            <strong>Total Payable</strong>
+            <span>${{ "%.2f"|format(order.total_price) }}</span>
+          </div>
+
+          <div class="pay-secure">
+            <i class="fas fa-shield-halved"></i> 256-bit SSL encrypted secure payment
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="pay-form-shell">
+      <div id="select-hint" class="pay-select-hint">
+        <i class="fas fa-hand-pointer"></i>
+        <strong>Select a payment method</strong>
+        Pick one of the options above to reveal its payment form. The selected method will open in the same aligned checkout area.
+      </div>
+
+      <div class="pay-form-panel" id="form-bkash">
+        <div class="pay-form-head">
+          <div class="pay-form-logo" style="background:#e2136e;">bKash</div>
           <div>
-            <div class="pay-form-hd-title">bKash Payment</div>
-            <div class="pay-form-hd-sub">Enter your bKash number and PIN</div>
+            <div class="pay-form-title">bKash Payment</div>
+            <div class="pay-form-sub">Enter your bKash number and 5-digit PIN.</div>
           </div>
         </div>
         <div class="pay-form-body">
-          <div class="pf-amount-box">
-            <span class="pf-amount-lbl">Amount to Pay</span>
-            <span class="pf-amount-val">${{ "%.2f"|format(order.total_price) }}</span>
-          </div>
-          <div class="pf-group">
-            <label class="pf-label">bKash Account Number</label>
-            <input class="pf-input bkash" type="tel" id="bkash-phone"
-                   placeholder="01XXXXXXXXX" maxlength="11">
-            <div class="pf-hint"><i class="fas fa-info-circle"></i> Enter your 11-digit bKash number</div>
-          </div>
-          <div class="pf-group">
-            <label class="pf-label">bKash PIN</label>
-            <div class="pin-row">
-              <input class="pin-dot bkash" type="password" maxlength="1" id="bkash-p1">
-              <input class="pin-dot bkash" type="password" maxlength="1" id="bkash-p2">
-              <input class="pin-dot bkash" type="password" maxlength="1" id="bkash-p3">
-              <input class="pin-dot bkash" type="password" maxlength="1" id="bkash-p4">
-              <input class="pin-dot bkash" type="password" maxlength="1" id="bkash-p5">
+          <div class="pay-form-grid">
+            <div>
+              <div class="pf-box">
+                <div class="pf-box-row">
+                  <span class="pf-box-label">Amount to Pay</span>
+                  <span class="pf-box-value">${{ "%.2f"|format(order.total_price) }}</span>
+                </div>
+              </div>
+
+              <div class="pf-group">
+                <label class="pf-label">bKash Account Number</label>
+                <input class="pf-input bkash" type="tel" id="bkash-phone" placeholder="01XXXXXXXXX" maxlength="11">
+                <div class="pf-hint">Enter your 11-digit bKash mobile number.</div>
+              </div>
+
+              <div class="pf-group">
+                <label class="pf-label">bKash PIN</label>
+                <div class="pin-row">
+                  <input class="pin-dot" type="password" maxlength="1" id="bkash-p1">
+                  <input class="pin-dot" type="password" maxlength="1" id="bkash-p2">
+                  <input class="pin-dot" type="password" maxlength="1" id="bkash-p3">
+                  <input class="pin-dot" type="password" maxlength="1" id="bkash-p4">
+                  <input class="pin-dot" type="password" maxlength="1" id="bkash-p5">
+                </div>
+                <div class="pf-hint">Your PIN is encrypted and secure.</div>
+              </div>
+
+              <button class="pf-submit bkash" type="button" onclick="processPayment('bkash')">
+                <i class="fas fa-lock"></i> Pay with bKash
+              </button>
             </div>
-            <div class="pf-hint"><i class="fas fa-shield-halved"></i> Your PIN is encrypted and secure</div>
+
+            <div class="pf-note-card">
+              <h4>Before you continue</h4>
+              <div class="pf-note-list">
+                <div class="pf-note-item"><i class="fas fa-circle-check"></i> Make sure your bKash account is active and has enough balance.</div>
+                <div class="pf-note-item"><i class="fas fa-circle-check"></i> Use the same mobile number that is linked to your bKash account.</div>
+                <div class="pf-note-item"><i class="fas fa-circle-check"></i> Payment confirmation will appear instantly after verification.</div>
+              </div>
+            </div>
           </div>
-          <button class="pf-submit bkash" onclick="processPayment('bkash')">
-            <i class="fas fa-lock"></i> Pay with bKash
-          </button>
         </div>
       </div>
 
-      <!-- ── Nagad Form ── -->
-      <div class="pay-form-panel" id="form-nagad" style="display:none;">
-        <div class="pay-form-hd">
-          <div class="pay-form-hd-logo" style="background:linear-gradient(135deg,#f05323,#f7941d);">Nagad</div>
+      <div class="pay-form-panel" id="form-nagad">
+        <div class="pay-form-head">
+          <div class="pay-form-logo" style="background:linear-gradient(135deg,#f05323,#f7941d);">Nagad</div>
           <div>
-            <div class="pay-form-hd-title">Nagad Payment</div>
-            <div class="pay-form-hd-sub">Enter your Nagad number and PIN</div>
+            <div class="pay-form-title">Nagad Payment</div>
+            <div class="pay-form-sub">Enter your Nagad number and 4-digit PIN.</div>
           </div>
         </div>
         <div class="pay-form-body">
-          <div class="pf-amount-box">
-            <span class="pf-amount-lbl">Amount to Pay</span>
-            <span class="pf-amount-val">${{ "%.2f"|format(order.total_price) }}</span>
-          </div>
-          <div class="pf-group">
-            <label class="pf-label">Nagad Account Number</label>
-            <input class="pf-input nagad" type="tel" id="nagad-phone"
-                   placeholder="01XXXXXXXXX" maxlength="11">
-            <div class="pf-hint"><i class="fas fa-info-circle"></i> Enter your 11-digit Nagad number</div>
-          </div>
-          <div class="pf-group">
-            <label class="pf-label">Nagad PIN</label>
-            <div class="pin-row">
-              <input class="pin-dot nagad" type="password" maxlength="1" id="nagad-p1">
-              <input class="pin-dot nagad" type="password" maxlength="1" id="nagad-p2">
-              <input class="pin-dot nagad" type="password" maxlength="1" id="nagad-p3">
-              <input class="pin-dot nagad" type="password" maxlength="1" id="nagad-p4">
+          <div class="pay-form-grid">
+            <div>
+              <div class="pf-box">
+                <div class="pf-box-row">
+                  <span class="pf-box-label">Amount to Pay</span>
+                  <span class="pf-box-value">${{ "%.2f"|format(order.total_price) }}</span>
+                </div>
+              </div>
+
+              <div class="pf-group">
+                <label class="pf-label">Nagad Account Number</label>
+                <input class="pf-input nagad" type="tel" id="nagad-phone" placeholder="01XXXXXXXXX" maxlength="11">
+                <div class="pf-hint">Enter your 11-digit Nagad number.</div>
+              </div>
+
+              <div class="pf-group">
+                <label class="pf-label">Nagad PIN</label>
+                <div class="pin-row pin-4">
+                  <input class="pin-dot" type="password" maxlength="1" id="nagad-p1">
+                  <input class="pin-dot" type="password" maxlength="1" id="nagad-p2">
+                  <input class="pin-dot" type="password" maxlength="1" id="nagad-p3">
+                  <input class="pin-dot" type="password" maxlength="1" id="nagad-p4">
+                </div>
+                <div class="pf-hint">Your transaction PIN is encrypted and secure.</div>
+              </div>
+
+              <button class="pf-submit nagad" type="button" onclick="processPayment('nagad')">
+                <i class="fas fa-lock"></i> Pay with Nagad
+              </button>
             </div>
-            <div class="pf-hint"><i class="fas fa-shield-halved"></i> Your PIN is encrypted and secure</div>
+
+            <div class="pf-note-card">
+              <h4>Before you continue</h4>
+              <div class="pf-note-list">
+                <div class="pf-note-item"><i class="fas fa-circle-check"></i> Use the number registered to your Nagad account.</div>
+                <div class="pf-note-item"><i class="fas fa-circle-check"></i> Keep your phone nearby in case your provider requires additional verification.</div>
+                <div class="pf-note-item"><i class="fas fa-circle-check"></i> You will be returned to the order receipt after payment success.</div>
+              </div>
+            </div>
           </div>
-          <button class="pf-submit nagad" onclick="processPayment('nagad')">
-            <i class="fas fa-lock"></i> Pay with Nagad
-          </button>
         </div>
       </div>
 
-      <!-- ── Rocket Form ── -->
-      <div class="pay-form-panel" id="form-rocket" style="display:none;">
-        <div class="pay-form-hd">
-          <div class="pay-form-hd-logo" style="background:#8b1a7a;">Rocket</div>
+      <div class="pay-form-panel" id="form-rocket">
+        <div class="pay-form-head">
+          <div class="pay-form-logo" style="background:#8b1a7a;">Rocket</div>
           <div>
-            <div class="pay-form-hd-title">Rocket Payment</div>
-            <div class="pay-form-hd-sub">Enter your Rocket number and PIN</div>
+            <div class="pay-form-title">Rocket Payment</div>
+            <div class="pay-form-sub">Enter your Rocket account number and PIN.</div>
           </div>
         </div>
         <div class="pay-form-body">
-          <div class="pf-amount-box">
-            <span class="pf-amount-lbl">Amount to Pay</span>
-            <span class="pf-amount-val">${{ "%.2f"|format(order.total_price) }}</span>
-          </div>
-          <div class="pf-group">
-            <label class="pf-label">Rocket Account Number</label>
-            <input class="pf-input rocket" type="tel" id="rocket-phone"
-                   placeholder="01XXXXXXXXX" maxlength="11">
-            <div class="pf-hint"><i class="fas fa-info-circle"></i> Enter your 11-digit Rocket number</div>
-          </div>
-          <div class="pf-group">
-            <label class="pf-label">Rocket PIN</label>
-            <div class="pin-row">
-              <input class="pin-dot rocket" type="password" maxlength="1" id="rocket-p1">
-              <input class="pin-dot rocket" type="password" maxlength="1" id="rocket-p2">
-              <input class="pin-dot rocket" type="password" maxlength="1" id="rocket-p3">
-              <input class="pin-dot rocket" type="password" maxlength="1" id="rocket-p4">
+          <div class="pay-form-grid">
+            <div>
+              <div class="pf-box">
+                <div class="pf-box-row">
+                  <span class="pf-box-label">Amount to Pay</span>
+                  <span class="pf-box-value">${{ "%.2f"|format(order.total_price) }}</span>
+                </div>
+              </div>
+
+              <div class="pf-group">
+                <label class="pf-label">Rocket Account Number</label>
+                <input class="pf-input rocket" type="tel" id="rocket-phone" placeholder="01XXXXXXXXX" maxlength="11">
+                <div class="pf-hint">Enter your 11-digit Rocket mobile number.</div>
+              </div>
+
+              <div class="pf-group">
+                <label class="pf-label">Rocket PIN</label>
+                <div class="pin-row pin-4">
+                  <input class="pin-dot" type="password" maxlength="1" id="rocket-p1">
+                  <input class="pin-dot" type="password" maxlength="1" id="rocket-p2">
+                  <input class="pin-dot" type="password" maxlength="1" id="rocket-p3">
+                  <input class="pin-dot" type="password" maxlength="1" id="rocket-p4">
+                </div>
+                <div class="pf-hint">Your PIN is secure and  encrypted.>
+              </div>
+
+              <button class="pf-submit rocket" type="button" onclick="processPayment('rocket')">
+                <i class="fas fa-lock"></i> Pay with Rocket
+              </button>
             </div>
-            <div class="pf-hint"><i class="fas fa-shield-halved"></i> Your PIN is encrypted and secure</div>
+
+            <div class="pf-note-card">
+              <h4>Before you continue</h4>
+              <div class="pf-note-list">
+                <div class="pf-note-item"><i class="fas fa-circle-check"></i> Verify your Rocket wallet is active before submitting payment.</div>
+                <div class="pf-note-item"><i class="fas fa-circle-check"></i> Double-check the number to avoid failed verification.</div>
+                <div class="pf-note-item"><i class="fas fa-circle-check"></i> Order confirmation happens immediately after successful payment.</div>
+              </div>
+            </div>
           </div>
-          <button class="pf-submit rocket" onclick="processPayment('rocket')">
-            <i class="fas fa-lock"></i> Pay with Rocket
-          </button>
         </div>
       </div>
 
-      <!-- ── Card Form ── -->
-      <div class="pay-form-panel" id="form-card" style="display:none;">
-        <div class="pay-form-hd">
-          <div class="pay-form-hd-logo" style="background:linear-gradient(135deg,#1a56db,#1c64f2);"><i class="fas fa-credit-card"></i></div>
+      <div class="pay-form-panel" id="form-card">
+        <div class="pay-form-head">
+          <div class="pay-form-logo" style="background:linear-gradient(135deg,#1a56db,#1c64f2);"><i class="fas fa-credit-card"></i></div>
           <div>
-            <div class="pay-form-hd-title">Card Payment</div>
-            <div class="pay-form-hd-sub">Visa / Mastercard / American Express</div>
+            <div class="pay-form-title">Card Payment</div>
+            <div class="pay-form-sub">Visa / Mastercard / American Express</div>
           </div>
         </div>
         <div class="pay-form-body">
-          <div class="pf-amount-box">
-            <span class="pf-amount-lbl">Amount to Pay</span>
-            <span class="pf-amount-val">${{ "%.2f"|format(order.total_price) }}</span>
-          </div>
-          <div class="pf-group">
-            <label class="pf-label">Card Number</label>
-            <input class="pf-input" type="text" id="card-number"
-                   placeholder="1234 5678 9012 3456" maxlength="19">
-          </div>
-          <div class="card-row">
-            <div class="pf-group">
-              <label class="pf-label">Expiry Date</label>
-              <input class="pf-input" type="text" id="card-expiry" placeholder="MM/YY" maxlength="5">
+          <div class="pay-form-grid">
+            <div>
+              <div class="pf-box">
+                <div class="pf-box-row">
+                  <span class="pf-box-label">Amount to Pay</span>
+                  <span class="pf-box-value">${{ "%.2f"|format(order.total_price) }}</span>
+                </div>
+              </div>
+
+              <div class="pf-group">
+                <label class="pf-label">Card Number</label>
+                <input class="pf-input" type="text" id="card-number" placeholder="1234 5678 9012 3456" maxlength="19">
+              </div>
+
+              <div class="card-row">
+                <div class="pf-group">
+                  <label class="pf-label">Expiry Date</label>
+                  <input class="pf-input" type="text" id="card-expiry" placeholder="MM/YY" maxlength="5">
+                </div>
+                <div class="pf-group">
+                  <label class="pf-label">CVV</label>
+                  <input class="pf-input" type="password" id="card-cvv" placeholder="•••" maxlength="3">
+                </div>
+              </div>
+
+              <div class="pf-group">
+                <label class="pf-label">Cardholder Name</label>
+                <input class="pf-input" type="text" id="card-name" placeholder="Name on card">
+              </div>
+
+              <button class="pf-submit card" type="button" onclick="processPayment('card')">
+                <i class="fas fa-lock"></i> Pay ${{ "%.2f"|format(order.total_price) }}
+              </button>
             </div>
-            <div class="pf-group">
-              <label class="pf-label">CVV</label>
-              <input class="pf-input" type="password" id="card-cvv" placeholder="•••" maxlength="3">
+
+            <div class="pf-note-card">
+              <h4>Before you continue</h4>
+              <div class="pf-note-list">
+                <div class="pf-note-item"><i class="fas fa-circle-check"></i> Make sure your card number, expiry date, and CVV are entered correctly.</div>
+                <div class="pf-note-item"><i class="fas fa-circle-check"></i> Supported cards include Visa, Mastercard, and similar international cards.</div>
+                <div class="pf-note-item"><i class="fas fa-circle-check"></i> Your card details are only used to authorize this payment.</div>
+              </div>
             </div>
           </div>
-          <div class="pf-group">
-            <label class="pf-label">Cardholder Name</label>
-            <input class="pf-input" type="text" id="card-name" placeholder="Name on card">
-          </div>
-          <button class="pf-submit card" onclick="processPayment('card')">
-            <i class="fas fa-lock"></i> Pay ${{ "%.2f"|format(order.total_price) }}
-          </button>
         </div>
       </div>
 
-      <!-- ── Wallet Form ── -->
       {% if wallet and wallet.balance >= order.total_price %}
-      <div class="pay-form-panel" id="form-wallet" style="display:none;">
-        <div class="pay-form-hd">
-          <div class="pay-form-hd-logo" style="background:linear-gradient(135deg,#0d9488,#0ea5e9);"><i class="fas fa-wallet"></i></div>
+      <div class="pay-form-panel" id="form-wallet">
+        <div class="pay-form-head">
+          <div class="pay-form-logo" style="background:linear-gradient(135deg,#0d9488,#0ea5e9);"><i class="fas fa-wallet"></i></div>
           <div>
-            <div class="pay-form-hd-title">Wallet Payment</div>
-            <div class="pay-form-hd-sub">Balance: ${{ "%.2f"|format(wallet.balance) }}</div>
+            <div class="pay-form-title">Wallet Payment</div>
+            <div class="pay-form-sub">Balance: ${{ "%.2f"|format(wallet.balance) }}</div>
           </div>
         </div>
         <div class="pay-form-body">
-          <div class="pf-amount-box">
-            <span class="pf-amount-lbl">Amount to Deduct</span>
-            <span class="pf-amount-val">${{ "%.2f"|format(order.total_price) }}</span>
+          <div class="pay-form-grid">
+            <div>
+              <div class="pf-box">
+                <div class="pf-box-row">
+                  <span class="pf-box-label">Amount to Deduct</span>
+                  <span class="pf-box-value">${{ "%.2f"|format(order.total_price) }}</span>
+                </div>
+              </div>
+
+              <div class="pf-box">
+                <div class="pf-box-row">
+                  <span class="pf-box-label">Remaining Balance</span>
+                  <span class="pf-box-value">${{ "%.2f"|format(wallet.balance - order.total_price) }}</span>
+                </div>
+              </div>
+
+              <form method="POST" action="{{ url_for('payment.pay_with_wallet', order_id=order.id) }}">
+                <button class="pf-submit wallet" type="submit">
+                  <i class="fas fa-wallet"></i> Pay from Wallet
+                </button>
+              </form>
+            </div>
+
+            <div class="pf-note-card">
+              <h4>Before you continue</h4>
+              <div class="pf-note-list">
+                <div class="pf-note-item"><i class="fas fa-circle-check"></i> Wallet payment confirms your order instantly without any extra fields.</div>
+                <div class="pf-note-item"><i class="fas fa-circle-check"></i> The amount will be deducted only once when you submit the payment.</div>
+                <div class="pf-note-item"><i class="fas fa-circle-check"></i> Cashback, if applicable, will still be applied after successful confirmation.</div>
+              </div>
+            </div>
           </div>
-          <p style="font-size:.82rem;color:var(--nc-text-muted);margin-bottom:1rem;line-height:1.6;">
-            <i class="fas fa-circle-check" style="color:#0d9488;margin-right:.3rem;"></i>
-            ${{ "%.2f"|format(order.total_price) }} will be instantly deducted from your NutriConnect wallet.
-            Remaining balance will be ${{ "%.2f"|format(wallet.balance - order.total_price) }}.
-          </p>
-          <form method="POST" action="{{ url_for('payment.pay_with_wallet', order_id=order.id) }}">
-            <button class="pf-submit wallet" type="submit">
-              <i class="fas fa-wallet"></i> Pay from Wallet
-            </button>
-          </form>
         </div>
       </div>
       {% endif %}
-
-      <!-- Select method hint -->
-      <div id="select-hint" style="text-align:center;padding:2.5rem;color:var(--nc-text-faint);font-size:.88rem;">
-        <i class="fas fa-hand-pointer" style="font-size:1.8rem;margin-bottom:.75rem;display:block;opacity:.4;"></i>
-        Select a payment method above to continue
-      </div>
-
-    </div>
-
-    <!-- Order summary -->
-    <div class="pay-summary">
-      <div class="pay-sum-hd"><i class="fas fa-receipt" style="margin-right:.4rem;color:var(--nc-brand);"></i>Order Summary</div>
-      {% for item in order.items.all() %}
-      <div class="pay-sum-item">
-        <div class="pay-sum-img">
-          {% if item.food and item.food.image %}
-            <img src="{{ url_for('static', filename='uploads/' ~ item.food.image) }}" alt="{{ item.food_name }}">
-          {% else %}
-            <div class="pay-sum-img-ph"><i class="fas fa-utensils"></i></div>
-          {% endif %}
-        </div>
-        <div class="pay-sum-name">{{ item.food_name }}</div>
-        <div class="pay-sum-qty">×{{ item.quantity }}</div>
-        <div class="pay-sum-price">${{ "%.2f"|format(item.subtotal) }}</div>
-      </div>
-      {% endfor %}
-      <div class="pay-sum-total">
-        <span>Total</span>
-        <span>${{ "%.2f"|format(order.total_price) }}</span>
-      </div>
-      <div class="pay-secure">
-        <i class="fas fa-shield-halved"></i> 256-bit SSL Encrypted · Secure Payment
-      </div>
     </div>
   </div>
-
 </div>
 
-<!-- Processing overlay -->
 <div class="pay-processing" id="processingOverlay">
   <div class="pay-proc-box">
-    <div class="pay-proc-spinner" id="procSpinner"></div>
+    <div class="pay-proc-spinner"></div>
     <div class="pay-proc-title" id="procTitle">Processing Payment...</div>
-    <div class="pay-proc-sub" id="procSub">Please wait, do not close this page</div>
+    <div class="pay-proc-sub" id="procSub">Please wait, do not close this page.</div>
   </div>
 </div>
 
-<!-- Success overlay -->
 <div class="pay-success" id="successOverlay">
   <div class="pay-succ-box">
     <div class="pay-succ-icon">✓</div>
     <div class="pay-succ-title">Payment Successful!</div>
     <div class="pay-succ-sub" id="successMsg">
-      Your payment has been received.<br>Your order is now confirmed!
+      Your payment has been received successfully.
     </div>
-    <a href="{{ url_for('payment.confirm_payment', order_id=order.id) }}"
-       class="pay-succ-btn" id="successBtn">
+    <a href="{{ url_for('payment.confirm_payment', order_id=order.id) }}" class="pay-succ-btn" id="successBtn">
       <i class="fas fa-bag-shopping"></i> View Order
     </a>
   </div>
 </div>
 
 <script>
-const ORDER_ID = {{ order.id }};
-const CONFIRM_URL = "{{ url_for('payment.confirm_payment', order_id=order.id) }}";
+function selectMethod(method, buttonEl) {
+  document.querySelectorAll('.pm-card').forEach(card => card.classList.remove('active'));
+  document.querySelectorAll('.pay-form-panel').forEach(panel => panel.style.display = 'none');
 
-function selectMethod(method) {
-  // Hide all forms and hint
-  ['bkash','nagad','rocket','card','wallet'].forEach(m => {
-    const el = document.getElementById('form-' + m);
-    if (el) el.style.display = 'none';
-  });
-  document.getElementById('select-hint').style.display = 'none';
+  const hint = document.getElementById('select-hint');
+  if (hint) hint.style.display = 'none';
 
-  // Remove active from all buttons
-  document.querySelectorAll('.pay-method-btn').forEach(b => b.classList.remove('active'));
+  if (buttonEl) buttonEl.classList.add('active');
 
-  // Show selected form
   const form = document.getElementById('form-' + method);
   if (form) {
     form.style.display = 'block';
     form.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
   }
-
-  // Set active button
-  event.currentTarget.classList.add('active');
 }
 
 function processPayment(method) {
-  // Basic validation
   if (method === 'bkash') {
-    const phone = document.getElementById('bkash-phone').value;
+    const phone = document.getElementById('bkash-phone').value.trim();
     const pin = ['bkash-p1','bkash-p2','bkash-p3','bkash-p4','bkash-p5']
-                  .map(id => document.getElementById(id).value).join('');
+      .map(id => document.getElementById(id).value).join('');
     if (phone.length < 11) { alert('Please enter a valid bKash number'); return; }
-    if (pin.length < 5)    { alert('Please enter your 5-digit PIN'); return; }
-  }
-  if (method === 'nagad') {
-    const phone = document.getElementById('nagad-phone').value;
-    const pin = ['nagad-p1','nagad-p2','nagad-p3','nagad-p4']
-                  .map(id => document.getElementById(id).value).join('');
-    if (phone.length < 11) { alert('Please enter a valid Nagad number'); return; }
-    if (pin.length < 4)    { alert('Please enter your 4-digit PIN'); return; }
-  }
-  if (method === 'rocket') {
-    const phone = document.getElementById('rocket-phone').value;
-    const pin = ['rocket-p1','rocket-p2','rocket-p3','rocket-p4']
-                  .map(id => document.getElementById(id).value).join('');
-    if (phone.length < 11) { alert('Please enter a valid Rocket number'); return; }
-    if (pin.length < 4)    { alert('Please enter your 4-digit PIN'); return; }
-  }
-  if (method === 'card') {
-    const num  = document.getElementById('card-number').value.replace(/\s/g,'');
-    const exp  = document.getElementById('card-expiry').value;
-    const cvv  = document.getElementById('card-cvv').value;
-    const name = document.getElementById('card-name').value;
-    if (num.length < 16)  { alert('Please enter a valid card number'); return; }
-    if (!exp.includes('/')) { alert('Please enter expiry date (MM/YY)'); return; }
-    if (cvv.length < 3)   { alert('Please enter CVV'); return; }
-    if (!name.trim())     { alert('Please enter cardholder name'); return; }
+    if (pin.length < 5) { alert('Please enter your 5-digit PIN'); return; }
   }
 
-  // Show processing
+  if (method === 'nagad') {
+    const phone = document.getElementById('nagad-phone').value.trim();
+    const pin = ['nagad-p1','nagad-p2','nagad-p3','nagad-p4']
+      .map(id => document.getElementById(id).value).join('');
+    if (phone.length < 11) { alert('Please enter a valid Nagad number'); return; }
+    if (pin.length < 4) { alert('Please enter your 4-digit PIN'); return; }
+  }
+
+  if (method === 'rocket') {
+    const phone = document.getElementById('rocket-phone').value.trim();
+    const pin = ['rocket-p1','rocket-p2','rocket-p3','rocket-p4']
+      .map(id => document.getElementById(id).value).join('');
+    if (phone.length < 11) { alert('Please enter a valid Rocket number'); return; }
+    if (pin.length < 4) { alert('Please enter your 4-digit PIN'); return; }
+  }
+
+  if (method === 'card') {
+    const num = document.getElementById('card-number').value.replace(/\s/g, '');
+    const exp = document.getElementById('card-expiry').value.trim();
+    const cvv = document.getElementById('card-cvv').value.trim();
+    const name = document.getElementById('card-name').value.trim();
+
+    if (num.length < 16) { alert('Please enter a valid card number'); return; }
+    if (!exp.includes('/')) { alert('Please enter expiry date in MM/YY format'); return; }
+    if (cvv.length < 3) { alert('Please enter CVV'); return; }
+    if (!name) { alert('Please enter cardholder name'); return; }
+  }
+
   document.getElementById('processingOverlay').classList.add('show');
 
   const labels = {
     bkash:  ['Connecting to bKash...', 'Verifying PIN...', 'Processing payment...'],
     nagad:  ['Connecting to Nagad...', 'Verifying PIN...', 'Processing payment...'],
-    rocket: ['Connecting to Rocket...','Verifying PIN...', 'Processing payment...'],
-    card:   ['Verifying card...','Authorizing payment...','Processing payment...'],
+    rocket: ['Connecting to Rocket...', 'Verifying PIN...', 'Processing payment...'],
+    card:   ['Verifying card...', 'Authorizing payment...', 'Processing payment...'],
   };
 
   let step = 0;
-  const steps = labels[method] || ['Processing...','Please wait...','Confirming...'];
+  const steps = labels[method] || ['Processing...', 'Please wait...', 'Confirming...'];
 
   const interval = setInterval(() => {
     if (step < steps.length) {
@@ -580,15 +1249,13 @@ function processPayment(method) {
     }
   }, 900);
 
-  // After 3 seconds → call backend to confirm payment
   setTimeout(() => {
     clearInterval(interval);
 
-    // Get phone number if mobile payment
     let phone = '';
-    if (method === 'bkash')  phone = document.getElementById('bkash-phone').value;
-    if (method === 'nagad')  phone = document.getElementById('nagad-phone').value;
-    if (method === 'rocket') phone = document.getElementById('rocket-phone').value;
+    if (method === 'bkash') phone = document.getElementById('bkash-phone').value.trim();
+    if (method === 'nagad') phone = document.getElementById('nagad-phone').value.trim();
+    if (method === 'rocket') phone = document.getElementById('rocket-phone').value.trim();
 
     fetch("{{ url_for('payment.confirm_payment_ajax', order_id=order.id) }}", {
       method: 'POST',
@@ -598,9 +1265,10 @@ function processPayment(method) {
     .then(r => r.json())
     .then(data => {
       document.getElementById('processingOverlay').classList.remove('show');
+
       if (data.success) {
         document.getElementById('successMsg').innerHTML =
-          `Your <strong>${method.charAt(0).toUpperCase()+method.slice(1)}</strong> payment of <strong>${{ "%.2f"|format(order.total_price) }}</strong> was successful!<br>Your order is now confirmed.`;
+          `Your <strong>${method.charAt(0).toUpperCase() + method.slice(1)}</strong> payment of <strong>${{ "%.2f"|format(order.total_price) }}</strong> was successful.<br>Your order is now confirmed.`;
         document.getElementById('successOverlay').classList.add('show');
       } else {
         alert('Payment failed: ' + (data.error || 'Unknown error'));
@@ -610,37 +1278,30 @@ function processPayment(method) {
       document.getElementById('processingOverlay').classList.remove('show');
       alert('Network error. Please try again.');
     });
-
-  }, 3000);
+  }, 2800);
 }
 
-// Auto-advance PIN dots
-document.querySelectorAll('.pin-dot').forEach((dot, index, all) => {
+document.querySelectorAll('.pin-dot').forEach((dot) => {
   dot.addEventListener('input', () => {
-    if (dot.value && index < all.length - 1) {
-      // Find next dot in same group
-      const siblings = dot.closest('.pin-row').querySelectorAll('.pin-dot');
-      const idx = Array.from(siblings).indexOf(dot);
-      if (idx < siblings.length - 1) siblings[idx + 1].focus();
-    }
+    const siblings = Array.from(dot.parentElement.querySelectorAll('.pin-dot'));
+    const idx = siblings.indexOf(dot);
+    if (dot.value && idx < siblings.length - 1) siblings[idx + 1].focus();
   });
 });
 
-// Card number formatting
 const cardInput = document.getElementById('card-number');
 if (cardInput) {
   cardInput.addEventListener('input', e => {
-    let v = e.target.value.replace(/\D/g,'').substring(0,16);
-    e.target.value = v.replace(/(.{4})/g,'$1 ').trim();
+    let v = e.target.value.replace(/\D/g, '').substring(0, 16);
+    e.target.value = v.replace(/(.{4})/g, '$1 ').trim();
   });
 }
 
-// Card expiry formatting
 const expiryInput = document.getElementById('card-expiry');
 if (expiryInput) {
   expiryInput.addEventListener('input', e => {
-    let v = e.target.value.replace(/\D/g,'');
-    if (v.length >= 2) v = v.substring(0,2) + '/' + v.substring(2,4);
+    let v = e.target.value.replace(/\D/g, '');
+    if (v.length >= 2) v = v.substring(0, 2) + '/' + v.substring(2, 4);
     e.target.value = v;
   });
 }

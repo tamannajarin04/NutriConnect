@@ -326,6 +326,13 @@
     background: var(--surf);
   }
 
+  .pod-select:disabled {
+    opacity: .72;
+    cursor: not-allowed;
+    background: var(--s3);
+    color: var(--mu);
+  }
+
   .pod-submit {
     width: 100%;
     height: 46px;
@@ -348,6 +355,10 @@
   .pod-submit:disabled {
     opacity: .65;
     cursor: not-allowed;
+    transform: none;
+    filter: none;
+    box-shadow: none;
+    background: linear-gradient(135deg, #64748b, #475569);
   }
 
   .pod-status-row {
@@ -395,6 +406,37 @@
   [data-theme="dark"] .st-ready     { background: rgba(16,185,129,.12); color: #34d399; }
   [data-theme="dark"] .st-delivered { background: rgba(16,185,129,.12); color: #34d399; }
   [data-theme="dark"] .st-cancelled { background: rgba(244,63,94,.12);  color: #fb7185; }
+
+  .pod-lock-note {
+    display: flex;
+    align-items: flex-start;
+    gap: .65rem;
+    margin-bottom: .9rem;
+    padding: .9rem 1rem;
+    border-radius: 14px;
+    border: 1px solid rgba(16,185,129,.2);
+    background: rgba(16,185,129,.08);
+    color: var(--txt2);
+  }
+
+  .pod-lock-note i {
+    margin-top: .12rem;
+    color: var(--emerald);
+    flex: 0 0 auto;
+  }
+
+  .pod-lock-title {
+    font-size: .84rem;
+    font-weight: 900;
+    color: var(--txt);
+    margin-bottom: .12rem;
+  }
+
+  .pod-lock-sub {
+    font-size: .76rem;
+    line-height: 1.6;
+    color: var(--mu);
+  }
 
   .pod-timeline {
     display: flex;
@@ -490,6 +532,7 @@
 
 {% set items = order.items.all() if order and order.items else [] %}
 {% set timeline_entries = order.timeline.all() if order and order.timeline else [] %}
+{% set is_delivered = (order.status == 'delivered') %}
 
 <div class="pod">
   <div class="pod-wrap">
@@ -575,13 +618,32 @@
               <span class="pod-badge st-{{ order.status }}">{{ order.status.title() }}</span>
             </div>
 
+            {% if is_delivered %}
+            <div class="pod-lock-note">
+              <i class="fas fa-lock"></i>
+              <div>
+                <div class="pod-lock-title">Delivered order is locked</div>
+                <div class="pod-lock-sub">
+                  This order has already been marked as delivered, so the provider cannot change its status again.
+                </div>
+              </div>
+            </div>
+            {% endif %}
+
             <form method="post" action="{{ url_for('provider.update_order_status', order_id=order.id) }}">
-              <select name="status" class="pod-select">
+              <select name="status" class="pod-select" {% if is_delivered %}disabled{% endif %}>
                 {% for s in ['pending','confirmed','preparing','ready','delivered','cancelled'] %}
                 <option value="{{ s }}" {% if order.status == s %}selected{% endif %}>{{ s.title() }}</option>
                 {% endfor %}
               </select>
-              <button class="pod-submit" type="submit">Save Status</button>
+
+              <button class="pod-submit" type="submit" {% if is_delivered %}disabled{% endif %}>
+                {% if is_delivered %}
+                  <i class="fas fa-lock"></i> Delivered Locked
+                {% else %}
+                  Save Status
+                {% endif %}
+              </button>
             </form>
           </div>
         </div>
