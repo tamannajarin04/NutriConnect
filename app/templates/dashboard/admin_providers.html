@@ -570,12 +570,12 @@
                         {% if provider.profile_picture %}
                           <img src="{{ url_for('static', filename=provider.profile_picture) }}" alt="{{ provider.username }}">
                         {% else %}
-                          {{ provider.username[0]|upper }}
+                          {{ provider.username[0]|upper if provider.username else 'P' }}
                         {% endif %}
                       </div>
                       <div style="min-width:0;">
-                        <div class="provider-name">{{ provider.username }}</div>
-                        <div class="provider-email">{{ provider.email }}</div>
+                        <div class="provider-name">{{ provider.username or 'Unknown Provider' }}</div>
+                        <div class="provider-email">{{ provider.email or 'No email' }}</div>
                       </div>
                     </div>
                   </td>
@@ -606,7 +606,7 @@
                   </td>
 
                   <td>
-                    <div class="food-count">{{ provider.foods.count() }}</div>
+                    <div class="food-count">{{ provider.foods|length if provider.foods is not none else 0 }}</div>
                   </td>
 
                   <td class="actions-cell">
