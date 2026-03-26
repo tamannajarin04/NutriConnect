@@ -1,781 +1,616 @@
-<!DOCTYPE html>
-<html lang="en" data-theme="light">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>{% block title %}NutriConnect{% endblock %}</title>
-  <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}">
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/custom.css') }}">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-  <style>
-    :root,[data-theme="light"] {
-      --nc-bg:#f8faff;--nc-surface:#ffffff;--nc-surface-2:#f1f5f9;--nc-surface-3:#e8edf5;
-      --nc-text:#0d1117;--nc-text-2:#374151;--nc-text-muted:#6b7280;--nc-text-faint:#9ca3af;
-      --nc-border:#e2e8f0;--nc-border-2:#cbd5e1;
-      --nc-brand:#0ea5e9;--nc-brand-d:#0284c7;--nc-brand-l:#e0f2fe;
-      --nc-nav-bg:rgba(255,255,255,0.88);--nc-nav-border:rgba(0,0,0,0.08);
-      --nc-nav-shadow:0 1px 0 rgba(0,0,0,0.06),0 4px 16px rgba(0,0,0,0.05);
-      --nc-card-bg:#ffffff;--nc-card-border:#e2e8f0;
-      --nc-card-shadow:0 1px 3px rgba(0,0,0,0.05),0 4px 16px rgba(0,0,0,0.06);
-      --nc-input-bg:#f8faff;--nc-input-border:#d1d5db;--nc-input-text:#0d1117;
-      --nc-hero-bg:#0d1117;
+{% extends "base.html" %}
 
-      /* Notification popup - light mode */
-      --notif-bg: rgba(255,255,255,0.88);
-      --notif-border: rgba(0,0,0,0.08);
-      --notif-shadow: 0 8px 32px rgba(0,0,0,0.14), 0 2px 8px rgba(0,0,0,0.08);
-      --notif-item-hover: rgba(14,165,233,0.06);
-      --notif-unread-bg: rgba(14,165,233,0.05);
-      --notif-title: #0d1117;
-      --notif-msg: #374151;
-      --notif-time: #9ca3af;
-      --notif-sep: rgba(0,0,0,0.07);
-      --notif-hd-bg: rgba(248,250,255,0.9);
-    }
-    [data-theme="dark"] {
-      --nc-bg:#0d1117;--nc-surface:#161b22;--nc-surface-2:#1c2333;--nc-surface-3:#21262d;
-      --nc-text:#e6edf3;--nc-text-2:#b1bac4;--nc-text-muted:#8b949e;--nc-text-faint:#6e7681;
-      --nc-border:#30363d;--nc-border-2:#3d444d;
-      --nc-brand:#38bdf8;--nc-brand-d:#0ea5e9;--nc-brand-l:#0c2340;
-      --nc-nav-bg:rgba(22,27,34,0.92);--nc-nav-border:rgba(255,255,255,0.06);
-      --nc-nav-shadow:0 1px 0 rgba(255,255,255,0.04),0 4px 16px rgba(0,0,0,0.4);
-      --nc-card-bg:#161b22;--nc-card-border:#30363d;
-      --nc-card-shadow:0 1px 3px rgba(0,0,0,0.3),0 4px 16px rgba(0,0,0,0.3);
-      --nc-input-bg:#1c2333;--nc-input-border:#30363d;--nc-input-text:#e6edf3;
-      --nc-hero-bg:#010409;
+{% block title %}BMI Calculator | NutriConnect{% endblock %}
 
-      /* Notification popup - dark mode */
-      --notif-bg: rgba(22,27,34,0.92);
-      --notif-border: rgba(255,255,255,0.08);
-      --notif-shadow: 0 8px 40px rgba(0,0,0,0.5), 0 2px 8px rgba(0,0,0,0.3);
-      --notif-item-hover: rgba(56,189,248,0.07);
-      --notif-unread-bg: rgba(56,189,248,0.06);
-      --notif-title: #e6edf3;
-      --notif-msg: #8b949e;
-      --notif-time: #6e7681;
-      --notif-sep: rgba(255,255,255,0.06);
-      --notif-hd-bg: rgba(13,17,23,0.8);
+{% block extra_css %}
+<style>
+  .bmi-page {
+    max-width: 1180px;
+    margin: 0 auto;
+  }
+
+  .bmi-hero {
+    position: relative;
+    overflow: hidden;
+    border-radius: 28px;
+    padding: 2.25rem 2rem;
+    margin-bottom: 1.75rem;
+    background:
+      radial-gradient(circle at top right, rgba(14, 165, 233, .18), transparent 28%),
+      linear-gradient(135deg, rgba(14, 165, 233, .12), rgba(56, 189, 248, .04)),
+      var(--nc-card-bg);
+    border: 1px solid var(--nc-card-border);
+    box-shadow: var(--nc-card-shadow);
+  }
+
+  .bmi-hero__badge {
+    display: inline-flex;
+    align-items: center;
+    gap: .45rem;
+    padding: .45rem .8rem;
+    border-radius: 999px;
+    background: rgba(14, 165, 233, .12);
+    color: var(--nc-brand);
+    font-size: .8rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+  }
+
+  .bmi-hero h1 {
+    font-size: clamp(1.8rem, 4vw, 2.8rem);
+    font-weight: 800;
+    letter-spacing: -.03em;
+    margin-bottom: .75rem;
+    color: var(--nc-text);
+  }
+
+  .bmi-hero p {
+    margin: 0;
+    max-width: 760px;
+    color: var(--nc-text-muted);
+    font-size: 1rem;
+    line-height: 1.75;
+  }
+
+  .bmi-card {
+    border: 1px solid var(--nc-card-border);
+    border-radius: 24px;
+    background: var(--nc-card-bg);
+    box-shadow: var(--nc-card-shadow);
+    overflow: hidden;
+    height: 100%;
+  }
+
+  .bmi-card .card-body {
+    padding: 1.6rem;
+  }
+
+  .bmi-section-title {
+    display: flex;
+    align-items: center;
+    gap: .65rem;
+    font-size: 1.15rem;
+    font-weight: 800;
+    color: var(--nc-text);
+    margin-bottom: .35rem;
+  }
+
+  .bmi-section-subtitle {
+    color: var(--nc-text-muted);
+    font-size: .92rem;
+    margin-bottom: 1.2rem;
+  }
+
+  .bmi-input-group {
+    margin-bottom: 1rem;
+  }
+
+  .bmi-input-addon {
+    font-size: .85rem;
+    font-weight: 700;
+    color: var(--nc-text-muted);
+    background: var(--nc-surface-2);
+    border: 1px solid var(--nc-border);
+    border-radius: 12px;
+    padding: .8rem 1rem;
+  }
+
+  .bmi-form-control {
+    border-radius: 14px !important;
+    padding: .9rem 1rem !important;
+    font-size: .98rem;
+  }
+
+  .bmi-submit {
+    width: 100%;
+    border: none;
+    border-radius: 14px;
+    padding: .95rem 1.1rem;
+    font-weight: 800;
+    font-size: .95rem;
+    color: #fff;
+    background: linear-gradient(135deg, var(--nc-brand), var(--nc-brand-d));
+    box-shadow: 0 10px 24px rgba(14, 165, 233, .22);
+    transition: transform .15s ease, box-shadow .15s ease, opacity .15s ease;
+  }
+
+  .bmi-submit:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 14px 28px rgba(14, 165, 233, .28);
+    opacity: .98;
+  }
+
+  .bmi-note {
+    margin-top: .9rem;
+    font-size: .85rem;
+    color: var(--nc-text-muted);
+  }
+
+  .bmi-result-wrap {
+    display: grid;
+    gap: 1rem;
+  }
+
+  .bmi-score-box {
+    border-radius: 22px;
+    padding: 1.5rem;
+    background:
+      linear-gradient(180deg, rgba(14, 165, 233, .12), rgba(14, 165, 233, .03)),
+      var(--nc-surface-2);
+    border: 1px solid var(--nc-border);
+  }
+
+  .bmi-score-label {
+    color: var(--nc-text-muted);
+    font-size: .88rem;
+    font-weight: 700;
+    margin-bottom: .5rem;
+  }
+
+  .bmi-score-value {
+    font-size: clamp(2.4rem, 5vw, 3.6rem);
+    line-height: 1;
+    font-weight: 900;
+    letter-spacing: -.05em;
+    color: var(--nc-text);
+    margin-bottom: .8rem;
+  }
+
+  .bmi-category-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: .55rem .9rem;
+    border-radius: 999px;
+    font-size: .85rem;
+    font-weight: 800;
+    white-space: nowrap;
+  }
+
+  .bmi-underweight {
+    background: rgba(245, 158, 11, .15);
+    color: #b45309;
+  }
+
+  .bmi-normal {
+    background: rgba(16, 185, 129, .15);
+    color: #047857;
+  }
+
+  .bmi-overweight {
+    background: rgba(249, 115, 22, .15);
+    color: #c2410c;
+  }
+
+  .bmi-obese {
+    background: rgba(239, 68, 68, .15);
+    color: #b91c1c;
+  }
+
+  [data-theme="dark"] .bmi-underweight { color: #fbbf24; }
+  [data-theme="dark"] .bmi-normal { color: #34d399; }
+  [data-theme="dark"] .bmi-overweight { color: #fb923c; }
+  [data-theme="dark"] .bmi-obese { color: #f87171; }
+
+  .bmi-metrics {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: .9rem;
+  }
+
+  .bmi-metric {
+    border-radius: 18px;
+    padding: 1rem;
+    background: var(--nc-surface-2);
+    border: 1px solid var(--nc-border);
+  }
+
+  .bmi-metric-label {
+    display: block;
+    color: var(--nc-text-muted);
+    font-size: .8rem;
+    margin-bottom: .3rem;
+    font-weight: 700;
+  }
+
+  .bmi-metric-value {
+    color: var(--nc-text);
+    font-size: 1.05rem;
+    font-weight: 800;
+  }
+
+  .bmi-scale {
+    display: grid;
+    gap: .7rem;
+  }
+
+  .bmi-scale-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: .8rem;
+    padding: .9rem 1rem;
+    border-radius: 16px;
+    background: var(--nc-surface-2);
+    border: 1px solid var(--nc-border);
+  }
+
+  .bmi-scale-left {
+    display: flex;
+    align-items: center;
+    gap: .7rem;
+    font-weight: 700;
+    color: var(--nc-text);
+  }
+
+  .bmi-scale-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  .dot-underweight { background: #f59e0b; }
+  .dot-normal { background: #10b981; }
+  .dot-overweight { background: #f97316; }
+  .dot-obese { background: #ef4444; }
+
+  .bmi-scale-range {
+    color: var(--nc-text-muted);
+    font-size: .9rem;
+    font-weight: 700;
+  }
+
+  .bmi-history-table {
+    width: 100%;
+    margin-bottom: 0;
+    border-collapse: separate;
+    border-spacing: 0 10px;
+    --bs-table-bg: transparent;
+    --bs-table-color: var(--nc-text);
+    --bs-table-border-color: transparent;
+    --bs-table-striped-bg: transparent;
+    --bs-table-striped-color: var(--nc-text);
+    --bs-table-active-bg: transparent;
+    --bs-table-active-color: var(--nc-text);
+    --bs-table-hover-bg: transparent;
+    --bs-table-hover-color: var(--nc-text);
+  }
+
+  .bmi-history-table thead th {
+    background: rgba(14, 165, 233, .12);
+    color: var(--nc-brand) !important;
+    border: 1px solid rgba(14, 165, 233, .14) !important;
+    padding: .95rem .9rem;
+    font-size: .78rem;
+    text-transform: uppercase;
+    letter-spacing: .06em;
+    font-weight: 800;
+  }
+
+  .bmi-history-table thead th:first-child {
+    border-top-left-radius: 14px;
+    border-bottom-left-radius: 14px;
+  }
+
+  .bmi-history-table thead th:last-child {
+    border-top-right-radius: 14px;
+    border-bottom-right-radius: 14px;
+  }
+
+  .bmi-history-table tbody tr {
+    transform: translateY(0);
+    transition: transform .16s ease;
+  }
+
+  .bmi-history-table tbody tr:hover {
+    transform: translateY(-1px);
+  }
+
+  .bmi-history-table tbody td {
+    background: var(--nc-surface-2) !important;
+    color: var(--nc-text) !important;
+    border-top: 1px solid var(--nc-border) !important;
+    border-bottom: 1px solid var(--nc-border) !important;
+    border-left: none !important;
+    border-right: none !important;
+    padding: .95rem .9rem;
+    vertical-align: middle;
+    font-weight: 700;
+  }
+
+  .bmi-history-table tbody td:first-child {
+    border-left: 1px solid var(--nc-border) !important;
+    border-top-left-radius: 16px;
+    border-bottom-left-radius: 16px;
+  }
+
+  .bmi-history-table tbody td:last-child {
+    border-right: 1px solid var(--nc-border) !important;
+    border-top-right-radius: 16px;
+    border-bottom-right-radius: 16px;
+  }
+
+  .bmi-history-table tbody td,
+  .bmi-history-table tbody td span,
+  .bmi-history-table tbody td div {
+    color: inherit !important;
+  }
+
+  .bmi-empty {
+    text-align: center;
+    padding: 2rem 1rem;
+    color: var(--nc-text-muted);
+  }
+
+  .bmi-empty i {
+    font-size: 2rem;
+    margin-bottom: .8rem;
+    color: var(--nc-text-faint);
+  }
+
+  @media (max-width: 991.98px) {
+    .bmi-card .card-body {
+      padding: 1.25rem;
+    }
+  }
+
+  @media (max-width: 575.98px) {
+    .bmi-hero {
+      padding: 1.5rem 1.1rem;
+      border-radius: 22px;
     }
 
-    *,*::before,*::after{box-sizing:border-box;}
-    html{scroll-behavior:smooth;}
-    body{font-family:'Sora',sans-serif;background:var(--nc-bg);color:var(--nc-text);margin:0;transition:background .25s,color .25s;}
-    .card{background:var(--nc-card-bg)!important;border-color:var(--nc-card-border)!important;color:var(--nc-text)!important;}
-    .table{color:var(--nc-text)!important;}
-    .table td,.table th{border-color:var(--nc-border)!important;}
-    .form-control,.form-select{background:var(--nc-input-bg)!important;border-color:var(--nc-input-border)!important;color:var(--nc-input-text)!important;}
-    .form-control:focus,.form-select:focus{background:var(--nc-input-bg)!important;color:var(--nc-input-text)!important;border-color:var(--nc-brand)!important;box-shadow:0 0 0 3px rgba(14,165,233,.18)!important;}
-    .form-control::placeholder{color:var(--nc-text-faint)!important;}
-    .form-label{color:var(--nc-text-2)!important;}
-    .text-muted{color:var(--nc-text-muted)!important;}
-    hr{border-color:var(--nc-border)!important;opacity:1;}
-    a{color:var(--nc-brand);}
-    a:hover{color:var(--nc-brand-d);}
-    :root{--brand:var(--nc-brand);--brand-light:var(--nc-brand-l);--brand-dark:var(--nc-brand-d);--surface:var(--nc-surface);--bg:var(--nc-bg);--text:var(--nc-text);--border:var(--nc-border);--muted:var(--nc-text-muted);}
-
-    /* ── Navbar ── */
-    .nc-navbar{position:sticky;top:0;z-index:1000;background:var(--nc-nav-bg);border-bottom:1px solid var(--nc-nav-border);box-shadow:var(--nc-nav-shadow);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);transition:background .25s,box-shadow .25s;}
-    .nc-navbar.scrolled{box-shadow:0 2px 20px rgba(0,0,0,.12);}
-    .nc-navbar__inner{display:flex;align-items:center;justify-content:space-between;height:64px;gap:1rem;}
-    .nc-brand{display:flex;align-items:center;gap:.6rem;text-decoration:none;}
-    .nc-brand__text{line-height:1;font-weight:800;font-size:1.15rem;letter-spacing:-.02em;}
-    .nc-brand__nutri{color:var(--nc-brand);}
-    .nc-brand__connect{color:var(--nc-text);}
-    .nc-nav{display:flex;align-items:center;gap:.25rem;list-style:none;margin:0;padding:0;}
-    .nc-nav__link{display:flex;align-items:center;gap:.4rem;padding:.45rem .85rem;border-radius:9px;font-size:.85rem;font-weight:600;text-decoration:none;color:var(--nc-text-muted);transition:color .15s,background .15s;}
-    .nc-nav__link:hover{color:var(--nc-brand);background:var(--nc-brand-l);}
-    .nc-nav__link.active{color:var(--nc-brand);background:var(--nc-brand-l);}
-    .nc-navbar__actions{display:flex;align-items:center;gap:.6rem;}
-    .nc-cart-badge{background:var(--nc-brand);color:#fff;border-radius:99px;padding:.05rem .45rem;font-size:.6rem;font-weight:800;margin-left:.2rem;line-height:1.4;}
-
-    /* ══════════════════════════════════════════════
-       BELL NOTIFICATION SYSTEM
-    ══════════════════════════════════════════════ */
-    .nc-notif-wrap { position: relative; }
-
-    .nc-bell-btn {
-      position: relative;
-      width: 38px; height: 38px; border-radius: 50%;
-      background: var(--nc-surface-2);
-      border: 1.5px solid var(--nc-border);
-      display: flex; align-items: center; justify-content: center;
-      cursor: pointer; color: var(--nc-text-muted);
-      font-size: .9rem; transition: all .15s;
-      outline: none;
-    }
-    .nc-bell-btn:hover { background: var(--nc-brand-l); color: var(--nc-brand); border-color: rgba(14,165,233,.3); }
-    .nc-bell-btn.open  { background: var(--nc-brand-l); color: var(--nc-brand); border-color: rgba(14,165,233,.3); }
-
-    @keyframes bell-ring {
-      0%,100%{transform:rotate(0)}
-      15%{transform:rotate(12deg)}
-      30%{transform:rotate(-10deg)}
-      45%{transform:rotate(8deg)}
-      60%{transform:rotate(-6deg)}
-      75%{transform:rotate(3deg)}
-    }
-    .nc-bell-btn:hover i { animation: bell-ring .5s ease; }
-
-    .nc-bell-badge {
-      position: absolute; top: -4px; right: -4px;
-      min-width: 18px; height: 18px; border-radius: 99px;
-      background: #ef4444; color: #fff;
-      font-size: .58rem; font-weight: 800;
-      display: flex; align-items: center; justify-content: center;
-      padding: 0 4px;
-      border: 2px solid var(--nc-nav-bg);
-    }
-    @keyframes badge-pop { from{transform:scale(0)} to{transform:scale(1)} }
-    .nc-bell-badge { animation: badge-pop .2s cubic-bezier(.34,1.56,.64,1) both; }
-
-    /* ── Notification dropdown popup ── */
-    .nc-notif-popup {
-      position: absolute; right: 0; top: calc(100% + 10px);
-      width: 380px;
-      background: var(--notif-bg);
-      border: 1.5px solid var(--notif-border);
-      border-radius: 20px;
-      box-shadow: var(--notif-shadow);
-      backdrop-filter: blur(24px) saturate(1.6);
-      -webkit-backdrop-filter: blur(24px) saturate(1.6);
-      z-index: 3000;
-      overflow: hidden;
-
-      /* Hidden state */
-      opacity: 0;
-      pointer-events: none;
-      transform: scale(.95) translateY(-8px);
-      transform-origin: top right;
-      transition: opacity .2s ease, transform .2s cubic-bezier(.16,1,.3,1);
-    }
-    .nc-notif-popup.open {
-      opacity: 1;
-      pointer-events: auto;
-      transform: scale(1) translateY(0);
+    .bmi-metrics {
+      grid-template-columns: 1fr;
     }
 
-    @media(max-width:440px){ .nc-notif-popup { width:calc(100vw - 2rem); right:-1rem; } }
-
-    /* Popup header */
-    .nc-notif-hd {
-      display: flex; align-items: center; justify-content: space-between;
-      padding: .85rem 1.1rem;
-      background: var(--notif-hd-bg);
-      border-bottom: 1px solid var(--notif-sep);
-    }
-    .nc-notif-hd-left { display: flex; align-items: center; gap: .55rem; }
-    .nc-notif-hd-title {
-      font-size: .82rem; font-weight: 900;
-      color: var(--notif-title); letter-spacing: -.02em;
-    }
-    .nc-notif-hd-count {
-      background: var(--nc-brand); color: #fff;
-      border-radius: 99px; padding: .08rem .5rem;
-      font-size: .62rem; font-weight: 800;
-      font-family: 'JetBrains Mono', monospace;
-    }
-    .nc-notif-mark-all {
-      font-size: .72rem; font-weight: 700;
-      color: var(--nc-brand); cursor: pointer;
-      background: none; border: none; padding: 0;
-      font-family: 'Sora', sans-serif;
-      transition: opacity .13s;
-    }
-    .nc-notif-mark-all:hover { opacity: .7; }
-
-    /* Notification items list */
-    .nc-notif-list {
-      max-height: 380px;
-      overflow-y: auto;
-      overflow-x: hidden;
-    }
-    .nc-notif-list::-webkit-scrollbar { width: 3px; }
-    .nc-notif-list::-webkit-scrollbar-track { background: transparent; }
-    .nc-notif-list::-webkit-scrollbar-thumb { background: var(--notif-sep); border-radius: 99px; }
-
-    /* Single notification item */
-    .nc-notif-item {
-      display: flex; align-items: flex-start; gap: .75rem;
-      padding: .88rem 1.1rem;
-      border-bottom: 1px solid var(--notif-sep);
-      cursor: pointer;
-      transition: background .13s;
-      text-decoration: none;
-    }
-    .nc-notif-item:last-child { border-bottom: none; }
-    .nc-notif-item:hover { background: var(--notif-item-hover); }
-    .nc-notif-item.unread { background: var(--notif-unread-bg); }
-    .nc-notif-item.unread:hover { background: var(--notif-item-hover); }
-
-    /* Icon circle */
-    .nc-notif-ico {
-      width: 36px; height: 36px; border-radius: 50%;
-      display: flex; align-items: center; justify-content: center;
-      font-size: .8rem; flex-shrink: 0; margin-top: .05rem;
-    }
-    .nc-notif-ico.new_order        { background: rgba(16,185,129,.15);  color: #059669; }
-    .nc-notif-ico.order_paid       { background: rgba(14,165,233,.15);  color: var(--nc-brand); }
-    .nc-notif-ico.payment_sent     { background: rgba(139,92,246,.15);  color: #7c3aed; }
-    .nc-notif-ico.payment_received { background: rgba(16,185,129,.15);  color: #059669; }
-    .nc-notif-ico.wallet_topup     { background: rgba(245,158,11,.15);  color: #d97706; }
-    .nc-notif-ico.default          { background: var(--nc-surface-2);   color: var(--nc-text-faint); }
-    [data-theme="dark"] .nc-notif-ico.new_order        { background: rgba(16,185,129,.18);  color: #34d399; }
-    [data-theme="dark"] .nc-notif-ico.order_paid       { background: rgba(56,189,248,.15);  color: #38bdf8; }
-    [data-theme="dark"] .nc-notif-ico.payment_sent     { background: rgba(139,92,246,.15);  color: #c4b5fd; }
-    [data-theme="dark"] .nc-notif-ico.payment_received { background: rgba(16,185,129,.15);  color: #34d399; }
-    [data-theme="dark"] .nc-notif-ico.wallet_topup     { background: rgba(245,158,11,.15);  color: #fcd34d; }
-
-    /* Text */
-    .nc-notif-body { flex: 1; min-width: 0; }
-    .nc-notif-title {
-      font-size: .82rem; font-weight: 800;
-      color: var(--notif-title);
-      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-      margin-bottom: .2rem;
-    }
-    .nc-notif-msg {
-      font-size: .75rem; color: var(--notif-msg);
-      line-height: 1.5;
-      display: -webkit-box; -webkit-line-clamp: 2;
-      -webkit-box-orient: vertical; overflow: hidden;
-    }
-    .nc-notif-time {
-      font-size: .67rem; color: var(--notif-time);
-      margin-top: .28rem;
-      display: flex; align-items: center; gap: .25rem;
+    .bmi-scale-item {
+      flex-direction: column;
+      align-items: flex-start;
     }
 
-    /* Unread dot */
-    .nc-notif-dot {
-      width: 7px; height: 7px; border-radius: 50%;
-      background: var(--nc-brand); flex-shrink: 0;
-      margin-top: .55rem;
+    .bmi-history-table {
+      border-spacing: 0 8px;
     }
 
-    /* Empty state inside popup */
-    .nc-notif-empty {
-      padding: 2.5rem 1.5rem; text-align: center;
+    .bmi-history-table thead th,
+    .bmi-history-table tbody td {
+      padding: .85rem .75rem;
+      font-size: .85rem;
     }
-    .nc-notif-empty-ico {
-      font-size: 1.8rem; color: var(--nc-text-faint);
-      margin-bottom: .6rem; display: block;
-    }
-    .nc-notif-empty-title {
-      font-size: .88rem; font-weight: 800;
-      color: var(--notif-title); margin-bottom: .25rem;
-    }
-    .nc-notif-empty-sub {
-      font-size: .76rem; color: var(--notif-msg);
-    }
+  }
+</style>
+{% endblock %}
 
-    /* Footer link */
-    .nc-notif-footer {
-      padding: .65rem 1.1rem; text-align: center;
-      border-top: 1px solid var(--notif-sep);
-      background: var(--notif-hd-bg);
-    }
-    .nc-notif-footer a {
-      font-size: .76rem; font-weight: 700;
-      color: var(--nc-brand); text-decoration: none;
-    }
-    .nc-notif-footer a:hover { opacity: .75; }
+{% block content %}
+<div class="bmi-page">
+  <section class="bmi-hero">
+    <div class="bmi-hero__badge">
+      <i class="fas fa-heart-pulse"></i>
+      BMI Health Tracker
+    </div>
+    <h1>Calculate and track your BMI</h1>
+    <p>
+      Enter your height in meters and weight in kilograms to calculate your Body Mass Index.
+      Your latest result will be shown instantly, and your recent records will stay saved for quick tracking.
+    </p>
+  </section>
 
-    /* ── Theme FAB ── */
-    .theme-fab{position:fixed;bottom:1.75rem;left:1.75rem;z-index:9999;display:flex;flex-direction:column;align-items:center;gap:.5rem;}
-    .theme-fab__trigger{width:48px;height:48px;border-radius:50%;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:1.15rem;background:var(--nc-surface);color:var(--nc-text);box-shadow:0 4px 16px rgba(0,0,0,.15),0 1px 4px rgba(0,0,0,.1);border:1.5px solid var(--nc-border);transition:transform .2s,box-shadow .2s;position:relative;}
-    .theme-fab__trigger:hover{transform:scale(1.08);box-shadow:0 6px 24px rgba(0,0,0,.2);}
-    .theme-fab__trigger .icon-sun,.theme-fab__trigger .icon-moon{position:absolute;transition:opacity .3s,transform .3s;}
-    [data-theme="light"] .theme-fab__trigger .icon-sun{opacity:1;transform:rotate(0deg) scale(1);}
-    [data-theme="light"] .theme-fab__trigger .icon-moon{opacity:0;transform:rotate(90deg) scale(.6);}
-    [data-theme="dark"] .theme-fab__trigger .icon-sun{opacity:0;transform:rotate(-90deg) scale(.6);}
-    [data-theme="dark"] .theme-fab__trigger .icon-moon{opacity:1;transform:rotate(0deg) scale(1);}
-    .theme-fab__panel{background:var(--nc-surface);border:1.5px solid var(--nc-border);border-radius:16px;padding:.5rem;box-shadow:0 8px 32px rgba(0,0,0,.15);display:flex;flex-direction:column;gap:.25rem;min-width:148px;transform-origin:bottom center;transform:scale(.85) translateY(8px);opacity:0;pointer-events:none;transition:transform .22s cubic-bezier(.34,1.56,.64,1),opacity .18s;}
-    .theme-fab__panel.open{transform:scale(1) translateY(0);opacity:1;pointer-events:auto;}
-    .theme-option{display:flex;align-items:center;gap:.65rem;padding:.55rem .8rem;border-radius:10px;cursor:pointer;border:none;background:none;font-family:inherit;font-size:.82rem;font-weight:600;color:var(--nc-text-2);transition:background .12s,color .12s;width:100%;text-align:left;}
-    .theme-option:hover{background:var(--nc-surface-2);color:var(--nc-text);}
-    .theme-option.active{background:var(--nc-brand-l);color:var(--nc-brand);}
-    .theme-option .t-icon{width:28px;height:28px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:.85rem;flex-shrink:0;}
-    .theme-option:nth-child(1) .t-icon{background:#fef3c7;color:#d97706;}
-    .theme-option:nth-child(2) .t-icon{background:#1e293b;color:#94a3b8;}
-    .theme-option:nth-child(3) .t-icon{background:var(--nc-surface-2);color:var(--nc-text-muted);}
-    .theme-option .t-check{margin-left:auto;font-size:.7rem;color:var(--nc-brand);opacity:0;transition:opacity .15s;}
-    .theme-option.active .t-check{opacity:1;}
-    .theme-fab__label{position:absolute;left:56px;top:50%;transform:translateY(-50%);background:var(--nc-surface);border:1px solid var(--nc-border);border-radius:8px;padding:.25rem .65rem;font-size:.74rem;font-weight:600;white-space:nowrap;color:var(--nc-text);pointer-events:none;box-shadow:0 2px 8px rgba(0,0,0,.1);opacity:0;transition:opacity .15s;}
-    .theme-fab__trigger:hover+.theme-fab__label,.theme-fab__trigger:focus+.theme-fab__label{opacity:1;}
-
-    /* ── User menu ── */
-    .nc-user-menu{position:relative;}
-    .nc-user-btn{display:flex;align-items:center;gap:.5rem;background:var(--nc-surface-2);border:1px solid var(--nc-border);border-radius:99px;padding:.3rem .85rem .3rem .3rem;cursor:pointer;transition:background .15s,border-color .15s;font-family:inherit;}
-    .nc-user-btn:hover{background:var(--nc-surface-3);border-color:var(--nc-border-2);}
-    .nc-avatar{width:30px;height:30px;border-radius:50%;background:var(--nc-brand);color:#fff;display:flex;align-items:center;justify-content:center;font-size:.82rem;font-weight:700;flex-shrink:0;}
-    .nc-avatar--lg{width:40px;height:40px;font-size:1rem;}
-    .nc-user-btn__name{font-size:.83rem;font-weight:600;color:var(--nc-text);}
-    .nc-chip{background:var(--nc-brand-l);color:var(--nc-brand-d);border-radius:99px;padding:.1rem .55rem;font-size:.7rem;font-weight:700;letter-spacing:.03em;}
-    .nc-chevron{font-size:.65rem;color:var(--nc-text-muted);transition:transform .2s;}
-    .nc-user-btn.open .nc-chevron{transform:rotate(180deg);}
-    .nc-dropdown{position:absolute;right:0;top:calc(100% + 8px);background:var(--nc-surface);border:1px solid var(--nc-border);border-radius:14px;box-shadow:0 8px 32px rgba(0,0,0,.15);width:220px;padding:.5rem;display:none;z-index:2000;animation:dropIn .18s ease;}
-    @keyframes dropIn{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:translateY(0)}}
-    .nc-dropdown.open{display:block;}
-    .nc-dropdown__header{display:flex;align-items:center;gap:.75rem;padding:.5rem .6rem .75rem;}
-    .nc-dropdown__name{font-size:.88rem;font-weight:700;color:var(--nc-text);}
-    .nc-dropdown__role{font-size:.74rem;color:var(--nc-text-muted);margin-top:.1rem;}
-    .nc-dropdown__sep{height:1px;background:var(--nc-border);margin:.3rem 0;}
-    .nc-dropdown__item{display:flex;align-items:center;gap:.6rem;padding:.55rem .75rem;border-radius:9px;font-size:.84rem;font-weight:500;text-decoration:none;color:var(--nc-text-2);transition:background .12s,color .12s;}
-    .nc-dropdown__item:hover{background:var(--nc-surface-2);color:var(--nc-text);}
-    .nc-dropdown__item.active{background:var(--nc-brand-l);color:var(--nc-brand);}
-    .nc-dropdown__item--red{color:#ef4444;}
-    .nc-dropdown__item--red:hover{background:#fef2f2;color:#dc2626;}
-    [data-theme="dark"] .nc-dropdown__item--red:hover{background:#2d1515;}
-    .nc-btn{display:inline-flex;align-items:center;gap:.4rem;background:var(--nc-brand);color:#fff;border:none;border-radius:10px;padding:.5rem 1.1rem;font-size:.83rem;font-weight:700;text-decoration:none;transition:background .15s,transform .1s;}
-    .nc-btn:hover{background:var(--nc-brand-d);color:#fff;transform:translateY(-1px);}
-    .nc-hamburger{background:none;border:none;cursor:pointer;display:flex;flex-direction:column;gap:5px;padding:4px;}
-    .nc-hamburger span{display:block;width:22px;height:2px;background:var(--nc-text-muted);border-radius:2px;transition:transform .2s,opacity .2s,width .2s;}
-    .nc-hamburger.open span:nth-child(1){transform:translateY(7px) rotate(45deg);}
-    .nc-hamburger.open span:nth-child(2){opacity:0;width:0;}
-    .nc-hamburger.open span:nth-child(3){transform:translateY(-7px) rotate(-45deg);}
-    .nc-mobile-drawer{display:none;background:var(--nc-surface);border-top:1px solid var(--nc-border);box-shadow:0 8px 24px rgba(0,0,0,.1);}
-    .nc-mobile-drawer.open{display:block;}
-    .nc-mobile-link{display:flex;align-items:center;gap:.6rem;padding:.7rem .5rem;border-radius:9px;margin-bottom:.1rem;font-size:.88rem;font-weight:600;text-decoration:none;color:var(--nc-text-2);transition:background .12s,color .12s;}
-    .nc-mobile-link:hover{background:var(--nc-surface-2);color:var(--nc-brand);}
-    .nc-mobile-link.active{background:var(--nc-brand-l);color:var(--nc-brand);}
-    .nc-mobile-link--primary{color:var(--nc-brand);}
-    .nc-mobile-link--red{color:#ef4444;}
-    .nc-mobile-sep{height:1px;background:var(--nc-border);margin:.5rem 0;}
-    .nc-alerts{display:flex;flex-direction:column;gap:.5rem;}
-    .nc-alert{display:flex;align-items:center;gap:.75rem;padding:.8rem 1rem;border-radius:12px;font-size:.87rem;font-weight:500;border:1px solid transparent;}
-    .nc-alert--success{background:#d1fae5;color:#065f46;border-color:#a7f3d0;}
-    .nc-alert--danger{background:#fee2e2;color:#991b1b;border-color:#fca5a5;}
-    .nc-alert--warning{background:#fef3c7;color:#92400e;border-color:#fde68a;}
-    .nc-alert--info{background:#e0f2fe;color:#075985;border-color:#bae6fd;}
-    [data-theme="dark"] .nc-alert--success{background:#0d2e1f;color:#6ee7b7;border-color:#065f46;}
-    [data-theme="dark"] .nc-alert--danger{background:#2d1515;color:#fca5a5;border-color:#991b1b;}
-    [data-theme="dark"] .nc-alert--warning{background:#2d2007;color:#fde68a;border-color:#92400e;}
-    [data-theme="dark"] .nc-alert--info{background:#0c2340;color:#7dd3fc;border-color:#075985;}
-    .nc-alert__icon{font-size:1rem;flex-shrink:0;}
-    .nc-alert__close{background:none;border:none;cursor:pointer;margin-left:auto;opacity:.6;font-size:.85rem;color:inherit;transition:opacity .15s;}
-    .nc-alert__close:hover{opacity:1;}
-    .nc-footer{background:var(--nc-surface);border-top:1px solid var(--nc-border);padding:1.5rem 0;margin-top:3rem;}
-    .nc-footer__row{display:flex;align-items:center;flex-wrap:wrap;gap:1rem;justify-content:space-between;}
-    .nc-footer__copy{font-size:.82rem;color:var(--nc-text-muted);margin:0;}
-    .nc-footer__links{display:flex;gap:1.25rem;}
-    .nc-footer__links a{font-size:.82rem;color:var(--nc-text-muted);text-decoration:none;}
-    .nc-footer__links a:hover{color:var(--nc-brand);}
-  </style>
-  {% block extra_css %}{% endblock %}
-</head>
-<body>
-  {% set ep = request.endpoint or '' %}
-
-  <nav class="nc-navbar">
-    <div class="container">
-      <div class="nc-navbar__inner">
-
-        <a class="nc-brand" href="{{ url_for('main.home') }}">
-          <div class="nc-brand__icon">
-            <svg width="38" height="38" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <defs>
-                <linearGradient id="appleBody" x1="20" y1="10" x2="80" y2="95" gradientUnits="userSpaceOnUse">
-                  <stop offset="0%" stop-color="#0096c7"/><stop offset="55%" stop-color="#0077b6"/><stop offset="100%" stop-color="#023e8a"/>
-                </linearGradient>
-                <linearGradient id="appleShine" x1="30" y1="20" x2="55" y2="60" gradientUnits="userSpaceOnUse">
-                  <stop offset="0%" stop-color="rgba(255,255,255,0.55)"/><stop offset="100%" stop-color="rgba(255,255,255,0)"/>
-                </linearGradient>
-              </defs>
-              <path d="M50 28 C50 28 36 18 26 24 C14 31 13 48 16 60 C19 72 26 88 36 90 C41 91 46 86 50 86 C54 86 59 91 64 90 C74 88 81 72 84 60 C87 48 86 31 74 24 C64 18 50 28 50 28Z" fill="url(#appleBody)"/>
-              <ellipse cx="36" cy="46" rx="10" ry="15" fill="url(#appleShine)" transform="rotate(-15 36 46)"/>
-              <path d="M50 28 C50 18 56 10 62 8" stroke="#00b4d8" stroke-width="3.5" stroke-linecap="round" fill="none"/>
-              <path d="M56 16 C60 10 68 10 66 17 C64 22 56 20 56 16Z" fill="#00b4d8" opacity="0.9"/>
-            </svg>
+  <div class="row g-4">
+    <div class="col-lg-5">
+      <div class="bmi-card">
+        <div class="card-body">
+          <div class="bmi-section-title">
+            <i class="fas fa-calculator text-primary"></i>
+            BMI Calculator
           </div>
-          <span class="nc-brand__text">
-            <span class="nc-brand__nutri">Nutri</span><span class="nc-brand__connect">Connect</span>
-          </span>
-        </a>
+          <div class="bmi-section-subtitle">
+            Fill in your measurements to get your current BMI.
+          </div>
 
-        <!-- DESKTOP NAV -->
-        <ul class="nc-nav d-none d-lg-flex">
-          {% if current_user.is_authenticated %}
-            {% if current_user.is_admin() %}
-              <li><a class="nc-nav__link {% if ep.startswith('admin.') %}active{% endif %}" href="{{ url_for('admin.dashboard') }}"><i class="fas fa-table-cells-large"></i> Dashboard</a></li>
-              <li><a class="nc-nav__link {% if ep.startswith('analytics.') %}active{% endif %}" href="{{ url_for('analytics.analytics_dashboard') }}"><i class="fas fa-chart-line"></i> Analytics</a></li>
-              <li><a class="nc-nav__link" href="{{ url_for('user_dashboard.view_profile') }}"><i class="fas fa-user"></i> Profile</a></li>
-            {% elif current_user.is_food_provider() %}
-              <li><a class="nc-nav__link {% if ep == 'provider.provider_dashboard' %}active{% endif %}" href="{{ url_for('provider.provider_dashboard') }}"><i class="fas fa-table-cells-large"></i> Dashboard</a></li>
-              <li><a class="nc-nav__link {% if ep.startswith('provider.provider_order') %}active{% endif %}" href="{{ url_for('provider.provider_orders') }}"><i class="fas fa-bag-shopping"></i> Orders</a></li>
-              <li><a class="nc-nav__link" href="{{ url_for('user_dashboard.view_profile') }}"><i class="fas fa-user"></i> Profile</a></li>
-              <li><a class="nc-nav__link {% if ep.startswith('food_search.') %}active{% endif %}" href="{{ url_for('food_search.search_foods') }}"><i class="fas fa-magnifying-glass"></i> Find Food</a></li>
-            {% else %}
-              <li><a class="nc-nav__link {% if ep == 'user_dashboard.index' %}active{% endif %}" href="{{ url_for('user_dashboard.index') }}"><i class="fas fa-table-cells-large"></i> Dashboard</a></li>
-              <li><a class="nc-nav__link" href="{{ url_for('user_dashboard.view_profile') }}"><i class="fas fa-user"></i> Profile</a></li>
-              <li><a class="nc-nav__link {% if ep.startswith('food_search.') %}active{% endif %}" href="{{ url_for('food_search.search_foods') }}"><i class="fas fa-magnifying-glass"></i> Find Food</a></li>
-              <li>
-                <a class="nc-nav__link {% if ep == 'orders.cart' %}active{% endif %}" href="{{ url_for('orders.cart') }}">
-                  <i class="fas fa-cart-shopping"></i> Cart
-                  {% set cart_count = current_user.cart_items.count() %}
-                  {% if cart_count > 0 %}<span class="nc-cart-badge">{{ cart_count }}</span>{% endif %}
-                </a>
-              </li>
-              <li><a class="nc-nav__link {% if ep.startswith('orders.') and ep != 'orders.cart' %}active{% endif %}" href="{{ url_for('orders.order_history') }}"><i class="fas fa-bag-shopping"></i> Orders</a></li>
-              <li><a class="nc-nav__link {% if ep == 'payment.wallet_dashboard' %}active{% endif %}" href="{{ url_for('payment.wallet_dashboard') }}"><i class="fas fa-wallet"></i> Wallet</a></li>
-              <li><a class="nc-nav__link {% if ep == 'user_dashboard.dietary_preferences' %}active{% endif %}" href="{{ url_for('user_dashboard.dietary_preferences') }}"><i class="fas fa-bowl-food"></i> Diet</a></li>
-            {% endif %}
-          {% else %}
-            <li><a class="nc-nav__link" href="{{ url_for('auth.login') }}">Login</a></li>
-          {% endif %}
-        </ul>
-
-        <div class="nc-navbar__actions">
-
-          {% if current_user.is_authenticated %}
-
-            <!-- ★ NOTIFICATION BELL WITH POPUP ★ -->
-            <div class="nc-notif-wrap">
-              <button class="nc-bell-btn" id="bellBtn" aria-label="Notifications">
-                <i class="fas fa-bell"></i>
-                {% set notif_count = current_user.unread_notifications_count %}
-                {% if notif_count > 0 %}
-                  <span class="nc-bell-badge" id="bellBadge">{{ notif_count if notif_count < 100 else '99+' }}</span>
-                {% endif %}
-              </button>
-
-              <!-- Popup dropdown -->
-              <div class="nc-notif-popup" id="notifPopup">
-
-                <!-- Header -->
-                <div class="nc-notif-hd">
-                  <div class="nc-notif-hd-left">
-                    <span class="nc-notif-hd-title">Notifications</span>
-                    {% if notif_count > 0 %}
-                      <span class="nc-notif-hd-count" id="notifHdCount">{{ notif_count }}</span>
-                    {% endif %}
-                  </div>
-                  {% if notif_count > 0 %}
-                    <button class="nc-notif-mark-all" id="markAllBtn">
-                      <i class="fas fa-check-double" style="margin-right:.3rem;"></i>Mark all read
-                    </button>
-                  {% endif %}
-                </div>
-
-                <!-- Notifications list -->
-                <div class="nc-notif-list" id="notifList">
-                  {% set recent_notifs = current_user.notifications.order_by('created_at desc').limit(10).all() %}
-                  {% if recent_notifs %}
-                    {% for n in recent_notifs %}
-                    <a class="nc-notif-item {{ 'unread' if not n.is_read }}"
-                       href="{{ n.link or '#' }}"
-                       data-id="{{ n.id }}">
-                      <div class="nc-notif-ico {{ n.type if n.type in ['new_order','order_paid','payment_sent','payment_received','wallet_topup'] else 'default' }}">
-                        {% if n.type == 'new_order' %}
-                          <i class="fas fa-bag-shopping"></i>
-                        {% elif n.type == 'payment_sent' %}
-                          <i class="fas fa-paper-plane"></i>
-                        {% elif n.type == 'payment_received' %}
-                          <i class="fas fa-money-bill-wave"></i>
-                        {% elif n.type == 'wallet_topup' %}
-                          <i class="fas fa-wallet"></i>
-                        {% elif n.type == 'order_paid' %}
-                          <i class="fas fa-circle-check"></i>
-                        {% else %}
-                          <i class="fas fa-bell"></i>
-                        {% endif %}
-                      </div>
-                      <div class="nc-notif-body">
-                        <div class="nc-notif-title">{{ n.title }}</div>
-                        <div class="nc-notif-msg">{{ n.message }}</div>
-                        <div class="nc-notif-time">
-                          <i class="fas fa-clock"></i>
-                          {{ n.created_at.strftime('%d %b · %I:%M %p') }}
-                        </div>
-                      </div>
-                      {% if not n.is_read %}
-                        <div class="nc-notif-dot"></div>
-                      {% endif %}
-                    </a>
-                    {% endfor %}
-                  {% else %}
-                    <div class="nc-notif-empty">
-                      <span class="nc-notif-empty-ico"><i class="fas fa-bell-slash"></i></span>
-                      <div class="nc-notif-empty-title">No notifications yet</div>
-                      <div class="nc-notif-empty-sub">Order alerts will appear here</div>
-                    </div>
-                  {% endif %}
-                </div>
-
-                <!-- Footer -->
-                {% if recent_notifs %}
-                <div class="nc-notif-footer">
-                  <a href="{{ url_for('payment.notifications') }}">
-                    View all notifications <i class="fas fa-arrow-right" style="font-size:.65rem;"></i>
-                  </a>
-                </div>
-                {% endif %}
-
+          <form method="POST" action="{{ url_for('bmi.bmi') }}">
+            <div class="bmi-input-group">
+              <label for="height" class="form-label">Height</label>
+              <div class="input-group">
+                <input
+                  type="number"
+                  class="form-control bmi-form-control"
+                  id="height"
+                  name="height"
+                  step="0.01"
+                  min="0.5"
+                  max="3.0"
+                  placeholder="e.g. 1.70"
+                  value="{{ result.height if result else '' }}"
+                  required
+                >
+                <span class="bmi-input-addon">meters</span>
               </div>
             </div>
-            <!-- END NOTIFICATION BELL -->
 
-            <div class="nc-user-menu">
-              <button class="nc-user-btn" id="userMenuBtn">
-                <span class="nc-avatar">{{ current_user.username[0]|upper }}</span>
-                <span class="nc-user-btn__name d-none d-md-inline">{{ current_user.username }}</span>
-                {% for role in current_user.roles %}<span class="nc-chip">{{ role.name }}</span>{% endfor %}
-                <i class="fas fa-chevron-down nc-chevron"></i>
-              </button>
-              <div class="nc-dropdown" id="userDropdown">
-                <div class="nc-dropdown__header">
-                  <span class="nc-avatar nc-avatar--lg">{{ current_user.username[0]|upper }}</span>
-                  <div>
-                    <div class="nc-dropdown__name">{{ current_user.username }}</div>
-                    <div class="nc-dropdown__role">{% for role in current_user.roles %}{{ role.name }}{% if not loop.last %}, {% endif %}{% endfor %}</div>
-                  </div>
-                </div>
-                <div class="nc-dropdown__sep"></div>
-                {% if current_user.is_admin() %}
-                  <a class="nc-dropdown__item {% if ep.startswith('admin.') %}active{% endif %}" href="{{ url_for('admin.dashboard') }}"><i class="fas fa-table-cells-large"></i> Dashboard</a>
-                  <a class="nc-dropdown__item {% if ep.startswith('analytics.') %}active{% endif %}" href="{{ url_for('analytics.analytics_dashboard') }}"><i class="fas fa-chart-line"></i> Analytics</a>
-                  <a class="nc-dropdown__item" href="{{ url_for('user_dashboard.view_profile') }}"><i class="fas fa-user"></i> Profile</a>
-                {% elif current_user.is_food_provider() %}
-                  <a class="nc-dropdown__item {% if ep == 'provider.provider_dashboard' %}active{% endif %}" href="{{ url_for('provider.provider_dashboard') }}"><i class="fas fa-table-cells-large"></i> Dashboard</a>
-                  <a class="nc-dropdown__item {% if ep.startswith('provider.provider_order') %}active{% endif %}" href="{{ url_for('provider.provider_orders') }}"><i class="fas fa-bag-shopping"></i> Orders</a>
-                  <a class="nc-dropdown__item {% if ep.startswith('food_search.') %}active{% endif %}" href="{{ url_for('food_search.search_foods') }}"><i class="fas fa-magnifying-glass"></i> Find Food</a>
-                {% else %}
-                  <a class="nc-dropdown__item {% if ep == 'user_dashboard.index' %}active{% endif %}" href="{{ url_for('user_dashboard.index') }}"><i class="fas fa-chart-bar"></i> Dashboard</a>
-                  <a class="nc-dropdown__item" href="{{ url_for('user_dashboard.view_profile') }}"><i class="fas fa-user"></i> Profile</a>
-                  <a class="nc-dropdown__item {% if ep.startswith('food_search.') %}active{% endif %}" href="{{ url_for('food_search.search_foods') }}"><i class="fas fa-magnifying-glass"></i> Find Food</a>
-                  <a class="nc-dropdown__item {% if ep == 'orders.cart' %}active{% endif %}" href="{{ url_for('orders.cart') }}">
-                    <i class="fas fa-cart-shopping"></i> Cart
-                    {% set cc = current_user.cart_items.count() %}
-                    {% if cc > 0 %}<span style="margin-left:auto;" class="nc-cart-badge">{{ cc }}</span>{% endif %}
-                  </a>
-                  <a class="nc-dropdown__item {% if ep.startswith('orders.') and ep != 'orders.cart' %}active{% endif %}" href="{{ url_for('orders.order_history') }}"><i class="fas fa-bag-shopping"></i> Orders</a>
-                  <a class="nc-dropdown__item {% if ep == 'payment.wallet_dashboard' %}active{% endif %}" href="{{ url_for('payment.wallet_dashboard') }}"><i class="fas fa-wallet"></i> Wallet</a>
-                  <a class="nc-dropdown__item {% if ep == 'user_dashboard.dietary_preferences' %}active{% endif %}" href="{{ url_for('user_dashboard.dietary_preferences') }}"><i class="fas fa-bowl-food"></i> Diet Prefs</a>
-                {% endif %}
-                <a class="nc-dropdown__item" href="{{ url_for('user_dashboard.edit_profile') }}"><i class="fas fa-pen-to-square"></i> Edit Profile</a>
-                <div class="nc-dropdown__sep"></div>
-                <a class="nc-dropdown__item nc-dropdown__item--red" href="{{ url_for('auth.logout') }}"><i class="fas fa-right-from-bracket"></i> Logout</a>
+            <div class="bmi-input-group">
+              <label for="weight" class="form-label">Weight</label>
+              <div class="input-group">
+                <input
+                  type="number"
+                  class="form-control bmi-form-control"
+                  id="weight"
+                  name="weight"
+                  step="0.1"
+                  min="1"
+                  placeholder="e.g. 65"
+                  value="{{ result.weight if result else '' }}"
+                  required
+                >
+                <span class="bmi-input-addon">kg</span>
               </div>
             </div>
-          {% else %}
-            <a class="nc-btn" href="{{ url_for('auth.register') }}">Get Started <i class="fas fa-arrow-right"></i></a>
-          {% endif %}
 
-          <button class="nc-hamburger d-lg-none" id="mobileMenuBtn">
-            <span></span><span></span><span></span>
-          </button>
+            <button type="submit" class="bmi-submit">
+              <i class="fas fa-chart-line me-2"></i>
+              Calculate BMI
+            </button>
+
+            <div class="bmi-note">
+              Healthy adult BMI range is generally considered <strong>18.5 to 24.9</strong>.
+            </div>
+          </form>
         </div>
       </div>
     </div>
 
-    <!-- MOBILE DRAWER -->
-    <div class="nc-mobile-drawer" id="mobileMenu">
-      <div class="container py-3">
-        {% if current_user.is_authenticated %}
-          {% if current_user.is_admin() %}
-            <a class="nc-mobile-link {% if ep.startswith('admin.') %}active{% endif %}" href="{{ url_for('admin.dashboard') }}"><i class="fas fa-table-cells-large"></i> Dashboard</a>
-            <a class="nc-mobile-link {% if ep.startswith('analytics.') %}active{% endif %}" href="{{ url_for('analytics.analytics_dashboard') }}"><i class="fas fa-chart-line"></i> Analytics</a>
-            <a class="nc-mobile-link" href="{{ url_for('user_dashboard.view_profile') }}"><i class="fas fa-user"></i> Profile</a>
-          {% elif current_user.is_food_provider() %}
-            <a class="nc-mobile-link {% if ep == 'provider.provider_dashboard' %}active{% endif %}" href="{{ url_for('provider.provider_dashboard') }}"><i class="fas fa-table-cells-large"></i> Dashboard</a>
-            <a class="nc-mobile-link {% if ep.startswith('provider.provider_order') %}active{% endif %}" href="{{ url_for('provider.provider_orders') }}"><i class="fas fa-bag-shopping"></i> Orders</a>
-            <a class="nc-mobile-link" href="{{ url_for('user_dashboard.view_profile') }}"><i class="fas fa-user"></i> Profile</a>
-            <a class="nc-mobile-link {% if ep.startswith('food_search.') %}active{% endif %}" href="{{ url_for('food_search.search_foods') }}"><i class="fas fa-magnifying-glass"></i> Find Food</a>
-            <a class="nc-mobile-link {% if ep == 'payment.notifications' %}active{% endif %}" href="{{ url_for('payment.notifications') }}">
-              <i class="fas fa-bell"></i> Notifications
-              {% set nc = current_user.unread_notifications_count %}
-              {% if nc > 0 %}<span class="nc-cart-badge">{{ nc }}</span>{% endif %}
-            </a>
-          {% else %}
-            <a class="nc-mobile-link {% if ep == 'user_dashboard.index' %}active{% endif %}" href="{{ url_for('user_dashboard.index') }}"><i class="fas fa-table-cells-large"></i> Dashboard</a>
-            <a class="nc-mobile-link" href="{{ url_for('user_dashboard.view_profile') }}"><i class="fas fa-user"></i> Profile</a>
-            <a class="nc-mobile-link {% if ep.startswith('food_search.') %}active{% endif %}" href="{{ url_for('food_search.search_foods') }}"><i class="fas fa-magnifying-glass"></i> Find Food</a>
-            <a class="nc-mobile-link {% if ep == 'orders.cart' %}active{% endif %}" href="{{ url_for('orders.cart') }}">
-              <i class="fas fa-cart-shopping"></i> Cart
-              {% set cc = current_user.cart_items.count() %}{% if cc > 0 %}<span class="nc-cart-badge">{{ cc }}</span>{% endif %}
-            </a>
-            <a class="nc-mobile-link {% if ep.startswith('orders.') and ep != 'orders.cart' %}active{% endif %}" href="{{ url_for('orders.order_history') }}"><i class="fas fa-bag-shopping"></i> Orders</a>
-            <a class="nc-mobile-link {% if ep == 'payment.wallet_dashboard' %}active{% endif %}" href="{{ url_for('payment.wallet_dashboard') }}"><i class="fas fa-wallet"></i> Wallet</a>
-            <a class="nc-mobile-link {% if ep == 'user_dashboard.dietary_preferences' %}active{% endif %}" href="{{ url_for('user_dashboard.dietary_preferences') }}"><i class="fas fa-bowl-food"></i> Diet Prefs</a>
-          {% endif %}
-          <a class="nc-mobile-link" href="{{ url_for('user_dashboard.edit_profile') }}"><i class="fas fa-pen-to-square"></i> Edit Profile</a>
-          <div class="nc-mobile-sep"></div>
-          <a class="nc-mobile-link nc-mobile-link--red" href="{{ url_for('auth.logout') }}"><i class="fas fa-right-from-bracket"></i> Logout</a>
-        {% else %}
-          <a class="nc-mobile-link" href="{{ url_for('auth.login') }}"><i class="fas fa-sign-in-alt"></i> Login</a>
-          <a class="nc-mobile-link nc-mobile-link--primary" href="{{ url_for('auth.register') }}"><i class="fas fa-user-plus"></i> Get Started</a>
-        {% endif %}
-      </div>
-    </div>
-  </nav>
-
-  {% with messages = get_flashed_messages(with_categories=true) %}
-    {% if messages %}
-      <div class="nc-alerts container mt-3">
-        {% for category, message in messages %}
-          <div class="nc-alert nc-alert--{{ category }}">
-            <span class="nc-alert__icon">
-              {% if category == 'success' %}<i class="fas fa-circle-check"></i>
-              {% elif category == 'danger' %}<i class="fas fa-circle-xmark"></i>
-              {% elif category == 'warning' %}<i class="fas fa-triangle-exclamation"></i>
-              {% else %}<i class="fas fa-circle-info"></i>{% endif %}
-            </span>
-            <span>{{ message }}</span>
-            <button class="nc-alert__close" onclick="this.closest('.nc-alert').remove()"><i class="fas fa-xmark"></i></button>
+    <div class="col-lg-7">
+      <div class="bmi-card">
+        <div class="card-body">
+          <div class="bmi-section-title">
+            <i class="fas fa-square-poll-vertical text-primary"></i>
+            Latest Result
           </div>
-        {% endfor %}
-      </div>
-    {% endif %}
-  {% endwith %}
+          <div class="bmi-section-subtitle">
+            {% if result %}
+              Based on your most recent calculation.
+            {% else %}
+              Your calculated BMI will appear here after submission.
+            {% endif %}
+          </div>
 
-  <main class="container my-5">
-    {% block content %}{% endblock %}
-  </main>
+          {% if result %}
+            <div class="bmi-result-wrap">
+              <div class="bmi-score-box">
+                <div class="bmi-score-label">Your BMI Score</div>
+                <div class="bmi-score-value">{{ result.bmi }}</div>
+                <span class="bmi-category-badge bmi-{{ result.category|lower }}">
+                  {{ result.category }}
+                </span>
+              </div>
 
-  <footer class="nc-footer">
-    <div class="container">
-      <div class="nc-footer__row">
-        <a class="nc-brand" href="{{ url_for('main.home') }}">
-          <svg width="28" height="28" viewBox="0 0 100 100" fill="none">
-            <defs>
-              <linearGradient id="appleBodyF" x1="20" y1="10" x2="80" y2="95" gradientUnits="userSpaceOnUse">
-                <stop offset="0%" stop-color="#0096c7"/><stop offset="55%" stop-color="#0077b6"/><stop offset="100%" stop-color="#023e8a"/>
-              </linearGradient>
-            </defs>
-            <path d="M50 28 C50 28 36 18 26 24 C14 31 13 48 16 60 C19 72 26 88 36 90 C41 91 46 86 50 86 C54 86 59 91 64 90 C74 88 81 72 84 60 C87 48 86 31 74 24 C64 18 50 28 50 28Z" fill="url(#appleBodyF)"/>
-          </svg>
-          <span class="nc-brand__text"><span class="nc-brand__nutri">Nutri</span><span class="nc-brand__connect">Connect</span></span>
-        </a>
-        <p class="nc-footer__copy">&copy; 2026 NutriConnect &mdash; Nourish smarter, live better.</p>
-        <div class="nc-footer__links"><a href="#">Privacy</a><a href="#">Terms</a><a href="#">Help</a></div>
+              <div class="bmi-metrics">
+                <div class="bmi-metric">
+                  <span class="bmi-metric-label">Height</span>
+                  <div class="bmi-metric-value">{{ result.height }} m</div>
+                </div>
+                <div class="bmi-metric">
+                  <span class="bmi-metric-label">Weight</span>
+                  <div class="bmi-metric-value">{{ result.weight }} kg</div>
+                </div>
+              </div>
+            </div>
+          {% else %}
+            <div class="bmi-empty">
+              <i class="fas fa-weight-scale"></i>
+              <div>No BMI result yet. Enter your data and calculate your BMI.</div>
+            </div>
+          {% endif %}
+        </div>
       </div>
     </div>
-  </footer>
-
-  <!-- Theme FAB -->
-  <div class="theme-fab" id="themeFab">
-    <div class="theme-fab__panel" id="themePanel">
-      <button class="theme-option" data-theme-val="light"><span class="t-icon"><i class="fas fa-sun"></i></span>Light<i class="fas fa-check t-check"></i></button>
-      <button class="theme-option" data-theme-val="dark"><span class="t-icon"><i class="fas fa-moon"></i></span>Dark<i class="fas fa-check t-check"></i></button>
-      <button class="theme-option" data-theme-val="system"><span class="t-icon"><i class="fas fa-desktop"></i></span>System<i class="fas fa-check t-check"></i></button>
-    </div>
-    <button class="theme-fab__trigger" id="themeTrigger" aria-label="Change theme">
-      <i class="fas fa-sun icon-sun"></i>
-      <i class="fas fa-moon icon-moon"></i>
-    </button>
-    <span class="theme-fab__label" id="themeLabel">Theme</span>
   </div>
 
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-  <script>
-    /* ── Theme ── */
-    const html=document.documentElement,trigger=document.getElementById('themeTrigger'),
-          panel=document.getElementById('themePanel'),themeLabel=document.getElementById('themeLabel'),
-          options=document.querySelectorAll('.theme-option');
-    const LABELS={light:'Light',dark:'Dark',system:'System'};
-    function resolveTheme(p){return p==='system'?window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light':p;}
-    function applyTheme(p){
-      const r=resolveTheme(p);
-      html.setAttribute('data-theme',r);
-      localStorage.setItem('nc-theme',p);
-      themeLabel.textContent=LABELS[p]||'Theme';
-      options.forEach(o=>o.classList.toggle('active',o.dataset.themeVal===p));
-    }
-    applyTheme(localStorage.getItem('nc-theme')||'system');
-    trigger.addEventListener('click',e=>{e.stopPropagation();panel.classList.toggle('open');});
-    options.forEach(o=>o.addEventListener('click',()=>{applyTheme(o.dataset.themeVal);panel.classList.remove('open');}));
-    document.addEventListener('click',e=>{if(!document.getElementById('themeFab').contains(e.target))panel.classList.remove('open');});
-    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change',()=>{if(localStorage.getItem('nc-theme')==='system')applyTheme('system');});
+  <div class="row g-4 mt-1">
+    <div class="col-lg-5">
+      <div class="bmi-card">
+        <div class="card-body">
+          <div class="bmi-section-title">
+            <i class="fas fa-list-check text-primary"></i>
+            BMI Categories
+          </div>
+          <div class="bmi-section-subtitle">
+            Standard BMI classification reference.
+          </div>
 
-    /* ── User dropdown ── */
-    const uBtn=document.getElementById('userMenuBtn'),uDrop=document.getElementById('userDropdown');
-    if(uBtn&&uDrop){
-      uBtn.addEventListener('click',e=>{e.stopPropagation();const o=uDrop.classList.toggle('open');uBtn.classList.toggle('open',o);});
-      document.addEventListener('click',()=>{uDrop.classList.remove('open');uBtn.classList.remove('open');});
-    }
+          <div class="bmi-scale">
+            <div class="bmi-scale-item">
+              <div class="bmi-scale-left">
+                <span class="bmi-scale-dot dot-underweight"></span>
+                Underweight
+              </div>
+              <div class="bmi-scale-range">Below 18.5</div>
+            </div>
 
-    /* ── Mobile menu ── */
-    const mBtn=document.getElementById('mobileMenuBtn'),mMenu=document.getElementById('mobileMenu');
-    if(mBtn&&mMenu){mBtn.addEventListener('click',()=>{mMenu.classList.toggle('open');mBtn.classList.toggle('open');});}
+            <div class="bmi-scale-item">
+              <div class="bmi-scale-left">
+                <span class="bmi-scale-dot dot-normal"></span>
+                Normal
+              </div>
+              <div class="bmi-scale-range">18.5 – 24.9</div>
+            </div>
 
-    /* ── Scroll shadow ── */
-    const navEl=document.querySelector('.nc-navbar');
-    window.addEventListener('scroll',()=>navEl.classList.toggle('scrolled',scrollY>8),{passive:true});
+            <div class="bmi-scale-item">
+              <div class="bmi-scale-left">
+                <span class="bmi-scale-dot dot-overweight"></span>
+                Overweight
+              </div>
+              <div class="bmi-scale-range">25.0 – 29.9</div>
+            </div>
 
-    /* ══════════════════════════════════════════════
-       NOTIFICATION BELL POPUP
-    ══════════════════════════════════════════════ */
-    const bellBtn   = document.getElementById('bellBtn');
-    const notifPopup= document.getElementById('notifPopup');
-    const markAllBtn= document.getElementById('markAllBtn');
-    const bellBadge = document.getElementById('bellBadge');
-    const notifHdCount = document.getElementById('notifHdCount');
+            <div class="bmi-scale-item">
+              <div class="bmi-scale-left">
+                <span class="bmi-scale-dot dot-obese"></span>
+                Obese
+              </div>
+              <div class="bmi-scale-range">30.0 and above</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
 
-    if (bellBtn && notifPopup) {
+    <div class="col-lg-7">
+      <div class="bmi-card">
+        <div class="card-body">
+          <div class="bmi-section-title">
+            <i class="fas fa-clock-rotate-left text-primary"></i>
+            Recent BMI Records
+          </div>
+          <div class="bmi-section-subtitle">
+            Your latest 5 saved BMI entries.
+          </div>
 
-      // Toggle popup on bell click
-      bellBtn.addEventListener('click', e => {
-        e.stopPropagation();
-        const isOpen = notifPopup.classList.toggle('open');
-        bellBtn.classList.toggle('open', isOpen);
-
-        // Close user dropdown if open
-        if (uDrop) { uDrop.classList.remove('open'); if(uBtn) uBtn.classList.remove('open'); }
-      });
-
-      // Close on outside click
-      document.addEventListener('click', e => {
-        const wrap = bellBtn.closest('.nc-notif-wrap');
-        if (wrap && !wrap.contains(e.target)) {
-          notifPopup.classList.remove('open');
-          bellBtn.classList.remove('open');
-        }
-      });
-
-      // Close on Escape
-      document.addEventListener('keydown', e => {
-        if (e.key === 'Escape') {
-          notifPopup.classList.remove('open');
-          bellBtn.classList.remove('open');
-        }
-      });
-
-      // Mark all as read
-      if (markAllBtn) {
-        markAllBtn.addEventListener('click', e => {
-          e.stopPropagation();
-          fetch("{{ url_for('payment.mark_notifications_read') }}", { method: 'POST' })
-            .then(() => {
-              // Remove all unread styles
-              document.querySelectorAll('.nc-notif-item.unread').forEach(el => el.classList.remove('unread'));
-              document.querySelectorAll('.nc-notif-dot').forEach(el => el.remove());
-              // Hide badge
-              if (bellBadge) bellBadge.style.display = 'none';
-              if (notifHdCount) notifHdCount.style.display = 'none';
-              markAllBtn.style.display = 'none';
-            });
-        });
-      }
-
-      // Auto-mark as read when popup opens (after 1.5s)
-      let markTimer = null;
-      bellBtn.addEventListener('click', () => {
-        if (notifPopup.classList.contains('open')) {
-          markTimer = setTimeout(() => {
-            if (bellBadge) bellBadge.style.display = 'none';
-            if (notifHdCount) notifHdCount.style.display = 'none';
-            document.querySelectorAll('.nc-notif-dot').forEach(el => el.remove());
-            document.querySelectorAll('.nc-notif-item.unread').forEach(el => el.classList.remove('unread'));
-            fetch("{{ url_for('payment.mark_notifications_read') }}", { method: 'POST' });
-          }, 1500);
-        } else {
-          clearTimeout(markTimer);
-        }
-      });
-    }
-  </script>
-
-  {% block extra_js %}{% endblock %}
-</body>
-</html>
+          {% if past_records %}
+            <div class="table-responsive">
+              <table class="table align-middle bmi-history-table">
+                <thead>
+                  <tr>
+                    <th>Date</th>
+                    <th>Height</th>
+                    <th>Weight</th>
+                    <th>BMI</th>
+                    <th>Category</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for record in past_records %}
+                    <tr>
+                      <td>
+                        {% if record.recorded_at %}
+                          {{ record.recorded_at.strftime('%d %b %Y, %I:%M %p') }}
+                        {% else %}
+                          -
+                        {% endif %}
+                      </td>
+                      <td>{{ record.height }} m</td>
+                      <td>{{ record.weight }} kg</td>
+                      <td>{{ record.bmi }}</td>
+                      <td>
+                        <span class="bmi-category-badge bmi-{{ record.category|lower }}">
+                          {{ record.category }}
+                        </span>
+                      </td>
+                    </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          {% else %}
+            <div class="bmi-empty">
+              <i class="fas fa-folder-open"></i>
+              <div>No previous BMI records found.</div>
+            </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
