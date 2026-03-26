@@ -498,6 +498,10 @@
   display:grid;
   grid-template-columns:minmax(0,1.35fr) minmax(260px,.9fr);
   gap:1rem;
+  align-items:start;
+}
+.pay-form-grid > *{
+  min-width:0;
 }
 @media(max-width:900px){
   .pay-form-grid{
@@ -529,7 +533,10 @@
   font-weight:700;
   color:var(--nc-text);
 }
-.pf-group{margin-bottom:.95rem;}
+.pf-group{
+  margin-bottom:.95rem;
+  min-width:0;
+}
 .pf-label{
   display:block;
   font-size:.72rem;
@@ -550,6 +557,8 @@
   font-weight:600;
   outline:none;
   transition:border-color .15s, box-shadow .15s;
+  box-sizing:border-box;
+  min-width:0;
 }
 .pf-input:focus{
   border-color:var(--nc-brand);
@@ -573,15 +582,24 @@
   margin-top:.35rem;
   line-height:1.5;
 }
+
+/* fixed pin layout */
 .pin-row{
   display:grid;
-  grid-template-columns:repeat(5,1fr);
+  width:100%;
+  min-width:0;
+  grid-template-columns:repeat(5, minmax(0, 1fr));
   gap:.55rem;
+  align-items:stretch;
 }
 .pin-row.pin-4{
-  grid-template-columns:repeat(4,1fr);
+  grid-template-columns:repeat(4, minmax(0, 1fr));
 }
 .pin-dot{
+  width:100%;
+  min-width:0;
+  max-width:100%;
+  box-sizing:border-box;
   text-align:center;
   font-size:1rem;
   font-weight:700;
@@ -591,11 +609,26 @@
   background:var(--nc-surface-2);
   color:var(--nc-text);
   outline:none;
+  appearance:none;
+  -webkit-appearance:none;
 }
 .pin-dot:focus{
   border-color:var(--nc-brand);
   box-shadow:0 0 0 3px rgba(14,165,233,.12);
 }
+.pin-dot.bkash:focus{
+  border-color:#e2136e;
+  box-shadow:0 0 0 3px rgba(226,19,110,.12);
+}
+.pin-dot.nagad:focus{
+  border-color:#f05323;
+  box-shadow:0 0 0 3px rgba(240,83,35,.12);
+}
+.pin-dot.rocket:focus{
+  border-color:#8b1a7a;
+  box-shadow:0 0 0 3px rgba(139,26,122,.12);
+}
+
 .card-row{
   display:grid;
   grid-template-columns:1fr 1fr;
@@ -605,12 +638,20 @@
   .card-row{
     grid-template-columns:1fr;
   }
+  .pin-row{
+    gap:.45rem;
+  }
+  .pin-dot{
+    font-size:.95rem;
+    padding:.76rem 0;
+  }
 }
 .pf-note-card{
   border:1px solid var(--nc-border);
   border-radius:16px;
   background:linear-gradient(180deg, rgba(14,165,233,.06), transparent);
   padding:1rem;
+  min-width:0;
 }
 .pf-note-card h4{
   margin:0 0 .7rem;
@@ -800,7 +841,7 @@
           </div>
 
           <div class="pm-card rocket" onclick="selectMethod('rocket', this)">
-            <div class="pm-left <div class="pm-left">
+            <div class="pm-left">
               <div class="pm-logo rocket">Rocket</div>
               <div>
                 <div class="pm-name">Rocket</div>
@@ -841,7 +882,7 @@
 
       <div class="pay-card pay-summary">
         <div class="pay-summary-head">
-          <div class="pay-summary-head-title">Order Summary-summary-head-title">Order Summary</div>
+          <div class="pay-summary-head-title">Order Summary</div>
           <div class="pay-summary-head-total">${{ "%.2f"|format(order.total_price) }}</div>
         </div>
 
@@ -920,11 +961,11 @@
               <div class="pf-group">
                 <label class="pf-label">bKash PIN</label>
                 <div class="pin-row">
-                  <input class="pin-dot" type="password" maxlength="1" id="bkash-p1">
-                  <input class="pin-dot" type="password" maxlength="1" id="bkash-p2">
-                  <input class="pin-dot" type="password" maxlength="1" id="bkash-p3">
-                  <input class="pin-dot" type="password" maxlength="1" id="bkash-p4">
-                  <input class="pin-dot" type="password" maxlength="1" id="bkash-p5">
+                  <input class="pin-dot bkash" type="password" maxlength="1" inputmode="numeric" pattern="[0-9]*" id="bkash-p1">
+                  <input class="pin-dot bkash" type="password" maxlength="1" inputmode="numeric" pattern="[0-9]*" id="bkash-p2">
+                  <input class="pin-dot bkash" type="password" maxlength="1" inputmode="numeric" pattern="[0-9]*" id="bkash-p3">
+                  <input class="pin-dot bkash" type="password" maxlength="1" inputmode="numeric" pattern="[0-9]*" id="bkash-p4">
+                  <input class="pin-dot bkash" type="password" maxlength="1" inputmode="numeric" pattern="[0-9]*" id="bkash-p5">
                 </div>
                 <div class="pf-hint">Your PIN is encrypted and secure.</div>
               </div>
@@ -973,10 +1014,10 @@
               <div class="pf-group">
                 <label class="pf-label">Nagad PIN</label>
                 <div class="pin-row pin-4">
-                  <input class="pin-dot" type="password" maxlength="1" id="nagad-p1">
-                  <input class="pin-dot" type="password" maxlength="1" id="nagad-p2">
-                  <input class="pin-dot" type="password" maxlength="1" id="nagad-p3">
-                  <input class="pin-dot" type="password" maxlength="1" id="nagad-p4">
+                  <input class="pin-dot nagad" type="password" maxlength="1" inputmode="numeric" pattern="[0-9]*" id="nagad-p1">
+                  <input class="pin-dot nagad" type="password" maxlength="1" inputmode="numeric" pattern="[0-9]*" id="nagad-p2">
+                  <input class="pin-dot nagad" type="password" maxlength="1" inputmode="numeric" pattern="[0-9]*" id="nagad-p3">
+                  <input class="pin-dot nagad" type="password" maxlength="1" inputmode="numeric" pattern="[0-9]*" id="nagad-p4">
                 </div>
                 <div class="pf-hint">Your transaction PIN is encrypted and secure.</div>
               </div>
@@ -1025,12 +1066,12 @@
               <div class="pf-group">
                 <label class="pf-label">Rocket PIN</label>
                 <div class="pin-row pin-4">
-                  <input class="pin-dot" type="password" maxlength="1" id="rocket-p1">
-                  <input class="pin-dot" type="password" maxlength="1" id="rocket-p2">
-                  <input class="pin-dot" type="password" maxlength="1" id="rocket-p3">
-                  <input class="pin-dot" type="password" maxlength="1" id="rocket-p4">
+                  <input class="pin-dot rocket" type="password" maxlength="1" inputmode="numeric" pattern="[0-9]*" id="rocket-p1">
+                  <input class="pin-dot rocket" type="password" maxlength="1" inputmode="numeric" pattern="[0-9]*" id="rocket-p2">
+                  <input class="pin-dot rocket" type="password" maxlength="1" inputmode="numeric" pattern="[0-9]*" id="rocket-p3">
+                  <input class="pin-dot rocket" type="password" maxlength="1" inputmode="numeric" pattern="[0-9]*" id="rocket-p4">
                 </div>
-                <div class="pf-hint">Your PIN is secure and  encrypted.>
+                <div class="pf-hint">Your PIN is encrypted and secure.</div>
               </div>
 
               <button class="pf-submit rocket" type="button" onclick="processPayment('rocket')">
@@ -1283,9 +1324,19 @@ function processPayment(method) {
 
 document.querySelectorAll('.pin-dot').forEach((dot) => {
   dot.addEventListener('input', () => {
+    dot.value = dot.value.replace(/\D/g, '').slice(0, 1);
     const siblings = Array.from(dot.parentElement.querySelectorAll('.pin-dot'));
     const idx = siblings.indexOf(dot);
     if (dot.value && idx < siblings.length - 1) siblings[idx + 1].focus();
+  });
+
+  dot.addEventListener('keydown', (e) => {
+    const siblings = Array.from(dot.parentElement.querySelectorAll('.pin-dot'));
+    const idx = siblings.indexOf(dot);
+
+    if (e.key === 'Backspace' && !dot.value && idx > 0) {
+      siblings[idx - 1].focus();
+    }
   });
 });
 

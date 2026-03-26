@@ -7,7 +7,7 @@
 @keyframes up      { from{opacity:0;transform:translateY(14px)} to{opacity:1;transform:translateY(0)} }
 @keyframes modalPop{ from{opacity:0;transform:scale(.93) translateY(12px)} to{opacity:1;transform:scale(1) translateY(0)} }
 
-.notif-hd { display:flex;align-items:center;justify-content:space-between;margin-bottom:1.25rem;animation:up .4s both; }
+.notif-hd { display:flex;align-items:center;justify-content:space-between;margin-bottom:1.25rem;animation:up .4s both; gap:.8rem; flex-wrap:wrap; }
 .notif-hd h1 { font-size:1.35rem;font-weight:900;letter-spacing:-.03em;color:var(--nc-text);margin:0; }
 
 .notif-clear-btn {
@@ -18,6 +18,7 @@
   font-size:.76rem;font-weight:700;cursor:pointer;transition:all .13s;
 }
 .notif-clear-btn:hover { border-color:var(--nc-brand);color:var(--nc-brand);background:var(--nc-brand-l); }
+.notif-clear-btn:disabled { opacity:.65; cursor:not-allowed; }
 
 .notif-panel {
   background:var(--nc-card-bg);border:1px solid var(--nc-card-border);
@@ -129,20 +130,16 @@
   <div class="notif-hd">
     <h1><i class="fas fa-bell" style="color:var(--nc-brand);margin-right:.45rem;"></i>Notifications</h1>
     {% if notifications %}
-    <form method="POST" action="{{ url_for('payment.mark_notifications_read') }}">
-      <button class="notif-clear-btn" type="submit">
-        <i class="fas fa-check-double"></i> Mark all read
-      </button>
-    </form>
+    <button class="notif-clear-btn" id="markAllNotificationsBtn" type="button" onclick="markAllNotificationsRead()">
+      <i class="fas fa-check-double"></i> Mark all read
+    </button>
     {% endif %}
   </div>
 
-  <div class="notif-panel">
+  <div class="notif-panel" id="notifPanel">
     {% if notifications %}
       {% for n in notifications %}
-      <div class="notif-item {{ 'unread' if not n.is_read }}"
-           data-id="{{ n.id }}"
-           onclick="openNotifModal('{{ n.id }}')">
+      <div class="notif-item {{ 'unread' if not n.is_read }}" data-id="{{ n.id }}" onclick="openNotifModal('{{ n.id }}')">
         <div class="notif-ico {{ n.type if n.type in ['new_order','payment_sent','payment_received','wallet_topup','order_paid'] else 'default' }}">
           {% if n.type == 'new_order' %}<i class="fas fa-bag-shopping"></i>
           {% elif n.type == 'payment_sent' %}<i class="fas fa-paper-plane"></i>
@@ -173,16 +170,14 @@
   </div>
 </div>
 
-<!-- ── Detail Modal ── -->
-<div class="notif-modal-overlay" id="notifModalOverlay"
-     onclick="if(event.target===this)closeNotifModal()">
+<div class="notif-modal-overlay" id="notifModalOverlay" onclick="if(event.target===this)closeNotifModal()">
   <div class="notif-modal-box">
     <div class="notif-modal-hd">
       <div class="notif-modal-hd-left">
         <div class="notif-modal-hd-ico" id="modalIco"></div>
         <div class="notif-modal-hd-title" id="modalTitle"></div>
       </div>
-      <button class="notif-modal-close" onclick="closeNotifModal()">
+      <button class="notif-modal-close" type="button" onclick="closeNotifModal()">
         <i class="fas fa-xmark"></i>
       </button>
     </div>
@@ -191,7 +186,7 @@
       <div class="notif-modal-time" id="modalTime"></div>
     </div>
     <div class="notif-modal-ft">
-      <button class="notif-modal-btn-close" onclick="closeNotifModal()">
+      <button class="notif-modal-btn-close" type="button" onclick="closeNotifModal()">
         <i class="fas fa-xmark" style="margin-right:.3rem;"></i>Close
       </button>
     </div>
@@ -199,7 +194,6 @@
 </div>
 
 <script>
-/* Notification data from server */
 const NOTIF_DATA = {
   {% for n in notifications %}
   "{{ n.id }}": {
@@ -217,7 +211,7 @@ const TYPE_STYLES = {
   payment_received: { ico:'<i class="fas fa-money-bill-wave"></i>', bg:'rgba(16,185,129,.12)', color:'#059669' },
   wallet_topup:     { ico:'<i class="fas fa-wallet"></i>',          bg:'rgba(245,158,11,.12)', color:'#d97706' },
   order_paid:       { ico:'<i class="fas fa-circle-check"></i>',    bg:'rgba(14,165,233,.12)', color:'#0ea5e9' },
-  default:          { ico:'<i class="fas fa-bell"></i>',            bg:'var(--nc-surface-2)',  color:'var(--nc-text-faint)' },
+  default:          { ico:'<i class="fas fa-bell"></i>',            bg:'var(--nc-surface-2)',  color:'var(--nc-text-faint)' }
 };
 
 function openNotifModal(id) {
@@ -227,14 +221,13 @@ function openNotifModal(id) {
   const s = TYPE_STYLES[d.type] || TYPE_STYLES.default;
 
   const ico = document.getElementById('modalIco');
-  ico.innerHTML       = s.ico;
+  ico.innerHTML = s.ico;
   ico.style.background = s.bg;
-  ico.style.color      = s.color;
+  ico.style.color = s.color;
 
   document.getElementById('modalTitle').textContent = d.title;
-  document.getElementById('modalMsg').textContent   = d.msg;
-  document.getElementById('modalTime').innerHTML =
-    `<i class="fas fa-clock"></i> ${d.time}`;
+  document.getElementById('modalMsg').textContent = d.msg;
+  document.getElementById('modalTime').innerHTML = `<i class="fas fa-clock"></i> ${d.time}`;
 
   document.getElementById('notifModalOverlay').classList.add('show');
   document.body.style.overflow = 'hidden';
@@ -243,6 +236,51 @@ function openNotifModal(id) {
 function closeNotifModal() {
   document.getElementById('notifModalOverlay').classList.remove('show');
   document.body.style.overflow = '';
+}
+
+function markAllNotificationsRead() {
+  const btn = document.getElementById('markAllNotificationsBtn');
+  if (!btn) return;
+
+  const originalHtml = btn.innerHTML;
+  btn.disabled = true;
+  btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Marking...';
+
+  fetch("{{ url_for('payment.mark_notifications_read') }}", {
+    method: 'POST',
+    headers: {
+      'X-Requested-With': 'XMLHttpRequest'
+    }
+  })
+  .then(response => {
+    if (!response.ok) {
+      throw new Error('Request failed');
+    }
+    return response.json();
+  })
+  .then(data => {
+    if (!data.success) {
+      throw new Error(data.error || 'Unable to mark notifications as read');
+    }
+
+    document.querySelectorAll('.notif-item.unread').forEach(el => el.classList.remove('unread'));
+    document.querySelectorAll('.notif-dot').forEach(el => el.remove());
+
+    const bellBadge = document.getElementById('bellBadge');
+    const notifHdCount = document.getElementById('notifHdCount');
+    const markAllBtnPopup = document.getElementById('markAllBtn');
+
+    if (bellBadge) bellBadge.style.display = 'none';
+    if (notifHdCount) notifHdCount.style.display = 'none';
+    if (markAllBtnPopup) markAllBtnPopup.style.display = 'none';
+
+    btn.style.display = 'none';
+  })
+  .catch(() => {
+    btn.disabled = false;
+    btn.innerHTML = originalHtml;
+    alert('Could not mark notifications as read. Please try again.');
+  });
 }
 
 document.addEventListener('keydown', e => {
