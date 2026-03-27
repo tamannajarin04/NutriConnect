@@ -45,6 +45,7 @@ def create_app(config_name="default"):
     from .routes.provider_dashboard import provider_bp
     from .routes.analytics import analytics_bp
     from .routes.payment import payment_bp
+    from app.routes.diet_suggestions import diet_suggestions_bp
 
     app.register_blueprint(main_bp)
     app.register_blueprint(auth_bp, url_prefix="/auth")
@@ -61,7 +62,7 @@ def create_app(config_name="default"):
     app.register_blueprint(provider_bp, url_prefix="/provider")
     app.register_blueprint(analytics_bp, url_prefix="/admin")
     app.register_blueprint(payment_bp, url_prefix="/dashboard")
-
+    app.register_blueprint(diet_suggestions_bp)
     with app.app_context():
         create_roles_if_ready()
         seed_admins_if_ready()

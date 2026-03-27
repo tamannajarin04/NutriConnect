@@ -477,3 +477,43 @@ class Notification(db.Model):
     is_read    = db.Column(db.Boolean, default=False, nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow, index=True)
     
+class DietSuggestion(db.Model):
+    __tablename__ = "diet_suggestions"
+
+    id          = db.Column(db.Integer, primary_key=True)
+    user_id     = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False, index=True)
+    created_at  = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
+
+    # Snapshot of profile used to generate this suggestion
+    goal         = db.Column(db.String(64))
+    bmi          = db.Column(db.Float)
+    bmi_category = db.Column(db.String(64))
+    calorie_goal = db.Column(db.Integer)
+    diet_type    = db.Column(db.String(64))
+
+    # Full AI response stored as JSON
+    insight        = db.Column(db.Text)
+    foods_json     = db.Column(db.Text)
+    meal_plan_json = db.Column(db.Text)
+    macro_warning  = db.Column(db.Text)
+
+    user = db.relationship("User", backref=db.backref("diet_suggestions", lazy="dynamic"))
+
+    def to_dict(self):
+        import json
+        return {
+            "id":            self.id,
+            "created_at":    self.created_at.isoformat(),
+            "goal":          self.goal,
+            "bmi":           self.bmi,
+            "bmi_category":  self.bmi_category,
+            "calorie_goal":  self.calorie_goal,
+            "diet_type":     self.diet_type,
+            "insight":       self.insight,
+            "foods":         json.loads(self.foods_json    or "[]"),
+            "meal_plan":     json.loads(self.meal_plan_json or "[]"),
+            "macro_warning": self.macro_warning,
+        }
+
+    def __repr__(self):
+        return f"<DietSuggestion user_id={self.user_id} id={self.id}>"
