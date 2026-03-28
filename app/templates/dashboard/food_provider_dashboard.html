@@ -41,7 +41,7 @@
 @keyframes pd-up { from{opacity:0;transform:translateY(12px)} to{opacity:1;transform:none} }
 @keyframes pd-pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.35;transform:scale(.65)} }
 
-/* ════ HERO BANNER (like user dashboard) ════ */
+/* ════ HERO BANNER ════ */
 .pd-hero {
   position:relative; overflow:hidden; isolation:isolate;
   border-radius:20px; padding:1.75rem 2rem; margin-bottom:1.25rem;
@@ -75,7 +75,6 @@
   display:flex; align-items:center; justify-content:space-between; gap:1.5rem; flex-wrap:wrap;
 }
 
-/* Store avatar / photo */
 .pd-hero-avatar {
   width:76px; height:76px; border-radius:16px; flex-shrink:0; overflow:hidden;
   border:2.5px solid rgba(255,255,255,.2);
@@ -187,33 +186,31 @@
 .pd-pill-gh:hover { border-color:var(--brand); color:var(--brand) !important; background:var(--brand-l); }
 .pd-pill-sm { padding:.38rem .82rem; font-size:.72rem; }
 
-/* ════ INSIGHTS MODAL ════ */
-.ins-backdrop {
-  position:fixed; inset:0; z-index:8500;
-  background:rgba(0,0,0,.65); backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px);
-  opacity:0; pointer-events:none; transition:opacity .28s;
-  display:flex; align-items:center; justify-content:center; padding:1.5rem;
+/* ════════════════════════════════════════════
+   INSIGHTS — FULL PAGE (replaces modal)
+   Hidden by default, swaps in place of .pd-wrap
+════════════════════════════════════════════ */
+.ins-page-wrap {
+  display: none;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding-bottom: 2rem;
 }
-.ins-backdrop.open { opacity:1; pointer-events:auto; }
-
-.ins-page {
-  background:var(--nc-surface); border:1.5px solid var(--nc-border);
-  border-radius:24px; width:100%; max-width:860px; max-height:92vh;
-  display:flex; flex-direction:column;
-  box-shadow:0 32px 80px rgba(0,0,0,.5),0 0 0 1px rgba(255,255,255,.04) inset;
-  transform:scale(.93) translateY(20px); opacity:0;
-  transition:transform .32s cubic-bezier(.16,1,.3,1),opacity .28s; overflow:hidden;
+.ins-page-wrap.open {
+  display: block;
 }
-.ins-backdrop.open .ins-page { transform:scale(1) translateY(0); opacity:1; }
 
-/* Insights header — dark hero like user */
+/* Insights header */
 .ins-hd {
-  flex-shrink:0;
   background:
     radial-gradient(ellipse 70% 150% at -5% 50%,rgba(14,165,233,.5) 0%,transparent 55%),
     radial-gradient(ellipse 45% 90% at 110% 5%,rgba(16,185,129,.3) 0%,transparent 50%),
     linear-gradient(145deg,#030d1f 0%,#081629 45%,#0c1d38 100%);
-  position:relative; overflow:hidden; padding:1.5rem 1.75rem 0;
+  position:relative; overflow:hidden;
+  padding:1.5rem 1.75rem 0;
+  border-radius:20px;
+  border:1px solid rgba(56,189,248,.2);
+  margin-bottom:1.25rem;
 }
 .ins-hd::before { content:''; position:absolute; inset:0; background-image:radial-gradient(rgba(255,255,255,.04) 1px,transparent 1px); background-size:22px 22px; pointer-events:none; }
 .ins-hd-scan { position:absolute; bottom:0; left:0; right:0; height:1px; background:linear-gradient(90deg,transparent 5%,rgba(56,189,248,.6) 35%,rgba(52,211,153,.5) 65%,transparent 95%); }
@@ -223,10 +220,10 @@
 .ins-hd-ico { width:42px; height:42px; border-radius:12px; flex-shrink:0; background:rgba(56,189,248,.15); color:#38bdf8; border:1px solid rgba(56,189,248,.25); display:flex; align-items:center; justify-content:center; font-size:1.05rem; }
 .ins-hd-title { font-size:1.1rem; font-weight:800; color:#fff; letter-spacing:-.03em; }
 .ins-hd-sub   { font-size:.7rem; color:rgba(255,255,255,.38); margin-top:.06rem; }
-.ins-hd-close { width:32px; height:32px; border-radius:9px; flex-shrink:0; background:rgba(255,255,255,.07); border:1px solid rgba(255,255,255,.1); color:rgba(255,255,255,.55); cursor:pointer; font-size:.82rem; display:flex; align-items:center; justify-content:center; transition:background .14s,color .14s; }
+.ins-hd-close { display:inline-flex; align-items:center; gap:.4rem; padding:.55rem 1rem; border-radius:12px; font-size:.78rem; font-weight:700; font-family:'Plus Jakarta Sans',sans-serif !important; cursor:pointer; border:1px solid rgba(255,255,255,.15); background:rgba(255,255,255,.08); color:#e2e8f0; transition:all .14s; }
 .ins-hd-close:hover { background:rgba(244,63,94,.18); color:#fb7185; border-color:rgba(244,63,94,.3); }
 
-/* ── 4 summary stat tiles (like FB Insights top cards) ── */
+/* 4 summary tiles */
 .ins-tiles {
   position:relative; z-index:2;
   display:grid; grid-template-columns:repeat(4,1fr); gap:.65rem; margin-bottom:1.25rem;
@@ -244,21 +241,18 @@
 .ins-tile-val.cy { color:#38bdf8; text-shadow:0 0 14px rgba(56,189,248,.35); }
 .ins-tile-val.em { color:#34d399; text-shadow:0 0 14px rgba(52,211,153,.35); }
 .ins-tile-lbl { font-size:.58rem; font-weight:800; text-transform:uppercase; letter-spacing:.1em; color:rgba(255,255,255,.35); }
-/* trend badge */
 .ins-tile-trend { display:inline-flex; align-items:center; gap:.2rem; font-size:.62rem; font-weight:700; margin-top:.35rem; }
 .trend-up   { color:#34d399; }
 .trend-down { color:#fb7185; }
 
-/* ── Modal body ── */
-.ins-body { flex:1; overflow-y:auto; padding:1.35rem 1.75rem 1.5rem; display:flex; flex-direction:column; gap:1.25rem; }
-.ins-body::-webkit-scrollbar { width:4px; }
-.ins-body::-webkit-scrollbar-thumb { background:var(--nc-border-2); border-radius:99px; }
+/* Body */
+.ins-body { display:flex; flex-direction:column; gap:1.25rem; }
 
-/* ── Section label (like FB Insights tabs) ── */
+/* Section label */
 .ins-sec-lbl { display:flex; align-items:center; gap:.45rem; font-size:.65rem; font-weight:800; text-transform:uppercase; letter-spacing:.1em; color:var(--nc-text-faint); }
 .ins-sec-lbl::after { content:''; flex:1; height:1px; background:var(--nc-border); }
 
-/* ── Line Chart Cards (3-col like FB Insights) ── */
+/* Line Chart Cards */
 .ins-charts { display:grid; grid-template-columns:repeat(3,1fr); gap:1rem; }
 .ins-chart-card {
   background:var(--nc-surface); border:1.5px solid var(--nc-border);
@@ -274,7 +268,7 @@
 .ins-chart-leg-item { display:flex; align-items:center; gap:.3rem; font-size:.66rem; color:var(--nc-text-muted); }
 .ins-chart-leg-dot { width:8px; height:8px; border-radius:50%; flex-shrink:0; }
 
-/* ── Ranking table ── */
+/* Ranking table */
 .ins-list { border:1.5px solid var(--nc-border); border-radius:16px; overflow:hidden; }
 .ins-row { display:grid; grid-template-columns:28px 48px 1fr auto; align-items:center; gap:.8rem; padding:.85rem 1.1rem; border-bottom:1px solid var(--nc-border); transition:background .12s; }
 .ins-row:last-child { border-bottom:none; }
@@ -310,7 +304,7 @@
 /* ════ RESPONSIVE ════ */
 @media(max-width:1100px){ .pd-stats{grid-template-columns:repeat(3,1fr);} .ins-charts{grid-template-columns:1fr 1fr;} }
 @media(max-width:768px) { .pd-stats{grid-template-columns:1fr 1fr;} .ins-charts{grid-template-columns:1fr;} .ins-tiles{grid-template-columns:1fr 1fr;} }
-@media(max-width:480px) { .pd-stats{grid-template-columns:1fr;} }
+@media(max-width:480px) { .pd-stats{grid-template-columns:1fr;} .ins-tiles{grid-template-columns:1fr 1fr;} }
 </style>
 {% endblock %}
 
@@ -323,14 +317,14 @@
 {% set viewed_cnt    = insights_list|selectattr('views','gt',0)|list|length if insights_list else 0 %}
 {% set avg_views     = ((views_total/foods_count)|round(1)) if foods_count>0 and views_total>0 else 0 %}
 
-<div class="pd">
-<div class="pd-wrap">
+<!-- ══ DASHBOARD ══ -->
+<div class="pd" id="pdRoot">
+<div class="pd-wrap" id="pdWrap">
 
-  <!-- ══ HERO BANNER with store photo ══ -->
+  <!-- ══ HERO BANNER ══ -->
   <div class="pd-hero">
     <div class="pd-hero-line"></div>
     <div class="pd-hero-in">
-      <!-- Avatar + text -->
       <div style="display:flex;align-items:center;gap:1.1rem;flex-wrap:wrap;">
         <div class="pd-hero-avatar">
           {% if current_user.profile_picture %}
@@ -345,7 +339,6 @@
           <p class="pd-hero-sub">Track your store at a glance, keep food listings updated, and manage orders.</p>
         </div>
       </div>
-      <!-- Actions -->
       <div class="pd-hero-acts">
         <a href="{{ url_for('provider.provider_orders') }}" class="pd-hbtn pd-hbtn-solid">
           <i class="fas fa-bag-shopping"></i> Manage Orders
@@ -481,231 +474,223 @@
 </div><!-- /pd-wrap -->
 </div><!-- /pd -->
 
-<!-- ══ INSIGHTS MODAL ══ -->
+
+<!-- ══ INSIGHTS FULL PAGE ══ -->
 {% if foods %}
 {% set max_views = (insights_list[0].views if insights_list and insights_list[0].views>0 else 1) %}
 
-<div class="ins-backdrop" id="insBackdrop" onclick="handleBackdropClick(event)">
-  <div class="ins-page" id="insPage">
+<div class="pd ins-page-wrap" id="insPageWrap">
 
-    <!-- Header -->
-    <div class="ins-hd">
-      <div class="ins-hd-scan"></div>
-      <div class="ins-hd-top">
-        <div class="ins-hd-left">
-          <div class="ins-hd-ico"><i class="fas fa-chart-line"></i></div>
-          <div>
-            <div class="ins-hd-title">Popularity Insights</div>
-            <div class="ins-hd-sub">Based on user clicks on food cards</div>
-          </div>
+  <!-- Header -->
+  <div class="ins-hd">
+    <div class="ins-hd-scan"></div>
+    <div class="ins-hd-top">
+      <div class="ins-hd-left">
+        <div class="ins-hd-ico"><i class="fas fa-chart-line"></i></div>
+        <div>
+          <div class="ins-hd-title">Popularity Insights</div>
+          <div class="ins-hd-sub">Based on user clicks on food cards</div>
         </div>
-        <button type="button" class="ins-hd-close" onclick="closeInsights()"><i class="fas fa-xmark"></i></button>
       </div>
+      <button type="button" class="ins-hd-close" onclick="closeInsights()">
+        <i class="fas fa-arrow-left"></i> Back to Dashboard
+      </button>
+    </div>
 
-      <!-- 4 summary tiles -->
-      <div class="ins-tiles">
-        <div class="ins-tile">
-          <div class="ins-tile-val vi">{{ views_total }}</div>
-          <div class="ins-tile-lbl">Total Views</div>
-          <div class="ins-tile-trend trend-up"><i class="fas fa-arrow-trend-up fa-xs"></i> All time</div>
+    <!-- 4 summary tiles -->
+    <div class="ins-tiles">
+      <div class="ins-tile">
+        <div class="ins-tile-val vi">{{ views_total }}</div>
+        <div class="ins-tile-lbl">Total Views</div>
+        <div class="ins-tile-trend trend-up"><i class="fas fa-arrow-trend-up fa-xs"></i> All time</div>
+      </div>
+      <div class="ins-tile">
+        <div class="ins-tile-val am">{{ top_views }}</div>
+        <div class="ins-tile-lbl">Best Item</div>
+        <div class="ins-tile-trend trend-up"><i class="fas fa-trophy fa-xs"></i> Top performer</div>
+      </div>
+      <div class="ins-tile">
+        <div class="ins-tile-val cy">{{ viewed_cnt }}/{{ foods_count }}</div>
+        <div class="ins-tile-lbl">Items Viewed</div>
+        <div class="ins-tile-trend {% if viewed_cnt==foods_count %}trend-up{% else %}trend-down{% endif %}">
+          <i class="fas fa-eye fa-xs"></i> {{ ((viewed_cnt/foods_count*100)|int if foods_count>0 else 0) }}% coverage
         </div>
-        <div class="ins-tile">
-          <div class="ins-tile-val am">{{ top_views }}</div>
-          <div class="ins-tile-lbl">Best Item</div>
-          <div class="ins-tile-trend trend-up"><i class="fas fa-trophy fa-xs"></i> Top performer</div>
-        </div>
-        <div class="ins-tile">
-          <div class="ins-tile-val cy">{{ viewed_cnt }}/{{ foods_count }}</div>
-          <div class="ins-tile-lbl">Items Viewed</div>
-          <div class="ins-tile-trend {% if viewed_cnt==foods_count %}trend-up{% else %}trend-down{% endif %}">
-            <i class="fas fa-eye fa-xs"></i> {{ ((viewed_cnt/foods_count*100)|int if foods_count>0 else 0) }}% coverage
+      </div>
+      <div class="ins-tile">
+        <div class="ins-tile-val em">{{ avg_views }}</div>
+        <div class="ins-tile-lbl">Avg / Item</div>
+        <div class="ins-tile-trend trend-up"><i class="fas fa-chart-bar fa-xs"></i> Per listing</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Body -->
+  <div class="ins-body">
+
+    <!-- 3 Line Charts -->
+    <div>
+      <div class="ins-sec-lbl" style="margin-bottom:.85rem;"><i class="fas fa-chart-line" style="color:#38bdf8"></i> Growth Overview</div>
+      <div class="ins-charts">
+
+        <!-- Chart 1: Total Views Over Time -->
+        <div class="ins-chart-card">
+          <div class="ins-chart-title">Total Views</div>
+          <div class="ins-chart-big">{{ views_total }}</div>
+          <div class="ins-chart-trend trend-up"><i class="fas fa-arrow-up fa-xs"></i> Growing</div>
+          <div class="ins-chart-legend">
+            <div class="ins-chart-leg-item"><span class="ins-chart-leg-dot" style="background:#38bdf8"></span>This week</div>
+            <div class="ins-chart-leg-item"><span class="ins-chart-leg-dot" style="background:rgba(56,189,248,.35)"></span>Last week</div>
           </div>
+          <svg width="100%" viewBox="0 0 220 70" xmlns="http://www.w3.org/2000/svg" style="display:block;overflow:visible;">
+            <defs>
+              <linearGradient id="lg1" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#38bdf8" stop-opacity=".25"/>
+                <stop offset="100%" stop-color="#38bdf8" stop-opacity="0"/>
+              </linearGradient>
+              <linearGradient id="lg1b" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#38bdf8" stop-opacity=".1"/>
+                <stop offset="100%" stop-color="#38bdf8" stop-opacity="0"/>
+              </linearGradient>
+            </defs>
+            <line x1="0" y1="15" x2="220" y2="15" stroke="var(--nc-border)" stroke-width="1"/>
+            <line x1="0" y1="35" x2="220" y2="35" stroke="var(--nc-border)" stroke-width="1"/>
+            <line x1="0" y1="55" x2="220" y2="55" stroke="var(--nc-border)" stroke-width="1"/>
+            <path d="M0,55 C30,52 60,48 90,44 C120,40 150,38 180,36 C195,35 210,35 220,35" fill="url(#lg1b)" stroke="#38bdf8" stroke-width="1.5" stroke-dasharray="4 3" opacity=".5"/>
+            <path d="M0,52 C30,46 60,38 90,30 C120,22 150,18 180,14 C195,12 210,11 220,10 L220,65 L0,65 Z" fill="url(#lg1)"/>
+            <path d="M0,52 C30,46 60,38 90,30 C120,22 150,18 180,14 C195,12 210,11 220,10" fill="none" stroke="#38bdf8" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
+            <circle cx="220" cy="10" r="3.5" fill="#38bdf8" stroke="white" stroke-width="1.5"/>
+            {% for d in ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'] %}
+              <text x="{{ loop.index0 * 36.5 }}" y="68" font-size="7" fill="#9ca3af" font-family="JetBrains Mono,monospace">{{ d }}</text>
+            {% endfor %}
+          </svg>
         </div>
-        <div class="ins-tile">
-          <div class="ins-tile-val em">{{ avg_views }}</div>
-          <div class="ins-tile-lbl">Avg / Item</div>
-          <div class="ins-tile-trend trend-up"><i class="fas fa-chart-bar fa-xs"></i> Per listing</div>
+
+        <!-- Chart 2: Item Reach -->
+        <div class="ins-chart-card">
+          <div class="ins-chart-title">Item Reach</div>
+          <div class="ins-chart-big">{{ viewed_cnt }}</div>
+          <div class="ins-chart-trend {% if viewed_cnt>0 %}trend-up{% else %}trend-down{% endif %}"><i class="fas fa-arrow-{% if viewed_cnt>0 %}up{% else %}down{% endif %} fa-xs"></i> Items reached</div>
+          <div class="ins-chart-legend">
+            <div class="ins-chart-leg-item"><span class="ins-chart-leg-dot" style="background:#34d399"></span>Viewed items</div>
+            <div class="ins-chart-leg-item"><span class="ins-chart-leg-dot" style="background:rgba(52,211,153,.3)"></span>Total items</div>
+          </div>
+          <svg width="100%" viewBox="0 0 220 70" xmlns="http://www.w3.org/2000/svg" style="display:block;overflow:visible;">
+            <defs>
+              <linearGradient id="lg2" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#34d399" stop-opacity=".25"/>
+                <stop offset="100%" stop-color="#34d399" stop-opacity="0"/>
+              </linearGradient>
+            </defs>
+            <line x1="0" y1="15" x2="220" y2="15" stroke="var(--nc-border)" stroke-width="1"/>
+            <line x1="0" y1="35" x2="220" y2="35" stroke="var(--nc-border)" stroke-width="1"/>
+            <line x1="0" y1="55" x2="220" y2="55" stroke="var(--nc-border)" stroke-width="1"/>
+            <path d="M0,28 C55,28 165,28 220,28" fill="none" stroke="#34d399" stroke-width="1.5" stroke-dasharray="4 3" opacity=".4"/>
+            <path d="M0,62 C30,58 60,50 90,42 C120,34 150,28 180,24 C195,22 210,21 220,20 L220,65 L0,65 Z" fill="url(#lg2)"/>
+            <path d="M0,62 C30,58 60,50 90,42 C120,34 150,28 180,24 C195,22 210,21 220,20" fill="none" stroke="#34d399" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
+            <circle cx="220" cy="20" r="3.5" fill="#34d399" stroke="white" stroke-width="1.5"/>
+            {% for d in ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'] %}
+              <text x="{{ loop.index0 * 36.5 }}" y="68" font-size="7" fill="#9ca3af" font-family="JetBrains Mono,monospace">{{ d }}</text>
+            {% endfor %}
+          </svg>
         </div>
+
+        <!-- Chart 3: Avg Views / Item -->
+        <div class="ins-chart-card">
+          <div class="ins-chart-title">Avg Views / Item</div>
+          <div class="ins-chart-big">{{ avg_views }}</div>
+          <div class="ins-chart-trend trend-up"><i class="fas fa-arrow-trend-up fa-xs"></i> Engagement rate</div>
+          <div class="ins-chart-legend">
+            <div class="ins-chart-leg-item"><span class="ins-chart-leg-dot" style="background:#a78bfa"></span>This week</div>
+            <div class="ins-chart-leg-item"><span class="ins-chart-leg-dot" style="background:rgba(167,139,250,.35)"></span>Last week</div>
+          </div>
+          <svg width="100%" viewBox="0 0 220 70" xmlns="http://www.w3.org/2000/svg" style="display:block;overflow:visible;">
+            <defs>
+              <linearGradient id="lg3" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#a78bfa" stop-opacity=".25"/>
+                <stop offset="100%" stop-color="#a78bfa" stop-opacity="0"/>
+              </linearGradient>
+            </defs>
+            <line x1="0" y1="15" x2="220" y2="15" stroke="var(--nc-border)" stroke-width="1"/>
+            <line x1="0" y1="35" x2="220" y2="35" stroke="var(--nc-border)" stroke-width="1"/>
+            <line x1="0" y1="55" x2="220" y2="55" stroke="var(--nc-border)" stroke-width="1"/>
+            <path d="M0,56 C30,53 60,50 90,46 C120,42 150,40 180,38 C195,37 210,37 220,37" fill="none" stroke="#a78bfa" stroke-width="1.5" stroke-dasharray="4 3" opacity=".45"/>
+            <path d="M0,58 C30,52 60,42 90,34 C120,26 150,20 180,16 C195,14 210,13 220,12 L220,65 L0,65 Z" fill="url(#lg3)"/>
+            <path d="M0,58 C30,52 60,42 90,34 C120,26 150,20 180,16 C195,14 210,13 220,12" fill="none" stroke="#a78bfa" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
+            <circle cx="220" cy="12" r="3.5" fill="#a78bfa" stroke="white" stroke-width="1.5"/>
+            {% for d in ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'] %}
+              <text x="{{ loop.index0 * 36.5 }}" y="68" font-size="7" fill="#9ca3af" font-family="JetBrains Mono,monospace">{{ d }}</text>
+            {% endfor %}
+          </svg>
+        </div>
+
       </div>
     </div>
 
-    <!-- Body -->
-    <div class="ins-body">
-
-      <!-- 3 Line Charts — like FB Insights Overview -->
-      <div>
-        <div class="ins-sec-lbl" style="margin-bottom:.85rem;"><i class="fas fa-chart-line" style="color:#38bdf8"></i> Growth Overview</div>
-        <div class="ins-charts">
-
-          <!-- Chart 1: Total Views Over Time -->
-          <div class="ins-chart-card">
-            <div class="ins-chart-title">Total Views</div>
-            <div class="ins-chart-big">{{ views_total }}</div>
-            <div class="ins-chart-trend trend-up"><i class="fas fa-arrow-up fa-xs"></i> Growing</div>
-            <div class="ins-chart-legend">
-              <div class="ins-chart-leg-item"><span class="ins-chart-leg-dot" style="background:#38bdf8"></span>This week</div>
-              <div class="ins-chart-leg-item"><span class="ins-chart-leg-dot" style="background:rgba(56,189,248,.35)"></span>Last week</div>
-            </div>
-            <svg width="100%" viewBox="0 0 220 70" xmlns="http://www.w3.org/2000/svg" style="display:block;overflow:visible;">
-              <defs>
-                <linearGradient id="lg1" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stop-color="#38bdf8" stop-opacity=".25"/>
-                  <stop offset="100%" stop-color="#38bdf8" stop-opacity="0"/>
-                </linearGradient>
-                <linearGradient id="lg1b" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stop-color="#38bdf8" stop-opacity=".1"/>
-                  <stop offset="100%" stop-color="#38bdf8" stop-opacity="0"/>
-                </linearGradient>
-              </defs>
-              <!-- Grid -->
-              <line x1="0" y1="15" x2="220" y2="15" stroke="var(--nc-border)" stroke-width="1"/>
-              <line x1="0" y1="35" x2="220" y2="35" stroke="var(--nc-border)" stroke-width="1"/>
-              <line x1="0" y1="55" x2="220" y2="55" stroke="var(--nc-border)" stroke-width="1"/>
-              <!-- Last week (dashed) -->
-              <path d="M0,55 C30,52 60,48 90,44 C120,40 150,38 180,36 C195,35 210,35 220,35" fill="url(#lg1b)" stroke="#38bdf8" stroke-width="1.5" stroke-dasharray="4 3" opacity=".5"/>
-              <!-- This week (solid) -->
-              <path d="M0,52 C30,46 60,38 90,30 C120,22 150,18 180,14 C195,12 210,11 220,10 L220,65 L0,65 Z" fill="url(#lg1)"/>
-              <path d="M0,52 C30,46 60,38 90,30 C120,22 150,18 180,14 C195,12 210,11 220,10" fill="none" stroke="#38bdf8" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
-              <circle cx="220" cy="10" r="3.5" fill="#38bdf8" stroke="white" stroke-width="1.5"/>
-              <!-- X labels -->
-              {% for d in ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'] %}
-                <text x="{{ loop.index0 * 36.5 }}" y="68" font-size="7" fill="#9ca3af" font-family="JetBrains Mono,monospace">{{ d }}</text>
-              {% endfor %}
-            </svg>
-          </div>
-
-          <!-- Chart 2: Items Popularity -->
-          <div class="ins-chart-card">
-            <div class="ins-chart-title">Item Reach</div>
-            <div class="ins-chart-big">{{ viewed_cnt }}</div>
-            <div class="ins-chart-trend {% if viewed_cnt>0 %}trend-up{% else %}trend-down{% endif %}"><i class="fas fa-arrow-{% if viewed_cnt>0 %}up{% else %}down{% endif %} fa-xs"></i> Items reached</div>
-            <div class="ins-chart-legend">
-              <div class="ins-chart-leg-item"><span class="ins-chart-leg-dot" style="background:#34d399"></span>Viewed items</div>
-              <div class="ins-chart-leg-item"><span class="ins-chart-leg-dot" style="background:rgba(52,211,153,.3)"></span>Total items</div>
-            </div>
-            <svg width="100%" viewBox="0 0 220 70" xmlns="http://www.w3.org/2000/svg" style="display:block;overflow:visible;">
-              <defs>
-                <linearGradient id="lg2" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stop-color="#34d399" stop-opacity=".25"/>
-                  <stop offset="100%" stop-color="#34d399" stop-opacity="0"/>
-                </linearGradient>
-              </defs>
-              <line x1="0" y1="15" x2="220" y2="15" stroke="var(--nc-border)" stroke-width="1"/>
-              <line x1="0" y1="35" x2="220" y2="35" stroke="var(--nc-border)" stroke-width="1"/>
-              <line x1="0" y1="55" x2="220" y2="55" stroke="var(--nc-border)" stroke-width="1"/>
-              <!-- Total items line (flat reference) -->
-              <path d="M0,28 C55,28 165,28 220,28" fill="none" stroke="#34d399" stroke-width="1.5" stroke-dasharray="4 3" opacity=".4"/>
-              <!-- Viewed items growth -->
-              <path d="M0,62 C30,58 60,50 90,42 C120,34 150,28 180,24 C195,22 210,21 220,20 L220,65 L0,65 Z" fill="url(#lg2)"/>
-              <path d="M0,62 C30,58 60,50 90,42 C120,34 150,28 180,24 C195,22 210,21 220,20" fill="none" stroke="#34d399" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
-              <circle cx="220" cy="20" r="3.5" fill="#34d399" stroke="white" stroke-width="1.5"/>
-              {% for d in ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'] %}
-                <text x="{{ loop.index0 * 36.5 }}" y="68" font-size="7" fill="#9ca3af" font-family="JetBrains Mono,monospace">{{ d }}</text>
-              {% endfor %}
-            </svg>
-          </div>
-
-          <!-- Chart 3: Avg Views per Item -->
-          <div class="ins-chart-card">
-            <div class="ins-chart-title">Avg Views / Item</div>
-            <div class="ins-chart-big">{{ avg_views }}</div>
-            <div class="ins-chart-trend trend-up"><i class="fas fa-arrow-trend-up fa-xs"></i> Engagement rate</div>
-            <div class="ins-chart-legend">
-              <div class="ins-chart-leg-item"><span class="ins-chart-leg-dot" style="background:#a78bfa"></span>This week</div>
-              <div class="ins-chart-leg-item"><span class="ins-chart-leg-dot" style="background:rgba(167,139,250,.35)"></span>Last week</div>
-            </div>
-            <svg width="100%" viewBox="0 0 220 70" xmlns="http://www.w3.org/2000/svg" style="display:block;overflow:visible;">
-              <defs>
-                <linearGradient id="lg3" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stop-color="#a78bfa" stop-opacity=".25"/>
-                  <stop offset="100%" stop-color="#a78bfa" stop-opacity="0"/>
-                </linearGradient>
-              </defs>
-              <line x1="0" y1="15" x2="220" y2="15" stroke="var(--nc-border)" stroke-width="1"/>
-              <line x1="0" y1="35" x2="220" y2="35" stroke="var(--nc-border)" stroke-width="1"/>
-              <line x1="0" y1="55" x2="220" y2="55" stroke="var(--nc-border)" stroke-width="1"/>
-              <!-- Last week -->
-              <path d="M0,56 C30,53 60,50 90,46 C120,42 150,40 180,38 C195,37 210,37 220,37" fill="none" stroke="#a78bfa" stroke-width="1.5" stroke-dasharray="4 3" opacity=".45"/>
-              <!-- This week -->
-              <path d="M0,58 C30,52 60,42 90,34 C120,26 150,20 180,16 C195,14 210,13 220,12 L220,65 L0,65 Z" fill="url(#lg3)"/>
-              <path d="M0,58 C30,52 60,42 90,34 C120,26 150,20 180,16 C195,14 210,13 220,12" fill="none" stroke="#a78bfa" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
-              <circle cx="220" cy="12" r="3.5" fill="#a78bfa" stroke="white" stroke-width="1.5"/>
-              {% for d in ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'] %}
-                <text x="{{ loop.index0 * 36.5 }}" y="68" font-size="7" fill="#9ca3af" font-family="JetBrains Mono,monospace">{{ d }}</text>
-              {% endfor %}
-            </svg>
-          </div>
-
+    <!-- Ranking table -->
+    <div>
+      <div class="ins-sec-lbl" style="margin-bottom:.85rem;"><i class="fas fa-fire" style="color:#fb7185"></i> Item Ranking</div>
+      {% if views_total==0 %}
+        <div class="ins-empty">
+          <div class="ins-empty-ico"><i class="fas fa-chart-line"></i></div>
+          <p>No views yet. Views are counted when users click a food card on the search page.</p>
         </div>
-      </div>
-
-      <!-- Ranking table -->
-      <div>
-        <div class="ins-sec-lbl" style="margin-bottom:.85rem;"><i class="fas fa-fire" style="color:#fb7185"></i> Item Ranking</div>
-        {% if views_total==0 %}
-          <div class="ins-empty">
-            <div class="ins-empty-ico"><i class="fas fa-chart-line"></i></div>
-            <p>No views yet. Views are counted when users click a food card on the search page.</p>
-          </div>
-        {% else %}
-          <div class="ins-list">
-            {% for item in insights_list %}
-              {% set pct = ((item.views/max_views)*100)|round(0)|int %}
-              {% set bar_cls = 'ibf-1' if loop.index==1 else 'ibf-2' if loop.index==2 else 'ibf-3' if loop.index==3 else 'ibf-n' %}
-              <div class="ins-row">
-                <div class="ins-rank {{ 'r1' if loop.index==1 else 'r2' if loop.index==2 else 'r3' if loop.index==3 else 'rn' }}">
-                  {% if loop.index==1 %}🥇{% elif loop.index==2 %}🥈{% elif loop.index==3 %}🥉{% else %}{{ loop.index }}{% endif %}
-                </div>
-                {% if item.food.image %}
-                  <img class="ins-thumb" src="{{ url_for('static',filename='uploads/'~item.food.image) }}" alt="{{ item.food.name }}">
-                {% else %}
-                  <div class="ins-thumb-ph"><i class="fas fa-utensils"></i></div>
-                {% endif %}
-                <div class="ins-info">
-                  <div class="ins-name">{{ item.food.name }}</div>
-                  <div class="ins-chips">
-                    {% if item.food.diet_type %}<span class="ins-chip ic-diet">{{ item.food.diet_type.replace('-',' ').title() }}</span>{% endif %}
-                    {% if item.food.calories  %}<span class="ins-chip ic-cal">{{ item.food.calories|int }} kcal</span>{% endif %}
-                    {% if item.food.price     %}<span class="ins-chip ic-price">${{ "%.2f"|format(item.food.price) }}</span>{% endif %}
-                  </div>
-                </div>
-                <div class="ins-right">
-                  <div class="ins-views-num">{{ item.views }}</div>
-                  <div class="ins-views-sub">views</div>
-                  <div class="ins-bar"><div class="ins-bar-fill {{ bar_cls }}" data-w="{{ pct }}"></div></div>
+      {% else %}
+        <div class="ins-list">
+          {% for item in insights_list %}
+            {% set pct = ((item.views/max_views)*100)|round(0)|int %}
+            {% set bar_cls = 'ibf-1' if loop.index==1 else 'ibf-2' if loop.index==2 else 'ibf-3' if loop.index==3 else 'ibf-n' %}
+            <div class="ins-row">
+              <div class="ins-rank {{ 'r1' if loop.index==1 else 'r2' if loop.index==2 else 'r3' if loop.index==3 else 'rn' }}">
+                {% if loop.index==1 %}🥇{% elif loop.index==2 %}🥈{% elif loop.index==3 %}🥉{% else %}{{ loop.index }}{% endif %}
+              </div>
+              {% if item.food.image %}
+                <img class="ins-thumb" src="{{ url_for('static',filename='uploads/'~item.food.image) }}" alt="{{ item.food.name }}">
+              {% else %}
+                <div class="ins-thumb-ph"><i class="fas fa-utensils"></i></div>
+              {% endif %}
+              <div class="ins-info">
+                <div class="ins-name">{{ item.food.name }}</div>
+                <div class="ins-chips">
+                  {% if item.food.diet_type %}<span class="ins-chip ic-diet">{{ item.food.diet_type.replace('-',' ').title() }}</span>{% endif %}
+                  {% if item.food.calories  %}<span class="ins-chip ic-cal">{{ item.food.calories|int }} kcal</span>{% endif %}
+                  {% if item.food.price     %}<span class="ins-chip ic-price">${{ "%.2f"|format(item.food.price) }}</span>{% endif %}
                 </div>
               </div>
-            {% endfor %}
-          </div>
-        {% endif %}
-      </div>
+              <div class="ins-right">
+                <div class="ins-views-num">{{ item.views }}</div>
+                <div class="ins-views-sub">views</div>
+                <div class="ins-bar"><div class="ins-bar-fill {{ bar_cls }}" data-w="{{ pct }}"></div></div>
+              </div>
+            </div>
+          {% endfor %}
+        </div>
+      {% endif %}
+    </div>
 
-    </div><!-- /ins-body -->
-  </div><!-- /ins-page -->
-</div><!-- /ins-backdrop -->
+  </div><!-- /ins-body -->
+</div><!-- /ins-page-wrap -->
 
 <script>
 function openInsights() {
-  const bd = document.getElementById('insBackdrop');
-  if (!bd) return;
-  bd.classList.add('open');
-  document.body.style.overflow = 'hidden';
-  setTimeout(() => {
-    document.querySelectorAll('.ins-bar-fill[data-w]').forEach(el => {
+  document.getElementById('pdWrap').style.display = 'none';
+  document.getElementById('insPageWrap').classList.add('open');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+  setTimeout(function() {
+    document.querySelectorAll('.ins-bar-fill[data-w]').forEach(function(el) {
       el.style.width = el.dataset.w + '%';
     });
-  }, 320);
+  }, 150);
 }
+
 function closeInsights() {
-  const bd = document.getElementById('insBackdrop');
-  if (!bd) return;
-  bd.classList.remove('open');
-  document.body.style.overflow = '';
+  document.getElementById('insPageWrap').classList.remove('open');
+  document.getElementById('pdWrap').style.display = '';
+  window.scrollTo({ top: 0, behavior: 'smooth' });
 }
-function handleBackdropClick(e) {
-  if (e.target === document.getElementById('insBackdrop')) closeInsights();
-}
-document.addEventListener('keydown', e => { if (e.key==='Escape') closeInsights(); });
+
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') closeInsights();
+});
 </script>
 {% endif %}
 {% endblock %}
