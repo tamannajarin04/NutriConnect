@@ -371,12 +371,14 @@
   gap: 1rem;
 }
 
+/* Card is now fully clickable like a link */
 .food-card {
   background: var(--nc-card-bg);
   border: 1px solid var(--nc-card-border);
   border-radius: 18px; overflow: hidden;
   display: flex; flex-direction: column;
   box-shadow: var(--nc-card-shadow);
+  cursor: pointer;
   transition: transform .2s cubic-bezier(.16,1,.3,1), box-shadow .2s cubic-bezier(.16,1,.3,1), border-color .2s;
   animation: up .4s cubic-bezier(.16,1,.3,1) both;
 }
@@ -675,203 +677,6 @@
   #foodGrid { grid-template-columns: 1fr; }
   .fs-hero__h1 { font-size: 1.2rem; }
 }
-
-/* Quick view modal */
-.fqv-backdrop{
-  position:fixed;
-  inset:0;
-  z-index:9000;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  padding:1.5rem;
-  background:rgba(3,8,18,.72);
-  backdrop-filter:blur(14px);
-  -webkit-backdrop-filter:blur(14px);
-  opacity:0;
-  pointer-events:none;
-  transition:opacity .22s ease;
-}
-
-.fqv-backdrop.open{
-  opacity:1;
-  pointer-events:auto;
-}
-
-.fqv-modal{
-  width:100%;
-  max-width:520px;
-  border-radius:22px;
-  overflow:hidden;
-  background:linear-gradient(180deg, rgba(18,25,39,.98), rgba(16,22,34,.98));
-  border:1px solid rgba(80,110,160,.25);
-  box-shadow:0 32px 90px rgba(0,0,0,.45);
-  transform:translateY(16px) scale(.97);
-  transition:transform .22s ease;
-}
-
-.fqv-backdrop.open .fqv-modal{
-  transform:translateY(0) scale(1);
-}
-
-.fqv-image{
-  position:relative;
-  height:260px;
-  background:var(--nc-surface-3);
-  overflow:hidden;
-}
-
-.fqv-image img{
-  width:100%;
-  height:100%;
-  object-fit:cover;
-  display:block;
-}
-
-.fqv-image-placeholder{
-  width:100%;
-  height:100%;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  color:var(--nc-text-faint);
-  font-size:2rem;
-}
-
-.fqv-close{
-  position:absolute;
-  top:14px;
-  right:14px;
-  width:36px;
-  height:36px;
-  border-radius:10px;
-  border:1px solid rgba(255,255,255,.12);
-  background:rgba(20,27,40,.78);
-  color:#cbd5e1;
-  cursor:pointer;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-}
-
-.fqv-body{
-  padding:1.15rem 1.2rem 1.2rem;
-}
-
-.fqv-title{
-  font-size:1.55rem;
-  font-weight:900;
-  color:#f8fafc;
-  letter-spacing:-.03em;
-  margin:0 0 .85rem;
-}
-
-.fqv-meta{
-  display:flex;
-  align-items:center;
-  gap:.55rem;
-  flex-wrap:wrap;
-  margin-bottom:.9rem;
-}
-
-.fqv-pill{
-  display:inline-flex;
-  align-items:center;
-  gap:.35rem;
-  border-radius:999px;
-  padding:.3rem .78rem;
-  font-size:.78rem;
-  font-weight:800;
-}
-
-.fqv-pill.diet{
-  background:rgba(16,185,129,.12);
-  color:#34d399;
-  border:1px solid rgba(16,185,129,.18);
-}
-
-.fqv-pill.price{
-  background:rgba(14,165,233,.14);
-  color:#38bdf8;
-  border:1px solid rgba(14,165,233,.22);
-  font-family:'JetBrains Mono', monospace;
-}
-
-.fqv-rating{
-  display:flex;
-  align-items:center;
-  gap:.55rem;
-  flex-wrap:wrap;
-  margin-bottom:1rem;
-  padding-bottom:1rem;
-  border-bottom:1px solid rgba(148,163,184,.16);
-}
-
-.fqv-stars{
-  display:flex;
-  align-items:center;
-  gap:.08rem;
-  color:#fbbf24;
-  font-size:.9rem;
-}
-
-.fqv-rating-value{
-  font-family:'JetBrains Mono', monospace;
-  font-size:.86rem;
-  font-weight:800;
-  color:#f8fafc;
-}
-
-.fqv-rating-count{
-  font-size:.78rem;
-  font-weight:700;
-  color:#94a3b8;
-}
-
-.fqv-desc{
-  color:#94a3b8;
-  font-size:.95rem;
-  line-height:1.7;
-  margin:0 0 1rem;
-}
-
-.fqv-footer{
-  display:flex;
-  align-items:center;
-  justify-content:flex-start;
-  gap:.75rem;
-  padding-top:1rem;
-  border-top:1px solid rgba(148,163,184,.16);
-}
-
-.fqv-provider{
-  display:flex;
-  align-items:center;
-  gap:.65rem;
-  min-width:0;
-}
-
-.fqv-provider-avatar{
-  width:34px;
-  height:34px;
-  border-radius:999px;
-  background:#38bdf8;
-  color:#fff;
-  font-weight:800;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  flex-shrink:0;
-}
-
-.fqv-provider-name{
-  color:#94a3b8;
-  font-size:.84rem;
-  font-weight:700;
-  white-space:nowrap;
-  overflow:hidden;
-  text-overflow:ellipsis;
-}
 </style>
 {% endblock %}
 
@@ -891,7 +696,7 @@
       </div>
       <h1 class="fs-hero__h1">
         {% if current_user.is_food_provider() %}
-        Browse <span class="grad">your foods and other providers’ foods</span>
+        Browse <span class="grad">your foods and other providers' foods</span>
         {% else %}
         Find your next <span class="grad">perfect meal</span>
         {% endif %}
@@ -1169,45 +974,7 @@
 </div>
 {% endif %}
 
-<div class="fqv-backdrop" id="foodQuickView" aria-hidden="true">
-  <div class="fqv-modal" role="dialog" aria-modal="true" aria-labelledby="fqvTitle">
-    <div class="fqv-image" id="fqvImageWrap">
-      <button type="button" class="fqv-close" id="fqvCloseBtn" aria-label="Close">
-        <i class="fas fa-xmark"></i>
-      </button>
-      <div class="fqv-image-placeholder" id="fqvImagePlaceholder">
-        <i class="fas fa-utensils"></i>
-      </div>
-      <img id="fqvImage" alt="" style="display:none;">
-    </div>
-
-    <div class="fqv-body">
-      <h3 class="fqv-title" id="fqvTitle">Food Item</h3>
-
-      <div class="fqv-meta">
-        <span class="fqv-pill diet" id="fqvDiet" style="display:none;"></span>
-        <span class="fqv-pill price" id="fqvPrice" style="display:none;"></span>
-      </div>
-
-      <div class="fqv-rating">
-        <div class="fqv-stars" id="fqvStars"></div>
-        <span class="fqv-rating-value" id="fqvRatingValue">0.0</span>
-        <span class="fqv-rating-count" id="fqvRatingCount">0 reviews</span>
-      </div>
-
-      <p class="fqv-desc" id="fqvDesc">No description available.</p>
-
-      <div class="fqv-footer">
-        <div class="fqv-provider">
-          <div class="fqv-provider-avatar" id="fqvProviderInitial">P</div>
-          <div class="fqv-provider-name" id="fqvProviderName">Unknown Provider</div>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
-
-</div>
+</div>{# end .fs #}
 {% endblock %}
 
 {% block extra_js %}
@@ -1215,18 +982,18 @@
 (function () {
   const $ = id => document.getElementById(id);
 
-  const form = $('filterForm');
-  const gridWrap = $('gridWrap');
-  const counter = $('resultCount');
-  const heroCount = $('heroCount');
-  const chipsRow = $('activeChips');
-  const sortSel = $('sortSelect');
+  const form          = $('filterForm');
+  const gridWrap      = $('gridWrap');
+  const counter       = $('resultCount');
+  const heroCount     = $('heroCount');
+  const chipsRow      = $('activeChips');
+  const sortSel       = $('sortSelect');
   const paginationWrap = $('paginationWrap');
 
-  let timer = null;
-  let diet = $('dietInput').value || '';
+  let timer           = null;
+  let diet            = $('dietInput').value || '';
   let activeController = null;
-  let activeRequestId = 0;
+  let activeRequestId  = 0;
 
   const DEFAULTS = {
     q: '',
@@ -1239,25 +1006,19 @@
 
   const RC = {
     cal: {
-      r: 'calRange',
-      v: 'calVal',
-      i: 'calInput',
+      r: 'calRange', v: 'calVal', i: 'calInput',
       def: DEFAULTS.max_cal,
       fmt: x => x >= 2000 ? 'Any' : `${x} kcal`,
       none: x => x >= 2000
     },
     prot: {
-      r: 'protRange',
-      v: 'protVal',
-      i: 'protInput',
+      r: 'protRange', v: 'protVal', i: 'protInput',
       def: DEFAULTS.min_protein,
       fmt: x => x <= 0 ? 'Any' : `${x}g`,
       none: x => x <= 0
     },
     price: {
-      r: 'priceRange',
-      v: 'priceVal',
-      i: 'priceInput',
+      r: 'priceRange', v: 'priceVal', i: 'priceInput',
       def: DEFAULTS.max_price,
       fmt: x => x >= 1000 ? 'Any' : `$${x}`,
       none: x => x >= 1000
@@ -1279,7 +1040,6 @@
   function setDietUI(value) {
     diet = (value || '').trim();
     $('dietInput').value = diet;
-
     document.querySelectorAll('.fs-pill').forEach(btn => {
       const on = btn.dataset.val === diet;
       btn.classList.toggle('on', on);
@@ -1288,17 +1048,16 @@
   }
 
   function setRangeState(type, value) {
-    const c = RC[type];
+    const c   = RC[type];
     const num = Number.isFinite(Number(value)) ? Number(value) : c.def;
-
-    $(c.r).value = num;
+    $(c.r).value       = num;
     $(c.v).textContent = c.fmt(num);
-    $(c.i).value = c.none(num) ? '' : num;
+    $(c.i).value       = c.none(num) ? '' : num;
   }
 
   function setSearchState(value) {
     const text = value || '';
-    $('hiddenQ').value = text;
+    $('hiddenQ').value     = text;
     $('searchInput').value = text;
   }
 
@@ -1308,35 +1067,29 @@
 
   function syncFromUrl() {
     const sp = new URLSearchParams(window.location.search);
-
-    setSearchState(sp.get('q') || DEFAULTS.q);
-    setDietUI(sp.get('diet_type') || DEFAULTS.diet_type);
-    setRangeState('cal', sp.get('max_cal') || DEFAULTS.max_cal);
-    setRangeState('prot', sp.get('min_protein') || DEFAULTS.min_protein);
-    setRangeState('price', sp.get('max_price') || DEFAULTS.max_price);
-    setSortState(sp.get('sort') || DEFAULTS.sort);
+    setSearchState(sp.get('q')           || DEFAULTS.q);
+    setDietUI(sp.get('diet_type')        || DEFAULTS.diet_type);
+    setRangeState('cal',   sp.get('max_cal')     || DEFAULTS.max_cal);
+    setRangeState('prot',  sp.get('min_protein') || DEFAULTS.min_protein);
+    setRangeState('price', sp.get('max_price')   || DEFAULTS.max_price);
+    setSortState(sp.get('sort')          || DEFAULTS.sort);
   }
 
   function params() {
     const fd = new FormData(form);
     fd.set('sort', sortSel.value);
-
     const p = new URLSearchParams();
     for (const [k, v] of fd.entries()) {
       const value = String(v).trim();
-      if (value) {
-        p.append(k, value);
-      }
+      if (value) p.append(k, value);
     }
     return p;
   }
 
   function renderChips() {
     chipsRow.innerHTML = '';
-
     for (const [k, v] of params().entries()) {
       if (k === 'q' || k === 'sort' || k === 'page') continue;
-
       const el = document.createElement('span');
       el.className = 'fs-chip';
       el.innerHTML = `${CL[k] ? CL[k](v) : v} <i class="fas fa-xmark"></i>`;
@@ -1346,19 +1099,14 @@
   }
 
   function clearOne(key) {
-    if (key === 'diet_type') {
-      setDietUI('');
-    } else if (key === 'max_cal') {
-      setRangeState('cal', RC.cal.def);
-    } else if (key === 'min_protein') {
-      setRangeState('prot', RC.prot.def);
-    } else if (key === 'max_price') {
-      setRangeState('price', RC.price.def);
-    } else {
+    if      (key === 'diet_type')   setDietUI('');
+    else if (key === 'max_cal')     setRangeState('cal',   RC.cal.def);
+    else if (key === 'min_protein') setRangeState('prot',  RC.prot.def);
+    else if (key === 'max_price')   setRangeState('price', RC.price.def);
+    else {
       const el = form.querySelector(`[name="${key}"]`);
       if (el) el.value = '';
     }
-
     go();
   }
 
@@ -1375,23 +1123,17 @@
   }
 
   function buildUrl() {
-    const p = params();
+    const p  = params();
     const qs = p.toString();
     const base = `{{ url_for('food_search.search_foods') }}`;
-    return {
-      params: p,
-      url: qs ? `${base}?${qs}` : base
-    };
+    return { params: p, url: qs ? `${base}?${qs}` : base };
   }
 
   function fetch_(push = true) {
-    const { params: p, url } = buildUrl();
+    const { url } = buildUrl();
     const requestId = ++activeRequestId;
 
-    if (activeController) {
-      activeController.abort();
-    }
-
+    if (activeController) activeController.abort();
     activeController = new AbortController();
 
     skeleton();
@@ -1406,37 +1148,29 @@
       if (requestId !== activeRequestId) return;
 
       gridWrap.innerHTML = `<div id="foodGrid">${d.html}</div>`;
-      counter.textContent = d.total;
+      counter.textContent   = d.total;
       heroCount.textContent = d.total;
 
       document.querySelectorAll('.food-card').forEach((c, i) => {
         c.style.animationDelay = `${i * 0.05}s`;
       });
 
-      if (paginationWrap) {
-        paginationWrap.style.display = 'none';
-      }
+      if (paginationWrap) paginationWrap.style.display = 'none';
 
       if (push) {
-        const nextUrl = url.replace(window.location.origin, '');
+        const nextUrl    = url.replace(window.location.origin, '');
         const currentUrl = window.location.pathname + window.location.search;
-        if (nextUrl !== currentUrl) {
-          history.pushState({}, '', nextUrl);
-        }
+        if (nextUrl !== currentUrl) history.pushState({}, '', nextUrl);
       }
     })
     .catch(err => {
       if (err.name === 'AbortError') return;
-
       gridWrap.innerHTML = `<div id="foodGrid"><div class="fs-empty">
         <div class="fs-empty__icon"><i class="fas fa-triangle-exclamation"></i></div>
         <h4>Something went wrong</h4>
         <p>Please refresh and try again.</p>
       </div></div>`;
-
-      if (paginationWrap) {
-        paginationWrap.style.display = 'none';
-      }
+      if (paginationWrap) paginationWrap.style.display = 'none';
     });
   }
 
@@ -1449,10 +1183,10 @@
   };
 
   window.onRange = type => {
-    const c = RC[type];
+    const c   = RC[type];
     const raw = parseFloat($(c.r).value);
     $(c.v).textContent = c.fmt(raw);
-    $(c.i).value = c.none(raw) ? '' : raw;
+    $(c.i).value       = c.none(raw) ? '' : raw;
     deb(fetch_);
   };
 
@@ -1465,8 +1199,8 @@
     form.reset();
     setSearchState('');
     setDietUI('');
-    setRangeState('cal', RC.cal.def);
-    setRangeState('prot', RC.prot.def);
+    setRangeState('cal',   RC.cal.def);
+    setRangeState('prot',  RC.prot.def);
     setRangeState('price', RC.price.def);
     setSortState(DEFAULTS.sort);
     go();
@@ -1490,140 +1224,18 @@
   syncFromUrl();
   renderChips();
 
-  const quickView = document.getElementById('foodQuickView');
-  const closeBtn = document.getElementById('fqvCloseBtn');
-  const imageEl = document.getElementById('fqvImage');
-  const imagePlaceholder = document.getElementById('fqvImagePlaceholder');
-  const titleEl = document.getElementById('fqvTitle');
-  const dietEl = document.getElementById('fqvDiet');
-  const priceEl = document.getElementById('fqvPrice');
-  const starsEl = document.getElementById('fqvStars');
-  const ratingValueEl = document.getElementById('fqvRatingValue');
-  const ratingCountEl = document.getElementById('fqvRatingCount');
-  const descEl = document.getElementById('fqvDesc');
-  const providerInitialEl = document.getElementById('fqvProviderInitial');
-  const providerNameEl = document.getElementById('fqvProviderName');
-
-  function renderStars(rating) {
-    let html = '';
-    const value = Number(rating) || 0;
-
-    for (let i = 0; i < 5; i += 1) {
-      if (value >= i + 1) {
-        html += '<i class="fas fa-star"></i>';
-      } else if (value >= i + 0.5) {
-        html += '<i class="fas fa-star-half-stroke"></i>';
-      } else {
-        html += '<i class="far fa-star" style="color:var(--nc-text-faint);"></i>';
-      }
-    }
-
-    return html;
-  }
-
-  function closeQuickView() {
-    quickView.classList.remove('open');
-    quickView.setAttribute('aria-hidden', 'true');
-    document.body.style.overflow = '';
-  }
-
-  function countFoodView(foodId) {
-    if (!foodId) return;
-
-    fetch(`/food/view/${foodId}`, {
-      method: 'POST',
-      headers: { 'X-Requested-With': 'XMLHttpRequest' }
-    }).catch(() => {});
-  }
-
-  function openQuickView(card) {
-    if (!card) return;
-
-    const data = card.dataset;
-    const imagePath = data.img ? `/static/uploads/${data.img}` : '';
-    const rating = parseFloat(data.rating || '0') || 0;
-    const reviewCount = parseInt(data.reviewCount || '0', 10) || 0;
-    const foodId = data.id;
-
-    titleEl.textContent = data.name || 'Food Item';
-    descEl.textContent = data.desc || 'No description available.';
-    providerNameEl.textContent = data.provider || 'Unknown Provider';
-    providerInitialEl.textContent = (data.providerInitial || 'P').charAt(0).toUpperCase();
-    ratingValueEl.textContent = rating.toFixed(1);
-    ratingCountEl.textContent = `${reviewCount} review${reviewCount === 1 ? '' : 's'}`;
-    starsEl.innerHTML = renderStars(rating);
-
-    if (data.diet) {
-      dietEl.style.display = 'inline-flex';
-      dietEl.innerHTML = `<i class="fas fa-leaf"></i> ${data.diet}`;
-    } else {
-      dietEl.style.display = 'none';
-      dietEl.innerHTML = '';
-    }
-
-    if (data.price) {
-      priceEl.style.display = 'inline-flex';
-      priceEl.textContent = `$${data.price}`;
-    } else {
-      priceEl.style.display = 'none';
-      priceEl.textContent = '';
-    }
-
-    if (imagePath) {
-      imageEl.src = imagePath;
-      imageEl.alt = data.name || 'Food image';
-      imageEl.style.display = 'block';
-      imagePlaceholder.style.display = 'none';
-    } else {
-      imageEl.removeAttribute('src');
-      imageEl.style.display = 'none';
-      imagePlaceholder.style.display = 'flex';
-    }
-
-    quickView.classList.add('open');
-    quickView.setAttribute('aria-hidden', 'false');
-    document.body.style.overflow = 'hidden';
-
-    countFoodView(foodId);
-  }
-
+  /* ── Card click → navigate to detail page ─────────────────────────────── */
   document.addEventListener('click', function (event) {
-    const reviewLink = event.target.closest('.js-review-link');
-    if (reviewLink) {
-      closeQuickView();
-      return;
-    }
-
-    const blockedAction = event.target.closest('.food-footer, form, button, .btn-view');
-    if (blockedAction) {
-      return;
-    }
+    /* Let links, buttons, forms handle themselves */
+    if (event.target.closest('a, button, form')) return;
 
     const card = event.target.closest('.food-card');
-    if (!card) {
-      return;
-    }
+    if (!card) return;
 
-    openQuickView(card);
+    const url = card.dataset.detailUrl;
+    if (url) window.location.href = url;
   });
 
-  quickView.addEventListener('click', function (event) {
-    if (event.target === quickView) {
-      closeQuickView();
-    }
-  });
-
-  closeBtn.addEventListener('click', closeQuickView);
-
-  document.addEventListener('keydown', function (event) {
-    if (event.key === 'Escape') {
-      closeQuickView();
-    }
-  });
-
-  window.addEventListener('pageshow', function () {
-    closeQuickView();
-  });
 })();
 </script>
 {% endblock %}
