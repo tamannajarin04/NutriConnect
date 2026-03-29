@@ -1,0 +1,331 @@
+{% extends "base.html" %}
+{% block title %}AI Goal Time Estimator · NutriConnect{% endblock %}
+
+{% block extra_css %}
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;800&family=Sora:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
+  .gt-page {
+    --gt-primary: #0ea5e9;
+    --gt-primary-deep: #2563eb;
+    --gt-emerald: #10b981;
+    --gt-violet: #8b5cf6;
+    --gt-amber: #f59e0b;
+    --gt-rose: #ef4444;
+    --gt-hero: linear-gradient(135deg, #0f172a 0%, #13213f 45%, #071827 100%);
+  }
+  .gt-shell { max-width: 1120px; margin: 0 auto; }
+
+  .gt-hero {
+    background: var(--gt-hero); color: #fff; border-radius: 24px; padding: 2rem 2rem 1.8rem;
+    position: relative; overflow: hidden; margin-bottom: 1.4rem; border: 1px solid rgba(56,189,248,.16);
+  }
+  .gt-hero::before,
+  .gt-hero::after {
+    content: ""; position: absolute; border-radius: 999px; pointer-events: none;
+  }
+  .gt-hero::before {
+    width: 240px; height: 240px; right: -70px; top: -90px;
+    background: radial-gradient(circle, rgba(14,165,233,.2) 0%, transparent 70%);
+  }
+  .gt-hero::after {
+    width: 190px; height: 190px; left: 20%; bottom: -70px;
+    background: radial-gradient(circle, rgba(139,92,246,.15) 0%, transparent 70%);
+  }
+  .gt-hero-inner {
+    position: relative; z-index: 1; display: flex; justify-content: space-between; gap: 1rem; flex-wrap: wrap;
+  }
+  .gt-kicker {
+    display: inline-flex; align-items: center; gap: .45rem; margin-bottom: .8rem;
+    padding: .28rem .8rem; border-radius: 999px; font-size: .72rem; font-weight: 800;
+    letter-spacing: .08em; text-transform: uppercase; color: rgba(255,255,255,.85);
+    background: rgba(255,255,255,.1); border: 1px solid rgba(255,255,255,.15);
+  }
+  .gt-title {
+    margin: 0; font-family: 'Playfair Display', serif; font-size: 2rem; font-weight: 800; line-height: 1.08;
+  }
+  .gt-title span {
+    background: linear-gradient(90deg, #5eead4, #7dd3fc);
+    -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
+  }
+  .gt-sub {
+    margin: .55rem 0 0; max-width: 620px; color: rgba(255,255,255,.72); line-height: 1.7; font-size: .88rem;
+  }
+
+  .gt-hero-actions { display: flex; gap: .7rem; flex-wrap: wrap; align-items: flex-start; }
+  .gt-btn {
+    display: inline-flex; align-items: center; gap: .5rem; text-decoration: none; font-weight: 700;
+    border-radius: 12px; padding: .74rem 1rem; transition: transform .14s, box-shadow .18s, background .18s;
+  }
+  .gt-btn:hover { transform: translateY(-2px); }
+  .gt-btn--primary {
+    color: #fff; background: linear-gradient(135deg, var(--gt-primary), var(--gt-primary-deep));
+    box-shadow: 0 10px 22px rgba(37,99,235,.22);
+  }
+  .gt-btn--ghost {
+    color: #d7f3ff; background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.16);
+  }
+
+  .gt-layout {
+    display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, .95fr); gap: 1.1rem;
+  }
+  @media (max-width: 960px) { .gt-layout { grid-template-columns: 1fr; } }
+
+  .gt-card {
+    background: var(--nc-card-bg); border: 1px solid var(--nc-card-border);
+    border-radius: 20px; box-shadow: var(--nc-card-shadow); overflow: hidden;
+  }
+  .gt-card-head {
+    padding: 1rem 1.25rem; border-bottom: 1px solid var(--nc-border); background: var(--nc-surface-2);
+  }
+  .gt-card-title { margin: 0; font-size: 1rem; font-weight: 800; color: var(--nc-text); }
+  .gt-card-sub { margin: .18rem 0 0; font-size: .76rem; color: var(--nc-text-muted); }
+  .gt-card-body { padding: 1.25rem; }
+
+  .gt-form-grid { display: grid; grid-template-columns: 1fr; gap: .95rem; }
+  .gt-label {
+    display: block; font-size: .72rem; text-transform: uppercase; letter-spacing: .08em; font-weight: 800;
+    color: var(--nc-text-muted); margin-bottom: .45rem;
+  }
+  .gt-input-wrap { position: relative; }
+  .gt-input-icon {
+    position: absolute; left: .9rem; top: 50%; transform: translateY(-50%); color: var(--nc-text-muted);
+  }
+  .gt-input {
+    width: 100%; border-radius: 12px; border: 1.5px solid var(--nc-input-border);
+    background: var(--nc-input-bg); color: var(--nc-input-text); outline: none;
+    padding: .78rem .9rem .78rem 2.5rem; font-size: .9rem; font-weight: 700;
+  }
+  .gt-input:focus {
+    border-color: var(--gt-primary); box-shadow: 0 0 0 3px rgba(14,165,233,.12);
+  }
+  .gt-help { margin-top: .42rem; font-size: .75rem; color: var(--nc-text-muted); line-height: 1.6; }
+  .gt-submit {
+    width: 100%; border: none; border-radius: 14px; padding: .86rem 1rem; cursor: pointer;
+    color: #fff; font-size: .92rem; font-weight: 800;
+    background: linear-gradient(135deg, var(--gt-primary), var(--gt-primary-deep));
+    box-shadow: 0 12px 26px rgba(37,99,235,.22);
+  }
+
+  .gt-note {
+    margin-top: 1rem; padding: .95rem 1rem; border-radius: 16px; border: 1px solid var(--nc-border);
+    background: var(--nc-surface-2); font-size: .82rem; color: var(--nc-text-muted); line-height: 1.7;
+  }
+
+  .gt-stats {
+    display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .9rem; margin-bottom: 1rem;
+  }
+  @media (max-width: 576px) { .gt-stats { grid-template-columns: 1fr; } }
+  .gt-stat {
+    background: var(--nc-surface-2); border: 1px solid var(--nc-border); border-radius: 18px; padding: 1rem;
+  }
+  .gt-stat-label {
+    font-size: .72rem; text-transform: uppercase; letter-spacing: .08em; font-weight: 800; color: var(--nc-text-muted);
+    margin-bottom: .4rem;
+  }
+  .gt-stat-value {
+    font-family: 'Playfair Display', serif; font-size: 1.6rem; font-weight: 800; color: var(--nc-text); line-height: 1;
+  }
+  .gt-stat-sub { margin-top: .28rem; font-size: .76rem; color: var(--nc-text-muted); }
+
+  .gt-result-strip {
+    display: flex; flex-wrap: wrap; gap: .7rem; margin-bottom: 1rem;
+  }
+  .gt-chip {
+    display: inline-flex; align-items: center; gap: .35rem; padding: .38rem .8rem; border-radius: 999px;
+    font-size: .76rem; font-weight: 800; border: 1px solid transparent;
+  }
+  .gt-chip--loss { background: rgba(239,68,68,.12); color: #b91c1c; border-color: rgba(239,68,68,.22); }
+  .gt-chip--gain { background: rgba(16,185,129,.12); color: #047857; border-color: rgba(16,185,129,.22); }
+  .gt-chip--maintain { background: rgba(14,165,233,.12); color: #0369a1; border-color: rgba(14,165,233,.22); }
+
+  .gt-summary {
+    padding: 1rem 1rem 1.05rem; border-radius: 18px; border: 1px solid var(--nc-border);
+    background: linear-gradient(180deg, rgba(14,165,233,.08), rgba(14,165,233,.02));
+    margin-bottom: 1rem;
+  }
+  .gt-summary-title { margin: 0 0 .35rem; font-size: .92rem; font-weight: 800; color: var(--nc-text); }
+  .gt-summary p { margin: 0; color: var(--nc-text-muted); line-height: 1.7; font-size: .84rem; }
+
+  .gt-ai-box {
+    padding: 1rem; border-radius: 18px; border: 1px solid var(--nc-border); background: var(--nc-surface-2);
+  }
+  .gt-ai-head {
+    display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-wrap: wrap; margin-bottom: .8rem;
+  }
+  .gt-ai-title { margin: 0; font-size: .94rem; font-weight: 800; color: var(--nc-text); }
+  .gt-ai-badge {
+    display: inline-flex; align-items: center; gap: .35rem; padding: .35rem .7rem; border-radius: 999px;
+    font-size: .74rem; font-weight: 800;
+  }
+  .gt-ai-badge--ok { background: rgba(16,185,129,.12); color: #047857; }
+  .gt-ai-badge--fallback { background: rgba(245,158,11,.12); color: #b45309; }
+  .gt-ai-text {
+    white-space: pre-line; color: var(--nc-text-2); line-height: 1.75; font-size: .85rem; margin: 0;
+  }
+  .gt-ai-error { margin-top: .8rem; font-size: .77rem; color: var(--nc-text-muted); }
+
+  .gt-empty {
+    text-align: center; padding: 3rem 1.4rem;
+  }
+  .gt-empty-icon {
+    width: 90px; height: 90px; margin: 0 auto 1rem; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center; font-size: 2.4rem;
+    background: var(--nc-surface-2); border: 2px dashed var(--nc-border);
+  }
+  .gt-empty-title {
+    font-family: 'Playfair Display', serif; font-size: 1.35rem; font-weight: 800; color: var(--nc-text); margin-bottom: .35rem;
+  }
+  .gt-empty-sub { margin: 0 auto; max-width: 420px; color: var(--nc-text-muted); line-height: 1.75; font-size: .85rem; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="gt-page">
+  <div class="gt-shell">
+    <div class="gt-hero">
+      <div class="gt-hero-inner">
+        <div>
+          <div class="gt-kicker"><i class="fas fa-robot"></i> AI goal time estimator</div>
+          <h1 class="gt-title">Estimate your <span>fitness timeline</span></h1>
+          <p class="gt-sub">
+            Enter your current weight, target weight, and daily calorie intake. The system will show a baseline estimate
+            and try to generate a short AI explanation for how long the goal may realistically take.
+          </p>
+        </div>
+
+        <div class="gt-hero-actions">
+          <a href="{{ url_for('meal_log.index') }}" class="gt-btn gt-btn--ghost">
+            <i class="fas fa-utensils"></i> Meal Log
+          </a>
+          <a href="{{ url_for('meal_log.nutrition_analyzer') }}" class="gt-btn gt-btn--primary">
+            <i class="fas fa-chart-pie"></i> Nutrition Analyzer
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <div class="gt-layout">
+      <div class="gt-card">
+        <div class="gt-card-head">
+          <h2 class="gt-card-title">Enter your goal details</h2>
+          <p class="gt-card-sub">All values should use kilograms and daily calories.</p>
+        </div>
+        <div class="gt-card-body">
+          <form method="POST" action="{{ url_for('meal_log.goal_time_estimator') }}">
+            <div class="gt-form-grid">
+              <div>
+                <label class="gt-label">Current Weight (kg)</label>
+                <div class="gt-input-wrap">
+                  <span class="gt-input-icon"><i class="fas fa-weight-scale"></i></span>
+                  <input type="number" step="0.1" min="1" name="current_weight" class="gt-input"
+                         value="{{ result.current_weight if result else '' }}" required>
+                </div>
+              </div>
+
+              <div>
+                <label class="gt-label">Target Weight (kg)</label>
+                <div class="gt-input-wrap">
+                  <span class="gt-input-icon"><i class="fas fa-bullseye"></i></span>
+                  <input type="number" step="0.1" min="1" name="target_weight" class="gt-input"
+                         value="{{ result.target_weight if result else '' }}" required>
+                </div>
+              </div>
+
+              <div>
+                <label class="gt-label">Daily Calorie Intake (kcal)</label>
+                <div class="gt-input-wrap">
+                  <span class="gt-input-icon"><i class="fas fa-fire"></i></span>
+                  <input type="number" step="1" min="1" name="daily_calorie_intake" class="gt-input"
+                         value="{{ result.daily_calorie_intake if result else '' }}" required>
+                </div>
+                <div class="gt-help">
+                  This is an estimate tool, not a medical diagnosis. The AI explanation may vary depending on your intake and stored profile context.
+                </div>
+              </div>
+
+              <button type="submit" class="gt-submit">
+                <i class="fas fa-wand-magic-sparkles"></i> Estimate Goal Timeline
+              </button>
+            </div>
+          </form>
+
+          <div class="gt-note">
+            <strong>How this works:</strong> the page first creates a healthy baseline time range using a practical weekly weight-change assumption,
+            then it tries to generate a short AI explanation from the same numbers. Real outcomes depend on sleep, training, adherence, metabolism,
+            health conditions, and whether your calorie estimate is accurate.
+          </div>
+        </div>
+      </div>
+
+      <div class="gt-card">
+        <div class="gt-card-head">
+          <h2 class="gt-card-title">Estimated result</h2>
+          <p class="gt-card-sub">Baseline timeline plus optional AI guidance.</p>
+        </div>
+        <div class="gt-card-body">
+          {% if result %}
+            <div class="gt-result-strip">
+              {% if result.goal_type == 'weight_loss' %}
+                <span class="gt-chip gt-chip--loss"><i class="fas fa-arrow-trend-down"></i> {{ result.goal_label }}</span>
+              {% elif result.goal_type == 'weight_gain' %}
+                <span class="gt-chip gt-chip--gain"><i class="fas fa-arrow-trend-up"></i> {{ result.goal_label }}</span>
+              {% else %}
+                <span class="gt-chip gt-chip--maintain"><i class="fas fa-scale-balanced"></i> {{ result.goal_label }}</span>
+              {% endif %}
+              <span class="gt-chip gt-chip--maintain"><i class="fas fa-ruler-combined"></i> {{ result.weight_delta }} kg change</span>
+            </div>
+
+            <div class="gt-stats">
+              <div class="gt-stat">
+                <div class="gt-stat-label">Estimated Time Range</div>
+                <div class="gt-stat-value">{{ '%.1f'|format(result.weeks_min) }}–{{ '%.1f'|format(result.weeks_max) }}</div>
+                <div class="gt-stat-sub">weeks</div>
+              </div>
+              <div class="gt-stat">
+                <div class="gt-stat-label">Expected Weekly Pace</div>
+                <div class="gt-stat-value">{{ '%.2f'|format(result.weekly_change_min) }}–{{ '%.2f'|format(result.weekly_change_max) }}</div>
+                <div class="gt-stat-sub">kg per week</div>
+              </div>
+            </div>
+
+            <div class="gt-summary">
+              <h3 class="gt-summary-title">Baseline interpretation</h3>
+              <p>{{ result.summary }}</p>
+            </div>
+
+            <div class="gt-ai-box">
+              <div class="gt-ai-head">
+                <h3 class="gt-ai-title">AI estimate</h3>
+                {% if ai_text %}
+                  <span class="gt-ai-badge gt-ai-badge--ok"><i class="fas fa-circle-check"></i> AI response ready</span>
+                {% else %}
+                  <span class="gt-ai-badge gt-ai-badge--fallback"><i class="fas fa-triangle-exclamation"></i> Showing baseline only</span>
+                {% endif %}
+              </div>
+
+              {% if ai_text %}
+                <p class="gt-ai-text">{{ ai_text }}</p>
+              {% else %}
+                <p class="gt-ai-text">The AI response was not available, so you can use the baseline estimate above as a practical planning range.</p>
+              {% endif %}
+
+              {% if ai_error %}
+                <div class="gt-ai-error"><strong>Reason:</strong> {{ ai_error }}</div>
+              {% endif %}
+            </div>
+          {% else %}
+            <div class="gt-empty">
+              <div class="gt-empty-icon">⏱️</div>
+              <div class="gt-empty-title">No estimate generated yet</div>
+              <p class="gt-empty-sub">
+                Fill in your current weight, target weight, and daily calorie intake, then submit the form to see your estimated timeline.
+              </p>
+            </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

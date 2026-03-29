@@ -1,0 +1,450 @@
+{% extends "base.html" %}
+{% block title %}Nutrition Analyzer — {{ selected_date.strftime('%B %d, %Y') }}{% endblock %}
+
+{% block extra_css %}
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;800&family=Sora:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
+  .na-page {
+    --na-primary: #0ea5e9;
+    --na-primary-deep: #2563eb;
+    --na-teal: #10b981;
+    --na-amber: #f59e0b;
+    --na-violet: #8b5cf6;
+    --na-rose: #ef4444;
+    --na-hero: linear-gradient(135deg, #0d1117 0%, #0b233f 45%, #101828 100%);
+    --na-ring: rgba(14, 165, 233, 0.18);
+  }
+
+  .na-shell { max-width: 1180px; margin: 0 auto; }
+
+  .na-hero {
+    background: var(--na-hero);
+    border-radius: 24px;
+    padding: 2rem 2rem 1.7rem;
+    margin-bottom: 1.4rem;
+    color: #fff;
+    position: relative;
+    overflow: hidden;
+    border: 1px solid rgba(56, 189, 248, 0.16);
+  }
+  .na-hero::before,
+  .na-hero::after {
+    content: "";
+    position: absolute;
+    border-radius: 999px;
+    pointer-events: none;
+  }
+  .na-hero::before {
+    width: 240px; height: 240px; top: -90px; right: -70px;
+    background: radial-gradient(circle, rgba(14,165,233,.2) 0%, transparent 70%);
+  }
+  .na-hero::after {
+    width: 190px; height: 190px; bottom: -70px; left: 24%;
+    background: radial-gradient(circle, rgba(16,185,129,.14) 0%, transparent 70%);
+  }
+  .na-hero-inner {
+    position: relative; z-index: 1;
+    display: flex; justify-content: space-between; gap: 1rem; flex-wrap: wrap;
+  }
+  .na-kicker {
+    display: inline-flex; align-items: center; gap: .45rem;
+    padding: .28rem .8rem; border-radius: 999px;
+    font-size: .72rem; font-weight: 800; letter-spacing: .08em; text-transform: uppercase;
+    background: rgba(255,255,255,.1); border: 1px solid rgba(255,255,255,.15);
+    color: rgba(255,255,255,.86); margin-bottom: .8rem;
+  }
+  .na-title {
+    margin: 0; color: #f8fbff; line-height: 1.08;
+    font-size: 2rem; font-family: 'Playfair Display', serif; font-weight: 800;
+  }
+  .na-title span {
+    background: linear-gradient(90deg, #5eead4, #7dd3fc);
+    -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
+  }
+  .na-sub {
+    margin: .55rem 0 0; max-width: 620px;
+    color: rgba(255,255,255,.7); font-size: .88rem; line-height: 1.7;
+  }
+
+  .na-actions {
+    display: flex; flex-wrap: wrap; gap: .7rem; align-items: flex-start;
+  }
+  .na-btn,
+  .na-date-btn {
+    display: inline-flex; align-items: center; gap: .5rem;
+    text-decoration: none; border-radius: 12px; font-weight: 700;
+    transition: transform .14s, box-shadow .18s, border-color .18s, background .18s;
+  }
+  .na-btn:hover,
+  .na-date-btn:hover { transform: translateY(-2px); }
+  .na-btn {
+    padding: .72rem 1rem; color: #fff;
+    background: linear-gradient(135deg, var(--na-primary), var(--na-primary-deep));
+    box-shadow: 0 10px 24px rgba(37,99,235,.25);
+  }
+  .na-btn--ghost {
+    color: #d7f3ff;
+    background: rgba(255,255,255,.08);
+    border: 1px solid rgba(255,255,255,.16);
+    box-shadow: none;
+  }
+
+  .na-date-wrap { display: flex; align-items: center; gap: .55rem; flex-wrap: wrap; }
+  .na-date-nav {
+    width: 36px; height: 36px; justify-content: center;
+    background: rgba(56,189,248,.13); border: 1px solid rgba(56,189,248,.25); color: #7dd3fc;
+  }
+  .na-date-nav[aria-disabled="true"] { pointer-events: none; opacity: .35; }
+  .na-date-form { display: inline-flex; align-items: center; }
+  .na-date-input {
+    min-width: 165px; padding: .62rem .95rem; border-radius: 12px;
+    border: 1.5px solid rgba(255,255,255,.15); background: rgba(255,255,255,.08);
+    color: #f8fbff; font-weight: 700; outline: none;
+  }
+
+  .na-grid {
+    display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: .95rem;
+    margin-bottom: 1.2rem;
+  }
+  @media (max-width: 992px) { .na-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+  @media (max-width: 576px) { .na-grid { grid-template-columns: 1fr; } }
+
+  .na-card,
+  .na-table-card,
+  .na-empty {
+    background: var(--nc-card-bg); border: 1px solid var(--nc-card-border);
+    border-radius: 20px; box-shadow: var(--nc-card-shadow);
+  }
+  .na-card {
+    padding: 1rem 1.1rem; position: relative; overflow: hidden;
+  }
+  .na-card::before {
+    content: ""; position: absolute; inset: 0 auto auto 0; width: 100%; height: 4px;
+  }
+  .na-card--cal::before { background: linear-gradient(90deg, #0ea5e9, #2563eb); }
+  .na-card--protein::before { background: linear-gradient(90deg, #10b981, #14b8a6); }
+  .na-card--carbs::before { background: linear-gradient(90deg, #f59e0b, #f97316); }
+  .na-card--fat::before { background: linear-gradient(90deg, #8b5cf6, #6366f1); }
+  .na-card-label {
+    font-size: .72rem; text-transform: uppercase; letter-spacing: .08em; font-weight: 800;
+    color: var(--nc-text-muted); margin-bottom: .45rem;
+  }
+  .na-card-value {
+    font-family: 'Playfair Display', serif; font-size: 1.85rem; font-weight: 800; color: var(--nc-text);
+    line-height: 1;
+  }
+  .na-card-sub { margin-top: .3rem; font-size: .75rem; color: var(--nc-text-muted); }
+
+  .na-meta-row {
+    display: grid; grid-template-columns: 1.2fr .8fr; gap: 1rem; margin-bottom: 1.2rem;
+  }
+  @media (max-width: 900px) { .na-meta-row { grid-template-columns: 1fr; } }
+
+  .na-info-card { padding: 1rem 1.1rem; }
+  .na-info-head {
+    display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-wrap: wrap;
+    margin-bottom: .8rem;
+  }
+  .na-info-title { font-size: .95rem; font-weight: 800; color: var(--nc-text); margin: 0; }
+  .na-info-sub { margin: .15rem 0 0; font-size: .76rem; color: var(--nc-text-muted); }
+  .na-badge {
+    display: inline-flex; align-items: center; gap: .35rem; padding: .35rem .75rem; border-radius: 999px;
+    font-size: .74rem; font-weight: 800; border: 1px solid transparent;
+  }
+  .na-badge--ok { background: rgba(16,185,129,.12); color: #047857; border-color: rgba(16,185,129,.24); }
+  .na-badge--warn { background: rgba(245,158,11,.12); color: #b45309; border-color: rgba(245,158,11,.24); }
+  .na-help {
+    margin: 0; padding-left: 1rem; color: var(--nc-text-muted); font-size: .83rem; line-height: 1.75;
+  }
+
+  .na-meal-grid {
+    display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: .8rem;
+  }
+  @media (max-width: 992px) { .na-meal-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+  @media (max-width: 576px) { .na-meal-grid { grid-template-columns: 1fr; } }
+  .na-meal-box {
+    padding: .9rem 1rem; border-radius: 16px; background: var(--nc-surface-2); border: 1px solid var(--nc-border);
+  }
+  .na-meal-name { font-size: .8rem; font-weight: 800; color: var(--nc-text); margin-bottom: .5rem; }
+  .na-meal-metric { font-size: .74rem; color: var(--nc-text-muted); display: flex; justify-content: space-between; gap: .5rem; }
+  .na-meal-metric + .na-meal-metric { margin-top: .28rem; }
+  .na-meal-metric strong { color: var(--nc-text-2); }
+
+  .na-table-card { overflow: hidden; }
+  .na-table-head {
+    display: flex; justify-content: space-between; align-items: center; gap: 1rem; flex-wrap: wrap;
+    padding: 1rem 1.2rem; border-bottom: 1px solid var(--nc-border); background: var(--nc-surface-2);
+  }
+  .na-table-title { font-size: 1rem; font-weight: 800; color: var(--nc-text); margin: 0; }
+  .na-table-sub { margin: .15rem 0 0; font-size: .76rem; color: var(--nc-text-muted); }
+  .na-submit {
+    border: none; border-radius: 12px; padding: .72rem 1rem; cursor: pointer; color: #fff; font-weight: 700;
+    background: linear-gradient(135deg, var(--na-primary), var(--na-primary-deep));
+    box-shadow: 0 10px 22px rgba(37,99,235,.18);
+  }
+
+  .na-table-wrap { overflow-x: auto; }
+  .na-table { width: 100%; min-width: 1020px; border-collapse: collapse; }
+  .na-table thead th {
+    padding: .85rem .95rem; font-size: .72rem; text-transform: uppercase; letter-spacing: .08em;
+    color: var(--nc-text-muted); background: var(--nc-surface-2); border-bottom: 1px solid var(--nc-border);
+    text-align: left; white-space: nowrap;
+  }
+  .na-table tbody tr { border-bottom: 1px solid var(--nc-border); }
+  .na-table tbody tr:hover { background: var(--nc-surface-2); }
+  .na-table td { padding: .9rem .95rem; color: var(--nc-text); vertical-align: middle; }
+
+  .na-log-main { display: flex; flex-direction: column; gap: .18rem; }
+  .na-log-title { font-size: .88rem; font-weight: 700; color: var(--nc-text); }
+  .na-log-sub { font-size: .74rem; color: var(--nc-text-muted); }
+
+  .na-select,
+  .na-input {
+    width: 100%; border-radius: 12px; border: 1.5px solid var(--nc-input-border);
+    background: var(--nc-input-bg); color: var(--nc-input-text); outline: none;
+    padding: .68rem .85rem; font-size: .84rem; font-weight: 600;
+  }
+  .na-select:focus,
+  .na-input:focus {
+    border-color: var(--na-primary); box-shadow: 0 0 0 3px rgba(14,165,233,.12);
+  }
+
+  .na-chip {
+    display: inline-flex; align-items: center; gap: .35rem; padding: .3rem .72rem; border-radius: 999px;
+    font-size: .74rem; font-weight: 800; border: 1px solid transparent;
+  }
+  .na-chip--matched { background: rgba(16,185,129,.12); color: #047857; border-color: rgba(16,185,129,.22); }
+  .na-chip--auto { background: rgba(14,165,233,.12); color: #0369a1; border-color: rgba(14,165,233,.22); }
+  .na-chip--missing { background: rgba(239,68,68,.12); color: #b91c1c; border-color: rgba(239,68,68,.22); }
+
+  .na-macro { font-size: .82rem; font-weight: 700; color: var(--nc-text-2); }
+  .na-muted { color: var(--nc-text-muted); }
+  .na-empty {
+    text-align: center; padding: 3rem 1.2rem; margin-top: 1.2rem;
+    border-style: dashed;
+  }
+  .na-empty-icon {
+    width: 86px; height: 86px; margin: 0 auto 1rem; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center; font-size: 2.3rem;
+    background: var(--nc-surface-2); border: 2px dashed var(--nc-border);
+  }
+  .na-empty-title {
+    font-family: 'Playfair Display', serif; font-size: 1.35rem; font-weight: 800; color: var(--nc-text); margin-bottom: .35rem;
+  }
+  .na-empty-sub { margin: 0 auto; max-width: 420px; font-size: .87rem; color: var(--nc-text-muted); line-height: 1.7; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="na-page">
+  <div class="na-shell">
+    <div class="na-hero">
+      <div class="na-hero-inner">
+        <div>
+          <div class="na-kicker"><i class="fas fa-chart-pie"></i> Meal-log nutrition analyzer</div>
+          <h1 class="na-title">Calculate your <span>daily nutrition</span></h1>
+          <p class="na-sub">
+            This page reads your logged meals for <strong>{{ selected_date.strftime('%B %d, %Y') }}</strong>,
+            tries to match them with stored food items, and totals calories, protein, carbohydrates, and fat.
+          </p>
+        </div>
+
+        <div>
+          <div class="na-date-wrap mb-2">
+            {% set prev_date = selected_date - timedelta(days=1) %}
+            <a href="{{ url_for('meal_log.nutrition_analyzer', date=prev_date.strftime('%Y-%m-%d')) }}" class="na-btn na-btn--ghost na-date-nav" title="Previous day">
+              <i class="fas fa-chevron-left"></i>
+            </a>
+
+            <form method="GET" action="{{ url_for('meal_log.nutrition_analyzer') }}" class="na-date-form" id="naDateForm">
+              <input type="date" name="date" id="naDateInput" class="na-date-input"
+                     value="{{ selected_date.strftime('%Y-%m-%d') }}"
+                     max="{{ today.strftime('%Y-%m-%d') }}">
+            </form>
+
+            {% if selected_date < today %}
+              {% set next_date = selected_date + timedelta(days=1) %}
+              <a href="{{ url_for('meal_log.nutrition_analyzer', date=next_date.strftime('%Y-%m-%d')) }}" class="na-btn na-btn--ghost na-date-nav" title="Next day">
+                <i class="fas fa-chevron-right"></i>
+              </a>
+            {% else %}
+              <span class="na-btn na-btn--ghost na-date-nav" aria-disabled="true">
+                <i class="fas fa-chevron-right"></i>
+              </span>
+            {% endif %}
+          </div>
+
+          <div class="na-actions">
+            <a href="{{ url_for('meal_log.index', date=selected_date.strftime('%Y-%m-%d')) }}" class="na-btn na-btn--ghost">
+              <i class="fas fa-arrow-left"></i> Back to Meal Log
+            </a>
+            <a href="{{ url_for('meal_log.goal_time_estimator') }}" class="na-btn">
+              <i class="fas fa-robot"></i> AI Goal Estimator
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="na-grid">
+      <div class="na-card na-card--cal">
+        <div class="na-card-label">Total Calories</div>
+        <div class="na-card-value">{{ '%.0f'|format(totals.calories) }}</div>
+        <div class="na-card-sub">kcal from matched meals</div>
+      </div>
+      <div class="na-card na-card--protein">
+        <div class="na-card-label">Total Protein</div>
+        <div class="na-card-value">{{ '%.1f'|format(totals.protein) }}</div>
+        <div class="na-card-sub">grams</div>
+      </div>
+      <div class="na-card na-card--carbs">
+        <div class="na-card-label">Total Carbs</div>
+        <div class="na-card-value">{{ '%.1f'|format(totals.carbs) }}</div>
+        <div class="na-card-sub">grams</div>
+      </div>
+      <div class="na-card na-card--fat">
+        <div class="na-card-label">Total Fat</div>
+        <div class="na-card-value">{{ '%.1f'|format(totals.fat) }}</div>
+        <div class="na-card-sub">grams</div>
+      </div>
+    </div>
+
+    <div class="na-meta-row">
+      <div class="na-card na-info-card">
+        <div class="na-info-head">
+          <div>
+            <h2 class="na-info-title">Analyzer status</h2>
+            <p class="na-info-sub">Review meal-to-food matching before using the totals.</p>
+          </div>
+          {% if unresolved_count == 0 %}
+            <span class="na-badge na-badge--ok"><i class="fas fa-circle-check"></i> All {{ total_entries }} entries matched</span>
+          {% else %}
+            <span class="na-badge na-badge--warn"><i class="fas fa-triangle-exclamation"></i> {{ unresolved_count }} unmatched entr{{ 'y' if unresolved_count == 1 else 'ies' }}</span>
+          {% endif %}
+        </div>
+        <ul class="na-help mb-0">
+          <li>The dropdown pulls from saved <strong>food items</strong> in your database.</li>
+          <li>The multiplier defaults from the number found in your meal quantity text, such as <em>2 bowls</em> → <strong>2.0</strong>.</li>
+          <li>You can change the matched food or multiplier and click <strong>Recalculate Nutrition</strong>.</li>
+        </ul>
+      </div>
+
+      <div class="na-card na-info-card">
+        <div class="na-info-head">
+          <div>
+            <h2 class="na-info-title">Meal-wise breakdown</h2>
+            <p class="na-info-sub">Quick nutrition totals by meal section.</p>
+          </div>
+        </div>
+        <div class="na-meal-grid">
+          {% for meal_type, label in [('breakfast','Breakfast'), ('lunch','Lunch'), ('dinner','Dinner'), ('snack','Snack')] %}
+            {% set values = meal_totals.get(meal_type, {'calories': 0, 'protein': 0, 'carbs': 0, 'fat': 0}) %}
+            <div class="na-meal-box">
+              <div class="na-meal-name">{{ label }}</div>
+              <div class="na-meal-metric"><span>Calories</span> <strong>{{ '%.0f'|format(values.calories) }} kcal</strong></div>
+              <div class="na-meal-metric"><span>Protein</span> <strong>{{ '%.1f'|format(values.protein) }} g</strong></div>
+              <div class="na-meal-metric"><span>Carbs</span> <strong>{{ '%.1f'|format(values.carbs) }} g</strong></div>
+              <div class="na-meal-metric"><span>Fat</span> <strong>{{ '%.1f'|format(values.fat) }} g</strong></div>
+            </div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+
+    {% if rows %}
+      <form method="POST" action="{{ url_for('meal_log.nutrition_analyzer') }}">
+        <input type="hidden" name="selected_date" value="{{ selected_date.strftime('%Y-%m-%d') }}">
+
+        <div class="na-table-card">
+          <div class="na-table-head">
+            <div>
+              <h2 class="na-table-title">Logged meal mapping</h2>
+              <p class="na-table-sub">Each meal entry is matched against stored food data before the nutrition values are calculated.</p>
+            </div>
+            <button type="submit" class="na-submit"><i class="fas fa-calculator"></i> Recalculate Nutrition</button>
+          </div>
+
+          <div class="na-table-wrap">
+            <table class="na-table">
+              <thead>
+                <tr>
+                  <th>Logged Meal</th>
+                  <th>Stored Food Match</th>
+                  <th>Multiplier</th>
+                  <th>Calories</th>
+                  <th>Protein</th>
+                  <th>Carbs</th>
+                  <th>Fat</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for row in rows %}
+                  <tr>
+                    <td>
+                      <div class="na-log-main">
+                        <span class="na-log-title">{{ row.log.food_name }}</span>
+                        <span class="na-log-sub">{{ row.log.meal_type|capitalize }} • {{ row.log.quantity }} • {{ row.log.logged_at.strftime('%I:%M %p') }}</span>
+                      </div>
+                    </td>
+                    <td>
+                      <select name="food_id_{{ row.log.id }}" class="na-select">
+                        <option value="">No stored food selected</option>
+                        {% for food in food_items %}
+                          <option value="{{ food.id }}" {% if row.chosen_food and row.chosen_food.id == food.id %}selected{% endif %}>
+                            {{ food.name }}
+                          </option>
+                        {% endfor %}
+                      </select>
+                    </td>
+                    <td style="width: 110px;">
+                      <input type="number" name="multiplier_{{ row.log.id }}" class="na-input"
+                             min="0.1" step="0.1" value="{{ row.multiplier }}">
+                    </td>
+                    <td><span class="na-macro">{{ '%.0f'|format(row.calories) }} <span class="na-muted">kcal</span></span></td>
+                    <td><span class="na-macro">{{ '%.1f'|format(row.protein) }} <span class="na-muted">g</span></span></td>
+                    <td><span class="na-macro">{{ '%.1f'|format(row.carbs) }} <span class="na-muted">g</span></span></td>
+                    <td><span class="na-macro">{{ '%.1f'|format(row.fat) }} <span class="na-muted">g</span></span></td>
+                    <td>
+                      {% if row.chosen_food %}
+                        {% if row.auto_matched_food and row.chosen_food.id == row.auto_matched_food.id %}
+                          <span class="na-chip na-chip--auto"><i class="fas fa-wand-magic-sparkles"></i> Auto matched</span>
+                        {% else %}
+                          <span class="na-chip na-chip--matched"><i class="fas fa-circle-check"></i> Selected</span>
+                        {% endif %}
+                      {% else %}
+                        <span class="na-chip na-chip--missing"><i class="fas fa-link-slash"></i> No match</span>
+                      {% endif %}
+                    </td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </form>
+    {% else %}
+      <div class="na-empty">
+        <div class="na-empty-icon">🥗</div>
+        <div class="na-empty-title">No meal logs found for this day</div>
+        <p class="na-empty-sub">
+          Go back to your meal journal, add a few meals for <strong>{{ selected_date.strftime('%B %d') }}</strong>,
+          then return here to calculate calories, protein, carbs, and fat from stored food data.
+        </p>
+      </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  const naDateInput = document.getElementById('naDateInput');
+  const naDateForm = document.getElementById('naDateForm');
+
+  if (naDateInput && naDateForm) {
+    naDateInput.addEventListener('change', () => naDateForm.submit());
+  }
+</script>
+{% endblock %}
