@@ -64,9 +64,7 @@
           {% endif %}
 
           {% if is_provider_own_food %}
-            <div
-              style="display:inline-flex;align-items:center;gap:.26rem;width:fit-content;background:var(--nc-brand-l);color:var(--nc-brand-d);border:1.5px solid rgba(14,165,233,.2);border-radius:99px;padding:.15rem .65rem;font-size:.65rem;font-weight:800;"
-            >
+            <div style="display:inline-flex;align-items:center;gap:.26rem;width:fit-content;background:var(--nc-brand-l);color:var(--nc-brand-d);border:1.5px solid rgba(14,165,233,.2);border-radius:99px;padding:.15rem .65rem;font-size:.65rem;font-weight:800;">
               <i class="fas fa-store"></i>
               Your Item
             </div>
@@ -89,12 +87,10 @@
                 {% endif %}
               {% endfor %}
             </div>
-
             <span style="font-family:'JetBrains Mono',monospace;font-size:.74rem;font-weight:800;color:var(--nc-text);">
               {{ "%.1f"|format(avg_rating) }}
             </span>
           </div>
-
           <div style="font-size:.68rem;font-weight:700;color:var(--nc-text-muted);white-space:nowrap;">
             {{ review_count }} review{% if review_count != 1 %}s{% endif %}
           </div>
@@ -125,11 +121,13 @@
         </div>
       </div>
 
+      {# Footer buttons — only for regular users, not providers/admins #}
       {% if current_user.is_authenticated and not current_user.is_food_provider() and not current_user.is_admin() %}
         <div
           class="food-footer"
           style="display:flex;align-items:center;justify-content:space-between;padding:.85rem 1rem;border-top:1px solid var(--nc-border);background:var(--nc-surface-2);gap:.5rem;"
         >
+          {# Review button — stops propagation so the card click doesn't also fire #}
           <a
             href="{{ detail_url }}"
             onclick="event.stopPropagation();"
@@ -139,7 +137,12 @@
           </a>
 
           {% if food.is_available %}
-            <form method="post" action="{{ url_for('orders.add_to_cart', food_id=food.id) }}" style="margin:0;flex:1;" onclick="event.stopPropagation();">
+            <form
+              method="post"
+              action="{{ url_for('orders.add_to_cart', food_id=food.id) }}"
+              style="margin:0;flex:1;"
+              onclick="event.stopPropagation();"
+            >
               <input type="hidden" name="quantity" value="1">
               <button
                 type="submit"
@@ -161,7 +164,8 @@
           {% endif %}
         </div>
       {% endif %}
-    </div>
+
+    </div>{# end .food-card #}
   {% endfor %}
 {% else %}
   <div class="fs-empty">
