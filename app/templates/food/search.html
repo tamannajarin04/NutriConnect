@@ -42,6 +42,7 @@
   70%  { box-shadow: 0 0 0 8px rgba(14,165,233,0); }
   100% { box-shadow: 0 0 0 0 rgba(14,165,233,0); }
 }
+@keyframes adv-spin { to { transform: rotate(360deg); } }
 
 .fs-hero {
   position: relative;
@@ -365,10 +366,12 @@
 }
 .fs-ssel:focus { border-color: var(--nc-brand); }
 
+/* ── THE FIX: align-items: start prevents row-stretching when AI panel expands ── */
 #foodGrid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(248px, 1fr));
   gap: 1rem;
+  align-items: start;
 }
 
 /* Card is now fully clickable like a link */
@@ -663,6 +666,27 @@
   color:var(--nc-text-muted);
   margin:0;
   line-height:1.55;
+}
+
+/* ── AI Advice Panel styles ────────────────────────────────────────────────── */
+.adv-good  { background: rgba(16,185,129,.12); color: #059669; border-color: rgba(16,185,129,.28) !important; }
+.adv-limit { background: rgba(245,158,11,.12);  color: #b45309; border-color: rgba(245,158,11,.28) !important; }
+.adv-avoid { background: rgba(239,68,68,.12);   color: #dc2626; border-color: rgba(239,68,68,.28) !important; }
+[data-theme="dark"] .adv-good  { color: #34d399; }
+[data-theme="dark"] .adv-limit { color: #fcd34d; }
+[data-theme="dark"] .adv-avoid { color: #f87171; }
+
+.adv-panel-good  { border-left: 3px solid #10b981 !important; }
+.adv-panel-limit { border-left: 3px solid #f59e0b !important; }
+.adv-panel-avoid { border-left: 3px solid #ef4444 !important; }
+
+.ai-advice-btn:hover {
+  background: rgba(13,148,136,.22) !important;
+  border-color: rgba(13,148,136,.5) !important;
+}
+.ai-advice-btn:disabled {
+  opacity: .6;
+  cursor: not-allowed !important;
 }
 
 @media (max-width: 768px) {
@@ -982,16 +1006,16 @@
 (function () {
   const $ = id => document.getElementById(id);
 
-  const form          = $('filterForm');
-  const gridWrap      = $('gridWrap');
-  const counter       = $('resultCount');
-  const heroCount     = $('heroCount');
-  const chipsRow      = $('activeChips');
-  const sortSel       = $('sortSelect');
+  const form           = $('filterForm');
+  const gridWrap       = $('gridWrap');
+  const counter        = $('resultCount');
+  const heroCount      = $('heroCount');
+  const chipsRow       = $('activeChips');
+  const sortSel        = $('sortSelect');
   const paginationWrap = $('paginationWrap');
 
-  let timer           = null;
-  let diet            = $('dietInput').value || '';
+  let timer            = null;
+  let diet             = $('dietInput').value || '';
   let activeController = null;
   let activeRequestId  = 0;
 
@@ -1224,17 +1248,118 @@
   syncFromUrl();
   renderChips();
 
-  /* ── Card click → navigate to detail page ─────────────────────────────── */
+  /* ── Card click → navigate to detail page ──────────────────────────────── */
   document.addEventListener('click', function (event) {
-    /* Let links, buttons, forms handle themselves */
     if (event.target.closest('a, button, form')) return;
-
     const card = event.target.closest('.food-card');
     if (!card) return;
-
     const url = card.dataset.detailUrl;
     if (url) window.location.href = url;
   });
+
+})();
+
+/* ════════════════════════════════════════════════════════════════════════════
+   AI Food Advice — "Eat This?" button logic
+   ════════════════════════════════════════════════════════════════════════════ */
+(function () {
+  "use strict";
+
+  /* ── Verdict → display config ─────────────────────────────────────────── */
+  const VERDICT_CFG = {
+    Good:  { label: "✅ Good for You",      panelCls: "adv-panel-good",  badgeCls: "adv-good"  },
+    Limit: { label: "⚠️ Eat in Moderation", panelCls: "adv-panel-limit", badgeCls: "adv-limit" },
+    Avoid: { label: "🚫 Best to Avoid",     panelCls: "adv-panel-avoid", badgeCls: "adv-avoid" },
+  };
+
+  /* ── Tiny helpers ─────────────────────────────────────────────────────── */
+  function show(el, displayMode = "flex") { el.style.display = displayMode; }
+  function hide(el)                       { el.style.display = "none"; }
+
+  /* ── Main entry-point called by each card button ──────────────────────── */
+  window.triggerFoodAdvice = async function (btn, foodId) {
+
+    const panel = document.getElementById(`advice-panel-${foodId}`);
+    if (!panel) return;
+
+    const loadingEl    = panel.querySelector(".adv-loading");
+    const resultEl     = panel.querySelector(".adv-result");
+    const errorEl      = panel.querySelector(".adv-error");
+    const verdictBadge = panel.querySelector(".adv-verdict-badge");
+    const analysisEl   = panel.querySelector(".adv-analysis");
+    const suggWrap     = panel.querySelector(".adv-suggestion-wrap");
+    const suggEl       = panel.querySelector(".adv-suggestion");
+
+    /* ── Toggle: if already open and not loading, close it ─────────────── */
+    const isOpen    = panel.style.display !== "none";
+    const isLoading = loadingEl.style.display === "flex";
+    if (isOpen && !isLoading) {
+      hide(panel);
+      btn.innerHTML = '<i class="fas fa-brain"></i> Eat This?';
+      return;
+    }
+
+    /* ── Show panel and reset all states ───────────────────────────────── */
+    show(panel, "block");
+    show(loadingEl, "flex");
+    hide(resultEl);
+    hide(errorEl);
+
+    panel.classList.remove("adv-panel-good", "adv-panel-limit", "adv-panel-avoid");
+
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-circle-notch fa-spin"></i> Thinking…';
+
+    try {
+      const resp = await fetch(`/food-advice/${foodId}`, {
+        method: "GET",
+        headers: { "Accept": "application/json" },
+        credentials: "same-origin",
+      });
+
+      const data = await resp.json();
+
+      hide(loadingEl);
+
+      if (!resp.ok || !data.success) {
+        errorEl.textContent = data.error || "Couldn't fetch advice right now. Please try again.";
+        show(errorEl, "block");
+        return;
+      }
+
+      /* ── Verdict styling ──────────────────────────────────────────────── */
+      const cfg = VERDICT_CFG[data.verdict] || VERDICT_CFG["Limit"];
+
+      panel.classList.add(cfg.panelCls);
+      verdictBadge.textContent = cfg.label;
+      verdictBadge.className   = `adv-verdict-badge ${cfg.badgeCls}`;
+
+      /* ── Analysis ────────────────────────────────────────────────────── */
+      analysisEl.textContent = data.analysis;
+
+      /* ── Suggestion — hide when AI returns "None" ────────────────────── */
+      const sugg = (data.suggestion || "").trim();
+      if (!sugg || sugg.toLowerCase() === "none") {
+        hide(suggWrap);
+      } else {
+        suggEl.textContent = sugg;
+        show(suggWrap, "block");
+      }
+
+      show(resultEl, "flex");
+
+    } catch (err) {
+      hide(loadingEl);
+      if (err.name === "AbortError") return;
+      errorEl.textContent = "Network error — check your connection and try again.";
+      show(errorEl, "block");
+      console.error("[FoodAdvice]", err);
+
+    } finally {
+      btn.disabled = false;
+      btn.innerHTML = '<i class="fas fa-brain"></i> Eat This?';
+    }
+  };
 
 })();
 </script>
