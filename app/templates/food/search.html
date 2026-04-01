@@ -4,6 +4,9 @@
 {% block extra_css %}
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet">
 <style>
+/* ═══════════════════════════════════════════════════════════════
+   PAGE TOKENS
+═══════════════════════════════════════════════════════════════ */
 .fs {
   --sky:    #0ea5e9;
   --sky-d:  #0284c7;
@@ -14,36 +17,67 @@
   --violet: #7c3aed;
   --rose:   #e11d48;
   --amber:  #d97706;
-
   --dk:     #0f1117;
   --dk2:    #161b27;
   --dk3:    #1e2435;
   --dk4:    #252d40;
   --dk5:    #2e384f;
-
   --t1: #f0f4ff;
   --t2: #b0bbd4;
   --t3: #6b7a99;
   --t4: #414d66;
-
   --b1: rgba(255,255,255,.07);
   --b2: rgba(255,255,255,.12);
-
   font-family: 'Plus Jakarta Sans', sans-serif;
   background: var(--nc-bg);
   min-height: 70vh;
 }
 
-@keyframes up   { from{opacity:0;transform:translateY(16px)} to{opacity:1;transform:translateY(0)} }
-@keyframes glow { 0%,100%{opacity:.5} 50%{opacity:1} }
-@keyframes skel { 0%,100%{opacity:.35} 50%{opacity:.7} }
-@keyframes livepulse {
-  0%   { box-shadow: 0 0 0 0 rgba(14,165,233,.7); }
-  70%  { box-shadow: 0 0 0 8px rgba(14,165,233,0); }
-  100% { box-shadow: 0 0 0 0 rgba(14,165,233,0); }
+/* ═══════════════════════════════════════════════════════════════
+   ANIMATIONS
+═══════════════════════════════════════════════════════════════ */
+@keyframes up         { from{opacity:0;transform:translateY(16px)} to{opacity:1;transform:translateY(0)} }
+@keyframes glow       { 0%,100%{opacity:.5} 50%{opacity:1} }
+@keyframes skel       { 0%,100%{opacity:.35} 50%{opacity:.7} }
+@keyframes livepulse  {
+  0%   { box-shadow: 0 0 0 0   rgba(14,165,233,.7); }
+  70%  { box-shadow: 0 0 0 8px rgba(14,165,233,0);  }
+  100% { box-shadow: 0 0 0 0   rgba(14,165,233,0);  }
 }
-@keyframes adv-spin { to { transform: rotate(360deg); } }
+@keyframes adv-slideup {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0);    }
+}
+@keyframes adv-fadein {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+@keyframes orbit-spin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+@keyframes orbit-spin-rev {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(-360deg); }
+}
+@keyframes core-pulse {
+  0%, 100% { transform: scale(1); opacity: .8; }
+  50% { transform: scale(1.1); opacity: 1; }
+}
+@keyframes bar-fill {
+  from { width: 0% !important; }
+}
+@keyframes score-draw {
+  from { stroke-dashoffset: 113; }
+}
+@keyframes ribbon-in {
+  from { opacity: 0; transform: translateY(-6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
 
+/* ═══════════════════════════════════════════════════════════════
+   HERO
+═══════════════════════════════════════════════════════════════ */
 .fs-hero {
   position: relative;
   overflow: hidden;
@@ -61,14 +95,12 @@
     0 16px 48px rgba(0,0,0,.4),
     inset 0 1px 0 rgba(255,255,255,.06);
 }
-
 .fs-hero::before {
   content: '';
   position: absolute; inset: 0;
   background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
   pointer-events: none; opacity: .4;
 }
-
 .fs-hero::after {
   content: '';
   position: absolute; inset: 0;
@@ -78,13 +110,11 @@
   background-size: 48px 48px;
   pointer-events: none;
 }
-
 .fs-hero__inner {
   position: relative; z-index: 2;
   display: flex; align-items: center; gap: 1.5rem;
   flex-wrap: wrap;
 }
-
 .fs-orb {
   position: absolute; border-radius: 50%;
   filter: blur(60px); pointer-events: none;
@@ -100,13 +130,10 @@
   background: radial-gradient(circle, rgba(99,102,241,.15), transparent 65%);
   bottom: -100px; left: -30px; animation-delay: 1.5s;
 }
-.fs-orb--c { display: none; }
-
 .fs-hero__left {
   flex: 1; min-width: 200px;
   animation: up .5s cubic-bezier(.16,1,.3,1) both;
 }
-
 .fs-hero__badge {
   display: inline-flex; align-items: center; gap: .4rem;
   background: rgba(14,165,233,.1);
@@ -120,7 +147,6 @@
   width: 5px; height: 5px; border-radius: 50%; background: #38bdf8;
   animation: livepulse 2s ease-in-out infinite;
 }
-
 .fs-hero__h1 {
   font-size: clamp(1.15rem, 2.4vw, 1.55rem);
   font-weight: 900; line-height: 1.15;
@@ -132,17 +158,14 @@
   -webkit-background-clip: text; -webkit-text-fill-color: transparent;
   background-clip: text;
 }
-
 .fs-hero__sub {
   font-size: .78rem; color: rgba(255,255,255,.38); font-weight: 500;
   margin: 0;
 }
-
 .fs-hero__right {
   flex: 2; min-width: 280px; display: flex; flex-direction: column; gap: .75rem;
   animation: up .5s cubic-bezier(.16,1,.3,1) .1s both;
 }
-
 .fs-hero__searchbar { position: relative; }
 .fs-hero__searchbar-ico {
   position: absolute; left: 1rem; top: 50%;
@@ -151,7 +174,6 @@
   pointer-events: none; transition: color .2s; z-index: 2;
 }
 .fs-hero__searchbar:focus-within .fs-hero__searchbar-ico { color: #38bdf8; }
-
 #searchInput {
   width: 100%;
   background: rgba(255,255,255,.06);
@@ -170,7 +192,6 @@
   background: rgba(255,255,255,.09);
   box-shadow: 0 0 0 3px rgba(14,165,233,.12);
 }
-
 .fs-search-tag {
   position: absolute; right: .85rem; top: 50%;
   transform: translateY(-50%);
@@ -183,10 +204,7 @@
   font-family: 'JetBrains Mono', monospace;
   font-size: .58rem; font-weight: 700; color: rgba(255,255,255,.35);
 }
-
-.fs-hero__stats {
-  display: flex; flex-wrap: wrap; gap: 0;
-}
+.fs-hero__stats { display: flex; flex-wrap: wrap; gap: 0; }
 .fs-hstat {
   padding-right: 1.25rem; margin-right: 1.25rem;
   border-right: 1px solid rgba(255,255,255,.1);
@@ -202,29 +220,30 @@
   letter-spacing: .09em; color: rgba(255,255,255,.32); margin-top: .18rem;
 }
 
+/* ═══════════════════════════════════════════════════════════════
+   LAYOUT
+═══════════════════════════════════════════════════════════════ */
 .fs-body {
   display: grid;
   grid-template-columns: 256px 1fr;
   gap: 1.5rem;
   align-items: start;
 }
-@media (max-width: 900px) {
-  .fs-body { grid-template-columns: 1fr; }
-}
+@media (max-width: 900px) { .fs-body { grid-template-columns: 1fr; } }
 
+/* ═══════════════════════════════════════════════════════════════
+   SIDEBAR / FILTERS
+═══════════════════════════════════════════════════════════════ */
 .fs-sidebar {
   position: sticky; top: 80px;
   animation: up .5s cubic-bezier(.16,1,.3,1) .2s both;
 }
-
 .fs-panel {
   background: var(--nc-card-bg);
   border: 1px solid var(--nc-card-border);
-  border-radius: 18px;
-  overflow: hidden;
+  border-radius: 18px; overflow: hidden;
   box-shadow: var(--nc-card-shadow);
 }
-
 .fs-panel__hd {
   display: flex; align-items: center; justify-content: space-between;
   padding: .9rem 1.15rem;
@@ -238,7 +257,6 @@
   display: flex; align-items: center; gap: .42rem;
 }
 .fs-panel__title i { color: var(--nc-brand); font-size: .68rem; }
-
 .fs-btn-reset {
   background: none; border: none; cursor: pointer;
   font-family: 'Plus Jakarta Sans', sans-serif;
@@ -248,13 +266,11 @@
   transition: color .14s;
 }
 .fs-btn-reset:hover { color: #ef4444; }
-
 .fs-fsec {
   padding: .8rem 1.15rem;
   border-bottom: 1px solid var(--nc-border);
 }
 .fs-fsec:last-child { border-bottom: none; }
-
 .fs-flbl {
   font-size: .62rem; font-weight: 900;
   text-transform: uppercase; letter-spacing: .09em;
@@ -263,33 +279,24 @@
   margin-bottom: .6rem;
 }
 .fs-flbl i { font-size: .58rem; }
-
 .fs-pills { display: flex; flex-wrap: wrap; gap: .34rem; }
 .fs-pill {
   display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  appearance: none;
-  -webkit-appearance: none;
+  align-items: center; justify-content: center;
+  appearance: none; -webkit-appearance: none;
   background: var(--nc-surface-2);
   border: 1.5px solid var(--nc-border);
-  border-radius: 99px;
-  padding: .23rem .68rem;
-  font-size: .71rem;
-  font-weight: 700;
+  border-radius: 99px; padding: .23rem .68rem;
+  font-size: .71rem; font-weight: 700;
   color: var(--nc-text-muted);
-  cursor: pointer;
-  user-select: none;
+  cursor: pointer; user-select: none;
   font-family: 'Plus Jakarta Sans', sans-serif;
-  transition: all .13s;
-  line-height: 1.2;
-  outline: none;
+  transition: all .13s; line-height: 1.2; outline: none;
 }
 .fs-pill:hover { border-color: var(--nc-brand); color: var(--nc-brand); background: var(--nc-brand-l); }
-.fs-pill.on { background: var(--nc-brand-l); border-color: var(--nc-brand); color: var(--nc-brand-d); font-weight: 800; }
+.fs-pill.on    { background: var(--nc-brand-l); border-color: var(--nc-brand); color: var(--nc-brand-d); font-weight: 800; }
 .fs-pill:focus-visible { box-shadow: 0 0 0 3px rgba(14,165,233,.14); }
 [data-theme="dark"] .fs-pill.on { color: #38bdf8; }
-
 .fs-rrow { display: flex; align-items: center; gap: .55rem; }
 .fs-range {
   flex: 1; -webkit-appearance: none; appearance: none;
@@ -309,7 +316,6 @@
   font-size: .69rem; font-weight: 700; color: var(--nc-brand);
   min-width: 72px; text-align: right; white-space: nowrap;
 }
-
 .fs-chips {
   display: flex; flex-wrap: wrap; gap: .34rem;
   padding: .68rem 1.15rem;
@@ -329,8 +335,10 @@
 [data-theme="dark"] .fs-chip:hover { background: rgba(14,165,233,.2); }
 .fs-chip i { font-size: .5rem; opacity: .6; }
 
+/* ═══════════════════════════════════════════════════════════════
+   RESULTS META BAR
+═══════════════════════════════════════════════════════════════ */
 .fs-results { display: flex; flex-direction: column; gap: 1.1rem; }
-
 .fs-meta {
   display: flex; align-items: center; justify-content: space-between;
   flex-wrap: wrap; gap: .7rem;
@@ -348,7 +356,6 @@
   color: var(--nc-text); letter-spacing: -.04em; line-height: 1;
 }
 .fs-clbl { font-size: .77rem; color: var(--nc-text-muted); font-weight: 600; }
-
 .fs-srow  { display: flex; align-items: center; gap: .5rem; }
 .fs-slbl  { font-size: .7rem; font-weight: 800; color: var(--nc-text-faint); }
 .fs-ssel {
@@ -366,7 +373,9 @@
 }
 .fs-ssel:focus { border-color: var(--nc-brand); }
 
-/* ── THE FIX: align-items: start prevents row-stretching when AI panel expands ── */
+/* ═══════════════════════════════════════════════════════════════
+   FOOD GRID
+═══════════════════════════════════════════════════════════════ */
 #foodGrid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(248px, 1fr));
@@ -374,7 +383,9 @@
   align-items: start;
 }
 
-/* Card is now fully clickable like a link */
+/* ═══════════════════════════════════════════════════════════════
+   FOOD CARD
+═══════════════════════════════════════════════════════════════ */
 .food-card {
   background: var(--nc-card-bg);
   border: 1px solid var(--nc-card-border);
@@ -394,7 +405,6 @@
 .food-card:nth-child(7){animation-delay:.28s}
 .food-card:nth-child(8){animation-delay:.32s}
 .food-card:nth-child(9){animation-delay:.36s}
-
 .food-card:hover {
   transform: translateY(-5px);
   box-shadow: 0 18px 48px rgba(0,0,0,.13), 0 0 0 1px rgba(14,165,233,.2);
@@ -408,7 +418,6 @@
 }
 .fc-img img { width: 100%; height: 100%; object-fit: cover; transition: transform .45s cubic-bezier(.16,1,.3,1); }
 .food-card:hover .fc-img img { transform: scale(1.07); }
-
 .fc-img-placeholder {
   width: 100%; height: 100%;
   display: flex; flex-direction: column;
@@ -417,7 +426,6 @@
 }
 .fc-img-placeholder i    { font-size: 2.2rem; color: var(--nc-text-faint); }
 .fc-img-placeholder span { font-size: .58rem; font-weight: 800; text-transform: uppercase; letter-spacing: .08em; color: var(--nc-text-faint); }
-
 .fc-price {
   position: absolute; bottom: 9px; left: 9px;
   background: rgba(0,0,0,.65); backdrop-filter: blur(10px);
@@ -428,11 +436,9 @@
   transition: background .2s, border-color .2s;
 }
 .food-card:hover .fc-price { background: var(--nc-brand); border-color: transparent; }
-
 .fc-avail { position: absolute; top: 9px; right: 9px; font-size: .6rem; font-weight: 800; text-transform: uppercase; letter-spacing: .05em; padding: .2rem .6rem; border-radius: 99px; }
-.fc-avail.on  { background: rgba(34,197,94,.85); color: #fff; }
-.fc-avail.off { background: rgba(239,68,68,.82); color: #fff; }
-
+.fc-avail.on  { background: rgba(34,197,94,.85);  color: #fff; }
+.fc-avail.off { background: rgba(239,68,68,.82);  color: #fff; }
 .fc-cat {
   position: absolute; top: 9px; left: 9px;
   background: rgba(0,0,0,.58); backdrop-filter: blur(8px);
@@ -441,265 +447,432 @@
   text-transform: uppercase; letter-spacing: .06em;
   border-radius: 8px; padding: .18rem .55rem;
 }
-
 .fc-body { padding: 1rem 1.05rem .88rem; flex: 1; display: flex; flex-direction: column; gap: .46rem; }
 .fc-name { font-size: .95rem; font-weight: 900; color: var(--nc-text); letter-spacing: -.025em; line-height: 1.22; }
 .fc-desc { font-size: .76rem; color: var(--nc-text-muted); line-height: 1.55; font-weight: 500; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
-
 .fc-diet {
   display: inline-flex; align-items: center; gap: .26rem; width: fit-content;
   background: #d1fae5; color: #065f46; border: 1.5px solid #a7f3d0;
   border-radius: 99px; padding: .15rem .65rem; font-size: .65rem; font-weight: 800;
 }
 [data-theme="dark"] .fc-diet { background: rgba(16,185,129,.1); color: #34d399; border-color: rgba(16,185,129,.25); }
-
 .fc-nutr { display: flex; flex-wrap: wrap; gap: .3rem; margin-top: auto; padding-top: .42rem; border-top: 1px solid var(--nc-border); }
 .nb { display: inline-flex; flex-direction: column; align-items: center; background: var(--nc-surface-2); border: 1px solid var(--nc-border); border-radius: 9px; padding: .28rem .5rem; min-width: 46px; transition: border-color .14s, transform .14s; }
 .food-card:hover .nb { border-color: var(--nc-border-2); transform: translateY(-1px); }
-.nb b { font-family: 'JetBrains Mono', monospace; font-size: .72rem; font-weight: 700; line-height: 1; }
+.nb b    { font-family: 'JetBrains Mono', monospace; font-size: .72rem; font-weight: 700; line-height: 1; }
 .nb span { font-size: .53rem; font-weight: 800; text-transform: uppercase; letter-spacing: .06em; color: var(--nc-text-faint); margin-top: .1rem; }
 .nb.kcal b { color: #f97316; }
 .nb.prot b { color: #06b6d4; }
 .nb.carb b { color: #a78bfa; }
 .nb.fat  b { color: #ec4899; }
-
 .fc-prov { display: flex; align-items: center; gap: .45rem; padding-top: .44rem; border-top: 1px solid var(--nc-border); font-size: .71rem; color: var(--nc-text-faint); font-weight: 700; }
-.fc-pav { width: 22px; height: 22px; border-radius: 50%; flex-shrink: 0; background: linear-gradient(135deg, var(--nc-brand) 0%, #38bdf8 100%); display: flex; align-items: center; justify-content: center; font-size: .58rem; font-weight: 900; color: #fff; }
+.fc-pav  { width: 22px; height: 22px; border-radius: 50%; flex-shrink: 0; background: linear-gradient(135deg, var(--nc-brand) 0%, #38bdf8 100%); display: flex; align-items: center; justify-content: center; font-size: .58rem; font-weight: 900; color: #fff; }
 
+/* ═══════════════════════════════════════════════════════════════
+   EMPTY STATE
+═══════════════════════════════════════════════════════════════ */
 .fs-empty { grid-column: 1 / -1; display: flex; flex-direction: column; align-items: center; text-align: center; padding: 4rem 2rem; gap: .85rem; }
 .fs-empty__icon { width: 72px; height: 72px; border-radius: 20px; background: var(--nc-brand-l); color: var(--nc-brand); display: flex; align-items: center; justify-content: center; font-size: 1.7rem; box-shadow: 0 0 0 10px var(--nc-brand-l); }
 [data-theme="dark"] .fs-empty__icon { background: rgba(14,165,233,.1); box-shadow: 0 0 0 10px rgba(14,165,233,.06); }
 .fs-empty h4 { font-size: 1rem; font-weight: 900; color: var(--nc-text); margin: 0; letter-spacing: -.025em; }
 .fs-empty p  { font-size: .83rem; color: var(--nc-text-muted); margin: 0; max-width: 240px; line-height: 1.65; font-weight: 500; }
 
+/* ═══════════════════════════════════════════════════════════════
+   SKELETON
+═══════════════════════════════════════════════════════════════ */
 .fs-skel-g { display: grid; grid-template-columns: repeat(auto-fill, minmax(248px, 1fr)); gap: 1rem; }
-.fs-sk { background: var(--nc-card-bg); border: 1px solid var(--nc-card-border); border-radius: 18px; overflow: hidden; animation: skel 1.5s ease-in-out infinite; }
-.sk-img  { height: 175px; background: var(--nc-surface-2); }
-.sk-body { padding: 1rem 1.05rem; display: flex; flex-direction: column; gap: .6rem; }
-.sk-ln   { background: var(--nc-surface-2); border-radius: 6px; height: 11px; }
-.sk-ln.w3 { width: 72%; } .sk-ln.w2 { width: 52%; }
-.sk-ft   { display: flex; gap: .32rem; padding-top: .42rem; border-top: 1px solid var(--nc-border); }
-.sk-nb   { height: 38px; width: 48px; border-radius: 9px; background: var(--nc-surface-2); }
+.fs-sk     { background: var(--nc-card-bg); border: 1px solid var(--nc-card-border); border-radius: 18px; overflow: hidden; animation: skel 1.5s ease-in-out infinite; }
+.sk-img    { height: 175px; background: var(--nc-surface-2); }
+.sk-body   { padding: 1rem 1.05rem; display: flex; flex-direction: column; gap: .6rem; }
+.sk-ln     { background: var(--nc-surface-2); border-radius: 6px; height: 11px; }
+.sk-ln.w3  { width: 72%; } .sk-ln.w2 { width: 52%; }
+.sk-ft     { display: flex; gap: .32rem; padding-top: .42rem; border-top: 1px solid var(--nc-border); }
+.sk-nb     { height: 38px; width: 48px; border-radius: 9px; background: var(--nc-surface-2); }
 
+/* ═══════════════════════════════════════════════════════════════
+   PAGINATION
+═══════════════════════════════════════════════════════════════ */
 .fs-pages { display: flex; justify-content: center; align-items: center; gap: .4rem; flex-wrap: wrap; padding-top: .25rem; }
 .pg-btn { display: inline-flex; align-items: center; gap: .3rem; background: var(--nc-card-bg); color: var(--nc-text-muted); border: 1.5px solid var(--nc-border); border-radius: 10px; padding: .5rem .9rem; font-size: .79rem; font-weight: 700; font-family: 'Plus Jakarta Sans', sans-serif; text-decoration: none; transition: all .14s; }
-.pg-btn:hover { border-color: var(--nc-brand); color: var(--nc-brand); background: var(--nc-brand-l); }
-.pg-btn.active { background: var(--nc-brand); color: #fff; border-color: var(--nc-brand); }
+.pg-btn:hover    { border-color: var(--nc-brand); color: var(--nc-brand); background: var(--nc-brand-l); }
+.pg-btn.active   { background: var(--nc-brand); color: #fff; border-color: var(--nc-brand); }
 .pg-btn.ellipsis { opacity: .35; pointer-events: none; }
 [data-theme="dark"] .pg-btn:hover { background: rgba(14,165,233,.1); }
 
-.fs-bottom-sections{
-  margin-top: 1.4rem;
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:1rem;
-}
-@media (max-width: 900px) {
-  .fs-bottom-sections{ grid-template-columns:1fr; }
-}
+/* ═══════════════════════════════════════════════════════════════
+   BOTTOM QUICK-ACCESS CARDS
+═══════════════════════════════════════════════════════════════ */
+.fs-bottom-sections { margin-top: 1.4rem; display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+@media (max-width: 900px) { .fs-bottom-sections { grid-template-columns: 1fr; } }
+.fs-qcard  { background: var(--nc-card-bg); border: 1px solid var(--nc-card-border); border-radius: 18px; overflow: hidden; box-shadow: var(--nc-card-shadow); }
+.fs-qhead  { display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding: .95rem 1.1rem; background: var(--nc-surface-2); border-bottom: 1px solid var(--nc-border); }
+.fs-qhead-left { display: flex; align-items: center; gap: .6rem; }
+.fs-qico   { width: 34px; height: 34px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: .8rem; }
+.fs-qico.heart { background: rgba(225,29,72,.12);  color: #e11d48; }
+.fs-qico.eye   { background: rgba(245,158,11,.12); color: #d97706; }
+[data-theme="dark"] .fs-qico.heart { background: rgba(225,29,72,.14);  color: #fb7185; }
+[data-theme="dark"] .fs-qico.eye   { background: rgba(245,158,11,.14); color: #fcd34d; }
+.fs-qtitle { font-size: .84rem; font-weight: 900; color: var(--nc-text); letter-spacing: -.02em; }
+.fs-qsub   { font-size: .7rem; color: var(--nc-text-muted); margin-top: .05rem; }
+.fs-qbtn   { display: inline-flex; align-items: center; gap: .35rem; padding: .42rem .75rem; border-radius: 10px; border: 1px solid var(--nc-border); background: var(--nc-card-bg); color: var(--nc-text-2); text-decoration: none; font-size: .72rem; font-weight: 800; transition: all .14s ease; }
+.fs-qbtn:hover { background: var(--nc-brand-l); border-color: rgba(14,165,233,.2); color: var(--nc-brand-d); }
+.fs-qbody  { padding: .95rem 1.1rem 1rem; }
+.fs-qlist  { display: flex; flex-direction: column; gap: .7rem; }
+.fs-qitem  { display: flex; align-items: center; justify-content: space-between; gap: .8rem; padding: .75rem .82rem; background: var(--nc-surface-2); border: 1px solid var(--nc-border); border-radius: 14px; transition: all .14s ease; }
+.fs-qitem:hover { background: var(--nc-surface-3); border-color: var(--nc-border-2); }
+.fs-qitem-left { display: flex; align-items: center; gap: .72rem; min-width: 0; flex: 1; }
+.fs-qthumb { width: 48px; height: 48px; border-radius: 12px; overflow: hidden; background: var(--nc-surface-3); border: 1px solid var(--nc-border); flex-shrink: 0; display: flex; align-items: center; justify-content: center; color: var(--nc-text-faint); }
+.fs-qthumb img { width: 100%; height: 100%; object-fit: cover; }
+.fs-qmeta  { min-width: 0; }
+.fs-qname  { font-size: .8rem; font-weight: 800; color: var(--nc-text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.fs-qdesc  { font-size: .7rem; color: var(--nc-text-muted); margin-top: .15rem; }
+.fs-qgo    { width: 34px; height: 34px; border-radius: 10px; display: inline-flex; align-items: center; justify-content: center; text-decoration: none; border: 1px solid var(--nc-border); background: var(--nc-card-bg); color: var(--nc-text-2); transition: all .14s ease; }
+.fs-qgo:hover { background: var(--nc-brand-l); color: var(--nc-brand-d); border-color: rgba(14,165,233,.2); }
+.fs-qempty { text-align: center; padding: 1.3rem .8rem 1rem; }
+.fs-qempty i  { font-size: 1.2rem; color: var(--nc-text-faint); margin-bottom: .55rem; }
+.fs-qempty h4 { font-size: .85rem; font-weight: 900; color: var(--nc-text); margin: 0 0 .25rem; }
+.fs-qempty p  { font-size: .74rem; color: var(--nc-text-muted); margin: 0; line-height: 1.55; }
 
-.fs-qcard{
-  background: var(--nc-card-bg);
-  border: 1px solid var(--nc-card-border);
-  border-radius: 18px;
+/* ═══════════════════════════════════════════════════════════════
+   AI ADVICE PANEL  ── REDESIGNED
+═══════════════════════════════════════════════════════════════ */
+
+/* Base panel */
+.adv-panel {
   overflow: hidden;
-  box-shadow: var(--nc-card-shadow);
+  background: var(--nc-card-bg);
+  border-top: 1px solid var(--nc-border);
 }
-.fs-qhead{
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  gap:1rem;
-  padding: .95rem 1.1rem;
+
+/* ── Verdict colour tokens ── */
+.adv-panel-good  { --adv-c: #10b981; --adv-cl: rgba(16,185,129,.12); --adv-cm: rgba(16,185,129,.22); --adv-cd: #059669; }
+.adv-panel-limit { --adv-c: #f59e0b; --adv-cl: rgba(245,158,11,.12);  --adv-cm: rgba(245,158,11,.22);  --adv-cd: #b45309; }
+.adv-panel-avoid { --adv-c: #ef4444; --adv-cl: rgba(239,68,68,.12);   --adv-cm: rgba(239,68,68,.22);   --adv-cd: #dc2626; }
+
+[data-theme="dark"] .adv-panel-good  { --adv-cd: #34d399; }
+[data-theme="dark"] .adv-panel-limit { --adv-cd: #fcd34d; }
+[data-theme="dark"] .adv-panel-avoid { --adv-cd: #f87171; }
+
+/* ════════════════════════════════
+   LOADING STATE
+════════════════════════════════ */
+.adv-loading {
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  padding: 2.2rem 1rem 2rem;
   background: var(--nc-surface-2);
+}
+
+/* Orbital spinner */
+.adv-loading__orbit {
+  position: relative;
+  width: 56px; height: 56px;
+}
+.adv-loading__ring {
+  position: absolute; inset: 0;
+  border-radius: 50%;
+  border: 2.5px solid transparent;
+  border-top-color: #0d9488;
+  border-right-color: rgba(13,148,136,.25);
+  animation: orbit-spin .9s linear infinite;
+}
+.adv-loading__ring--2 {
+  inset: 7px;
+  border-top-color: transparent;
+  border-bottom-color: #38bdf8;
+  border-left-color: rgba(56,189,248,.25);
+  animation: orbit-spin-rev 1.3s linear infinite;
+}
+.adv-loading__core {
+  position: absolute;
+  inset: 16px;
+  background: linear-gradient(135deg, rgba(13,148,136,.15), rgba(56,189,248,.1));
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: .9rem; color: #0d9488;
+  animation: core-pulse 2s ease-in-out infinite;
+  border: 1px solid rgba(13,148,136,.2);
+}
+
+.adv-loading__text-wrap {
+  display: flex; flex-direction: column; align-items: center; gap: .22rem;
+}
+.adv-loading__title {
+  font-size: .82rem; font-weight: 800;
+  color: var(--nc-text); letter-spacing: -.01em;
+}
+.adv-loading__sub {
+  font-size: .68rem; font-weight: 500;
+  color: var(--nc-text-faint);
+}
+
+/* ════════════════════════════════
+   VERDICT RIBBON (top bar)
+════════════════════════════════ */
+.adv-ribbon {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: .8rem;
+  padding: .9rem 1rem .85rem;
+  background: var(--adv-cl, var(--nc-surface-2));
+  border-bottom: 1px solid var(--adv-cm, var(--nc-border));
+  animation: ribbon-in .3s cubic-bezier(.16,1,.3,1) both;
+  transition: background .3s, border-color .3s;
+}
+
+.adv-ribbon__left {
+  display: flex; align-items: center; gap: .72rem;
+  min-width: 0; flex: 1;
+}
+
+/* Verdict icon bubble */
+.adv-ribbon__icon-wrap {
+  width: 40px; height: 40px;
+  border-radius: 12px;
+  background: var(--adv-cm, rgba(14,165,233,.15));
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+  border: 1.5px solid var(--adv-cm, var(--nc-border));
+  font-size: 1.1rem;
+  transition: all .3s;
+}
+
+.adv-ribbon__eyebrow {
+  font-size: .58rem; font-weight: 900;
+  text-transform: uppercase; letter-spacing: .14em;
+  color: var(--nc-text-faint);
+  margin-bottom: .28rem;
+}
+
+/* Verdict badge pill */
+.adv-verdict-badge {
+  display: inline-flex; align-items: center;
+  font-size: .86rem; font-weight: 900;
+  letter-spacing: -.01em;
+  color: var(--adv-cd, var(--nc-text));
+  line-height: 1;
+}
+
+/* Score ring (right side) */
+.adv-ribbon__score-wrap {
+  display: flex; align-items: center; gap: .5rem;
+  flex-shrink: 0;
+}
+.adv-score-ring {
+  position: relative;
+  width: 44px; height: 44px;
+  flex-shrink: 0;
+}
+.adv-score-svg {
+  width: 44px; height: 44px;
+  transform: rotate(-90deg);
+}
+.adv-score-track {
+  fill: none;
+  stroke: var(--nc-border);
+  stroke-width: 3.5;
+}
+.adv-score-fill {
+  fill: none;
+  stroke: var(--adv-c, #0ea5e9);
+  stroke-width: 3.5;
+  stroke-linecap: round;
+  stroke-dasharray: 113;
+  stroke-dashoffset: 113;
+  transition: stroke-dashoffset .8s cubic-bezier(.16,1,.3,1), stroke .3s;
+}
+.adv-score-num {
+  position: absolute; inset: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: .72rem; font-weight: 800;
+  color: var(--adv-cd, var(--nc-text));
+  transition: color .3s;
+}
+.adv-ribbon__score-label {
+  font-size: .55rem; font-weight: 900;
+  text-transform: uppercase; letter-spacing: .1em;
+  color: var(--nc-text-faint); line-height: 1.3;
+  text-align: center;
+}
+
+/* ════════════════════════════════
+   MACRO PROGRESS BARS
+════════════════════════════════ */
+.adv-macros {
+  padding: .75rem 1rem .65rem;
   border-bottom: 1px solid var(--nc-border);
+  background: var(--nc-surface-2);
 }
-.fs-qhead-left{
-  display:flex;
-  align-items:center;
-  gap:.6rem;
+.adv-macros__title {
+  font-size: .6rem; font-weight: 900;
+  text-transform: uppercase; letter-spacing: .12em;
+  color: var(--nc-text-faint);
+  display: flex; align-items: center; gap: .3rem;
+  margin-bottom: .6rem;
 }
-.fs-qico{
-  width:34px;
-  height:34px;
-  border-radius:10px;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  font-size:.8rem;
+.adv-macro-list {
+  display: flex; flex-direction: column; gap: .42rem;
 }
-.fs-qico.heart{ background: rgba(225,29,72,.12); color:#e11d48; }
-.fs-qico.eye{ background: rgba(245,158,11,.12); color:#d97706; }
-[data-theme="dark"] .fs-qico.heart{ background: rgba(225,29,72,.14); color:#fb7185; }
-[data-theme="dark"] .fs-qico.eye{ background: rgba(245,158,11,.14); color:#fcd34d; }
+.adv-macro-row {
+  display: flex; align-items: center; gap: .65rem;
+}
+.adv-macro-label {
+  font-size: .68rem; font-weight: 700;
+  color: var(--nc-text-muted);
+  width: 60px; flex-shrink: 0;
+  display: flex; align-items: center; gap: .28rem;
+}
+.adv-macro-label i { font-size: .6rem; }
+.adv-macro-bar-wrap {
+  flex: 1;
+  height: 6px;
+  background: var(--nc-border);
+  border-radius: 99px;
+  overflow: hidden;
+}
+.adv-macro-bar {
+  height: 100%;
+  border-radius: 99px;
+  transition: width .8s cubic-bezier(.16,1,.3,1);
+  width: 0%;
+}
+.adv-macro-bar--cal  { background: linear-gradient(90deg, #f97316, #fb923c); }
+.adv-macro-bar--prot { background: linear-gradient(90deg, #0891b2, #06b6d4); }
+.adv-macro-bar--carb { background: linear-gradient(90deg, #7c3aed, #a78bfa); }
+.adv-macro-bar--fat  { background: linear-gradient(90deg, #be185d, #ec4899); }
+.adv-macro-val {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: .65rem; font-weight: 700;
+  white-space: nowrap; min-width: 52px; text-align: right;
+}
+.adv-macro-val--cal  { color: #f97316; }
+.adv-macro-val--prot { color: #06b6d4; }
+.adv-macro-val--carb { color: #a78bfa; }
+.adv-macro-val--fat  { color: #ec4899; }
 
-.fs-qtitle{
-  font-size:.84rem;
-  font-weight:900;
-  color:var(--nc-text);
-  letter-spacing:-.02em;
-}
-.fs-qsub{
-  font-size:.7rem;
-  color:var(--nc-text-muted);
-  margin-top:.05rem;
-}
-.fs-qbtn{
-  display:inline-flex;
-  align-items:center;
-  gap:.35rem;
-  padding:.42rem .75rem;
-  border-radius:10px;
-  border:1px solid var(--nc-border);
-  background:var(--nc-card-bg);
-  color:var(--nc-text-2);
-  text-decoration:none;
-  font-size:.72rem;
-  font-weight:800;
-  transition:all .14s ease;
-}
-.fs-qbtn:hover{
-  background:var(--nc-brand-l);
-  border-color:rgba(14,165,233,.2);
-  color:var(--nc-brand-d);
-}
-
-.fs-qbody{
-  padding: .95rem 1.1rem 1rem;
-}
-.fs-qlist{
-  display:flex;
-  flex-direction:column;
-  gap:.7rem;
-}
-.fs-qitem{
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  gap:.8rem;
-  padding:.75rem .82rem;
-  background:var(--nc-surface-2);
-  border:1px solid var(--nc-border);
-  border-radius:14px;
-  transition:all .14s ease;
-}
-.fs-qitem:hover{
-  background:var(--nc-surface-3);
-  border-color:var(--nc-border-2);
-}
-.fs-qitem-left{
-  display:flex;
-  align-items:center;
-  gap:.72rem;
-  min-width:0;
-  flex:1;
-}
-.fs-qthumb{
-  width:48px;
-  height:48px;
-  border-radius:12px;
-  overflow:hidden;
-  background:var(--nc-surface-3);
-  border:1px solid var(--nc-border);
-  flex-shrink:0;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  color:var(--nc-text-faint);
-}
-.fs-qthumb img{
-  width:100%;
-  height:100%;
-  object-fit:cover;
-}
-.fs-qmeta{
-  min-width:0;
-}
-.fs-qname{
-  font-size:.8rem;
-  font-weight:800;
-  color:var(--nc-text);
-  white-space:nowrap;
-  overflow:hidden;
-  text-overflow:ellipsis;
-}
-.fs-qdesc{
-  font-size:.7rem;
-  color:var(--nc-text-muted);
-  margin-top:.15rem;
-}
-.fs-qgo{
-  width:34px;
-  height:34px;
-  border-radius:10px;
-  display:inline-flex;
-  align-items:center;
-  justify-content:center;
-  text-decoration:none;
-  border:1px solid var(--nc-border);
-  background:var(--nc-card-bg);
-  color:var(--nc-text-2);
-  transition:all .14s ease;
-}
-.fs-qgo:hover{
-  background:var(--nc-brand-l);
-  color:var(--nc-brand-d);
-  border-color:rgba(14,165,233,.2);
-}
-.fs-qempty{
-  text-align:center;
-  padding:1.3rem .8rem 1rem;
-}
-.fs-qempty i{
-  font-size:1.2rem;
-  color:var(--nc-text-faint);
-  margin-bottom:.55rem;
-}
-.fs-qempty h4{
-  font-size:.85rem;
-  font-weight:900;
-  color:var(--nc-text);
-  margin:0 0 .25rem;
-}
-.fs-qempty p{
-  font-size:.74rem;
-  color:var(--nc-text-muted);
-  margin:0;
-  line-height:1.55;
+/* ════════════════════════════════
+   CONTENT BODY
+════════════════════════════════ */
+.adv-body {
+  padding: .72rem .85rem .8rem;
+  display: flex; flex-direction: column; gap: .52rem;
 }
 
-/* ── AI Advice Panel styles ────────────────────────────────────────────────── */
-.adv-good  { background: rgba(16,185,129,.12); color: #059669; border-color: rgba(16,185,129,.28) !important; }
-.adv-limit { background: rgba(245,158,11,.12);  color: #b45309; border-color: rgba(245,158,11,.28) !important; }
-.adv-avoid { background: rgba(239,68,68,.12);   color: #dc2626; border-color: rgba(239,68,68,.28) !important; }
-[data-theme="dark"] .adv-good  { color: #34d399; }
-[data-theme="dark"] .adv-limit { color: #fcd34d; }
-[data-theme="dark"] .adv-avoid { color: #f87171; }
+/* Sections */
+.adv-section {
+  border-radius: 12px;
+  padding: .7rem .85rem;
+  border: 1px solid var(--nc-border);
+  background: var(--nc-card-bg);
+  animation: adv-slideup .28s cubic-bezier(.16,1,.3,1) both;
+}
+.adv-section__label {
+  display: flex; align-items: center; gap: .3rem;
+  font-size: .58rem; font-weight: 900;
+  text-transform: uppercase; letter-spacing: .13em;
+  color: var(--nc-text-faint);
+  margin-bottom: .42rem;
+}
+.adv-section__label i { font-size: .62rem; }
 
-.adv-panel-good  { border-left: 3px solid #10b981 !important; }
-.adv-panel-limit { border-left: 3px solid #f59e0b !important; }
-.adv-panel-avoid { border-left: 3px solid #ef4444 !important; }
+/* Analysis */
+.adv-analysis {
+  font-size: .775rem; font-weight: 500;
+  color: var(--nc-text-2); line-height: 1.72;
+}
+.adv-section--analysis {
+  border-left: 3px solid var(--adv-c, var(--nc-border-2));
+  transition: border-left-color .3s;
+}
+.adv-section--analysis .adv-section__label { color: var(--adv-cd, var(--nc-text-faint)); }
 
+/* Suggestion */
+.adv-suggestion {
+  font-size: .775rem; font-weight: 500;
+  color: var(--nc-text-2); line-height: 1.7;
+}
+.adv-section--suggest {
+  background: rgba(13,148,136,.06);
+  border-color: rgba(13,148,136,.2);
+  border-left: 3px solid #0d9488;
+}
+[data-theme="dark"] .adv-section--suggest {
+  background: rgba(13,148,136,.09);
+  border-color: rgba(13,148,136,.22);
+}
+.adv-section--suggest .adv-section__label { color: #0d9488; }
+[data-theme="dark"] .adv-section--suggest .adv-section__label { color: #2dd4bf; }
+
+/* ════════════════════════════════
+   PANEL FOOTER
+════════════════════════════════ */
+.adv-footer {
+  display: flex; align-items: center; justify-content: center; gap: .35rem;
+  padding: .52rem .85rem .65rem;
+  font-size: .62rem; font-weight: 700;
+  color: var(--nc-text-faint);
+  border-top: 1px solid var(--nc-border);
+  background: var(--nc-surface-2);
+  letter-spacing: .02em;
+}
+.adv-footer i { font-size: .6rem; color: var(--nc-brand); }
+
+/* ════════════════════════════════
+   ERROR STATE
+════════════════════════════════ */
+.adv-error {
+  display: none;
+  align-items: center; gap: .55rem;
+  margin: .85rem .9rem .9rem;
+  padding: .72rem .9rem;
+  font-size: .76rem; font-weight: 600;
+  color: #ef4444; line-height: 1.55;
+  background: rgba(239,68,68,.07);
+  border: 1px solid rgba(239,68,68,.18);
+  border-radius: 11px;
+}
+.adv-error i { font-size: 1rem; flex-shrink: 0; }
+
+/* Result wrapper */
+.adv-result {
+  display: none;
+  flex-direction: column;
+}
+
+/* ════════════════════════════════
+   EAT THIS? BUTTON
+════════════════════════════════ */
 .ai-advice-btn:hover {
   background: rgba(13,148,136,.22) !important;
   border-color: rgba(13,148,136,.5) !important;
+  transform: translateY(-1px);
 }
 .ai-advice-btn:disabled {
   opacity: .6;
   cursor: not-allowed !important;
+  transform: none !important;
 }
 
+/* ═══════════════════════════════════════════════════════════════
+   RESPONSIVE
+═══════════════════════════════════════════════════════════════ */
 @media (max-width: 768px) {
-  .fs-hero { padding: 1rem 1.25rem 1.2rem; border-radius: 14px; }
+  .fs-hero  { padding: 1rem 1.25rem 1.2rem; border-radius: 14px; }
   .fs-hero__inner { flex-direction: column; gap: .85rem; }
   .fs-hero__right { min-width: 0; width: 100%; }
   .fs-hstat { padding-right: 1rem; margin-right: 1rem; }
   #foodGrid { grid-template-columns: 1fr 1fr; }
   .fs-srow  { display: none; }
+  .adv-ribbon__score-wrap { display: none; }
 }
 @media (max-width: 520px) {
-  #foodGrid { grid-template-columns: 1fr; }
-  .fs-hero__h1 { font-size: 1.2rem; }
+  #foodGrid       { grid-template-columns: 1fr; }
+  .fs-hero__h1    { font-size: 1.2rem; }
 }
 </style>
 {% endblock %}
@@ -707,29 +880,30 @@
 {% block content %}
 <div class="fs">
 
+<!-- ── Hero ── -->
 <div class="fs-hero">
   <div class="fs-orb fs-orb--a"></div>
   <div class="fs-orb fs-orb--b"></div>
-  <div class="fs-orb fs-orb--c"></div>
 
   <div class="fs-hero__inner">
     <div class="fs-hero__left">
       <div class="fs-hero__badge">
         <span class="fs-hero__badge-dot"></span>
-        NutriConnect &nbsp;·&nbsp; {% if current_user.is_food_provider() %}Provider Browse{% else %}Food Discovery{% endif %}
+        NutriConnect &nbsp;·&nbsp;
+        {% if current_user.is_food_provider() %}Provider Browse{% else %}Food Discovery{% endif %}
       </div>
       <h1 class="fs-hero__h1">
         {% if current_user.is_food_provider() %}
-        Browse <span class="grad">your foods and other providers' foods</span>
+          Browse <span class="grad">your foods and other providers' foods</span>
         {% else %}
-        Find your next <span class="grad">perfect meal</span>
+          Find your next <span class="grad">perfect meal</span>
         {% endif %}
       </h1>
       <p class="fs-hero__sub">
         {% if current_user.is_food_provider() %}
-        Explore the full food catalog across NutriConnect, including your own items, with ratings and nutrition details.
+          Explore the full food catalog across NutriConnect, including your own items, with ratings and nutrition details.
         {% else %}
-        Search dishes from all NutriConnect providers.
+          Search dishes from all NutriConnect providers.
         {% endif %}
       </p>
     </div>
@@ -759,15 +933,19 @@
         </div>
         <div class="fs-hstat">
           <div class="fs-hstat__val">{{ favorite_count or 0 }}</div>
-          <div class="fs-hstat__lbl">{% if current_user.is_food_provider() %}Ratings Ready{% else %}Saved Foods{% endif %}</div>
+          <div class="fs-hstat__lbl">
+            {% if current_user.is_food_provider() %}Ratings Ready{% else %}Saved Foods{% endif %}
+          </div>
         </div>
       </div>
     </div>
   </div>
 </div>
+<!-- /Hero -->
 
 <div class="fs-body">
 
+  <!-- ── Sidebar ── -->
   <aside class="fs-sidebar">
     <form id="filterForm">
       <input type="hidden" id="hiddenQ" name="q" value="{{ q }}">
@@ -780,6 +958,7 @@
           </button>
         </div>
 
+        <!-- Diet Type -->
         <div class="fs-fsec">
           <div class="fs-flbl"><i class="fas fa-leaf"></i> Diet Type</div>
           <div class="fs-pills">
@@ -790,53 +969,64 @@
                 data-val="{{ dt }}"
                 aria-pressed="{{ 'true' if diet_type == dt else 'false' }}"
                 onclick="toggleDiet(this)"
-              >
-                {{ dt.replace('-',' ').title() }}
-              </button>
+              >{{ dt.replace('-',' ').title() }}</button>
             {% endfor %}
           </div>
           <input type="hidden" id="dietInput" name="diet_type" value="{{ diet_type or '' }}">
         </div>
 
+        <!-- Max Calories -->
         <div class="fs-fsec">
           <div class="fs-flbl"><i class="fas fa-fire-flame-curved"></i> Max Calories</div>
           <div class="fs-rrow">
             <input type="range" class="fs-range" id="calRange"
                    min="0" max="2000" step="50"
                    value="{{ max_cal or 2000 }}" oninput="onRange('cal')">
-            <span class="fs-rval" id="calVal">{% if max_cal %}{{ max_cal }} kcal{% else %}Any{% endif %}</span>
+            <span class="fs-rval" id="calVal">
+              {% if max_cal %}{{ max_cal }} kcal{% else %}Any{% endif %}
+            </span>
           </div>
           <input type="hidden" id="calInput" name="max_cal" value="{{ max_cal or '' }}">
         </div>
 
+        <!-- Min Protein -->
         <div class="fs-fsec">
           <div class="fs-flbl"><i class="fas fa-drumstick-bite"></i> Min Protein</div>
           <div class="fs-rrow">
             <input type="range" class="fs-range" id="protRange"
                    min="0" max="100" step="5"
                    value="{{ min_pro or 0 }}" oninput="onRange('prot')">
-            <span class="fs-rval" id="protVal">{% if min_pro and min_pro|int > 0 %}{{ min_pro }}g{% else %}Any{% endif %}</span>
+            <span class="fs-rval" id="protVal">
+              {% if min_pro and min_pro|int > 0 %}{{ min_pro }}g{% else %}Any{% endif %}
+            </span>
           </div>
           <input type="hidden" id="protInput" name="min_protein" value="{{ min_pro or '' }}">
         </div>
 
+        <!-- Max Price -->
         <div class="fs-fsec">
           <div class="fs-flbl"><i class="fas fa-tag"></i> Max Price</div>
           <div class="fs-rrow">
             <input type="range" class="fs-range" id="priceRange"
                    min="0" max="1000" step="10"
                    value="{{ max_price or 1000 }}" oninput="onRange('price')">
-            <span class="fs-rval" id="priceVal">{% if max_price %}${{ max_price }}{% else %}Any{% endif %}</span>
+            <span class="fs-rval" id="priceVal">
+              {% if max_price %}${{ max_price }}{% else %}Any{% endif %}
+            </span>
           </div>
           <input type="hidden" id="priceInput" name="max_price" value="{{ max_price or '' }}">
         </div>
 
+        <!-- Active filter chips -->
         <div class="fs-chips" id="activeChips"></div>
       </div>
     </form>
   </aside>
+  <!-- /Sidebar -->
 
+  <!-- ── Results ── -->
   <section class="fs-results">
+
     <div class="fs-meta">
       <div class="fs-cblock">
         <div class="fs-cdot"></div>
@@ -848,11 +1038,11 @@
       <div class="fs-srow">
         <span class="fs-slbl">Sort</span>
         <select class="fs-ssel" id="sortSelect" onchange="go()">
-          <option value="name"     {{ 'selected' if sort_by == 'name' }}>Name A → Z</option>
-          <option value="cal_asc"  {{ 'selected' if sort_by == 'cal_asc' }}>Calories ↑</option>
+          <option value="name"     {{ 'selected' if sort_by == 'name'     }}>Name A → Z</option>
+          <option value="cal_asc"  {{ 'selected' if sort_by == 'cal_asc'  }}>Calories ↑</option>
           <option value="cal_desc" {{ 'selected' if sort_by == 'cal_desc' }}>Calories ↓</option>
-          <option value="price"    {{ 'selected' if sort_by == 'price' }}>Price ↑</option>
-          <option value="protein"  {{ 'selected' if sort_by == 'protein' }}>Protein ↓</option>
+          <option value="price"    {{ 'selected' if sort_by == 'price'    }}>Price ↑</option>
+          <option value="protein"  {{ 'selected' if sort_by == 'protein'  }}>Protein ↓</option>
         </select>
       </div>
     </div>
@@ -885,12 +1075,17 @@
       {% endif %}
     </div>
     {% endif %}
-  </section>
-</div>
 
+  </section>
+  <!-- /Results -->
+
+</div>{# end .fs-body #}
+
+<!-- ── Bottom quick-access cards (customers only) ── -->
 {% if not current_user.is_food_provider() %}
 <div class="fs-bottom-sections">
 
+  <!-- Favourites -->
   <div class="fs-qcard">
     <div class="fs-qhead">
       <div class="fs-qhead-left">
@@ -904,45 +1099,45 @@
         <i class="fas fa-heart"></i> View All
       </a>
     </div>
-
     <div class="fs-qbody">
       {% if favorite_items %}
-      <div class="fs-qlist">
-        {% for fav in favorite_items %}
-          {% if fav.food %}
-          <div class="fs-qitem">
-            <div class="fs-qitem-left">
-              <div class="fs-qthumb">
-                {% if fav.food.image %}
-                  <img src="{{ url_for('static', filename='uploads/' ~ fav.food.image) }}" alt="{{ fav.food.name }}">
-                {% else %}
-                  <i class="fas fa-utensils"></i>
-                {% endif %}
-              </div>
-              <div class="fs-qmeta">
-                <div class="fs-qname">{{ fav.food.name }}</div>
-                <div class="fs-qdesc">
-                  {% if fav.food.price is not none %}${{ "%.2f"|format(fav.food.price) }}{% else %}Price unavailable{% endif %}
+        <div class="fs-qlist">
+          {% for fav in favorite_items %}
+            {% if fav.food %}
+            <div class="fs-qitem">
+              <div class="fs-qitem-left">
+                <div class="fs-qthumb">
+                  {% if fav.food.image %}
+                    <img src="{{ url_for('static', filename='uploads/' ~ fav.food.image) }}" alt="{{ fav.food.name }}">
+                  {% else %}
+                    <i class="fas fa-utensils"></i>
+                  {% endif %}
+                </div>
+                <div class="fs-qmeta">
+                  <div class="fs-qname">{{ fav.food.name }}</div>
+                  <div class="fs-qdesc">
+                    {% if fav.food.price is not none %}${{ "%.2f"|format(fav.food.price) }}{% else %}Price unavailable{% endif %}
+                  </div>
                 </div>
               </div>
+              <a href="{{ url_for('food_search.food_detail', food_id=fav.food.id) }}" class="fs-qgo">
+                <i class="fas fa-arrow-right"></i>
+              </a>
             </div>
-            <a href="{{ url_for('food_search.food_detail', food_id=fav.food.id) }}" class="fs-qgo">
-              <i class="fas fa-arrow-right"></i>
-            </a>
-          </div>
-          {% endif %}
-        {% endfor %}
-      </div>
+            {% endif %}
+          {% endfor %}
+        </div>
       {% else %}
-      <div class="fs-qempty">
-        <i class="fas fa-heart-crack"></i>
-        <h4>No favourites yet</h4>
-        <p>Save foods you like and they will appear here for quick access.</p>
-      </div>
+        <div class="fs-qempty">
+          <i class="fas fa-heart-crack"></i>
+          <h4>No favourites yet</h4>
+          <p>Save foods you like and they will appear here for quick access.</p>
+        </div>
       {% endif %}
     </div>
   </div>
 
+  <!-- Recently Viewed -->
   <div class="fs-qcard">
     <div class="fs-qhead">
       <div class="fs-qhead-left">
@@ -956,41 +1151,40 @@
         <i class="fas fa-compass"></i> Explore
       </a>
     </div>
-
     <div class="fs-qbody">
       {% if recent_views %}
-      <div class="fs-qlist">
-        {% for item in recent_views %}
-          {% if item.food %}
-          <div class="fs-qitem">
-            <div class="fs-qitem-left">
-              <div class="fs-qthumb">
-                {% if item.food.image %}
-                  <img src="{{ url_for('static', filename='uploads/' ~ item.food.image) }}" alt="{{ item.food.name }}">
-                {% else %}
-                  <i class="fas fa-utensils"></i>
-                {% endif %}
-              </div>
-              <div class="fs-qmeta">
-                <div class="fs-qname">{{ item.food.name }}</div>
-                <div class="fs-qdesc">
-                  Viewed {{ item.viewed_at.strftime('%d %b %Y, %I:%M %p') if item.viewed_at else 'Recently' }}
+        <div class="fs-qlist">
+          {% for item in recent_views %}
+            {% if item.food %}
+            <div class="fs-qitem">
+              <div class="fs-qitem-left">
+                <div class="fs-qthumb">
+                  {% if item.food.image %}
+                    <img src="{{ url_for('static', filename='uploads/' ~ item.food.image) }}" alt="{{ item.food.name }}">
+                  {% else %}
+                    <i class="fas fa-utensils"></i>
+                  {% endif %}
+                </div>
+                <div class="fs-qmeta">
+                  <div class="fs-qname">{{ item.food.name }}</div>
+                  <div class="fs-qdesc">
+                    Viewed {{ item.viewed_at.strftime('%d %b %Y, %I:%M %p') if item.viewed_at else 'Recently' }}
+                  </div>
                 </div>
               </div>
+              <a href="{{ url_for('food_search.food_detail', food_id=item.food.id) }}" class="fs-qgo">
+                <i class="fas fa-arrow-right"></i>
+              </a>
             </div>
-            <a href="{{ url_for('food_search.food_detail', food_id=item.food.id) }}" class="fs-qgo">
-              <i class="fas fa-arrow-right"></i>
-            </a>
-          </div>
-          {% endif %}
-        {% endfor %}
-      </div>
+            {% endif %}
+          {% endfor %}
+        </div>
       {% else %}
-      <div class="fs-qempty">
-        <i class="fas fa-clock-rotate-left"></i>
-        <h4>No recent views yet</h4>
-        <p>Foods you open from the catalog will show up here automatically.</p>
-      </div>
+        <div class="fs-qempty">
+          <i class="fas fa-clock-rotate-left"></i>
+          <h4>No recent views yet</h4>
+          <p>Foods you open from the catalog will show up here automatically.</p>
+        </div>
       {% endif %}
     </div>
   </div>
@@ -1003,7 +1197,12 @@
 
 {% block extra_js %}
 <script>
+/* ════════════════════════════════════════════════════════════════════════════
+   SEARCH, FILTER & SORT
+════════════════════════════════════════════════════════════════════════════ */
 (function () {
+  'use strict';
+
   const $ = id => document.getElementById(id);
 
   const form           = $('filterForm');
@@ -1019,47 +1218,22 @@
   let activeController = null;
   let activeRequestId  = 0;
 
-  const DEFAULTS = {
-    q: '',
-    diet_type: '',
-    max_cal: 2000,
-    min_protein: 0,
-    max_price: 1000,
-    sort: 'name'
-  };
+  const DEFAULTS = { q: '', diet_type: '', max_cal: 2000, min_protein: 0, max_price: 1000, sort: 'name' };
 
   const RC = {
-    cal: {
-      r: 'calRange', v: 'calVal', i: 'calInput',
-      def: DEFAULTS.max_cal,
-      fmt: x => x >= 2000 ? 'Any' : `${x} kcal`,
-      none: x => x >= 2000
-    },
-    prot: {
-      r: 'protRange', v: 'protVal', i: 'protInput',
-      def: DEFAULTS.min_protein,
-      fmt: x => x <= 0 ? 'Any' : `${x}g`,
-      none: x => x <= 0
-    },
-    price: {
-      r: 'priceRange', v: 'priceVal', i: 'priceInput',
-      def: DEFAULTS.max_price,
-      fmt: x => x >= 1000 ? 'Any' : `$${x}`,
-      none: x => x >= 1000
-    }
+    cal:   { r:'calRange',   v:'calVal',   i:'calInput',   def:DEFAULTS.max_cal,     fmt:x=>x>=2000?'Any':`${x} kcal`, none:x=>x>=2000 },
+    prot:  { r:'protRange',  v:'protVal',  i:'protInput',  def:DEFAULTS.min_protein, fmt:x=>x<=0?'Any':`${x}g`,        none:x=>x<=0   },
+    price: { r:'priceRange', v:'priceVal', i:'priceInput', def:DEFAULTS.max_price,   fmt:x=>x>=1000?'Any':`$${x}`,     none:x=>x>=1000 },
   };
 
   const CL = {
-    diet_type:   v => `🥗 ${v.replace('-', ' ').replace(/\b\w/g, c => c.toUpperCase())}`,
+    diet_type:   v => `🥗 ${v.replace('-',' ').replace(/\b\w/g,c=>c.toUpperCase())}`,
     max_cal:     v => `🔥 ≤ ${v} kcal`,
     min_protein: v => `💪 ≥ ${v}g protein`,
-    max_price:   v => `🏷 ≤ $${v}`
+    max_price:   v => `🏷 ≤ $${v}`,
   };
 
-  function deb(fn, ms = 380) {
-    clearTimeout(timer);
-    timer = setTimeout(fn, ms);
-  }
+  function deb(fn, ms = 380) { clearTimeout(timer); timer = setTimeout(fn, ms); }
 
   function setDietUI(value) {
     diet = (value || '').trim();
@@ -1080,14 +1254,11 @@
   }
 
   function setSearchState(value) {
-    const text = value || '';
-    $('hiddenQ').value     = text;
-    $('searchInput').value = text;
+    $('hiddenQ').value     = value || '';
+    $('searchInput').value = value || '';
   }
 
-  function setSortState(value) {
-    sortSel.value = value || DEFAULTS.sort;
-  }
+  function setSortState(value) { sortSel.value = value || DEFAULTS.sort; }
 
   function syncFromUrl() {
     const sp = new URLSearchParams(window.location.search);
@@ -1103,10 +1274,7 @@
     const fd = new FormData(form);
     fd.set('sort', sortSel.value);
     const p = new URLSearchParams();
-    for (const [k, v] of fd.entries()) {
-      const value = String(v).trim();
-      if (value) p.append(k, value);
-    }
+    for (const [k, v] of fd.entries()) { if (String(v).trim()) p.append(k, String(v).trim()); }
     return p;
   }
 
@@ -1127,15 +1295,12 @@
     else if (key === 'max_cal')     setRangeState('cal',   RC.cal.def);
     else if (key === 'min_protein') setRangeState('prot',  RC.prot.def);
     else if (key === 'max_price')   setRangeState('price', RC.price.def);
-    else {
-      const el = form.querySelector(`[name="${key}"]`);
-      if (el) el.value = '';
-    }
+    else { const el = form.querySelector(`[name="${key}"]`); if (el) el.value = ''; }
     go();
   }
 
   function skeleton() {
-    gridWrap.innerHTML = `<div class="fs-skel-g">${Array.from({length: 6}).map(() => `
+    gridWrap.innerHTML = `<div class="fs-skel-g">${Array.from({length:6}).map(()=>`
       <div class="fs-sk">
         <div class="sk-img"></div>
         <div class="sk-body">
@@ -1165,15 +1330,15 @@
 
     fetch(url, {
       headers: { 'X-Requested-With': 'XMLHttpRequest' },
-      signal: activeController.signal
+      signal: activeController.signal,
     })
     .then(r => r.json())
     .then(d => {
       if (requestId !== activeRequestId) return;
 
-      gridWrap.innerHTML = `<div id="foodGrid">${d.html}</div>`;
-      counter.textContent   = d.total;
-      heroCount.textContent = d.total;
+      gridWrap.innerHTML        = `<div id="foodGrid">${d.html}</div>`;
+      counter.textContent       = d.total;
+      heroCount.textContent     = d.total;
 
       document.querySelectorAll('.food-card').forEach((c, i) => {
         c.style.animationDelay = `${i * 0.05}s`;
@@ -1201,8 +1366,7 @@
   window.go = () => deb(fetch_, 0);
 
   window.toggleDiet = el => {
-    const v = el.dataset.val;
-    setDietUI(diet === v ? '' : v);
+    setDietUI(diet === el.dataset.val ? '' : el.dataset.val);
     go();
   };
 
@@ -1240,123 +1404,174 @@
     }
   });
 
-  window.addEventListener('popstate', () => {
-    syncFromUrl();
-    fetch_(false);
-  });
+  window.addEventListener('popstate', () => { syncFromUrl(); fetch_(false); });
 
   syncFromUrl();
   renderChips();
 
-  /* ── Card click → navigate to detail page ──────────────────────────────── */
-  document.addEventListener('click', function (event) {
-    if (event.target.closest('a, button, form')) return;
-    const card = event.target.closest('.food-card');
-    if (!card) return;
-    const url = card.dataset.detailUrl;
-    if (url) window.location.href = url;
+  document.addEventListener('click', e => {
+    if (e.target.closest('a, button, form')) return;
+    const card = e.target.closest('.food-card');
+    if (card && card.dataset.detailUrl) window.location.href = card.dataset.detailUrl;
   });
 
 })();
 
 /* ════════════════════════════════════════════════════════════════════════════
-   AI Food Advice — "Eat This?" button logic
-   ════════════════════════════════════════════════════════════════════════════ */
+   AI FOOD ADVICE — Redesigned
+════════════════════════════════════════════════════════════════════════════ */
 (function () {
-  "use strict";
+  'use strict';
 
-  /* ── Verdict → display config ─────────────────────────────────────────── */
+  /* ── Verdict config ── */
   const VERDICT_CFG = {
-    Good:  { label: "✅ Good for You",      panelCls: "adv-panel-good",  badgeCls: "adv-good"  },
-    Limit: { label: "⚠️ Eat in Moderation", panelCls: "adv-panel-limit", badgeCls: "adv-limit" },
-    Avoid: { label: "🚫 Best to Avoid",     panelCls: "adv-panel-avoid", badgeCls: "adv-avoid" },
+    Good:  { label: '✅ Good for You',       panelCls: 'adv-panel-good',  icon: '✅', score: 85 },
+    Limit: { label: '⚠️ Eat in Moderation',  panelCls: 'adv-panel-limit', icon: '⚠️', score: 52 },
+    Avoid: { label: '🚫 Best to Avoid',      panelCls: 'adv-panel-avoid', icon: '🚫', score: 20 },
   };
 
-  /* ── Tiny helpers ─────────────────────────────────────────────────────── */
-  function show(el, displayMode = "flex") { el.style.display = displayMode; }
-  function hide(el)                       { el.style.display = "none"; }
+  /* Daily reference values for progress bars */
+  const DAILY = { cal: 2000, prot: 200, carb: 250, fat: 65 };
 
-  /* ── Main entry-point called by each card button ──────────────────────── */
+  function show(el, mode = 'flex') { if (el) el.style.display = mode; }
+  function hide(el)                { if (el) el.style.display = 'none'; }
+
+  function animateScoreRing(panel, score) {
+    const fill = panel.querySelector('.adv-score-fill');
+    const num  = panel.querySelector('.adv-score-num');
+    if (!fill || !num) return;
+
+    const circumference = 113; // 2π × r18
+    const offset = circumference - (score / 100) * circumference;
+
+    /* Trigger animation */
+    requestAnimationFrame(() => {
+      fill.style.transition = 'none';
+      fill.style.strokeDashoffset = circumference;
+      requestAnimationFrame(() => {
+        fill.style.transition = 'stroke-dashoffset .85s cubic-bezier(.16,1,.3,1), stroke .3s';
+        fill.style.strokeDashoffset = offset;
+      });
+    });
+
+    /* Count-up number */
+    let current = 0;
+    const step  = score / 40;
+    const timer = setInterval(() => {
+      current = Math.min(current + step, score);
+      num.textContent = Math.round(current);
+      if (current >= score) clearInterval(timer);
+    }, 20);
+  }
+
+  function animateMacroBars(panel, card) {
+    const vals = {
+      cal:  parseInt(card.dataset.cal  || 0),
+      prot: parseInt(card.dataset.prot || 0),
+      carb: parseInt(card.dataset.carb || 0),
+      fat:  parseInt(card.dataset.fat  || 0),
+    };
+
+    ['cal','prot','carb','fat'].forEach(macro => {
+      const bar = panel.querySelector(`.adv-macro-bar--${macro}`);
+      if (!bar) return;
+      const pct = Math.min(100, Math.round((vals[macro] / DAILY[macro]) * 100));
+      /* Small delay so the panel is visible first */
+      setTimeout(() => { bar.style.width = pct + '%'; }, 80);
+    });
+  }
+
   window.triggerFoodAdvice = async function (btn, foodId) {
-
     const panel = document.getElementById(`advice-panel-${foodId}`);
     if (!panel) return;
 
-    const loadingEl    = panel.querySelector(".adv-loading");
-    const resultEl     = panel.querySelector(".adv-result");
-    const errorEl      = panel.querySelector(".adv-error");
-    const verdictBadge = panel.querySelector(".adv-verdict-badge");
-    const analysisEl   = panel.querySelector(".adv-analysis");
-    const suggWrap     = panel.querySelector(".adv-suggestion-wrap");
-    const suggEl       = panel.querySelector(".adv-suggestion");
+    const card         = panel.closest('.food-card');
+    const loadingEl    = panel.querySelector('.adv-loading');
+    const resultEl     = panel.querySelector('.adv-result');
+    const errorEl      = panel.querySelector('.adv-error');
+    const verdictBadge = panel.querySelector('.adv-verdict-badge');
+    const iconWrap     = panel.querySelector('.adv-ribbon__icon-wrap');
+    const analysisEl   = panel.querySelector('.adv-analysis');
+    const suggWrap     = panel.querySelector('.adv-suggestion-wrap');
+    const suggEl       = panel.querySelector('.adv-suggestion');
 
-    /* ── Toggle: if already open and not loading, close it ─────────────── */
-    const isOpen    = panel.style.display !== "none";
-    const isLoading = loadingEl.style.display === "flex";
+    /* Toggle: close if open & idle */
+    const isOpen    = panel.style.display !== 'none';
+    const isLoading = loadingEl && loadingEl.style.display === 'flex';
     if (isOpen && !isLoading) {
-      hide(panel);
+      panel.style.display = 'none';
       btn.innerHTML = '<i class="fas fa-brain"></i> Eat This?';
       return;
     }
 
-    /* ── Show panel and reset all states ───────────────────────────────── */
-    show(panel, "block");
-    show(loadingEl, "flex");
+    /* Open & reset */
+    panel.style.display = 'block';
+    show(loadingEl, 'flex');
     hide(resultEl);
     hide(errorEl);
+    panel.classList.remove('adv-panel-good', 'adv-panel-limit', 'adv-panel-avoid');
 
-    panel.classList.remove("adv-panel-good", "adv-panel-limit", "adv-panel-avoid");
-
-    btn.disabled = true;
-    btn.innerHTML = '<i class="fas fa-circle-notch fa-spin"></i> Thinking…';
+    btn.disabled  = true;
+    btn.innerHTML = '<i class="fas fa-circle-notch fa-spin"></i> Analysing…';
 
     try {
       const resp = await fetch(`/food-advice/${foodId}`, {
-        method: "GET",
-        headers: { "Accept": "application/json" },
-        credentials: "same-origin",
+        method: 'GET',
+        headers: { Accept: 'application/json' },
+        credentials: 'same-origin',
       });
 
       const data = await resp.json();
-
       hide(loadingEl);
 
       if (!resp.ok || !data.success) {
-        errorEl.textContent = data.error || "Couldn't fetch advice right now. Please try again.";
-        show(errorEl, "block");
+        const errMsg = panel.querySelector('.adv-error__msg');
+        if (errMsg) errMsg.textContent = data.error || 'Couldn\'t fetch advice right now.';
+        show(errorEl, 'flex');
         return;
       }
 
-      /* ── Verdict styling ──────────────────────────────────────────────── */
-      const cfg = VERDICT_CFG[data.verdict] || VERDICT_CFG["Limit"];
-
+      /* Apply verdict */
+      const cfg = VERDICT_CFG[data.verdict] || VERDICT_CFG['Limit'];
       panel.classList.add(cfg.panelCls);
-      verdictBadge.textContent = cfg.label;
-      verdictBadge.className   = `adv-verdict-badge ${cfg.badgeCls}`;
 
-      /* ── Analysis ────────────────────────────────────────────────────── */
-      analysisEl.textContent = data.analysis;
+      if (verdictBadge) verdictBadge.textContent = cfg.label;
+      if (iconWrap)     iconWrap.textContent      = cfg.icon;
 
-      /* ── Suggestion — hide when AI returns "None" ────────────────────── */
-      const sugg = (data.suggestion || "").trim();
-      if (!sugg || sugg.toLowerCase() === "none") {
-        hide(suggWrap);
-      } else {
-        suggEl.textContent = sugg;
-        show(suggWrap, "block");
+      /* Analysis */
+      if (analysisEl) analysisEl.textContent = data.analysis || '';
+
+      /* Suggestion */
+      const sugg = (data.suggestion || '').trim();
+      if (suggWrap) {
+        if (!sugg || sugg.toLowerCase() === 'none') {
+          hide(suggWrap);
+        } else {
+          if (suggEl) suggEl.textContent = sugg;
+          show(suggWrap, 'block');
+        }
       }
 
-      show(resultEl, "flex");
+      /* Show result */
+      if (resultEl) {
+        resultEl.style.display       = 'flex';
+        resultEl.style.flexDirection = 'column';
+      }
+
+      /* Animate score ring & macro bars */
+      animateScoreRing(panel, cfg.score);
+      if (card) animateMacroBars(panel, card);
 
     } catch (err) {
       hide(loadingEl);
-      if (err.name === "AbortError") return;
-      errorEl.textContent = "Network error — check your connection and try again.";
-      show(errorEl, "block");
-      console.error("[FoodAdvice]", err);
+      if (err.name === 'AbortError') return;
+      const errMsg = panel.querySelector('.adv-error__msg');
+      if (errMsg) errMsg.textContent = 'Network error — check your connection and try again.';
+      show(errorEl, 'flex');
+      console.error('[FoodAdvice]', err);
 
     } finally {
-      btn.disabled = false;
+      btn.disabled  = false;
       btn.innerHTML = '<i class="fas fa-brain"></i> Eat This?';
     }
   };
