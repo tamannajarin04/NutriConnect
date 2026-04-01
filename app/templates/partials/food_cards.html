@@ -12,220 +12,223 @@
       data-id="{{ food.id }}"
       data-name="{{ food.name }}"
       data-desc="{{ food.description or '' }}"
-      data-img="{{ food.image or '' }}"
       data-price="{{ '%.2f'|format(food.price) if food.price else '' }}"
       data-diet="{{ food.diet_type.replace('-', ' ').title() if food.diet_type else '' }}"
-      data-cal="{{ food.calories|int if food.calories else '' }}"
-      data-prot="{{ food.protein|int if food.protein else '' }}"
-      data-carb="{{ food.carbs|int if food.carbs else '' }}"
-      data-fat="{{ food.fat|int if food.fat else '' }}"
+      data-cal="{{ food.calories|int if food.calories else 0 }}"
+      data-prot="{{ food.protein|int if food.protein else 0 }}"
+      data-carb="{{ food.carbs|int if food.carbs else 0 }}"
+      data-fat="{{ food.fat|int if food.fat else 0 }}"
       data-provider="{{ provider_name }}"
       data-provider-initial="{{ provider_initial }}"
       data-rating="{{ '%.1f'|format(avg_rating) }}"
       data-review-count="{{ review_count }}"
       data-detail-url="{{ detail_url }}"
+      data-img-url="{% if food.image %}{{ url_for('static', filename='uploads/' ~ food.image) }}{% endif %}"
     >
+      <!-- ── Image ── -->
       <div class="fc-img">
         {% if food.image %}
           <img src="{{ url_for('static', filename='uploads/' ~ food.image) }}" alt="{{ food.name }}">
         {% else %}
           <div class="fc-img-placeholder">
-            <i class="fas fa-utensils"></i>
-            <span>No Image</span>
+            <i class="fas fa-utensils"></i><span>No Image</span>
           </div>
         {% endif %}
-
-        {% if food.price %}
-          <div class="fc-price">${{ "%.2f"|format(food.price) }}</div>
-        {% endif %}
-
+        {% if food.price %}<div class="fc-price">${{ "%.2f"|format(food.price) }}</div>{% endif %}
         <div class="fc-avail {{ 'on' if food.is_available else 'off' }}">
           {{ 'Available' if food.is_available else 'Out of Stock' }}
         </div>
-
-        {% if food.diet_type %}
-          <div class="fc-cat">{{ food.diet_type.replace('-', ' ').title() }}</div>
-        {% endif %}
+        {% if food.diet_type %}<div class="fc-cat">{{ food.diet_type.replace('-', ' ').title() }}</div>{% endif %}
       </div>
 
+      <!-- ── Body ── -->
       <div class="fc-body">
         <div class="fc-name">{{ food.name }}</div>
-
-        <div class="fc-desc">
-          {{ food.description[:120] if food.description else 'No description available.' }}
-        </div>
+        <div class="fc-desc">{{ food.description[:120] if food.description else 'No description available.' }}</div>
 
         <div style="display:flex;align-items:center;gap:.4rem;flex-wrap:wrap;">
           {% if food.diet_type %}
-            <div class="fc-diet">
-              <i class="fas fa-leaf"></i>
-              {{ food.diet_type.replace('-', ' ').title() }}
-            </div>
+            <div class="fc-diet"><i class="fas fa-leaf"></i> {{ food.diet_type.replace('-', ' ').title() }}</div>
           {% endif %}
-
           {% if is_provider_own_food %}
-            <div style="display:inline-flex;align-items:center;gap:.26rem;width:fit-content;background:var(--nc-brand-l);color:var(--nc-brand-d);border:1.5px solid rgba(14,165,233,.2);border-radius:99px;padding:.15rem .65rem;font-size:.65rem;font-weight:800;">
-              <i class="fas fa-store"></i>
-              Your Item
+            <div style="display:inline-flex;align-items:center;gap:.26rem;background:var(--nc-brand-l);color:var(--nc-brand-d);border:1.5px solid rgba(14,165,233,.2);border-radius:99px;padding:.15rem .65rem;font-size:.65rem;font-weight:800;">
+              <i class="fas fa-store"></i> Your Item
             </div>
           {% endif %}
         </div>
 
-        <div
-          class="fc-rating"
-          style="display:flex;align-items:center;justify-content:space-between;gap:.65rem;padding:.15rem 0 .35rem;border-bottom:1px solid var(--nc-border);margin-top:.45rem;"
-        >
-          <div style="display:flex;align-items:center;gap:.45rem;flex-wrap:wrap;">
+        <!-- Rating -->
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:.65rem;padding:.15rem 0 .35rem;border-bottom:1px solid var(--nc-border);margin-top:.45rem;">
+          <div style="display:flex;align-items:center;gap:.45rem;">
             <div style="display:flex;align-items:center;gap:.08rem;color:#fbbf24;font-size:.76rem;">
               {% for i in range(5) %}
-                {% if avg_rating >= i + 1 %}
-                  <i class="fas fa-star"></i>
-                {% elif avg_rating >= i + 0.5 %}
-                  <i class="fas fa-star-half-stroke"></i>
-                {% else %}
-                  <i class="far fa-star" style="color:var(--nc-text-faint);"></i>
+                {% if avg_rating >= i + 1 %}<i class="fas fa-star"></i>
+                {% elif avg_rating >= i + 0.5 %}<i class="fas fa-star-half-stroke"></i>
+                {% else %}<i class="far fa-star" style="color:var(--nc-text-faint);"></i>
                 {% endif %}
               {% endfor %}
             </div>
-            <span style="font-family:'JetBrains Mono',monospace;font-size:.74rem;font-weight:800;color:var(--nc-text);">
-              {{ "%.1f"|format(avg_rating) }}
-            </span>
+            <span style="font-family:'JetBrains Mono',monospace;font-size:.74rem;font-weight:800;color:var(--nc-text);">{{ "%.1f"|format(avg_rating) }}</span>
           </div>
-          <div style="font-size:.68rem;font-weight:700;color:var(--nc-text-muted);white-space:nowrap;">
-            {{ review_count }} review{% if review_count != 1 %}s{% endif %}
-          </div>
+          <div style="font-size:.68rem;font-weight:700;color:var(--nc-text-muted);">{{ review_count }} review{% if review_count != 1 %}s{% endif %}</div>
         </div>
 
+        <!-- Nutrition badges -->
         <div class="fc-nutr">
-          <div class="nb kcal">
-            <b>{{ food.calories|int if food.calories else '—' }}</b>
-            <span>kcal</span>
-          </div>
-          <div class="nb prot">
-            <b>{{ food.protein|int if food.protein else '—' }}{% if food.protein %}g{% endif %}</b>
-            <span>prot</span>
-          </div>
-          <div class="nb carb">
-            <b>{{ food.carbs|int if food.carbs else '—' }}{% if food.carbs %}g{% endif %}</b>
-            <span>carb</span>
-          </div>
-          <div class="nb fat">
-            <b>{{ food.fat|int if food.fat else '—' }}{% if food.fat %}g{% endif %}</b>
-            <span>fat</span>
-          </div>
+          <div class="nb kcal"><b>{{ food.calories|int if food.calories else '—' }}</b><span>kcal</span></div>
+          <div class="nb prot"><b>{{ food.protein|int if food.protein else '—' }}{% if food.protein %}g{% endif %}</b><span>prot</span></div>
+          <div class="nb carb"><b>{{ food.carbs|int if food.carbs else '—' }}{% if food.carbs %}g{% endif %}</b><span>carb</span></div>
+          <div class="nb fat"><b>{{ food.fat|int if food.fat else '—' }}{% if food.fat %}g{% endif %}</b><span>fat</span></div>
         </div>
 
+        <!-- Provider -->
         <div class="fc-prov">
           <div class="fc-pav">{{ provider_initial }}</div>
           <span>{{ provider_name }}</span>
         </div>
       </div>
 
-      {# ── Footer buttons — only for regular users ──────────────────────── #}
+      <!-- ── Footer buttons (customers only) ── -->
       {% if current_user.is_authenticated and not current_user.is_food_provider() and not current_user.is_admin() %}
+      <div class="food-footer">
+        <a href="{{ detail_url }}" onclick="event.stopPropagation();" class="ff-btn ff-btn--ghost">
+          <i class="fas fa-star"></i> Review
+        </a>
 
-        <div
-          class="food-footer"
-          style="display:flex;align-items:center;justify-content:space-between;padding:.85rem 1rem .75rem;border-top:1px solid var(--nc-border);background:var(--nc-surface-2);gap:.4rem;"
+        {# FIX: was calling window.openAdviceModal which is not defined.
+           search.html defines window.triggerFoodAdvice(btn, foodId) — call that instead. #}
+        <button
+          type="button"
+          class="ff-btn ff-btn--ai ai-advice-btn"
+          onclick="event.stopPropagation(); window.triggerFoodAdvice(this, {{ food.id }});"
+          data-food-id="{{ food.id }}"
+          data-food-name="{{ food.name }}"
+          data-food-price="{{ '%.2f'|format(food.price) if food.price else '' }}"
+          data-food-cal="{{ food.calories|int if food.calories else 0 }}"
+          data-food-prot="{{ food.protein|int if food.protein else 0 }}"
+          data-food-carb="{{ food.carbs|int if food.carbs else 0 }}"
+          data-food-fat="{{ food.fat|int if food.fat else 0 }}"
+          data-food-diet="{{ food.diet_type.replace('-', ' ').title() if food.diet_type else '' }}"
+          data-food-img="{% if food.image %}{{ url_for('static', filename='uploads/' ~ food.image) }}{% endif %}"
         >
-          {# ── Review ───────────────────────────────────────────────────── #}
-          <a
-            href="{{ detail_url }}"
-            onclick="event.stopPropagation();"
-            style="flex:1;display:inline-flex;align-items:center;justify-content:center;gap:.32rem;background:transparent;color:var(--nc-text);border:1px solid var(--nc-border-2);border-radius:10px;padding:.46rem .55rem;font-size:.72rem;font-weight:800;text-decoration:none;"
-          >
-            <i class="fas fa-star"></i> Review
-          </a>
+          <i class="fas fa-brain"></i> Eat This?
+        </button>
 
-          {# ── Should I Eat This? ───────────────────────────────────────── #}
-          <button
-            type="button"
-            class="ai-advice-btn"
-            data-food-id="{{ food.id }}"
-            onclick="event.stopPropagation(); window.triggerFoodAdvice(this, {{ food.id }});"
-            style="flex:1;display:inline-flex;align-items:center;justify-content:center;gap:.32rem;background:rgba(13,148,136,.12);color:#0d9488;border:1px solid rgba(13,148,136,.28);border-radius:10px;padding:.46rem .55rem;font-size:.72rem;font-weight:800;cursor:pointer;transition:all .15s;white-space:nowrap;"
-          >
-            <i class="fas fa-brain"></i> Eat This?
-          </button>
-
-          {# ── Add to Cart / Out of Stock ───────────────────────────────── #}
-          {% if food.is_available %}
-            <form
-              method="post"
-              action="{{ url_for('orders.add_to_cart', food_id=food.id) }}"
-              style="margin:0;flex:1;"
-              onclick="event.stopPropagation();"
-            >
-              <input type="hidden" name="quantity" value="1">
-              <button
-                type="submit"
-                onclick="event.stopPropagation();"
-                style="width:100%;display:inline-flex;align-items:center;justify-content:center;gap:.32rem;background:linear-gradient(135deg,var(--nc-brand-d),var(--nc-brand));color:#fff;border:none;border-radius:10px;padding:.46rem .55rem;font-size:.72rem;font-weight:800;cursor:pointer;"
-              >
-                <i class="fas fa-cart-plus"></i> Add
-              </button>
-            </form>
-          {% else %}
-            <button
-              type="button"
-              disabled
-              onclick="event.stopPropagation();"
-              style="flex:1;display:inline-flex;align-items:center;justify-content:center;gap:.32rem;background:#9ca3af;color:#fff;border:none;border-radius:10px;padding:.46rem .55rem;font-size:.72rem;font-weight:800;cursor:not-allowed;opacity:.8;"
-            >
-              <i class="fas fa-ban"></i> Out
+        {% if food.is_available %}
+          <form method="post" action="{{ url_for('orders.add_to_cart', food_id=food.id) }}" style="flex:1;margin:0;" onclick="event.stopPropagation();">
+            <input type="hidden" name="quantity" value="1">
+            <button type="submit" onclick="event.stopPropagation();" class="ff-btn ff-btn--primary" style="width:100%;">
+              <i class="fas fa-cart-plus"></i> Add
             </button>
-          {% endif %}
+          </form>
+        {% else %}
+          <button type="button" disabled class="ff-btn ff-btn--disabled"><i class="fas fa-ban"></i> Out</button>
+        {% endif %}
+      </div>
+
+      <!-- ── AI Advice Panel ── -->
+      {# FIX: this panel was referenced by id in triggerFoodAdvice() but never rendered.
+         It must live inside the card so triggerFoodAdvice can find it via
+         document.getElementById('advice-panel-{id}'). #}
+      <div
+        id="advice-panel-{{ food.id }}"
+        class="adv-panel"
+        style="display:none;"
+      >
+        <!-- Loading state -->
+        <div class="adv-loading">
+          <div class="adv-loading__orbit">
+            <div class="adv-loading__ring"></div>
+            <div class="adv-loading__ring adv-loading__ring--2"></div>
+            <div class="adv-loading__core"><i class="fas fa-brain"></i></div>
+          </div>
+          <div class="adv-loading__text-wrap">
+            <div class="adv-loading__title">Analysing nutrition…</div>
+            <div class="adv-loading__sub">Checking against your goals</div>
+          </div>
         </div>
 
-        {# ── AI Advice Panel (hidden until button clicked) ─────────────── #}
-        <div
-          id="advice-panel-{{ food.id }}"
-          onclick="event.stopPropagation();"
-          style="display:none;border-top:1px solid var(--nc-border);background:var(--nc-card-bg);padding:.8rem 1rem .9rem;"
-        >
-          {# Loading state #}
-          <div class="adv-loading" style="display:none;align-items:center;gap:.55rem;color:var(--nc-text-muted);font-size:.78rem;font-weight:600;">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
-              style="animation:adv-spin .75s linear infinite;flex-shrink:0;">
-              <path d="M21 12a9 9 0 1 1-6.219-8.56"/>
-            </svg>
-            Analysing with AI…
-          </div>
-
-          {# Result state #}
-          <div class="adv-result" style="display:none;flex-direction:column;gap:.52rem;">
-
-            {# Verdict bar #}
-            <div class="adv-verdict-bar" style="display:flex;align-items:center;justify-content:space-between;gap:.5rem;">
-              <span style="font-size:.62rem;font-weight:900;text-transform:uppercase;letter-spacing:.09em;color:var(--nc-text-faint);">
-                <i class="fas fa-brain" style="margin-right:.25rem;"></i>AI Verdict
-              </span>
-              <span class="adv-verdict-badge" style="font-size:.68rem;font-weight:900;border-radius:99px;padding:.2rem .75rem;border:1.5px solid transparent;"></span>
-            </div>
-
-            {# Analysis #}
-            <div style="background:var(--nc-surface-2);border:1px solid var(--nc-border);border-radius:10px;padding:.62rem .78rem;">
-              <div style="font-size:.6rem;font-weight:900;text-transform:uppercase;letter-spacing:.09em;color:var(--nc-text-faint);margin-bottom:.3rem;">Analysis</div>
-              <div class="adv-analysis" style="font-size:.76rem;font-weight:500;color:var(--nc-text-2);line-height:1.6;"></div>
-            </div>
-
-            {# Suggestion #}
-            <div class="adv-suggestion-wrap" style="background:var(--nc-surface-2);border:1px solid var(--nc-border);border-radius:10px;padding:.62rem .78rem;">
-              <div style="font-size:.6rem;font-weight:900;text-transform:uppercase;letter-spacing:.09em;color:var(--nc-text-faint);margin-bottom:.3rem;">Suggestion</div>
-              <div class="adv-suggestion" style="font-size:.76rem;font-weight:500;color:var(--nc-text-2);line-height:1.6;"></div>
-            </div>
-
-          </div>
-
-          {# Error state #}
-          <div class="adv-error" style="display:none;font-size:.76rem;font-weight:600;color:#ef4444;background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.2);border-radius:10px;padding:.55rem .75rem;"></div>
-
+        <!-- Error state -->
+        <div class="adv-error">
+          <i class="fas fa-triangle-exclamation"></i>
+          <span class="adv-error__msg">Couldn't fetch advice right now.</span>
         </div>
 
-      {% endif %}{# end user-only block #}
+        <!-- Result state -->
+        <div class="adv-result">
+
+          <!-- Verdict ribbon -->
+          <div class="adv-ribbon">
+            <div class="adv-ribbon__left">
+              <div class="adv-ribbon__icon-wrap"></div>
+              <div>
+                <div class="adv-ribbon__eyebrow">AI Nutrition Verdict</div>
+                <div class="adv-verdict-badge"></div>
+              </div>
+            </div>
+            <div class="adv-ribbon__score-wrap">
+              <div class="adv-score-ring">
+                <svg class="adv-score-svg" viewBox="0 0 44 44">
+                  <circle class="adv-score-track" cx="22" cy="22" r="18"/>
+                  <circle class="adv-score-fill"  cx="22" cy="22" r="18"/>
+                </svg>
+                <div class="adv-score-num">0</div>
+              </div>
+              <div class="adv-ribbon__score-label">Health<br>Score</div>
+            </div>
+          </div>
+
+          <!-- Macro progress bars -->
+          <div class="adv-macros">
+            <div class="adv-macros__title"><i class="fas fa-chart-bar"></i> % of Daily Value</div>
+            <div class="adv-macro-list">
+              <div class="adv-macro-row">
+                <div class="adv-macro-label"><i class="fas fa-fire" style="color:#f97316;"></i> Calories</div>
+                <div class="adv-macro-bar-wrap"><div class="adv-macro-bar adv-macro-bar--cal"></div></div>
+                <div class="adv-macro-val adv-macro-val--cal">{{ food.calories|int if food.calories else 0 }} kcal</div>
+              </div>
+              <div class="adv-macro-row">
+                <div class="adv-macro-label"><i class="fas fa-drumstick-bite" style="color:#06b6d4;"></i> Protein</div>
+                <div class="adv-macro-bar-wrap"><div class="adv-macro-bar adv-macro-bar--prot"></div></div>
+                <div class="adv-macro-val adv-macro-val--prot">{{ food.protein|int if food.protein else 0 }}g</div>
+              </div>
+              <div class="adv-macro-row">
+                <div class="adv-macro-label"><i class="fas fa-bread-slice" style="color:#a78bfa;"></i> Carbs</div>
+                <div class="adv-macro-bar-wrap"><div class="adv-macro-bar adv-macro-bar--carb"></div></div>
+                <div class="adv-macro-val adv-macro-val--carb">{{ food.carbs|int if food.carbs else 0 }}g</div>
+              </div>
+              <div class="adv-macro-row">
+                <div class="adv-macro-label"><i class="fas fa-droplet" style="color:#ec4899;"></i> Fat</div>
+                <div class="adv-macro-bar-wrap"><div class="adv-macro-bar adv-macro-bar--fat"></div></div>
+                <div class="adv-macro-val adv-macro-val--fat">{{ food.fat|int if food.fat else 0 }}g</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Analysis & Suggestion -->
+          <div class="adv-body">
+            <div class="adv-section adv-section--analysis">
+              <div class="adv-section__label"><i class="fas fa-magnifying-glass"></i> Analysis</div>
+              <div class="adv-analysis"></div>
+            </div>
+            <div class="adv-section adv-section--suggest adv-suggestion-wrap">
+              <div class="adv-section__label"><i class="fas fa-lightbulb"></i> Suggestion</div>
+              <div class="adv-suggestion"></div>
+            </div>
+          </div>
+
+          <!-- Footer -->
+          <div class="adv-footer">
+            <i class="fas fa-sparkles"></i> Powered by NutriConnect AI
+          </div>
+        </div>{# end .adv-result #}
+      </div>{# end .adv-panel #}
+
+      {% endif %}{# end customer-only block #}
 
     </div>{# end .food-card #}
   {% endfor %}
+
 {% else %}
   <div class="fs-empty">
     <div class="fs-empty__icon"><i class="fas fa-bowl-food"></i></div>
@@ -233,3 +236,76 @@
     <p>Try changing your search or filters.</p>
   </div>
 {% endif %}
+
+
+{# ═══════════════════════════════════════════════════════════════════════
+   FOOD FOOTER & BUTTON STYLES
+   These classes are used above but were missing from search.html's CSS.
+   Injecting them once here (they are scoped so no conflicts).
+═══════════════════════════════════════════════════════════════════════ #}
+<style>
+.food-footer {
+  display: flex;
+  align-items: center;
+  gap: .38rem;
+  padding: .62rem .75rem .72rem;
+  border-top: 1px solid var(--nc-border);
+  background: var(--nc-surface-2);
+  flex-wrap: nowrap;
+}
+.ff-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: .3rem;
+  border-radius: 10px;
+  padding: .42rem .72rem;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: .72rem;
+  font-weight: 800;
+  border: 1.5px solid transparent;
+  cursor: pointer;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: background .14s, border-color .14s, color .14s, transform .14s;
+  flex-shrink: 0;
+  line-height: 1;
+}
+.ff-btn--ghost {
+  background: var(--nc-card-bg);
+  border-color: var(--nc-border);
+  color: var(--nc-text-muted);
+}
+.ff-btn--ghost:hover {
+  background: rgba(251,191,36,.08);
+  border-color: rgba(251,191,36,.35);
+  color: #fbbf24;
+}
+.ff-btn--ai {
+  background: rgba(13,148,136,.1);
+  border-color: rgba(13,148,136,.3);
+  color: #0d9488;
+}
+[data-theme="dark"] .ff-btn--ai {
+  background: rgba(13,148,136,.12);
+  border-color: rgba(13,148,136,.32);
+  color: #2dd4bf;
+}
+.ff-btn--primary {
+  background: var(--nc-brand);
+  border-color: var(--nc-brand);
+  color: #fff;
+}
+.ff-btn--primary:hover {
+  background: var(--nc-brand-d, #0284c7);
+  border-color: var(--nc-brand-d, #0284c7);
+  transform: translateY(-1px);
+}
+.ff-btn--disabled {
+  background: var(--nc-surface-2);
+  border-color: var(--nc-border);
+  color: var(--nc-text-faint);
+  cursor: not-allowed;
+  opacity: .55;
+}
+</style>

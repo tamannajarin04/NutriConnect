@@ -1,0 +1,1107 @@
+{% extends "base.html" %}
+{% block title %}AI Diet Suggestions · NutriConnect{% endblock %}
+
+{% block extra_css %}
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* ═══════════════════════════════════════════
+   DIET SUGGESTIONS — uses base.html tokens
+   --bg, --surface, --surface-2, --text, etc.
+═══════════════════════════════════════════ */
+
+:root {
+  --ds-mono: 'DM Mono', 'Courier New', monospace;
+  --ds-radius: 16px;
+  --ds-radius-sm: 10px;
+  --ds-green:   #10b981;
+  --ds-green-d: #059669;
+  --ds-blue:    #3b82f6;
+  --ds-blue-d:  #2563eb;
+  --ds-amber:   #f59e0b;
+  --ds-purple:  #8b5cf6;
+  --ds-cyan:    #06b6d4;
+  --ds-red:     #ef4444;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+
+.ds-wrap {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+}
+
+/* ══ HERO ════════════════════════════════ */
+.ds-hero {
+  position: relative; overflow: hidden; isolation: isolate;
+  border-radius: 22px;
+  padding: 2.2rem 2.4rem;
+  margin-bottom: 1.25rem;
+  background: linear-gradient(158deg, #040b18 0%, #061522 50%, #07201a 100%);
+  border: 1px solid rgba(16,185,129,.18);
+  box-shadow: 0 24px 64px rgba(0,0,0,.5), 0 1px 0 rgba(255,255,255,.05) inset;
+}
+
+.ds-hero::before {
+  content: '';
+  position: absolute; inset: 0;
+  background-image: radial-gradient(circle, rgba(255,255,255,.035) 1px, transparent 1px);
+  background-size: 24px 24px;
+  mask-image: radial-gradient(ellipse 100% 100% at 50% 50%, black 0%, transparent 70%);
+  pointer-events: none;
+}
+
+.ds-hero-bg-green {
+  position: absolute; inset: 0; pointer-events: none;
+  background: radial-gradient(ellipse 80% 160% at -10% 60%, rgba(16,185,129,.45) 0%, transparent 50%);
+}
+
+.ds-hero-bg-blue {
+  position: absolute; inset: 0; pointer-events: none;
+  background: radial-gradient(ellipse 55% 110% at 115% 0%, rgba(59,130,246,.38) 0%, transparent 50%);
+}
+
+.ds-hero-glow {
+  position: absolute; bottom: 0; left: 0; right: 0; height: 1px;
+  background: linear-gradient(90deg, transparent 5%, rgba(16,185,129,.7) 40%, rgba(96,165,250,.55) 70%, transparent 95%);
+}
+
+.ds-hero-inner {
+  position: relative; z-index: 1;
+  display: flex; align-items: center; justify-content: space-between; gap: 1.5rem; flex-wrap: wrap;
+}
+
+.ds-eyebrow {
+  display: inline-flex; align-items: center; gap: .38rem;
+  background: rgba(16,185,129,.12); border: 1px solid rgba(16,185,129,.28);
+  border-radius: 99px; padding: .22rem .9rem;
+  font-size: .6rem; font-weight: 700; letter-spacing: .11em; text-transform: uppercase;
+  color: rgba(255,255,255,.65); margin-bottom: .55rem;
+}
+
+.ds-pulse {
+  width: 5px; height: 5px; border-radius: 50%;
+  background: #10b981; box-shadow: 0 0 8px #10b981;
+  animation: ds-pulse-dot 2.2s ease-in-out infinite;
+  flex-shrink: 0;
+}
+
+.ds-hero-title {
+  font-size: 1.85rem; font-weight: 800; color: #fff;
+  letter-spacing: -.045em; line-height: 1.07; margin-bottom: .3rem;
+}
+
+.ds-hero-title .gr {
+  background: linear-gradient(130deg, #34d399 10%, #60a5fa 90%);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.ds-hero-sub { color: rgba(255,255,255,.38); font-size: .82rem; line-height: 1.65; }
+
+/* ══ GENERATE BUTTON ═════════════════════ */
+.ds-gen-btn {
+  display: inline-flex; align-items: center; gap: .5rem;
+  padding: .8rem 1.6rem; border-radius: 13px;
+  font-size: .85rem; font-weight: 700; font-family: inherit;
+  cursor: pointer; border: none; transition: all .18s cubic-bezier(.16,1,.3,1);
+  background: linear-gradient(135deg, #059669 0%, #10b981 100%); color: #fff;
+  box-shadow: 0 6px 24px rgba(5,150,105,.42), 0 1px 0 rgba(255,255,255,.15) inset;
+  flex-shrink: 0;
+}
+
+.ds-gen-btn:hover:not(:disabled) {
+  filter: brightness(1.12); transform: translateY(-2px);
+  box-shadow: 0 12px 32px rgba(5,150,105,.5);
+}
+
+.ds-gen-btn:active:not(:disabled) { transform: translateY(0); filter: brightness(.98); }
+.ds-gen-btn:disabled { opacity: .55; cursor: not-allowed; }
+
+/* ══ SAVED CHIP ══════════════════════════ */
+.ds-saved-chip {
+  display: none; align-items: center; gap: .35rem;
+  font-size: .68rem; font-weight: 700; padding: .25rem .75rem; border-radius: 99px;
+  background: rgba(16,185,129,.1); border: 1px solid rgba(16,185,129,.25);
+  color: var(--ds-green);
+}
+
+.ds-saved-chip.show { display: inline-flex; animation: ds-rise .3s ease both; }
+.ds-saved-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--ds-green); }
+
+/* ══ ALERT BANNERS ═══════════════════════ */
+.ds-banner {
+  display: flex; align-items: center; gap: .75rem;
+  border-radius: 14px; padding: .95rem 1.2rem; margin-bottom: 1.2rem;
+  font-size: .82rem; font-weight: 600;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  box-shadow: 0 4px 16px rgba(0,0,0,.08);
+}
+
+.ds-banner-warn {
+  border-left: 3px solid rgba(245,158,11,.7);
+  color: var(--amber);
+}
+
+[data-theme="light"] .ds-banner-warn { color: #92400e; }
+
+.ds-banner-warn i { color: var(--amber); flex-shrink: 0; }
+
+.ds-banner-err {
+  border-left: 3px solid rgba(239,68,68,.7);
+  color: var(--ds-red);
+}
+
+[data-theme="light"] .ds-banner-err { color: #991b1b; }
+.ds-banner-err i { color: var(--ds-red); flex-shrink: 0; }
+
+.ds-banner a { color: var(--brand); text-decoration: underline; text-underline-offset: 2px; }
+
+.ds-banner-close {
+  margin-left: auto; background: none; border: none; cursor: pointer;
+  padding: 0; line-height: 1; opacity: .5; transition: opacity .15s; color: inherit; font-size: .9rem;
+}
+
+.ds-banner-close:hover { opacity: 1; }
+
+/* ══ PROFILE SNAP ════════════════════════ */
+.ds-profile-snap {
+  display: grid; grid-template-columns: repeat(4, 1fr); gap: .9rem;
+  margin-bottom: 1.25rem;
+}
+
+.ds-snap-card {
+  background: var(--surface);
+  border: 1.5px solid var(--border);
+  border-radius: var(--ds-radius); padding: 1rem;
+  position: relative; overflow: hidden; text-align: center;
+  transition: transform .22s cubic-bezier(.16,1,.3,1), box-shadow .22s, border-color .22s;
+}
+
+.ds-snap-card:hover {
+  transform: translateY(-4px);
+  border-color: var(--border-2);
+  box-shadow: var(--card-shadow);
+}
+
+.ds-snap-stripe {
+  position: absolute; top: 0; left: 0; right: 0; height: 3px;
+  border-radius: var(--ds-radius) var(--ds-radius) 0 0;
+}
+
+.ds-snap-ico {
+  width: 36px; height: 36px; border-radius: 10px;
+  margin: 0 auto .55rem; display: flex; align-items: center; justify-content: center; font-size: 14px;
+}
+
+.ds-snap-lbl {
+  font-size: .6rem; font-weight: 700; color: var(--text-muted);
+  letter-spacing: .05em; text-transform: uppercase; margin-bottom: .2rem;
+}
+
+.ds-snap-val {
+  font-family: var(--ds-mono); font-size: 1.05rem; font-weight: 600; color: var(--text);
+}
+
+/* ══ LOADING ═════════════════════════════ */
+.ds-loading { text-align: center; padding: 3.5rem 1rem; display: none; }
+
+.ds-spinner {
+  width: 42px; height: 42px; border-radius: 50%; margin: 0 auto 1.1rem;
+  border: 3px solid var(--border); border-top-color: var(--ds-green);
+  animation: ds-spin .75s linear infinite;
+}
+
+.ds-loading-label {
+  font-size: .8rem; color: var(--text-muted); font-weight: 600; margin-bottom: .9rem;
+}
+
+.ds-steps { display: flex; flex-direction: column; gap: .38rem; max-width: 240px; margin: 0 auto; }
+
+.ds-step {
+  font-size: .74rem; color: var(--text-muted);
+  display: flex; align-items: center; gap: .45rem;
+  opacity: 0; transition: opacity .3s, color .3s;
+}
+
+.ds-step.active { opacity: 1; color: var(--ds-green); font-weight: 600; }
+.ds-step.done   { opacity: .45; }
+.ds-step i { width: 14px; font-size: .65rem; }
+
+/* ══ EMPTY STATE ═════════════════════════ */
+.ds-empty { text-align: center; padding: 4rem 1rem 3rem; }
+
+.ds-empty-icon {
+  width: 72px; height: 72px; border-radius: 20px; margin: 0 auto 1.3rem;
+  background: linear-gradient(135deg, rgba(16,185,129,.1), rgba(59,130,246,.1));
+  border: 1.5px solid var(--border);
+  display: flex; align-items: center; justify-content: center; font-size: 1.9rem;
+}
+
+.ds-empty h3 { font-size: 1.1rem; font-weight: 800; color: var(--text); margin-bottom: .4rem; }
+.ds-empty p  { font-size: .82rem; color: var(--text-muted); line-height: 1.7; max-width: 310px; margin: 0 auto; }
+
+/* ══ RESULTS ═════════════════════════════ */
+.ds-results { display: none; }
+
+/* ══ AI INSIGHT ══════════════════════════ */
+.ds-ai-insight {
+  background: var(--surface);
+  border: 1.5px solid rgba(59,130,246,.25);
+  border-radius: var(--ds-radius); padding: 1.3rem 1.5rem; margin-bottom: 1.5rem;
+  position: relative; overflow: hidden;
+}
+
+.ds-ai-insight::before {
+  content: ''; position: absolute; top: 0; left: 0; bottom: 0; width: 3px;
+  background: linear-gradient(180deg, var(--ds-blue), var(--ds-purple));
+}
+
+.ds-ai-insight-hd { display: flex; align-items: center; gap: .5rem; margin-bottom: .65rem; }
+
+.ds-ai-tag {
+  display: inline-flex; align-items: center; gap: .3rem;
+  font-size: .62rem; font-weight: 800; letter-spacing: .09em;
+  text-transform: uppercase; color: var(--ds-blue);
+}
+
+.ds-ai-tag-dot {
+  width: 6px; height: 6px; border-radius: 50%; background: var(--ds-blue);
+  animation: ds-pulse-dot 1.9s ease-in-out infinite;
+}
+
+.ds-ai-insight p { font-size: .85rem; color: var(--text-muted); line-height: 1.8; margin: 0; }
+
+/* ══ SECTION HEADER ══════════════════════ */
+.ds-sec-hd {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 1.05rem; flex-wrap: wrap; gap: .5rem;
+}
+
+.ds-sec-title {
+  font-size: 1rem; font-weight: 800; color: var(--text);
+  display: flex; align-items: center; gap: .5rem;
+}
+
+.ds-sec-ico {
+  width: 28px; height: 28px; border-radius: 8px;
+  display: flex; align-items: center; justify-content: center; font-size: 12px;
+}
+
+.ds-sec-badge {
+  font-size: .67rem; font-weight: 700; color: var(--text-muted);
+  background: var(--surface-2); border: 1.5px solid var(--border);
+  border-radius: 99px; padding: .12rem .55rem;
+}
+
+/* ══ DAILY TOTALS ════════════════════════ */
+.ds-daily-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: .9rem; margin-bottom: 1.6rem; }
+
+.ds-sum-card {
+  background: var(--surface);
+  border: 1.5px solid var(--border);
+  border-radius: var(--ds-radius); padding: 1.15rem 1.1rem;
+  position: relative; overflow: hidden;
+  transition: transform .22s cubic-bezier(.16,1,.3,1), box-shadow .22s, border-color .22s;
+}
+
+.ds-sum-card:hover { transform: translateY(-4px); box-shadow: var(--card-shadow); }
+
+.ds-sum-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: .8rem; }
+
+.ds-sum-ico {
+  width: 38px; height: 38px; border-radius: 11px;
+  display: flex; align-items: center; justify-content: center; font-size: 15px;
+}
+
+.ds-sum-ring { width: 38px; height: 38px; }
+.ds-sum-ring-bg  { fill: none; stroke: var(--border); stroke-width: 3; }
+.ds-sum-ring-arc { fill: none; stroke-width: 3; stroke-linecap: round; transform: rotate(-90deg); transform-origin: 50% 50%; }
+
+.ds-sum-val {
+  font-family: var(--ds-mono); font-size: 1.6rem; font-weight: 600; color: var(--text);
+  line-height: 1; margin-bottom: .22rem; letter-spacing: -.04em;
+}
+
+.ds-sum-meta { display: flex; align-items: center; gap: .35rem; flex-wrap: wrap; }
+
+.ds-sum-unit {
+  font-size: .61rem; font-weight: 700; text-transform: uppercase;
+  letter-spacing: .07em; color: var(--text-muted);
+}
+
+.ds-sum-pct {
+  font-size: .58rem; font-weight: 800;
+  padding: .1rem .42rem; border-radius: 99px; margin-left: auto;
+}
+
+/* ══ FOOD GRID ═══════════════════════════ */
+.ds-food-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 1.05rem; margin-bottom: 1.6rem; }
+
+.ds-food-card {
+  background: var(--surface);
+  border: 1.5px solid var(--border);
+  border-radius: var(--ds-radius); overflow: hidden;
+  display: flex; flex-direction: column;
+  transition: all .22s cubic-bezier(.16,1,.3,1);
+}
+
+.ds-food-card:hover {
+  transform: translateY(-5px);
+  border-color: var(--ds-green);
+  box-shadow: 0 18px 44px rgba(16,185,129,.13);
+}
+
+.ds-food-banner {
+  height: 74px; display: flex; align-items: center; justify-content: space-between;
+  padding: 0 1.1rem; position: relative; overflow: hidden; flex-shrink: 0;
+}
+
+.ds-food-banner::after {
+  content: ''; position: absolute; inset: 0;
+  background: linear-gradient(180deg, transparent 35%, var(--surface) 100%);
+  pointer-events: none;
+}
+
+.ds-food-emoji { font-size: 2.1rem; line-height: 1; position: relative; z-index: 1; }
+
+.ds-food-score {
+  position: relative; z-index: 1;
+  display: inline-flex; align-items: center; gap: .22rem;
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 99px; padding: .22rem .62rem;
+  font-size: .65rem; font-weight: 800; color: var(--text);
+  box-shadow: 0 2px 8px rgba(0,0,0,.1);
+}
+
+.ds-food-body { padding: .9rem 1.05rem 1rem; flex: 1; display: flex; flex-direction: column; }
+.ds-food-name { font-size: .96rem; font-weight: 800; color: var(--text); letter-spacing: -.02em; margin-bottom: .3rem; line-height: 1.25; }
+
+.ds-food-diet-tag {
+  display: inline-flex; align-items: center; gap: .2rem;
+  font-size: .62rem; font-weight: 700; text-transform: uppercase; letter-spacing: .04em;
+  padding: .13rem .52rem; border-radius: 99px; margin-bottom: .6rem; width: fit-content;
+  border: 1px solid transparent;
+}
+
+.ds-food-macros { display: flex; flex-wrap: wrap; gap: .26rem; margin-bottom: .65rem; }
+
+.ds-food-macro {
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 7px; padding: .18rem .5rem;
+  font-size: .64rem; font-weight: 600; color: var(--text-muted);
+  font-family: var(--ds-mono);
+}
+
+.ds-food-reason {
+  font-size: .75rem; color: var(--text-muted); line-height: 1.7;
+  margin-bottom: .75rem; flex: 1;
+  display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;
+}
+
+.ds-food-match-row { display: flex; align-items: center; gap: .6rem; margin-top: auto; }
+.ds-food-match-lbl { font-size: .61rem; color: var(--text-faint); flex-shrink: 0; }
+.ds-food-match-bar { flex: 1; height: 5px; background: var(--surface-2); border-radius: 99px; overflow: hidden; border: 1px solid var(--border); }
+.ds-food-match-fill { height: 100%; border-radius: 99px; background: linear-gradient(90deg, var(--ds-green-d), var(--ds-green)); width: 0%; transition: width 1.2s cubic-bezier(.16,1,.3,1); }
+.ds-food-match-pct { font-family: var(--ds-mono); font-size: .72rem; font-weight: 700; color: var(--ds-green); flex-shrink: 0; min-width: 28px; text-align: right; }
+
+/* ══ MEAL PLAN ═══════════════════════════ */
+.ds-meal-plan {
+  background: var(--surface);
+  border: 1.5px solid var(--border);
+  border-radius: var(--ds-radius); overflow: hidden;
+  margin-bottom: 1.6rem; padding: 0 1.4rem;
+}
+
+.ds-meal-row {
+  display: flex; align-items: flex-start; gap: 1rem; padding: 1.1rem 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.ds-meal-row:last-child { border-bottom: none; }
+
+.ds-meal-timeline { display: flex; flex-direction: column; align-items: center; flex-shrink: 0; padding-top: .08rem; }
+
+.ds-meal-dot {
+  width: 36px; height: 36px; border-radius: 11px;
+  display: flex; align-items: center; justify-content: center; font-size: .8rem;
+  flex-shrink: 0; border: 1.5px solid transparent; transition: transform .18s;
+}
+
+.ds-meal-row:hover .ds-meal-dot { transform: scale(1.08); }
+
+.ds-meal-vline {
+  width: 2px; flex: 1; min-height: 16px; margin-top: 5px;
+  background: var(--border); border-radius: 99px;
+}
+
+.ds-meal-row:last-child .ds-meal-vline { display: none; }
+.ds-meal-content { flex: 1; min-width: 0; }
+.ds-meal-header  { display: flex; align-items: center; gap: .5rem; margin-bottom: .3rem; flex-wrap: wrap; }
+
+.ds-meal-badge {
+  display: inline-flex; align-items: center; gap: .28rem;
+  padding: .2rem .62rem; border-radius: 99px; font-size: .64rem; font-weight: 800;
+  border: 1px solid transparent;
+}
+
+.ds-meal-time {
+  font-family: var(--ds-mono); font-size: .62rem; font-weight: 600; color: var(--text-faint);
+  background: var(--surface-2); border: 1px solid var(--border);
+  border-radius: 6px; padding: .1rem .42rem;
+}
+
+.ds-meal-food  { font-size: .9rem; font-weight: 800; color: var(--text); margin-bottom: .22rem; letter-spacing: -.015em; }
+.ds-meal-why   { font-size: .74rem; color: var(--text-muted); line-height: 1.65; }
+.ds-meal-pills { display: flex; flex-wrap: wrap; gap: .22rem; margin-top: .32rem; }
+
+.ds-meal-pill {
+  font-family: var(--ds-mono); font-size: .6rem; font-weight: 600;
+  padding: .12rem .42rem; border-radius: 6px; border: 1px solid transparent;
+}
+
+.ds-meal-cal-col { text-align: right; flex-shrink: 0; padding-top: .08rem; min-width: 52px; }
+.ds-meal-cal-num { font-family: var(--ds-mono); font-size: 1rem; font-weight: 700; color: var(--text); }
+.ds-meal-cal-unit { font-size: .55rem; color: var(--text-faint); text-transform: uppercase; letter-spacing: .07em; }
+
+/* ══ REGEN FOOTER ════════════════════════ */
+.ds-regen-footer {
+  display: flex; align-items: center; justify-content: center;
+  gap: .75rem; padding: 1.3rem 0 .25rem; flex-wrap: wrap;
+}
+
+.ds-regen-hint { font-size: .77rem; color: var(--text-muted); }
+
+.ds-regen-btn {
+  display: inline-flex; align-items: center; gap: .45rem;
+  padding: .65rem 1.3rem; border-radius: 12px;
+  font-size: .8rem; font-weight: 700; font-family: inherit;
+  cursor: pointer; border: none; transition: all .18s cubic-bezier(.16,1,.3,1);
+  background: linear-gradient(135deg, var(--ds-blue-d), var(--ds-blue)); color: #fff;
+  box-shadow: 0 6px 20px rgba(37,99,235,.35);
+}
+
+.ds-regen-btn:hover { filter: brightness(1.1); transform: translateY(-2px); box-shadow: 0 10px 28px rgba(37,99,235,.42); }
+
+/* ══ ANIMATIONS ══════════════════════════ */
+@keyframes ds-rise     { from { opacity:0; transform:translateY(14px) } to { opacity:1; transform:none } }
+@keyframes ds-pulse-dot{ 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.25;transform:scale(.6)} }
+@keyframes ds-spin     { to { transform:rotate(360deg) } }
+@keyframes ds-fade-up  { from{opacity:0;transform:translateY(14px)} to{opacity:1;transform:none} }
+
+.ds-hero       { animation: ds-rise .4s cubic-bezier(.16,1,.3,1) both; }
+.ds-loading    { animation: ds-rise .25s ease both; }
+.ds-results    { animation: ds-rise .38s ease both; }
+
+/* ══ RESPONSIVE ══════════════════════════ */
+@media(max-width:980px) {
+  .ds-food-grid         { grid-template-columns: 1fr 1fr; }
+  .ds-profile-snap      { grid-template-columns: 1fr 1fr; }
+  .ds-daily-grid        { grid-template-columns: 1fr 1fr; }
+}
+
+@media(max-width:640px) {
+  .ds-food-grid     { grid-template-columns: 1fr; }
+  .ds-hero-title    { font-size: 1.4rem; }
+  .ds-hero          { padding: 1.6rem 1.4rem; }
+}
+
+@media(max-width:440px) {
+  .ds-profile-snap  { grid-template-columns: 1fr 1fr; }
+  .ds-meal-row      { flex-wrap: wrap; gap: .5rem; }
+  .ds-daily-grid    { grid-template-columns: 1fr 1fr; }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="ds-wrap">
+
+  <!-- ══ HERO ══════════════════════════════════ -->
+  <div class="ds-hero">
+    <div class="ds-hero-bg-green"></div>
+    <div class="ds-hero-bg-blue"></div>
+    <div class="ds-hero-glow"></div>
+    <div class="ds-hero-inner">
+      <div>
+        <div class="ds-eyebrow">
+          <span class="ds-pulse"></span>
+          AI-Powered &middot; Personalised
+        </div>
+        <h1 class="ds-hero-title">Your <span class="gr">Diet Suggestions</span></h1>
+        <p class="ds-hero-sub">Tailored to your BMI, calorie goals, and dietary preferences.</p>
+      </div>
+      <div style="display:flex;align-items:center;gap:.75rem;flex-wrap:wrap;">
+        <span class="ds-saved-chip" id="saved-chip">
+          <span class="ds-saved-dot"></span>Loaded from history
+        </span>
+        <button class="ds-gen-btn" id="gen-btn" onclick="dsGenerate()">
+          <i class="fas fa-sparkles"></i> Generate Suggestions
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ NO PREFERENCE WARNING ═════════════════ -->
+  {% if not profile.has_preference %}
+  <div class="ds-banner ds-banner-warn">
+    <i class="fas fa-triangle-exclamation"></i>
+    <span>
+      No dietary preferences set — suggestions will use default values.
+      <a href="{{ url_for('user_dashboard.dietary_preferences') }}">Set preferences →</a>
+    </span>
+  </div>
+  {% endif %}
+
+  <!-- ══ MACRO WARNING (dynamic) ═══════════════ -->
+  <div class="ds-banner ds-banner-warn" id="macro-warn" style="display:none;">
+    <i class="fas fa-triangle-exclamation"></i>
+    <span id="macro-warn-msg"></span>
+    <button class="ds-banner-close" id="macro-warn-close" title="Dismiss">
+      <i class="fas fa-xmark"></i>
+    </button>
+  </div>
+
+  <!-- ══ ERROR BOX ══════════════════════════════ -->
+  <div class="ds-banner ds-banner-err" id="error-box" style="display:none;">
+    <i class="fas fa-circle-exclamation"></i>
+    <span id="error-msg">Something went wrong.</span>
+  </div>
+
+  <!-- ══ PROFILE SNAPSHOT ═══════════════════════ -->
+  <div class="ds-profile-snap">
+    <div class="ds-snap-card">
+      <div class="ds-snap-stripe" style="background:linear-gradient(90deg,#059669,#34d399)"></div>
+      <div class="ds-snap-ico" style="background:rgba(5,150,105,.12);color:#059669;">
+        <i class="fas fa-bullseye"></i>
+      </div>
+      <div class="ds-snap-lbl">Goal</div>
+      <div class="ds-snap-val" style="font-size:.83rem;">
+        {{ profile.goal | replace('_',' ') | title if profile.goal else 'Not set' }}
+      </div>
+    </div>
+
+    <div class="ds-snap-card">
+      <div class="ds-snap-stripe" style="background:linear-gradient(90deg,#2563eb,#60a5fa)"></div>
+      <div class="ds-snap-ico" style="background:rgba(37,99,235,.12);color:#2563eb;">
+        <i class="fas fa-weight-scale"></i>
+      </div>
+      <div class="ds-snap-lbl">BMI</div>
+      <div class="ds-snap-val">
+        {% if profile.bmi %}
+          {{ "%.1f"|format(profile.bmi) }}
+        {% else %}
+          <span style="font-size:.75rem;opacity:.5;">No record</span>
+        {% endif %}
+      </div>
+    </div>
+
+    <div class="ds-snap-card">
+      <div class="ds-snap-stripe" style="background:linear-gradient(90deg,#d97706,#fbbf24)"></div>
+      <div class="ds-snap-ico" style="background:rgba(217,119,6,.12);color:#d97706;">
+        <i class="fas fa-fire-flame-curved"></i>
+      </div>
+      <div class="ds-snap-lbl">Calorie Target</div>
+      <div class="ds-snap-val">
+        {% if profile.calorie_goal %}
+          {{ "{:,}".format(profile.calorie_goal) }}<span style="font-size:.6rem;font-family:inherit;opacity:.6;"> kcal</span>
+        {% else %}
+          <span style="font-size:.75rem;opacity:.5;">Not set</span>
+        {% endif %}
+      </div>
+    </div>
+
+    <div class="ds-snap-card">
+      <div class="ds-snap-stripe" style="background:linear-gradient(90deg,#7c3aed,#a78bfa)"></div>
+      <div class="ds-snap-ico" style="background:rgba(124,58,237,.12);color:#7c3aed;">
+        <i class="fas fa-leaf"></i>
+      </div>
+      <div class="ds-snap-lbl">Diet Type</div>
+      <div class="ds-snap-val" style="font-size:.83rem;">
+        {{ profile.diet_type | title if profile.diet_type and profile.diet_type != 'none' else 'Not set' }}
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ LOADING ════════════════════════════════ -->
+  <div class="ds-loading" id="ds-loading">
+    <div class="ds-spinner"></div>
+    <p class="ds-loading-label">Analysing your profile…</p>
+    <div class="ds-steps">
+      <div class="ds-step" id="lstep-1"><i class="fas fa-circle-check"></i> Reading your BMI &amp; goals</div>
+      <div class="ds-step" id="lstep-2"><i class="fas fa-circle-check"></i> Matching foods to your diet</div>
+      <div class="ds-step" id="lstep-3"><i class="fas fa-circle-check"></i> Building meal plan</div>
+      <div class="ds-step" id="lstep-4"><i class="fas fa-circle-check"></i> Calculating macros</div>
+    </div>
+  </div>
+
+  <!-- ══ EMPTY STATE ════════════════════════════ -->
+  <div class="ds-empty" id="ds-empty-state">
+    <div class="ds-empty-icon">🥗</div>
+    <h3>No suggestions yet</h3>
+    <p>Hit <strong>Generate Suggestions</strong> above and let the AI craft a personalised meal plan from your profile.</p>
+  </div>
+
+  <!-- ══ RESULTS ════════════════════════════════ -->
+  <div class="ds-results" id="ds-results">
+
+    <!-- AI Insight -->
+    <div class="ds-ai-insight">
+      <div class="ds-ai-insight-hd">
+        <div class="ds-ai-tag">
+          <span class="ds-ai-tag-dot"></span>AI Reasoning
+        </div>
+      </div>
+      <p id="ai-insight-text"></p>
+    </div>
+
+    <!-- Daily Totals -->
+    <div class="ds-sec-hd">
+      <div class="ds-sec-title">
+        <div class="ds-sec-ico" style="background:rgba(37,99,235,.12);color:#2563eb;">
+          <i class="fas fa-chart-pie"></i>
+        </div>
+        Daily Totals
+      </div>
+    </div>
+    <div class="ds-daily-grid" id="daily-grid"></div>
+
+    <!-- Recommended Foods -->
+    <div class="ds-sec-hd">
+      <div class="ds-sec-title">
+        <div class="ds-sec-ico" style="background:rgba(5,150,105,.12);color:#059669;">
+          <i class="fas fa-seedling"></i>
+        </div>
+        Recommended Foods
+        <span class="ds-sec-badge" id="food-count"></span>
+      </div>
+    </div>
+    <div class="ds-food-grid" id="food-grid"></div>
+
+    <!-- Meal Plan -->
+    <div class="ds-sec-hd">
+      <div class="ds-sec-title">
+        <div class="ds-sec-ico" style="background:rgba(217,119,6,.12);color:#d97706;">
+          <i class="fas fa-utensils"></i>
+        </div>
+        Sample Meal Plan
+      </div>
+    </div>
+    <div class="ds-meal-plan" id="meal-plan"></div>
+
+    <!-- Regenerate Footer -->
+    <div class="ds-regen-footer">
+      <span class="ds-regen-hint">Not happy with these suggestions?</span>
+      <button class="ds-regen-btn" onclick="dsGenerate()">
+        <i class="fas fa-rotate"></i> Regenerate
+      </button>
+    </div>
+
+  </div><!-- /.ds-results -->
+
+</div><!-- /.ds-wrap -->
+{% endblock %}
+
+{% block extra_js %}
+<script>
+'use strict';
+
+/* ── Constants ── */
+const DS_CALORIE_TARGET = {{ profile.calorie_goal or 2000 }};
+const DS_RING_CIRC = 2 * Math.PI * 15;
+
+const DS_TOTALS_CFG = [
+  { key:'calories', label:'Calories', unit:'kcal', color:'#3b82f6', icon:'fas fa-fire'      },
+  { key:'protein',  label:'Protein',  unit:'g',    color:'#06b6d4', icon:'fas fa-dumbbell'  },
+  { key:'carbs',    label:'Carbs',    unit:'g',    color:'#10b981', icon:'fas fa-wheat-awn' },
+  { key:'fat',      label:'Fat',      unit:'g',    color:'#f59e0b', icon:'fas fa-droplet'   },
+];
+
+const DS_TOTALS_REF = { calories: DS_CALORIE_TARGET, protein: 200, carbs: 300, fat: 80 };
+
+const DS_MEAL_META = {
+  'breakfast':         { color:'#0891b2', icon:'fas fa-sun',         time:'7:30 AM'  },
+  'mid-morning snack': { color:'#d97706', icon:'fas fa-apple-whole', time:'10:30 AM' },
+  'lunch':             { color:'#059669', icon:'fas fa-bowl-food',   time:'1:00 PM'  },
+  'afternoon snack':   { color:'#7c3aed', icon:'fas fa-cookie-bite', time:'4:00 PM'  },
+  'dinner':            { color:'#2563eb', icon:'fas fa-moon',        time:'7:00 PM'  },
+  'evening snack':     { color:'#64748b', icon:'fas fa-mug-hot',     time:'9:00 PM'  },
+  'snack':             { color:'#d97706', icon:'fas fa-apple-whole', time:'10:30 AM' },
+  'evening':           { color:'#64748b', icon:'fas fa-mug-hot',     time:'9:00 PM'  },
+};
+
+const DS_DIET_COLORS = {
+  'high protein':'#0891b2','whole grain':'#2563eb','probiotic':'#7c3aed',
+  'vegetable':'#059669','omega-3 rich':'#d97706','plant protein':'#7c3aed',
+  'vegetarian':'#059669','vegan':'#34d399','keto':'#d97706','balanced':'#2563eb',
+  'non-vegetarian':'#0891b2','pescatarian':'#06b6d4','paleo':'#b45309',
+};
+
+const DS_FOOD_EMOJI_MAP = {
+  'rice':'🍚','chicken':'🍗','beef':'🥩','fish':'🐟','salmon':'🐟','tuna':'🐟',
+  'egg':'🥚','eggs':'🥚','milk':'🥛','yogurt':'🥛','cheese':'🧀',
+  'bread':'🍞','oat':'🌾','oats':'🌾','pasta':'🍝','noodle':'🍜','noodles':'🍜',
+  'broccoli':'🥦','spinach':'🥬','lettuce':'🥬','tomato':'🍅','carrot':'🥕',
+  'potato':'🥔','sweet potato':'🍠','corn':'🌽','pepper':'🫑','mushroom':'🍄',
+  'apple':'🍎','banana':'🍌','orange':'🍊','berry':'🫐','berries':'🫐',
+  'avocado':'🥑','lemon':'🍋','mango':'🥭','grape':'🍇',
+  'almond':'🥜','peanut':'🥜','nut':'🥜','seed':'🌰',
+  'oil':'🫙','sesame':'🫙','olive':'🫒',
+  'green tea':'🍵','tea':'🍵','coffee':'☕','water':'💧','juice':'🧃',
+  'tofu':'🧆','bean':'🫘','beans':'🫘','lentil':'🫘','chickpea':'🫘',
+  'soup':'🍲','salad':'🥗','stir':'🥘','bok choy':'🥬',
+  'shrimp':'🦐','prawn':'🦐','crab':'🦀',
+};
+
+const DS_MACRO_PILL = {
+  protein: { bg:'rgba(8,145,178,.1)',  border:'rgba(8,145,178,.25)',  color:'#0e7490' },
+  carbs:   { bg:'rgba(5,150,105,.1)',  border:'rgba(5,150,105,.25)',  color:'#065f46' },
+  fat:     { bg:'rgba(217,119,6,.1)',  border:'rgba(217,119,6,.25)',  color:'#92400e' },
+};
+
+/* ── State ── */
+let dsLoading = false;
+
+/* ── Helpers ── */
+function dsEsc(s) {
+  return String(s == null ? '' : s)
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+}
+
+function dsFoodEmoji(name) {
+  const n = (name || '').toLowerCase();
+  for (const [k, v] of Object.entries(DS_FOOD_EMOJI_MAP)) {
+    if (n.includes(k)) return v;
+  }
+  return '🍽️';
+}
+
+function dsDietColor(t) {
+  return DS_DIET_COLORS[(t || '').toLowerCase()] || '#059669';
+}
+
+function dsAnimateCount(el, target) {
+  const dur = 900, t0 = performance.now();
+  (function tick(now) {
+    const p = Math.min((now - t0) / dur, 1);
+    const ease = 1 - Math.pow(1 - p, 3);
+    el.textContent = Math.round(target * ease);
+    if (p < 1) requestAnimationFrame(tick);
+    else el.textContent = target;
+  })(t0);
+}
+
+function dsRunAnimations() {
+  document.querySelectorAll('.ds-food-match-fill[data-w]').forEach(el => {
+    el.style.width = el.dataset.w + '%';
+  });
+  document.querySelectorAll('.ds-sum-ring-arc[data-pct]').forEach(arc => {
+    const pct = parseFloat(arc.dataset.pct) || 0;
+    arc.style.strokeDasharray  = DS_RING_CIRC;
+    arc.style.strokeDashoffset = DS_RING_CIRC - (pct / 100) * DS_RING_CIRC;
+  });
+  document.querySelectorAll('.ds-sum-val[data-target]').forEach(el => {
+    dsAnimateCount(el, parseInt(el.dataset.target, 10) || 0);
+  });
+}
+
+/* ── Normalise AI data ── */
+function dsNormalise(raw) {
+  let meal_plan = raw.meal_plan;
+  let foods     = raw.foods;
+
+  if (typeof meal_plan === 'string') {
+    try { meal_plan = JSON.parse(meal_plan); } catch(_) { meal_plan = []; }
+  }
+  if (typeof foods === 'string') {
+    try { foods = JSON.parse(foods); } catch(_) { foods = []; }
+  }
+
+  meal_plan = (Array.isArray(meal_plan) ? meal_plan : []).map(m => {
+    const key  = (m.meal_type || '').toLowerCase().trim();
+    const meta = DS_MEAL_META[key] || { color:'#64748b', icon:'fas fa-utensils', time:'' };
+    return Object.assign({}, m, meta);
+  });
+
+  foods = (Array.isArray(foods) ? foods : []).map(f =>
+    Object.assign({}, f, { color: dsDietColor(f.diet_type) })
+  );
+
+  const totals = {
+    calories: meal_plan.reduce((s, m) => s + (m.calories || 0), 0),
+    protein:  meal_plan.reduce((s, m) => s + (m.protein  || 0), 0),
+    carbs:    meal_plan.reduce((s, m) => s + (m.carbs    || 0), 0),
+    fat:      meal_plan.reduce((s, m) => s + (m.fat      || 0), 0),
+  };
+
+  return Object.assign({}, raw, { meal_plan, foods, totals });
+}
+
+/* ── UI helpers ── */
+function dsShowMacroWarn(msg) {
+  if (!msg) return;
+  document.getElementById('macro-warn-msg').textContent = msg;
+  document.getElementById('macro-warn').style.display = 'flex';
+}
+
+function dsHideMacroWarn() {
+  document.getElementById('macro-warn').style.display = 'none';
+}
+
+function dsShowError(msg) {
+  document.getElementById('error-msg').textContent = msg || 'Something went wrong.';
+  document.getElementById('error-box').style.display = 'flex';
+}
+
+function dsHideError() {
+  document.getElementById('error-box').style.display = 'none';
+}
+
+function dsResetBtn() {
+  const btn = document.getElementById('gen-btn');
+  btn.disabled = false;
+  btn.innerHTML = '<i class="fas fa-sparkles"></i> Generate Suggestions';
+  dsLoading = false;
+}
+
+/* ════════════════════════════════════════════
+   GENERATE
+════════════════════════════════════════════ */
+function dsGenerate() {
+  if (dsLoading) return;
+  dsLoading = true;
+
+  const btn        = document.getElementById('gen-btn');
+  const loading    = document.getElementById('ds-loading');
+  const results    = document.getElementById('ds-results');
+  const emptyState = document.getElementById('ds-empty-state');
+  const savedChip  = document.getElementById('saved-chip');
+
+  btn.disabled = true;
+  btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generating…';
+  loading.style.display    = 'block';
+  results.style.display    = 'none';
+  emptyState.style.display = 'none';
+  savedChip.classList.remove('show');
+  dsHideError();
+  dsHideMacroWarn();
+
+  /* Animate loading steps */
+  const stepIds = ['lstep-1','lstep-2','lstep-3','lstep-4'];
+  stepIds.forEach(id => { document.getElementById(id).className = 'ds-step'; });
+  stepIds.forEach((id, i) => {
+    setTimeout(() => {
+      document.getElementById(id).className = 'ds-step active';
+      if (i > 0) document.getElementById(stepIds[i-1]).className = 'ds-step done';
+    }, i * 650);
+  });
+
+  fetch('{{ url_for("diet_suggestions.generate") }}', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
+  })
+  .then(res => {
+    if (!res.ok) throw new Error('Server error: ' + res.status);
+    return res.json();
+  })
+  .then(raw => {
+    loading.style.display = 'none';
+
+    if (raw.error) {
+      dsShowError(raw.error);
+      emptyState.style.display = 'block';
+      dsResetBtn();
+      return;
+    }
+
+    if (raw.macro_warning) dsShowMacroWarn(raw.macro_warning);
+
+    const data = dsNormalise(raw);
+    dsRenderResults(data);
+
+    results.style.display = 'block';
+    dsResetBtn();
+    setTimeout(dsRunAnimations, 150);
+  })
+  .catch(err => {
+    console.error('[DS] Generate error:', err);
+    loading.style.display = 'none';
+    dsShowError('Network error — please try again.');
+    emptyState.style.display = 'block';
+    dsResetBtn();
+  });
+}
+
+/* ════════════════════════════════════════════
+   RENDER
+════════════════════════════════════════════ */
+function dsRenderResults(data) {
+  /* AI Insight */
+  document.getElementById('ai-insight-text').textContent = data.insight || '';
+
+  /* ── Daily Totals ── */
+  const dailyGrid = document.getElementById('daily-grid');
+  dailyGrid.innerHTML = '';
+
+  DS_TOTALS_CFG.forEach(cfg => {
+    const val = (data.totals && data.totals[cfg.key]) || 0;
+    const pct = Math.min(Math.round((val / (DS_TOTALS_REF[cfg.key] || 1)) * 100), 100);
+    dailyGrid.innerHTML += `
+      <div class="ds-sum-card">
+        <div class="ds-sum-top">
+          <div class="ds-sum-ico" style="background:${cfg.color}1a;color:${cfg.color};">
+            <i class="${cfg.icon}"></i>
+          </div>
+          <svg class="ds-sum-ring" viewBox="0 0 36 36" aria-hidden="true">
+            <circle class="ds-sum-ring-bg" cx="18" cy="18" r="15"/>
+            <circle class="ds-sum-ring-arc" cx="18" cy="18" r="15"
+              stroke="${cfg.color}" data-pct="${pct}"
+              style="stroke-dasharray:${DS_RING_CIRC};stroke-dashoffset:${DS_RING_CIRC};transition:stroke-dashoffset 1.1s cubic-bezier(.16,1,.3,1);"/>
+          </svg>
+        </div>
+        <div class="ds-sum-val" data-target="${val}">0</div>
+        <div class="ds-sum-meta">
+          <span class="ds-sum-unit">${dsEsc(cfg.unit)} ${dsEsc(cfg.label)}</span>
+          <span class="ds-sum-pct" style="background:${cfg.color}1a;color:${cfg.color};">${pct}%</span>
+        </div>
+      </div>`;
+  });
+
+  /* ── Food Grid ── */
+  const foodGrid = document.getElementById('food-grid');
+  foodGrid.innerHTML = '';
+  const foods = data.foods || [];
+  document.getElementById('food-count').textContent = foods.length + ' foods';
+
+  foods.forEach((f, i) => {
+    const dc      = dsDietColor(f.diet_type);
+    const emoji   = dsFoodEmoji(f.name);
+    const isBev   = f.is_beverage === true;
+    const allZero = !f.protein && !f.carbs && !f.fat;
+
+    let macrosHtml;
+    if (isBev) {
+      macrosHtml = `<div class="ds-food-macros">
+        <span class="ds-food-macro"><i class="fas fa-mug-hot" style="font-size:.52rem;margin-right:2px;"></i>Beverage</span>
+        <span class="ds-food-macro">${f.calories > 0 ? f.calories + ' kcal' : '~0 kcal'}</span>
+      </div>`;
+    } else {
+      macrosHtml = `<div class="ds-food-macros">
+        <span class="ds-food-macro">${f.calories || 0} kcal</span>
+        ${(f.protein > 0) ? `<span class="ds-food-macro">${f.protein}g P</span>` : ''}
+        ${(f.carbs   > 0) ? `<span class="ds-food-macro">${f.carbs}g C</span>`   : ''}
+        ${(f.fat     > 0) ? `<span class="ds-food-macro">${f.fat}g F</span>`     : ''}
+        ${allZero ? `<span class="ds-food-macro"><i class="fas fa-mug-hot" style="font-size:.52rem;margin-right:2px;"></i>Low-cal</span>` : ''}
+      </div>`;
+    }
+
+    const animDelay = (i * 0.07).toFixed(2);
+    foodGrid.innerHTML += `
+      <div class="ds-food-card" style="animation:ds-fade-up .38s ${animDelay}s cubic-bezier(.16,1,.3,1) both;">
+        <div class="ds-food-banner" style="background:linear-gradient(135deg,${dc}2a,${dc}08);">
+          <span class="ds-food-emoji">${emoji}</span>
+          <span class="ds-food-score">
+            <i class="fas fa-star" style="font-size:.55rem;color:#f59e0b;"></i>${dsEsc(String(f.match_score || 0))}%
+          </span>
+        </div>
+        <div class="ds-food-body">
+          <div class="ds-food-name">${dsEsc(f.name)}</div>
+          <div class="ds-food-diet-tag" style="background:${dc}18;color:${dc};border-color:${dc}30;">${dsEsc(f.diet_type || '')}</div>
+          ${macrosHtml}
+          <p class="ds-food-reason">${dsEsc(f.reason)}</p>
+          <div class="ds-food-match-row">
+            <span class="ds-food-match-lbl">Match</span>
+            <div class="ds-food-match-bar">
+              <div class="ds-food-match-fill" data-w="${f.match_score || 0}"></div>
+            </div>
+            <span class="ds-food-match-pct">${dsEsc(String(f.match_score || 0))}%</span>
+          </div>
+        </div>
+      </div>`;
+  });
+
+  /* ── Meal Plan ── */
+  const mealEl = document.getElementById('meal-plan');
+  mealEl.innerHTML = '';
+  const meals = data.meal_plan || [];
+
+  meals.forEach((m, i) => {
+    const pills = ['protein','carbs','fat']
+      .filter(k => m[k] != null && m[k] > 0)
+      .map(k => {
+        const s = DS_MACRO_PILL[k];
+        const label = k === 'protein' ? `${m[k]}g P` : k === 'carbs' ? `${m[k]}g C` : `${m[k]}g F`;
+        return `<span class="ds-meal-pill" style="background:${s.bg};border-color:${s.border};color:${s.color};">${label}</span>`;
+      }).join('');
+
+    const pillsHtml = pills ? `<div class="ds-meal-pills">${pills}</div>` : '';
+    const animDelay = (i * 0.08).toFixed(2);
+    const mColor = m.color || '#64748b';
+    const mIcon  = m.icon  || 'fas fa-utensils';
+    const mTime  = m.time  || '';
+
+    mealEl.innerHTML += `
+      <div class="ds-meal-row" style="animation:ds-fade-up .38s ${animDelay}s cubic-bezier(.16,1,.3,1) both;">
+        <div class="ds-meal-timeline">
+          <div class="ds-meal-dot" style="background:${mColor}18;color:${mColor};border-color:${mColor}35;">
+            <i class="${mIcon}"></i>
+          </div>
+          <div class="ds-meal-vline"></div>
+        </div>
+        <div class="ds-meal-content">
+          <div class="ds-meal-header">
+            <span class="ds-meal-badge" style="background:${mColor}18;color:${mColor};border-color:${mColor}30;">
+              ${dsEsc(m.meal_type || '')}
+            </span>
+            ${mTime ? `<span class="ds-meal-time">${dsEsc(mTime)}</span>` : ''}
+          </div>
+          <div class="ds-meal-food">${dsEsc(m.food)}</div>
+          <div class="ds-meal-why">${dsEsc(m.why)}</div>
+          ${pillsHtml}
+        </div>
+        <div class="ds-meal-cal-col">
+          <div class="ds-meal-cal-num">${m.calories || 0}</div>
+          <div class="ds-meal-cal-unit">kcal</div>
+        </div>
+      </div>`;
+  });
+}
+
+/* ════════════════════════════════════════════
+   AUTO-LOAD latest saved suggestion on open
+════════════════════════════════════════════ */
+window.addEventListener('DOMContentLoaded', () => {
+
+  /* Dismiss macro warning */
+  const macroClose = document.getElementById('macro-warn-close');
+  if (macroClose) macroClose.addEventListener('click', dsHideMacroWarn);
+
+  /* Fetch latest from DB */
+  fetch('/diet-suggestions/latest', {
+    headers: { 'X-Requested-With': 'XMLHttpRequest' }
+  })
+  .then(res => {
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    return res.json();
+  })
+  .then(raw => {
+    if (!raw || raw.none || raw.error) return;
+
+    const data = dsNormalise(raw);
+    if (data.macro_warning) dsShowMacroWarn(data.macro_warning);
+
+    dsRenderResults(data);
+
+    document.getElementById('ds-results').style.display    = 'block';
+    document.getElementById('ds-empty-state').style.display = 'none';
+    document.getElementById('saved-chip').classList.add('show');
+
+    setTimeout(dsRunAnimations, 200);
+  })
+  .catch(err => {
+    console.debug('[DS] Auto-load skipped:', err.message);
+  });
+});
+</script>
+{% endblock %}
