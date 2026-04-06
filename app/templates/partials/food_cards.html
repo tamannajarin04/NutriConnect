@@ -95,21 +95,11 @@
           <i class="fas fa-star"></i> Review
         </a>
 
-        {# FIX: was calling window.openAdviceModal which is not defined.
-           search.html defines window.triggerFoodAdvice(btn, foodId) — call that instead. #}
         <button
           type="button"
           class="ff-btn ff-btn--ai ai-advice-btn"
           onclick="event.stopPropagation(); window.triggerFoodAdvice(this, {{ food.id }});"
           data-food-id="{{ food.id }}"
-          data-food-name="{{ food.name }}"
-          data-food-price="{{ '%.2f'|format(food.price) if food.price else '' }}"
-          data-food-cal="{{ food.calories|int if food.calories else 0 }}"
-          data-food-prot="{{ food.protein|int if food.protein else 0 }}"
-          data-food-carb="{{ food.carbs|int if food.carbs else 0 }}"
-          data-food-fat="{{ food.fat|int if food.fat else 0 }}"
-          data-food-diet="{{ food.diet_type.replace('-', ' ').title() if food.diet_type else '' }}"
-          data-food-img="{% if food.image %}{{ url_for('static', filename='uploads/' ~ food.image) }}{% endif %}"
         >
           <i class="fas fa-brain"></i> Eat This?
         </button>
@@ -126,16 +116,16 @@
         {% endif %}
       </div>
 
-      <!-- ── AI Advice Panel ── -->
-      {# FIX: this panel was referenced by id in triggerFoodAdvice() but never rendered.
-         It must live inside the card so triggerFoodAdvice can find it via
-         document.getElementById('advice-panel-{id}'). #}
+      <!-- ══════════════════════════════════════════
+           AI ADVICE PANEL — Premium Redesign
+      ══════════════════════════════════════════ -->
       <div
         id="advice-panel-{{ food.id }}"
         class="adv-panel"
         style="display:none;"
       >
-        <!-- Loading state -->
+
+        <!-- ── Loading ── -->
         <div class="adv-loading">
           <div class="adv-loading__orbit">
             <div class="adv-loading__ring"></div>
@@ -148,81 +138,96 @@
           </div>
         </div>
 
-        <!-- Error state -->
+        <!-- ── Error ── -->
         <div class="adv-error">
           <i class="fas fa-triangle-exclamation"></i>
           <span class="adv-error__msg">Couldn't fetch advice right now.</span>
         </div>
 
-        <!-- Result state -->
+        <!-- ── Result ── -->
         <div class="adv-result">
 
-          <!-- Verdict ribbon -->
-          <div class="adv-ribbon">
-            <div class="adv-ribbon__left">
-              <div class="adv-ribbon__icon-wrap"></div>
+          <!-- TOP: verdict header strip -->
+          <div class="adv2-header">
+            <div class="adv2-header__left">
+              <div class="adv2-verdict-icon"></div>
               <div>
-                <div class="adv-ribbon__eyebrow">AI Nutrition Verdict</div>
-                <div class="adv-verdict-badge"></div>
+                <div class="adv2-eyebrow">AI Nutrition Verdict</div>
+                <div class="adv2-verdict-label"></div>
               </div>
             </div>
-            <div class="adv-ribbon__score-wrap">
-              <div class="adv-score-ring">
-                <svg class="adv-score-svg" viewBox="0 0 44 44">
-                  <circle class="adv-score-track" cx="22" cy="22" r="18"/>
-                  <circle class="adv-score-fill"  cx="22" cy="22" r="18"/>
+            <div class="adv2-score-pill">
+              <svg class="adv2-score-svg" viewBox="0 0 36 36">
+                <circle class="adv2-score-track" cx="18" cy="18" r="15"/>
+                <circle class="adv2-score-arc"   cx="18" cy="18" r="15"/>
+              </svg>
+              <span class="adv2-score-num">0</span>
+            </div>
+          </div>
+
+          <!-- MACRO RINGS ROW -->
+          <div class="adv2-rings">
+            <div class="adv2-ring-item">
+              <div class="adv2-ring-wrap">
+                <svg viewBox="0 0 44 44" class="adv2-ring-svg">
+                  <circle class="adv2-ring-track" cx="22" cy="22" r="17"/>
+                  <circle class="adv2-ring-fill adv2-ring-fill--cal" cx="22" cy="22" r="17" data-macro="cal"/>
                 </svg>
-                <div class="adv-score-num">0</div>
+                <span class="adv2-ring-val adv2-ring-val--cal">{{ food.calories|int if food.calories else 0 }}</span>
               </div>
-              <div class="adv-ribbon__score-label">Health<br>Score</div>
+              <span class="adv2-ring-lbl">kcal</span>
+            </div>
+            <div class="adv2-ring-item">
+              <div class="adv2-ring-wrap">
+                <svg viewBox="0 0 44 44" class="adv2-ring-svg">
+                  <circle class="adv2-ring-track" cx="22" cy="22" r="17"/>
+                  <circle class="adv2-ring-fill adv2-ring-fill--prot" cx="22" cy="22" r="17" data-macro="prot"/>
+                </svg>
+                <span class="adv2-ring-val adv2-ring-val--prot">{{ food.protein|int if food.protein else 0 }}g</span>
+              </div>
+              <span class="adv2-ring-lbl">protein</span>
+            </div>
+            <div class="adv2-ring-item">
+              <div class="adv2-ring-wrap">
+                <svg viewBox="0 0 44 44" class="adv2-ring-svg">
+                  <circle class="adv2-ring-track" cx="22" cy="22" r="17"/>
+                  <circle class="adv2-ring-fill adv2-ring-fill--carb" cx="22" cy="22" r="17" data-macro="carb"/>
+                </svg>
+                <span class="adv2-ring-val adv2-ring-val--carb">{{ food.carbs|int if food.carbs else 0 }}g</span>
+              </div>
+              <span class="adv2-ring-lbl">carbs</span>
+            </div>
+            <div class="adv2-ring-item">
+              <div class="adv2-ring-wrap">
+                <svg viewBox="0 0 44 44" class="adv2-ring-svg">
+                  <circle class="adv2-ring-track" cx="22" cy="22" r="17"/>
+                  <circle class="adv2-ring-fill adv2-ring-fill--fat" cx="22" cy="22" r="17" data-macro="fat"/>
+                </svg>
+                <span class="adv2-ring-val adv2-ring-val--fat">{{ food.fat|int if food.fat else 0 }}g</span>
+              </div>
+              <span class="adv2-ring-lbl">fat</span>
             </div>
           </div>
 
-          <!-- Macro progress bars -->
-          <div class="adv-macros">
-            <div class="adv-macros__title"><i class="fas fa-chart-bar"></i> % of Daily Value</div>
-            <div class="adv-macro-list">
-              <div class="adv-macro-row">
-                <div class="adv-macro-label"><i class="fas fa-fire" style="color:#f97316;"></i> Calories</div>
-                <div class="adv-macro-bar-wrap"><div class="adv-macro-bar adv-macro-bar--cal"></div></div>
-                <div class="adv-macro-val adv-macro-val--cal">{{ food.calories|int if food.calories else 0 }} kcal</div>
-              </div>
-              <div class="adv-macro-row">
-                <div class="adv-macro-label"><i class="fas fa-drumstick-bite" style="color:#06b6d4;"></i> Protein</div>
-                <div class="adv-macro-bar-wrap"><div class="adv-macro-bar adv-macro-bar--prot"></div></div>
-                <div class="adv-macro-val adv-macro-val--prot">{{ food.protein|int if food.protein else 0 }}g</div>
-              </div>
-              <div class="adv-macro-row">
-                <div class="adv-macro-label"><i class="fas fa-bread-slice" style="color:#a78bfa;"></i> Carbs</div>
-                <div class="adv-macro-bar-wrap"><div class="adv-macro-bar adv-macro-bar--carb"></div></div>
-                <div class="adv-macro-val adv-macro-val--carb">{{ food.carbs|int if food.carbs else 0 }}g</div>
-              </div>
-              <div class="adv-macro-row">
-                <div class="adv-macro-label"><i class="fas fa-droplet" style="color:#ec4899;"></i> Fat</div>
-                <div class="adv-macro-bar-wrap"><div class="adv-macro-bar adv-macro-bar--fat"></div></div>
-                <div class="adv-macro-val adv-macro-val--fat">{{ food.fat|int if food.fat else 0 }}g</div>
-              </div>
-            </div>
+          <!-- ANALYSIS -->
+          <div class="adv2-section adv2-section--analysis">
+            <div class="adv2-section-label"><i class="fas fa-magnifying-glass"></i> Analysis</div>
+            <div class="adv-analysis"></div>
           </div>
 
-          <!-- Analysis & Suggestion -->
-          <div class="adv-body">
-            <div class="adv-section adv-section--analysis">
-              <div class="adv-section__label"><i class="fas fa-magnifying-glass"></i> Analysis</div>
-              <div class="adv-analysis"></div>
-            </div>
-            <div class="adv-section adv-section--suggest adv-suggestion-wrap">
-              <div class="adv-section__label"><i class="fas fa-lightbulb"></i> Suggestion</div>
-              <div class="adv-suggestion"></div>
-            </div>
+          <!-- SUGGESTION -->
+          <div class="adv2-section adv2-section--suggest adv-suggestion-wrap">
+            <div class="adv2-section-label"><i class="fas fa-lightbulb"></i> Suggestion</div>
+            <div class="adv-suggestion"></div>
           </div>
 
-          <!-- Footer -->
-          <div class="adv-footer">
+          <!-- FOOTER -->
+          <div class="adv2-footer">
             <i class="fas fa-sparkles"></i> Powered by NutriConnect AI
           </div>
-        </div>{# end .adv-result #}
-      </div>{# end .adv-panel #}
+
+        </div><!-- /.adv-result -->
+      </div><!-- /.adv-panel -->
 
       {% endif %}{# end customer-only block #}
 
@@ -239,11 +244,10 @@
 
 
 {# ═══════════════════════════════════════════════════════════════════════
-   FOOD FOOTER & BUTTON STYLES
-   These classes are used above but were missing from search.html's CSS.
-   Injecting them once here (they are scoped so no conflicts).
+   STYLES — food footer + AI panel v2
 ═══════════════════════════════════════════════════════════════════════ #}
 <style>
+/* ── Food footer ── */
 .food-footer {
   display: flex;
   align-items: center;
@@ -254,58 +258,242 @@
   flex-wrap: nowrap;
 }
 .ff-btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: .3rem;
-  border-radius: 10px;
-  padding: .42rem .72rem;
+  display: inline-flex; align-items: center; justify-content: center;
+  gap: .3rem; border-radius: 10px; padding: .42rem .72rem;
   font-family: 'Plus Jakarta Sans', sans-serif;
-  font-size: .72rem;
-  font-weight: 800;
-  border: 1.5px solid transparent;
-  cursor: pointer;
-  text-decoration: none;
-  white-space: nowrap;
+  font-size: .72rem; font-weight: 800;
+  border: 1.5px solid transparent; cursor: pointer;
+  text-decoration: none; white-space: nowrap;
   transition: background .14s, border-color .14s, color .14s, transform .14s;
-  flex-shrink: 0;
-  line-height: 1;
+  flex-shrink: 0; line-height: 1;
 }
-.ff-btn--ghost {
+.ff-btn--ghost  { background: var(--nc-card-bg); border-color: var(--nc-border); color: var(--nc-text-muted); }
+.ff-btn--ghost:hover { background: rgba(251,191,36,.08); border-color: rgba(251,191,36,.35); color: #fbbf24; }
+.ff-btn--ai     { background: rgba(13,148,136,.1); border-color: rgba(13,148,136,.3); color: #0d9488; }
+[data-theme="dark"] .ff-btn--ai { background: rgba(13,148,136,.12); border-color: rgba(13,148,136,.32); color: #2dd4bf; }
+.ff-btn--ai:hover { background: rgba(13,148,136,.22) !important; border-color: rgba(13,148,136,.5) !important; transform: translateY(-1px); }
+.ff-btn--ai:disabled { opacity:.6; cursor:not-allowed !important; transform:none !important; }
+.ff-btn--primary { background: var(--nc-brand); border-color: var(--nc-brand); color: #fff; }
+.ff-btn--primary:hover { background: var(--nc-brand-d, #0284c7); border-color: var(--nc-brand-d,#0284c7); transform: translateY(-1px); }
+.ff-btn--disabled { background: var(--nc-surface-2); border-color: var(--nc-border); color: var(--nc-text-faint); cursor: not-allowed; opacity:.55; }
+
+/* ══════════════════════════════════
+   AI PANEL v2  — base
+══════════════════════════════════ */
+.adv-panel {
+  border-top: 1px solid var(--nc-border);
   background: var(--nc-card-bg);
-  border-color: var(--nc-border);
-  color: var(--nc-text-muted);
+  overflow: hidden;
 }
-.ff-btn--ghost:hover {
-  background: rgba(251,191,36,.08);
-  border-color: rgba(251,191,36,.35);
-  color: #fbbf24;
-}
-.ff-btn--ai {
-  background: rgba(13,148,136,.1);
-  border-color: rgba(13,148,136,.3);
-  color: #0d9488;
-}
-[data-theme="dark"] .ff-btn--ai {
-  background: rgba(13,148,136,.12);
-  border-color: rgba(13,148,136,.32);
-  color: #2dd4bf;
-}
-.ff-btn--primary {
-  background: var(--nc-brand);
-  border-color: var(--nc-brand);
-  color: #fff;
-}
-.ff-btn--primary:hover {
-  background: var(--nc-brand-d, #0284c7);
-  border-color: var(--nc-brand-d, #0284c7);
-  transform: translateY(-1px);
-}
-.ff-btn--disabled {
+
+/* verdict colour tokens */
+.adv-panel-good  { --adv-c:#10b981; --adv-cl:rgba(16,185,129,.1);  --adv-cm:rgba(16,185,129,.2);  --adv-cd:#059669; --adv-icon:"✅"; }
+.adv-panel-limit { --adv-c:#f59e0b; --adv-cl:rgba(245,158,11,.1);  --adv-cm:rgba(245,158,11,.2);  --adv-cd:#b45309; --adv-icon:"⚠️"; }
+.adv-panel-avoid { --adv-c:#ef4444; --adv-cl:rgba(239,68,68,.1);   --adv-cm:rgba(239,68,68,.2);   --adv-cd:#dc2626; --adv-icon:"🚫"; }
+[data-theme="dark"] .adv-panel-good  { --adv-cd:#34d399; }
+[data-theme="dark"] .adv-panel-limit { --adv-cd:#fcd34d; }
+[data-theme="dark"] .adv-panel-avoid { --adv-cd:#f87171; }
+
+/* loading (unchanged — already good) */
+.adv-loading {
+  display:none; flex-direction:column; align-items:center; justify-content:center;
+  gap:1rem; padding:2rem 1rem;
   background: var(--nc-surface-2);
-  border-color: var(--nc-border);
-  color: var(--nc-text-faint);
-  cursor: not-allowed;
-  opacity: .55;
 }
+.adv-loading__orbit { position:relative; width:56px; height:56px; }
+.adv-loading__ring {
+  position:absolute; inset:0; border-radius:50%;
+  border:2.5px solid transparent;
+  border-top-color:#0d9488; border-right-color:rgba(13,148,136,.25);
+  animation: orbit-spin .9s linear infinite;
+}
+.adv-loading__ring--2 {
+  inset:7px;
+  border-top-color:transparent; border-bottom-color:#38bdf8; border-left-color:rgba(56,189,248,.25);
+  animation: orbit-spin-rev 1.3s linear infinite;
+}
+.adv-loading__core {
+  position:absolute; inset:16px;
+  background:linear-gradient(135deg,rgba(13,148,136,.15),rgba(56,189,248,.1));
+  border-radius:50%; display:flex; align-items:center; justify-content:center;
+  font-size:.9rem; color:#0d9488;
+  animation:core-pulse 2s ease-in-out infinite;
+  border:1px solid rgba(13,148,136,.2);
+}
+.adv-loading__text-wrap { display:flex; flex-direction:column; align-items:center; gap:.22rem; }
+.adv-loading__title { font-size:.82rem; font-weight:800; color:var(--nc-text); letter-spacing:-.01em; }
+.adv-loading__sub   { font-size:.68rem; font-weight:500; color:var(--nc-text-faint); }
+
+/* error */
+.adv-error {
+  display:none; align-items:center; gap:.55rem;
+  margin:.85rem .9rem; padding:.72rem .9rem;
+  font-size:.76rem; font-weight:600; color:#ef4444; line-height:1.55;
+  background:rgba(239,68,68,.07); border:1px solid rgba(239,68,68,.18); border-radius:11px;
+}
+.adv-error i { font-size:1rem; flex-shrink:0; }
+
+/* result wrapper */
+.adv-result { display:none; flex-direction:column; }
+
+/* ──────────────────────────────────
+   VERDICT HEADER  (new)
+────────────────────────────────── */
+.adv2-header {
+  display: flex; align-items: center; justify-content: space-between; gap:.75rem;
+  padding: .85rem 1rem .8rem;
+  background: var(--adv-cl, var(--nc-surface-2));
+  border-bottom: 1px solid var(--adv-cm, var(--nc-border));
+  transition: background .3s, border-color .3s;
+  animation: adv-fadein .25s ease both;
+}
+.adv2-header__left { display:flex; align-items:center; gap:.65rem; min-width:0; flex:1; }
+
+/* verdict icon bubble */
+.adv2-verdict-icon {
+  width: 36px; height: 36px;
+  border-radius: 10px;
+  background: var(--adv-cm, rgba(14,165,233,.15));
+  border: 1.5px solid var(--adv-cm, var(--nc-border));
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1rem; flex-shrink: 0;
+  transition: all .3s;
+}
+.adv2-eyebrow {
+  font-size: .56rem; font-weight: 900; text-transform: uppercase;
+  letter-spacing: .13em; color: var(--nc-text-faint); margin-bottom: .22rem;
+}
+.adv2-verdict-label {
+  font-size: .88rem; font-weight: 900; letter-spacing: -.015em;
+  color: var(--adv-cd, var(--nc-text)); line-height: 1; transition: color .3s;
+}
+
+/* score pill — compact donut */
+.adv2-score-pill {
+  position: relative; width: 46px; height: 46px; flex-shrink: 0;
+}
+.adv2-score-svg {
+  width: 46px; height: 46px; transform: rotate(-90deg);
+}
+.adv2-score-track {
+  fill: none; stroke: var(--nc-border); stroke-width: 3.5;
+}
+.adv2-score-arc {
+  fill: none;
+  stroke: var(--adv-c, #0ea5e9);
+  stroke-width: 3.5; stroke-linecap: round;
+  stroke-dasharray: 94.25;
+  stroke-dashoffset: 94.25;
+  transition: stroke-dashoffset .85s cubic-bezier(.16,1,.3,1), stroke .3s;
+}
+.adv2-score-num {
+  position: absolute; inset: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: .72rem; font-weight: 800;
+  color: var(--adv-cd, var(--nc-text)); transition: color .3s;
+}
+
+/* ──────────────────────────────────
+   MACRO RINGS ROW  (new design)
+────────────────────────────────── */
+.adv2-rings {
+  display: grid; grid-template-columns: repeat(4, 1fr);
+  gap: 0;
+  background: var(--nc-surface-2);
+  border-bottom: 1px solid var(--nc-border);
+  padding: .75rem .6rem .65rem;
+  animation: adv-slideup .3s cubic-bezier(.16,1,.3,1) .05s both;
+}
+.adv2-ring-item {
+  display: flex; flex-direction: column; align-items: center; gap: .28rem;
+}
+.adv2-ring-wrap {
+  position: relative; width: 50px; height: 50px;
+}
+.adv2-ring-svg { width: 50px; height: 50px; transform: rotate(-90deg); }
+
+.adv2-ring-track { fill: none; stroke: var(--nc-border); stroke-width: 3; }
+.adv2-ring-fill  {
+  fill: none; stroke-width: 3; stroke-linecap: round;
+  stroke-dasharray: 106.8;
+  stroke-dashoffset: 106.8;
+  transition: stroke-dashoffset .9s cubic-bezier(.16,1,.3,1);
+}
+.adv2-ring-fill--cal  { stroke: #f97316; }
+.adv2-ring-fill--prot { stroke: #06b6d4; }
+.adv2-ring-fill--carb { stroke: #a78bfa; }
+.adv2-ring-fill--fat  { stroke: #ec4899; }
+
+.adv2-ring-val {
+  position: absolute; inset: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: .62rem; font-weight: 800; line-height: 1;
+}
+.adv2-ring-val--cal  { color: #f97316; }
+.adv2-ring-val--prot { color: #06b6d4; }
+.adv2-ring-val--carb { color: #a78bfa; }
+.adv2-ring-val--fat  { color: #ec4899; }
+
+.adv2-ring-lbl {
+  font-size: .57rem; font-weight: 800; text-transform: uppercase;
+  letter-spacing: .07em; color: var(--nc-text-faint);
+}
+
+/* ──────────────────────────────────
+   ANALYSIS & SUGGESTION SECTIONS
+────────────────────────────────── */
+.adv2-section {
+  margin: .6rem .75rem .0rem;
+  border-radius: 11px;
+  border: 1px solid var(--nc-border);
+  background: var(--nc-card-bg);
+  padding: .65rem .8rem .7rem;
+  animation: adv-slideup .3s cubic-bezier(.16,1,.3,1) .08s both;
+}
+.adv2-section:last-of-type { margin-bottom: 0; }
+
+.adv2-section-label {
+  display: flex; align-items: center; gap: .3rem;
+  font-size: .57rem; font-weight: 900;
+  text-transform: uppercase; letter-spacing: .13em;
+  color: var(--nc-text-faint); margin-bottom: .38rem;
+}
+.adv2-section-label i { font-size: .6rem; }
+
+.adv2-section--analysis {
+  border-left: 3px solid var(--adv-c, var(--nc-border-2));
+  transition: border-left-color .3s;
+}
+.adv2-section--analysis .adv2-section-label { color: var(--adv-cd, var(--nc-text-faint)); }
+
+.adv2-section--suggest {
+  background: rgba(13,148,136,.06);
+  border-color: rgba(13,148,136,.2);
+  border-left: 3px solid #0d9488;
+  margin-bottom: 0;
+}
+[data-theme="dark"] .adv2-section--suggest { background: rgba(13,148,136,.09); border-color: rgba(13,148,136,.22); }
+.adv2-section--suggest .adv2-section-label { color: #0d9488; }
+[data-theme="dark"] .adv2-section--suggest .adv2-section-label { color: #2dd4bf; }
+
+.adv-analysis, .adv-suggestion {
+  font-size: .76rem; font-weight: 500;
+  color: var(--nc-text-2); line-height: 1.72;
+}
+
+/* ──────────────────────────────────
+   FOOTER
+────────────────────────────────── */
+.adv2-footer {
+  display: flex; align-items: center; justify-content: center; gap: .35rem;
+  padding: .5rem .85rem .6rem;
+  margin-top: .6rem;
+  font-size: .6rem; font-weight: 700;
+  color: var(--nc-text-faint); letter-spacing: .02em;
+  border-top: 1px solid var(--nc-border);
+  background: var(--nc-surface-2);
+}
+.adv2-footer i { font-size: .58rem; color: var(--nc-brand); }
 </style>
