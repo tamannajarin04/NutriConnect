@@ -18,6 +18,7 @@ logger = logging.getLogger(__name__)
 
 _client: Groq | None = None
 
+
 def _get_client() -> Groq:
     global _client
     if _client is None:
@@ -27,17 +28,20 @@ def _get_client() -> Groq:
         _client = Groq(api_key=api_key)
     return _client
 
+
 def _safe_float(val):
     try:
         return float(val) if val is not None else 0
     except:
         return 0
 
+
 def _safe_int(val):
     try:
         return int(val) if val is not None else 0
     except:
         return 0
+
 
 def _extract_user_data(user: "User") -> Dict[str, Any]:
     from app.models import BMIRecord, MealLog, FoodItem
@@ -75,7 +79,12 @@ def _extract_user_data(user: "User") -> Dict[str, Any]:
         recent_meals = user.meal_logs.order_by(MealLog.logged_at.desc()).limit(10).all()
         if recent_meals:
             data["recent"]["meal_patterns"] = [
-                {"food": m.food_name, "meal_type": m.meal_type, "date": m.logged_at.strftime("%Y-%m-%d"), "goal": m.goal}
+                {
+                    "food": m.food_name,
+                    "meal_type": m.meal_type,
+                    "date": m.logged_at.strftime("%Y-%m-%d"),
+                    "goal": m.goal,
+                }
                 for m in recent_meals
             ]
         seven_days_ago = datetime.utcnow().replace(hour=0, minute=0, second=0) - timedelta(days=7)
@@ -96,12 +105,12 @@ def _extract_user_data(user: "User") -> Dict[str, Any]:
 
 
 def _build_enhanced_prompt(user_data: Dict[str, Any], food: "FoodItem") -> str:
-    food_name = getattr(food, "name", "Unknown Food")
-    calories  = _safe_float(getattr(food, "calories", 0))
-    protein   = _safe_float(getattr(food, "protein", 0))
-    carbs     = _safe_float(getattr(food, "carbs", 0))
-    fat       = _safe_float(getattr(food, "fat", 0))
-    diet_type = getattr(food, "diet_type", None)
+    food_name   = getattr(food, "name", "Unknown Food")
+    calories    = _safe_float(getattr(food, "calories", 0))
+    protein     = _safe_float(getattr(food, "protein", 0))
+    carbs       = _safe_float(getattr(food, "carbs", 0))
+    fat         = _safe_float(getattr(food, "fat", 0))
+    diet_type   = getattr(food, "diet_type", None)
     description = getattr(food, "description", "")
 
     b = user_data["basic"]
@@ -109,37 +118,34 @@ def _build_enhanced_prompt(user_data: Dict[str, Any], food: "FoodItem") -> str:
     p = user_data["preferences"]
     r = user_data["recent"]
 
-    bmi          = b.get("bmi")
-    bmi_category = b.get("bmi_category", "unknown")
-    weight       = b.get("weight")
-    height       = b.get("height")
-    calorie_goal = g.get("calorie_goal")
-    protein_goal = g.get("protein_goal")
-    carbs_goal   = g.get("carbs_goal")
-    fat_goal     = g.get("fat_goal")
+    bmi           = b.get("bmi")
+    bmi_category  = b.get("bmi_category", "unknown")
+    weight        = b.get("weight")
+    height        = b.get("height")
+    calorie_goal  = g.get("calorie_goal")
+    protein_goal  = g.get("protein_goal")
+    carbs_goal    = g.get("carbs_goal")
+    fat_goal      = g.get("fat_goal")
     meals_per_day = g.get("meals_per_day")
-    user_diet    = p.get("diet_type", "not specified")
-    allergies    = p.get("allergies", [])
-    restrictions = p.get("food_restrictions", [])
-    avoid_foods  = p.get("avoid_foods", [])
-    fav_foods    = p.get("favorite_foods", [])
-    cuisine      = p.get("preferred_cuisine", [])
-    avg_cal      = r.get("avg_daily_calories")
-    recent_meals = r.get("meal_patterns", [])
+    user_diet     = p.get("diet_type", "not specified")
+    allergies     = p.get("allergies", [])
+    restrictions  = p.get("food_restrictions", [])
+    avoid_foods   = p.get("avoid_foods", [])
+    fav_foods     = p.get("favorite_foods", [])
+    cuisine       = p.get("preferred_cuisine", [])
+    avg_cal       = r.get("avg_daily_calories")
+    recent_meals  = r.get("meal_patterns", [])
 
-    # Calculate concrete per-meal budget if possible
     per_meal_budget = ""
     if calorie_goal and meals_per_day:
         budget = calorie_goal / meals_per_day
         per_meal_budget = f"Per-meal calorie budget: {budget:.0f} kcal (based on {meals_per_day} meals/day)"
 
-    # Calculate how much of calorie goal this food uses
     calorie_pct = ""
     if calorie_goal and calories:
         pct = (calories / calorie_goal) * 100
         calorie_pct = f"This food = {pct:.1f}% of daily calorie goal"
 
-    # Macro gap analysis
     macro_context = ""
     if protein_goal and protein:
         macro_context += f"Protein: {protein:.1f}g out of {protein_goal:.0f}g daily goal. "
@@ -148,7 +154,6 @@ def _build_enhanced_prompt(user_data: Dict[str, Any], food: "FoodItem") -> str:
     if fat_goal and fat:
         macro_context += f"Fat: {fat:.1f}g out of {fat_goal:.0f}g daily goal."
 
-    # Recent eating context
     recent_context = ""
     if recent_meals:
         names = [m["food"] for m in recent_meals[:5]]
@@ -156,21 +161,18 @@ def _build_enhanced_prompt(user_data: Dict[str, Any], food: "FoodItem") -> str:
     if avg_cal:
         recent_context += f". Avg daily intake last 7 days: {avg_cal:.0f} kcal"
 
-    prompt = f"""You are a clinical nutritionist. A specific user is asking whether they should eat a specific food.
-You MUST use every piece of the user's data below to give highly personalized advice. 
-Do NOT give generic nutrition facts — the user already knows those.
-Reference their exact BMI, weight, goals, and recent eating patterns in your response.
+    prompt = f"""You are a sharp, direct clinical nutritionist texting a client — not writing a report.
 
 ═══════════════════════════════════════
-USER DATA (use ALL of this)
+USER DATA
 ═══════════════════════════════════════
 Body Metrics:
-  - BMI: {bmi:.1f} (Category: {bmi_category}) {"← this is high, weight loss is a priority" if bmi_category in ["obese","overweight"] else "← this is low, gaining weight is a priority" if bmi_category == "underweight" else "← healthy range"}
+  - BMI: {bmi:.1f} (Category: {bmi_category}) {"← weight loss is a priority" if bmi_category in ["obese", "overweight"] else "← gaining weight is a priority" if bmi_category == "underweight" else "← healthy range"}
   - Weight: {weight:.1f} kg | Height: {height:.1f} cm
 
 Daily Goals:
   - Calorie Goal: {calorie_goal or "not set"} kcal
-  - Protein Goal: {protein_goal or "not set"}g | Carbs: {carbs_goal or "not set"}g | Fat: {fat_goal or "not set"}g
+  - Protein: {protein_goal or "not set"}g | Carbs: {carbs_goal or "not set"}g | Fat: {fat_goal or "not set"}g
   - Meals Per Day: {meals_per_day or "not set"}
   {per_meal_budget}
 
@@ -198,30 +200,34 @@ Calories: {calories:.0f} kcal | Protein: {protein:.1f}g | Carbs: {carbs:.1f}g | 
 ═══════════════════════════════════════
 INSTRUCTIONS
 ═══════════════════════════════════════
-Write as if you are talking DIRECTLY to this user.
-- Mention their actual BMI value and category by name.
-- Mention their actual calorie/macro numbers, not placeholders.
-- If they have allergies or restrictions, call them out explicitly.
-- Reference their recent meals if relevant (e.g. "you've been eating X a lot recently").
-- Give a specific portion size recommendation, not vague advice.
-- Verdict must be exactly one of: "Good", "Limit", or "Avoid".
+Write like a sharp, direct nutritionist texting a client — not a report.
+- "analysis": 1 crisp sentence. Lead with the single most important insight for THIS user.
+  No openers like "Given your profile" or "Based on your data". Just the insight.
+  Mention ONE concrete number (BMI, calories, or a macro) max.
+- "suggestion": 1 actionable sentence. Exact portion size + best timing + what to pair it with.
+  No vague advice like "eat in moderation". Be specific.
+- "verdict": exactly one of "Good", "Limit", or "Avoid".
+- "reasoning": the one data point that decided the verdict.
+
+If the user has an allergy or restriction that matches, lead with that — it overrides everything else.
+If they've eaten high-calorie foods recently and this is also high-cal, call it out.
 
 Return ONLY this JSON, no markdown, no extra text:
 {{
-  "analysis": "2-3 sentences referencing user's specific BMI ({bmi_category}), goals, and how this food fits",
-  "suggestion": "Specific advice with exact portion size and best meal time for this user",
+  "analysis": "1 punchy sentence — the most important thing about this food for this specific user",
+  "suggestion": "Exact portion, best meal time, and what to pair it with",
   "verdict": "Good | Limit | Avoid",
-  "reasoning": "One sentence citing the specific user data point that drove this verdict"
+  "reasoning": "The one data point that decided this verdict"
 }}"""
 
     return prompt.strip()
 
 
 def _smart_fallback_analysis(user_data: Dict[str, Any], food: "FoodItem") -> Dict[str, Any]:
-    calories  = _safe_float(getattr(food, "calories", 0))
-    protein   = _safe_float(getattr(food, "protein", 0))
-    fat       = _safe_float(getattr(food, "fat", 0))
-    food_name = getattr(food, "name", "this food").lower()
+    calories       = _safe_float(getattr(food, "calories", 0))
+    protein        = _safe_float(getattr(food, "protein", 0))
+    fat            = _safe_float(getattr(food, "fat", 0))
+    food_name      = getattr(food, "name", "this food").lower()
     food_diet_type = getattr(food, "diet_type", "").lower()
 
     bmi          = user_data["basic"].get("bmi")
@@ -233,44 +239,48 @@ def _smart_fallback_analysis(user_data: Dict[str, Any], food: "FoodItem") -> Dic
     restrictions = user_data["preferences"].get("food_restrictions", [])
     avoid_foods  = user_data["preferences"].get("avoid_foods", [])
 
+    # Allergy check — highest priority
     for allergy in allergies:
         if allergy and allergy.lower() in food_name:
             return {
                 "success": True,
-                "analysis": f"This food likely contains {allergy}, which is on your allergy list. Even trace amounts can cause reactions.",
-                "suggestion": "Avoid this completely. Check labels carefully and look for certified allergen-free alternatives.",
+                "analysis": f"This contains {allergy} — which is on your allergy list.",
+                "suggestion": "Skip it entirely and check labels on any similar products.",
                 "verdict": "Avoid",
                 "reasoning": f"Allergen match: {allergy}",
                 "error": None,
-                "using_fallback": True
+                "using_fallback": True,
             }
 
+    # Restriction / avoid-foods check
     for r in restrictions + avoid_foods:
         if r and r.lower() in food_name:
             return {
                 "success": True,
-                "analysis": f"This food matches '{r}', which is on your avoid list.",
-                "suggestion": f"Skip this one. Find an alternative that fits your {diet_type or 'dietary'} preferences.",
+                "analysis": f"'{r}' is on your avoid list — this one's out.",
+                "suggestion": f"Find a {diet_type or 'diet-friendly'} alternative that hits the same craving.",
                 "verdict": "Avoid",
                 "reasoning": f"Matches avoid/restriction entry: {r}",
                 "error": None,
-                "using_fallback": True
+                "using_fallback": True,
             }
 
+    # Diet type mismatch check
     if diet_type and food_diet_type and diet_type != food_diet_type:
         return {
             "success": True,
-            "analysis": f"You follow a {diet_type} diet but this food is labeled {food_diet_type}.",
-            "suggestion": f"Look for a {diet_type}-certified alternative to stay on track.",
+            "analysis": f"You eat {diet_type} but this is labeled {food_diet_type} — doesn't align.",
+            "suggestion": f"Look for a {diet_type}-certified version of this instead.",
             "verdict": "Avoid",
-            "reasoning": f"Diet type mismatch: you need {diet_type}, food is {food_diet_type}",
+            "reasoning": f"Diet mismatch: need {diet_type}, food is {food_diet_type}",
             "error": None,
-            "using_fallback": True
+            "using_fallback": True,
         }
 
     calorie_pct = (calories / calorie_goal * 100) if calorie_goal else 0
-    bmi_str = f"BMI {bmi:.1f} ({bmi_category})" if bmi else "your profile"
+    bmi_str     = f"BMI {bmi:.1f} ({bmi_category})" if bmi else "your current profile"
 
+    # Verdict logic
     verdict = "Limit"
     if bmi_category == "underweight" and calories > 400:
         verdict = "Good"
@@ -283,23 +293,22 @@ def _smart_fallback_analysis(user_data: Dict[str, Any], food: "FoodItem") -> Dic
     elif bmi_category == "obese" and calories > 500:
         verdict = "Avoid"
 
-    portion_tip = "one serving" if verdict == "Good" else "half a serving" if verdict == "Limit" else "a smaller alternative"
-
+    # Tight, direct copy for each verdict
     if verdict == "Good":
-        analysis   = f"With your {bmi_str}, this food is a reasonable choice. It contributes {calorie_pct:.0f}% of your {calorie_goal} kcal daily goal and provides {protein:.0f}g protein toward your target."
-        suggestion = f"Have {portion_tip} as part of your meal. Best eaten at breakfast or lunch when you need the energy most."
+        analysis   = f"At {calories:.0f} kcal and {protein:.0f}g protein, this fits your {calorie_goal} kcal goal well."
+        suggestion = "Have one serving at breakfast or lunch when you need the energy most."
+        reasoning  = f"{bmi_str} + solid protein-to-calorie ratio"
     elif verdict == "Limit":
-        analysis   = f"Given your {bmi_str} and a daily goal of {calorie_goal} kcal, this food at {calories:.0f} kcal ({calorie_pct:.0f}% of your goal) should be occasional."
-        suggestion = f"Limit yourself to {portion_tip} and pair it with vegetables or lean protein to balance the meal."
+        analysis   = f"At {calorie_pct:.0f}% of your {calorie_goal} kcal daily goal, this works occasionally — not every day."
+        suggestion = "Stick to half a serving; pair with leafy greens or lean protein to keep the meal balanced."
+        reasoning  = f"{bmi_str} — calorie load is borderline at {calories:.0f} kcal"
     else:
-        analysis   = f"With your {bmi_str}, consuming {calories:.0f} kcal ({calorie_pct:.0f}% of your daily goal) from a single item works against your goals."
-        suggestion = f"Skip this for now. Try lean proteins or fibre-rich vegetables that won't spike your calorie intake."
-
-    reasoning = f"Verdict driven by {bmi_str}"
-    if verdict == "Avoid" and calories > 500:
-        reasoning += f" and high calorie load ({calories:.0f} kcal = {calorie_pct:.0f}% of daily goal)"
-    elif verdict == "Good" and protein > 15:
-        reasoning += f" and solid protein content ({protein:.0f}g)"
+        analysis   = f"{calories:.0f} kcal in one item is too steep for your {calorie_goal} kcal goal and {bmi_category} BMI."
+        suggestion = "Swap for a lean protein or veggie-based option — same satisfaction, far fewer calories."
+        reasoning  = (
+            f"{bmi_str} + {calories:.0f} kcal = {calorie_pct:.0f}% of daily goal in one shot"
+            if calories > 500 else bmi_str
+        )
 
     return {
         "success": True,
@@ -308,7 +317,7 @@ def _smart_fallback_analysis(user_data: Dict[str, Any], food: "FoodItem") -> Dic
         "verdict": verdict,
         "reasoning": reasoning,
         "error": None,
-        "using_fallback": True
+        "using_fallback": True,
     }
 
 
@@ -321,19 +330,23 @@ def get_food_advice(user: "User", food: "FoodItem") -> Dict[str, Any]:
             prompt = _build_enhanced_prompt(user_data, food)
 
             print("DEBUG: Sending to Groq API...")
-            print(f"DEBUG: User data populated — basic={bool(user_data['basic'])}, goals={bool(user_data['goals'])}, prefs={bool(user_data['preferences'])}")
+            print(
+                f"DEBUG: User data populated — "
+                f"basic={bool(user_data['basic'])}, "
+                f"goals={bool(user_data['goals'])}, "
+                f"prefs={bool(user_data['preferences'])}"
+            )
 
             completion = client.chat.completions.create(
-                model="llama-3.3-70b-versatile",   # ← updated model
+                model="llama-3.3-70b-versatile",
                 messages=[
                     {
                         "role": "system",
                         "content": (
-                            "You are a clinical nutritionist giving highly personalized dietary advice. "
-                            "Always reference the user's exact BMI, weight, calorie goals, and restrictions in your response. "
-                            "Never give generic advice — every sentence must be specific to the user's data. "
+                            "You are a sharp clinical nutritionist giving direct, personalised dietary advice. "
+                            "Every sentence must reference the user's actual numbers — no generic statements. "
                             "Return only valid JSON with no markdown formatting."
-                        )
+                        ),
                     },
                     {"role": "user", "content": prompt},
                 ],
@@ -354,13 +367,13 @@ def get_food_advice(user: "User", food: "FoodItem") -> Dict[str, Any]:
             parsed = json.loads(raw)
 
             return {
-                "success":       True,
-                "analysis":      parsed.get("analysis", ""),
-                "suggestion":    parsed.get("suggestion", ""),
-                "verdict":       parsed.get("verdict", "Limit"),
-                "reasoning":     parsed.get("reasoning", ""),
-                "error":         None,
-                "using_fallback": False
+                "success":        True,
+                "analysis":       parsed.get("analysis", ""),
+                "suggestion":     parsed.get("suggestion", ""),
+                "verdict":        parsed.get("verdict", "Limit"),
+                "reasoning":      parsed.get("reasoning", ""),
+                "error":          None,
+                "using_fallback": False,
             }
 
         except Exception as e:
@@ -374,11 +387,11 @@ def get_food_advice(user: "User", food: "FoodItem") -> Dict[str, Any]:
         print(f"CRITICAL ERROR: {type(e).__name__}: {e}")
         import traceback; traceback.print_exc()
         return {
-            "success":       False,
-            "analysis":      f"This food contains {_safe_float(getattr(food, 'calories', 0)):.0f} calories.",
-            "suggestion":    "Service error — please try again.",
-            "verdict":       "Limit",
-            "reasoning":     f"Error: {str(e)[:100]}",
-            "error":         str(e),
-            "using_fallback": True
+            "success":        False,
+            "analysis":       f"This food has {_safe_float(getattr(food, 'calories', 0)):.0f} kcal.",
+            "suggestion":     "Service error — please try again.",
+            "verdict":        "Limit",
+            "reasoning":      f"Error: {str(e)[:100]}",
+            "error":          str(e),
+            "using_fallback": True,
         }
