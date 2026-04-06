@@ -10,8 +10,7 @@ def home():
             return redirect(url_for("admin.dashboard"))
         if current_user.is_food_provider():
             return redirect(url_for("provider.provider_dashboard"))
-        return redirect(url_for("user_dashboard.index"))
-    return redirect(url_for("auth.login"))
+    return render_template("home.html")  # ← everyone sees the homepage
 
 @main_bp.route("/privacy")
 def privacy():

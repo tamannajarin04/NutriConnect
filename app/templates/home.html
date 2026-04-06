@@ -1,0 +1,916 @@
+{% extends "base.html" %}
+{% block title %}NutriConnect — Nourish Smarter, Live Better{% endblock %}
+
+{% block extra_css %}
+<link href="https://fonts.googleapis.com/css2?family=Clash+Display:wght@500;600;700&family=Cabinet+Grotesk:wght@400;500;700;800&display=swap" rel="stylesheet">
+<style>
+/* reset page wrapper */
+main.container{max-width:100%!important;padding:0!important;margin:0!important}
+
+:root{
+  --ink:#03080f;
+  --ink2:#060e1e;
+  --ink3:#091528;
+  --glass:rgba(255,255,255,.04);
+  --glass-b:rgba(255,255,255,.07);
+  --glow-b:rgba(56,115,255,.18);
+  --blue:#3b73ff;
+  --blue2:#2257e0;
+  --cyan:#00d4ff;
+  --purple:#7c5cff;
+  --text:#eaf2ff;
+  --muted:rgba(160,195,255,.45);
+  --sub:rgba(160,195,255,.7);
+  --ff-head:'Cabinet Grotesk',sans-serif;
+  --ff-body:'Cabinet Grotesk',sans-serif;
+}
+
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--ink)}
+
+/* ── PAGE BG ── */
+.pg{
+  background:
+    radial-gradient(ellipse 60% 55% at -8% 35%,rgba(56,115,255,.32) 0%,transparent 60%),
+    radial-gradient(ellipse 45% 45% at 110% 5%,rgba(0,212,255,.18) 0%,transparent 58%),
+    radial-gradient(ellipse 35% 40% at 65% 100%,rgba(124,92,255,.14) 0%,transparent 60%),
+    linear-gradient(175deg,#03080f 0%,#06101f 40%,#04091a 100%);
+  min-height:100vh;
+}
+.pg::before{
+  content:'';position:fixed;inset:0;pointer-events:none;
+  background-image:radial-gradient(rgba(56,115,255,.055) 1px,transparent 1px);
+  background-size:28px 28px;
+}
+
+/* ══════════════════════════════════════
+   HERO
+══════════════════════════════════════ */
+.hero{
+  position:relative;isolation:isolate;
+  min-height:100vh;display:grid;
+  align-items:center;overflow:hidden;
+}
+
+/* floating orbs */
+.orb{position:absolute;border-radius:50%;pointer-events:none;filter:blur(90px)}
+.o1{width:650px;height:650px;background:radial-gradient(circle,rgba(56,115,255,.42),transparent 68%);
+    top:-180px;left:-200px;animation:drift 20s ease-in-out infinite}
+.o2{width:480px;height:480px;background:radial-gradient(circle,rgba(0,212,255,.22),transparent 68%);
+    top:60px;right:-100px;animation:drift 26s ease-in-out infinite reverse}
+.o3{width:350px;height:350px;background:radial-gradient(circle,rgba(124,92,255,.18),transparent 68%);
+    bottom:-60px;left:38%;animation:drift 18s ease-in-out infinite 5s}
+@keyframes drift{
+  0%,100%{transform:translate(0,0) scale(1)}
+  33%{transform:translate(28px,-18px) scale(1.04)}
+  66%{transform:translate(-18px,24px) scale(.96)}
+}
+
+.hero-inner{
+  position:relative;z-index:1;
+  max-width:1320px;margin:0 auto;width:100%;
+  padding:6rem 2.5rem 5rem;
+  display:grid;
+  /* left copy gets remaining space, right visual gets fixed 560px */
+  grid-template-columns:1fr 560px;
+  gap:2rem;
+  align-items:center;
+}
+
+/* ── COPY ── */
+.badge{
+  display:inline-flex;align-items:center;gap:.55rem;
+  border:1px solid rgba(56,115,255,.28);
+  background:rgba(56,115,255,.08);
+  backdrop-filter:blur(14px);
+  border-radius:99px;padding:.38rem 1.1rem;margin-bottom:2rem;
+  animation:up .55s ease both;
+}
+.badge-dot{width:7px;height:7px;border-radius:50%;background:var(--cyan);
+  box-shadow:0 0 10px var(--cyan);animation:pulse 2.2s ease-in-out infinite}
+.badge span{font-family:var(--ff-body);font-size:.67rem;font-weight:700;
+  letter-spacing:.1em;text-transform:uppercase;color:rgba(100,180,255,.85)}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.2}}
+
+.headline{
+  font-family:var(--ff-head);
+  font-size:clamp(3.2rem,5.5vw,5rem);
+  font-weight:800;line-height:.96;
+  letter-spacing:-.05em;color:var(--text);
+  margin-bottom:1.5rem;
+  animation:up .55s .06s ease both;
+}
+.headline .g{
+  background:linear-gradient(130deg,#60a5fa 0%,#00d4ff 55%,#a78bfa 100%);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+}
+
+.sub{
+  font-family:var(--ff-body);font-size:1.08rem;line-height:1.8;
+  color:var(--sub);max-width:520px;margin-bottom:2.6rem;
+  animation:up .55s .13s ease both;
+}
+
+.ctas{
+  display:flex;align-items:center;gap:1.1rem;flex-wrap:wrap;
+  margin-bottom:3.2rem;animation:up .55s .2s ease both;
+}
+
+/* primary CTA */
+.btn-p{
+  display:inline-flex;align-items:center;gap:.6rem;
+  background:linear-gradient(135deg,#3b73ff,#2257e0);
+  color:#fff;border:none;border-radius:16px;
+  padding:.95rem 1.85rem;font-size:.9rem;font-weight:800;
+  font-family:var(--ff-body);text-decoration:none;cursor:pointer;
+  box-shadow:0 8px 36px rgba(56,115,255,.5),inset 0 1px 0 rgba(255,255,255,.15);
+  transition:all .22s;position:relative;overflow:hidden;
+}
+.btn-p::before{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(135deg,rgba(255,255,255,.16),transparent 55%);
+  border-radius:inherit;
+}
+.btn-p:hover{color:#fff;transform:translateY(-3px);
+  box-shadow:0 16px 48px rgba(56,115,255,.6),inset 0 1px 0 rgba(255,255,255,.18)}
+
+/* ghost CTA */
+.btn-g{
+  display:inline-flex;align-items:center;gap:.55rem;
+  background:rgba(255,255,255,.04);
+  border:1px solid rgba(255,255,255,.1);
+  backdrop-filter:blur(14px);
+  color:rgba(255,255,255,.65);border-radius:16px;
+  padding:.95rem 1.6rem;font-size:.9rem;font-weight:700;
+  font-family:var(--ff-body);text-decoration:none;cursor:pointer;
+  transition:all .22s;
+}
+.btn-g:hover{background:rgba(255,255,255,.09);color:#fff;
+  border-color:rgba(56,115,255,.4);box-shadow:0 0 28px rgba(56,115,255,.14)}
+
+/* stats */
+.stats{
+  display:flex;gap:2.8rem;
+  padding-top:2.2rem;
+  border-top:1px solid rgba(255,255,255,.07);
+  animation:up .55s .27s ease both;
+}
+.sv{font-family:var(--ff-head);font-size:2rem;font-weight:800;color:var(--text);line-height:1}
+.sv em{font-style:normal;color:var(--cyan)}
+.sl{font-family:var(--ff-body);font-size:.7rem;color:var(--muted);margin-top:.3rem;letter-spacing:.03em}
+
+/* ══════════════════════════════════════
+   VISUAL COLUMN — fully self-contained
+══════════════════════════════════════ */
+.visual{
+  position:relative;
+  /* 560px column — card is 320px wide, chips live in 120px padding each side */
+  width:100%;
+  height:600px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  animation:up .65s .1s ease both;
+}
+
+/* ── Dashboard card ── */
+.dash-card{
+  position:relative;
+  width:320px;
+  flex-shrink:0;
+  background:rgba(6,14,30,.9);
+  backdrop-filter:blur(28px) saturate(1.8);
+  -webkit-backdrop-filter:blur(28px) saturate(1.8);
+  border:1px solid rgba(255,255,255,.1);
+  border-radius:26px;
+  overflow:hidden;
+  box-shadow:
+    0 50px 100px rgba(0,0,0,.7),
+    0 0 0 1px rgba(56,115,255,.08),
+    inset 0 1px 0 rgba(255,255,255,.07);
+  transform:perspective(1000px) rotateY(-4deg) rotateX(2deg);
+  transition:transform .55s ease;
+  z-index:2;
+}
+.dash-card:hover{
+  transform:perspective(1000px) rotateY(-1deg) rotateX(.5deg);
+}
+
+/* hero photo */
+.dc-photo{
+  width:100%;
+  height:190px;
+  object-fit:cover;
+  object-position:center 35%;
+  display:block;
+  filter:saturate(1.3) brightness(.82) contrast(1.06);
+}
+.dc-photo-fade{
+  position:absolute;
+  top:0;left:0;right:0;
+  height:190px;
+  background:linear-gradient(180deg,rgba(3,8,15,.15) 0%,transparent 38%,rgba(6,14,30,.92) 100%);
+  pointer-events:none;
+}
+.dc-photo-tag{
+  position:absolute;
+  top:11px;left:12px;
+  display:flex;align-items:center;gap:6px;
+  background:rgba(3,8,15,.65);
+  backdrop-filter:blur(12px);
+  border:1px solid rgba(255,255,255,.1);
+  border-radius:99px;
+  padding:4px 11px;
+  font-family:var(--ff-body);font-size:.58rem;font-weight:700;
+  letter-spacing:.07em;text-transform:uppercase;
+  color:rgba(200,230,255,.72);
+}
+.dc-tag-dot{
+  width:5px;height:5px;border-radius:50%;
+  background:#00d4ff;box-shadow:0 0 8px #00d4ff;
+  animation:pulse 2.2s ease-in-out infinite;
+}
+
+/* card body */
+.dc-body{padding:1.1rem 1.25rem 1.4rem}
+
+.dc-meal-row{
+  display:flex;align-items:center;justify-content:space-between;
+  margin-bottom:1rem;
+}
+.dc-meal-name{
+  font-family:var(--ff-head);font-size:.95rem;font-weight:800;
+  color:var(--text);letter-spacing:-.02em;
+}
+.dc-meal-kcal{
+  font-family:var(--ff-body);font-size:.68rem;font-weight:700;
+  color:#00d4ff;
+  background:rgba(0,212,255,.1);border:1px solid rgba(0,212,255,.22);
+  border-radius:99px;padding:.2rem .65rem;white-space:nowrap;
+}
+
+/* macros */
+.dc-macros{
+  display:grid;grid-template-columns:repeat(3,1fr);
+  gap:.6rem;margin-bottom:1.1rem;
+}
+.dc-macro{
+  background:rgba(255,255,255,.04);
+  border:1px solid rgba(255,255,255,.07);
+  border-radius:13px;padding:.6rem .5rem;
+  text-align:center;
+}
+.dc-macro-v{
+  font-family:var(--ff-head);font-size:.9rem;font-weight:800;
+  line-height:1;margin-bottom:.2rem;
+}
+.dc-macro-l{
+  font-family:var(--ff-body);font-size:.55rem;
+  color:rgba(160,195,255,.35);text-transform:uppercase;letter-spacing:.07em;
+}
+
+/* progress */
+.dc-prog-row{
+  display:flex;align-items:center;justify-content:space-between;
+  margin-bottom:.42rem;
+}
+.dc-prog-label{font-family:var(--ff-body);font-size:.65rem;color:rgba(160,195,255,.42)}
+.dc-prog-nums{font-family:var(--ff-head);font-size:.68rem;font-weight:800;color:var(--text)}
+.dc-prog-nums em{font-style:normal;color:rgba(160,195,255,.3);font-weight:600;font-size:.65rem}
+.dc-bar{height:5px;border-radius:99px;background:rgba(255,255,255,.07);overflow:hidden;margin-bottom:1.1rem}
+.dc-bar-fill{height:100%;border-radius:99px;background:linear-gradient(90deg,#2257e0,#00d4ff);width:68%}
+
+/* meal log */
+.dc-meal-item{
+  display:flex;align-items:center;gap:.7rem;
+  padding:.48rem 0;
+  border-bottom:1px solid rgba(255,255,255,.04);
+}
+.dc-meal-item:last-child{border-bottom:none}
+.dc-meal-thumb{
+  width:34px;height:34px;border-radius:9px;overflow:hidden;flex-shrink:0;
+}
+.dc-meal-thumb img{
+  width:100%;height:100%;object-fit:cover;
+  filter:saturate(1.3) brightness(.85);
+}
+.dc-meal-info{flex:1;min-width:0}
+.dc-meal-info-name{
+  font-family:var(--ff-body);font-size:.7rem;font-weight:700;
+  color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+.dc-meal-info-time{font-family:var(--ff-body);font-size:.56rem;color:rgba(160,195,255,.3)}
+.dc-meal-info-k{
+  font-family:var(--ff-head);font-size:.68rem;font-weight:800;
+  color:rgba(160,195,255,.45);flex-shrink:0;
+}
+
+/* ── Floating chips — positioned WITHIN .visual using absolute ── */
+/* .visual is 560px wide, card is 320px centered → card left edge ≈ 120px */
+.fc{
+  position:absolute;
+  background:rgba(6,14,30,.85);
+  backdrop-filter:blur(22px) saturate(1.6);
+  -webkit-backdrop-filter:blur(22px) saturate(1.6);
+  border:1px solid rgba(255,255,255,.1);
+  border-radius:16px;
+  padding:.8rem 1rem;
+  box-shadow:0 12px 40px rgba(0,0,0,.55),0 0 0 1px rgba(56,115,255,.06);
+  white-space:nowrap;
+  z-index:10;
+}
+
+/* BMI — top-left of visual area */
+.fc1{
+  top:60px;
+  left:0px;
+  animation:gf 5s ease-in-out infinite;
+}
+/* Streak — right side middle */
+.fc2{
+  top:50%;
+  right:0px;
+  transform:translateY(-50%);
+  animation:gf2 6s ease-in-out infinite 1.8s;
+}
+/* Protein — bottom-left */
+.fc3{
+  bottom:70px;
+  left:0px;
+  animation:gf 4.8s ease-in-out infinite .9s;
+}
+
+@keyframes gf{
+  0%,100%{transform:translateY(0)}
+  50%{transform:translateY(-8px)}
+}
+@keyframes gf2{
+  0%,100%{transform:translateY(-50%)}
+  50%{transform:translateY(calc(-50% - 8px))}
+}
+
+.fc-ico{font-size:1rem;margin-bottom:.28rem}
+.fc-lbl{
+  font-family:var(--ff-body);font-size:.54rem;font-weight:700;
+  color:rgba(160,195,255,.3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:.1rem;
+}
+.fc-val{
+  font-family:var(--ff-head);font-size:.95rem;font-weight:800;color:var(--text);line-height:1;
+}
+.fc-val .c{color:var(--cyan)}
+.fc-val .b{color:#7da8ff}
+.fc-sub{font-family:var(--ff-body);font-size:.55rem;color:rgba(160,195,255,.28);margin-top:.07rem}
+.fc-sparkline{
+  display:flex;align-items:flex-end;gap:3px;margin-top:.5rem;height:20px;
+}
+.fc-bar-s{width:7px;border-radius:3px;background:rgba(56,115,255,.22)}
+.fc-bar-s.a{background:linear-gradient(180deg,#3b73ff,#00d4ff)}
+
+/* ── hero bottom line ── */
+.hero-line{
+  position:absolute;bottom:0;left:0;right:0;height:1px;
+  background:linear-gradient(90deg,transparent 5%,rgba(56,115,255,.5) 35%,rgba(0,212,255,.4) 65%,transparent 95%);
+}
+
+/* scroll hint */
+.scroll-h{
+  position:absolute;bottom:2rem;left:50%;transform:translateX(-50%);
+  display:flex;flex-direction:column;align-items:center;gap:.45rem;z-index:2;
+}
+.scroll-h span{font-family:var(--ff-body);font-size:.6rem;color:rgba(255,255,255,.15);
+  letter-spacing:.1em;text-transform:uppercase}
+.scroll-ring{width:28px;height:28px;border:1px solid rgba(255,255,255,.1);border-radius:50%;
+  display:flex;align-items:center;justify-content:center;animation:bounce 2.5s ease-in-out infinite}
+.scroll-ring i{font-size:.5rem;color:rgba(255,255,255,.18)}
+@keyframes bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(6px)}}
+
+/* ══════════════════════════════════════
+   FEATURES STRIP
+══════════════════════════════════════ */
+.strip{
+  background:rgba(255,255,255,.022);
+  border-top:1px solid rgba(255,255,255,.055);
+  border-bottom:1px solid rgba(255,255,255,.055);
+  backdrop-filter:blur(8px);
+  padding:2.8rem 0;
+}
+.strip-in{
+  max-width:1320px;margin:0 auto;padding:0 2.5rem;
+  display:grid;grid-template-columns:repeat(4,1fr);gap:1.8rem;
+}
+.feat{display:flex;align-items:flex-start;gap:1.1rem}
+.feat-ico{
+  width:44px;height:44px;border-radius:13px;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;font-size:17px;
+  background:rgba(255,255,255,.045);border:1px solid rgba(255,255,255,.07);
+  backdrop-filter:blur(10px);
+}
+.feat-n{font-family:var(--ff-head);font-size:.84rem;font-weight:700;
+  color:var(--text);margin-bottom:.24rem}
+.feat-d{font-family:var(--ff-body);font-size:.72rem;color:var(--muted);line-height:1.65}
+
+/* ══════════════════════════════════════
+   BENTO PHOTO GRID
+══════════════════════════════════════ */
+.bento-wrap{max-width:1320px;margin:0 auto;padding:5rem 2.5rem 1rem}
+.bento-head{text-align:center;margin-bottom:3rem}
+.chip{
+  display:inline-flex;align-items:center;gap:.5rem;
+  background:rgba(56,115,255,.09);border:1px solid rgba(56,115,255,.22);
+  backdrop-filter:blur(10px);border-radius:99px;
+  padding:.3rem 1rem;margin-bottom:1rem;
+  font-family:var(--ff-body);font-size:.67rem;font-weight:700;
+  letter-spacing:.08em;text-transform:uppercase;color:#7da8ff;
+}
+.sec-title{
+  font-family:var(--ff-head);
+  font-size:clamp(2rem,3.8vw,3rem);font-weight:800;
+  color:var(--text);letter-spacing:-.04em;line-height:1.08;
+  margin-bottom:.8rem;
+}
+.sec-sub{
+  font-family:var(--ff-body);font-size:.95rem;
+  color:var(--muted);line-height:1.75;max-width:480px;margin:0 auto;
+}
+.bento{
+  display:grid;
+  grid-template-columns:1.6fr 1fr 1fr;
+  grid-template-rows:240px 240px;
+  gap:1.1rem;
+}
+.bcell{
+  border-radius:22px;overflow:hidden;position:relative;
+  border:1px solid rgba(255,255,255,.07);
+  box-shadow:0 24px 70px rgba(0,0,0,.45);
+}
+.bcell img{
+  width:100%;height:100%;object-fit:cover;
+  filter:saturate(1.35) brightness(.84) contrast(1.05);
+  transition:transform .5s ease,filter .5s ease;
+}
+.bcell:hover img{transform:scale(1.07);filter:saturate(1.5) brightness(.9) contrast(1.08)}
+.bcell-tall{grid-row:1/3}
+.bfade{position:absolute;inset:0;
+  background:linear-gradient(180deg,transparent 40%,rgba(3,8,15,.75) 100%)}
+.btag{
+  position:absolute;bottom:.9rem;left:.9rem;
+  font-family:var(--ff-body);font-size:.63rem;font-weight:700;
+  color:rgba(200,230,255,.6);letter-spacing:.06em;text-transform:uppercase;
+  background:rgba(6,14,30,.65);backdrop-filter:blur(8px);
+  border:1px solid rgba(255,255,255,.09);border-radius:9px;
+  padding:.26rem .65rem;
+}
+.bstat{
+  position:absolute;top:1rem;left:1rem;
+  background:rgba(6,14,30,.82);backdrop-filter:blur(18px);
+  border:1px solid rgba(255,255,255,.1);border-radius:16px;
+  padding:.85rem 1.05rem;
+}
+.bstat-v{
+  font-family:var(--ff-head);font-size:1.6rem;font-weight:800;color:var(--text);line-height:1;
+}
+.bstat-v em{font-style:normal;color:var(--cyan)}
+.bstat-l{font-family:var(--ff-body);font-size:.6rem;color:rgba(160,195,255,.38);margin-top:.12rem;}
+
+/* ══════════════════════════════════════
+   HOW IT WORKS
+══════════════════════════════════════ */
+.how{max-width:1320px;margin:0 auto;padding:6rem 2.5rem}
+.how-top{
+  display:flex;align-items:flex-start;
+  justify-content:space-between;flex-wrap:wrap;gap:2rem;margin-bottom:3.5rem;
+}
+.steps{display:grid;grid-template-columns:repeat(3,1fr);gap:1.5rem}
+.step{
+  background:rgba(255,255,255,.025);
+  backdrop-filter:blur(24px) saturate(1.4);
+  -webkit-backdrop-filter:blur(24px) saturate(1.4);
+  border:1px solid rgba(255,255,255,.065);
+  border-radius:22px;padding:2rem;
+  position:relative;overflow:hidden;
+  transition:transform .28s,box-shadow .28s,border-color .28s;
+}
+.step::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:2px;
+  background:linear-gradient(90deg,#2257e0,#00d4ff);
+  border-radius:22px 22px 0 0;
+}
+.step::after{
+  content:'';position:absolute;inset:0;border-radius:22px;
+  background:radial-gradient(ellipse 80% 55% at 15% 0%,rgba(56,115,255,.055),transparent 68%);
+  pointer-events:none;
+}
+.step:hover{
+  transform:translateY(-6px);
+  box-shadow:0 24px 70px rgba(0,0,0,.4),0 0 50px rgba(56,115,255,.1);
+  border-color:rgba(100,160,255,.22);
+}
+.step-n{
+  font-family:var(--ff-head);font-size:3.2rem;font-weight:800;line-height:1;
+  color:rgba(100,160,255,.1);margin-bottom:1.1rem;
+}
+.step-ico{
+  width:52px;height:52px;border-radius:16px;
+  background:rgba(56,115,255,.1);border:1px solid rgba(56,115,255,.18);
+  display:flex;align-items:center;justify-content:center;
+  font-size:22px;margin-bottom:1.1rem;color:#7da8ff;
+}
+.step-t{font-family:var(--ff-head);font-size:.97rem;font-weight:800;
+  color:var(--text);margin-bottom:.55rem}
+.step-d{font-family:var(--ff-body);font-size:.78rem;color:var(--muted);line-height:1.75}
+
+/* ══════════════════════════════════════
+   CTA BAND
+══════════════════════════════════════ */
+.cta{
+  position:relative;overflow:hidden;text-align:center;
+  padding:7rem 2.5rem;
+  background:
+    radial-gradient(ellipse 60% 200% at -5% 50%,rgba(56,115,255,.38) 0%,transparent 55%),
+    radial-gradient(ellipse 50% 130% at 108% 50%,rgba(0,212,255,.22) 0%,transparent 55%),
+    radial-gradient(ellipse 40% 100% at 50% 100%,rgba(124,92,255,.1) 0%,transparent 60%),
+    linear-gradient(165deg,#030910 0%,#040d1b 50%,#030812 100%);
+  border-top:1px solid rgba(56,115,255,.1);
+}
+.cta::before{
+  content:'';position:absolute;inset:0;pointer-events:none;
+  background-image:radial-gradient(rgba(255,255,255,.04) 1px,transparent 1px);
+  background-size:26px 26px;
+}
+.cta::after{
+  content:'';
+  position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
+  width:600px;height:300px;border-radius:50%;
+  background:radial-gradient(ellipse,rgba(56,115,255,.12),transparent 70%);
+  filter:blur(40px);pointer-events:none;
+}
+.cta-in{position:relative;z-index:1;max-width:640px;margin:0 auto}
+.cta-title{
+  font-family:var(--ff-head);
+  font-size:clamp(2.4rem,4.5vw,3.8rem);font-weight:800;
+  color:var(--text);letter-spacing:-.05em;line-height:1.0;margin-bottom:1.1rem;
+}
+.cta-title .g{
+  background:linear-gradient(130deg,#60a5fa,#00d4ff,#a78bfa);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+}
+.cta-sub{
+  font-family:var(--ff-body);font-size:.97rem;
+  color:rgba(160,195,255,.42);margin-bottom:2.4rem;line-height:1.8;
+}
+.cta-btns{display:flex;align-items:center;justify-content:center;gap:1.1rem;flex-wrap:wrap}
+
+/* ══════════════════════════════════════
+   ANIMATIONS
+══════════════════════════════════════ */
+@keyframes up{
+  from{opacity:0;transform:translateY(20px)}
+  to{opacity:1;transform:translateY(0)}
+}
+.reveal{opacity:0;transform:translateY(24px);transition:opacity .65s ease,transform .65s ease}
+.reveal.in{opacity:1;transform:none}
+
+/* ══════════════════════════════════════
+   RESPONSIVE
+══════════════════════════════════════ */
+@media(max-width:1120px){
+  .hero-inner{grid-template-columns:1fr;gap:3rem}
+  .visual{height:520px;width:100%}
+  .strip-in{grid-template-columns:repeat(2,1fr)}
+  .steps{grid-template-columns:repeat(2,1fr)}
+  .bento{grid-template-columns:1fr 1fr;grid-template-rows:220px 220px 220px}
+  .bcell-tall{grid-column:1/3;grid-row:1}
+}
+@media(max-width:680px){
+  .hero-inner{padding:4rem 1.5rem 3.5rem}
+  .visual{height:460px}
+  .dash-card{width:280px}
+  .dc-photo{height:160px}
+  .fc1,.fc2,.fc3{display:none}
+  .strip-in{grid-template-columns:1fr;gap:1.2rem;padding:0 1.5rem}
+  .steps{grid-template-columns:1fr}
+  .how{padding:4rem 1.5rem}
+  .bento-wrap{padding:4rem 1.5rem 1rem}
+  .bento{grid-template-columns:1fr;grid-template-rows:auto}
+  .bcell-tall{grid-column:1;height:240px}
+  .bcell{height:200px}
+  .cta{padding:5rem 1.5rem}
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="pg">
+
+<!-- ═══════════ HERO ═══════════ -->
+<section class="hero">
+  <div class="orb o1"></div>
+  <div class="orb o2"></div>
+  <div class="orb o3"></div>
+  <div class="hero-line"></div>
+
+  <div class="hero-inner">
+
+    <!-- COPY LEFT -->
+    <div class="copy">
+      <div class="badge">
+        <div class="badge-dot"></div>
+        <span>AI-Powered Nutrition &nbsp;·&nbsp; Free Forever</span>
+      </div>
+
+      <h1 class="headline">
+        Your body.<br>Your goals.<br><span class="g">Your fuel.</span>
+      </h1>
+
+      <p class="sub">
+        Track macros, BMI, and nutrition goals in one beautiful dashboard.
+        NutriAI delivers personalised coaching that actually works.
+      </p>
+
+      <div class="ctas">
+        {% if current_user.is_authenticated %}
+          <a href="{{ url_for('user_dashboard.index') }}" class="btn-p">
+            <i class="fas fa-table-cells-large"></i> Go to Dashboard
+          </a>
+        {% else %}
+          <a href="{{ url_for('auth.register') }}" class="btn-p">
+            <i class="fas fa-seedling"></i> Start for Free
+          </a>
+          <a href="{{ url_for('auth.login') }}" class="btn-g">
+            <i class="fas fa-right-to-bracket"></i> Sign In
+          </a>
+        {% endif %}
+      </div>
+
+      <div class="stats">
+        <div><div class="sv">2<em>k+</em></div><div class="sl">Active users</div></div>
+        <div><div class="sv">500<em>+</em></div><div class="sl">Foods in database</div></div>
+        <div><div class="sv">98<em>%</em></div><div class="sl">Goal success rate</div></div>
+      </div>
+    </div>
+
+    <!-- VISUAL RIGHT — all chips anchored inside this 560px column -->
+    <div class="visual">
+
+      <!-- Chip: BMI — top-left -->
+      <div class="fc fc1">
+        <div class="fc-ico">⚖️</div>
+        <div class="fc-lbl">BMI Score</div>
+        <div class="fc-val"><span class="b">22.4</span></div>
+        <div class="fc-sub">Healthy range</div>
+      </div>
+
+      <!-- Chip: Streak — right side -->
+      <div class="fc fc2">
+        <div class="fc-ico">🔥</div>
+        <div class="fc-lbl">Streak</div>
+        <div class="fc-val"><span class="c">14</span> days</div>
+        <div class="fc-sub">Personal best!</div>
+        <div class="fc-sparkline">
+          <div class="fc-bar-s a" style="height:10px"></div>
+          <div class="fc-bar-s a" style="height:14px"></div>
+          <div class="fc-bar-s"   style="height:8px"></div>
+          <div class="fc-bar-s a" style="height:16px"></div>
+          <div class="fc-bar-s a" style="height:20px"></div>
+          <div class="fc-bar-s a" style="height:20px"></div>
+          <div class="fc-bar-s a" style="height:20px"></div>
+        </div>
+      </div>
+
+      <!-- Chip: Protein — bottom-left -->
+      <div class="fc fc3">
+        <div class="fc-ico">💪</div>
+        <div class="fc-lbl">Protein</div>
+        <div class="fc-val"><span class="b">142g</span><span style="font-size:.65rem;color:rgba(255,255,255,.2);font-weight:600"> / 200g</span></div>
+        <div class="fc-sub">On track · 58g left</div>
+      </div>
+
+      <!-- Dashboard Card -->
+      <div class="dash-card">
+
+        <img
+          class="dc-photo"
+          src="https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=800&q=90&auto=format&fit=crop&crop=top"
+          alt="Colourful healthy meal bowl">
+        <div class="dc-photo-fade"></div>
+        <div class="dc-photo-tag">
+          <div class="dc-tag-dot"></div>
+          Today's Lunch
+        </div>
+
+        <div class="dc-body">
+
+          <div class="dc-meal-row">
+            <div class="dc-meal-name">Quinoa Power Bowl</div>
+            <div class="dc-meal-kcal">487 kcal</div>
+          </div>
+
+          <div class="dc-macros">
+            <div class="dc-macro">
+              <div class="dc-macro-v" style="color:#60a5fa">48g</div>
+              <div class="dc-macro-l">Carbs</div>
+            </div>
+            <div class="dc-macro">
+              <div class="dc-macro-v" style="color:#a78bfa">32g</div>
+              <div class="dc-macro-l">Protein</div>
+            </div>
+            <div class="dc-macro">
+              <div class="dc-macro-v" style="color:#34d399">14g</div>
+              <div class="dc-macro-l">Fat</div>
+            </div>
+          </div>
+
+          <div class="dc-prog-row">
+            <div class="dc-prog-label">Daily Calories</div>
+            <div class="dc-prog-nums">1,420 <em>/ 2,100 kcal</em></div>
+          </div>
+          <div class="dc-bar"><div class="dc-bar-fill"></div></div>
+
+          <div class="dc-meal-item">
+            <div class="dc-meal-thumb">
+              <img src="https://images.unsplash.com/photo-1525351484163-7529414344d8?w=200&q=80&auto=format&fit=crop&crop=center" alt="">
+            </div>
+            <div class="dc-meal-info">
+              <div class="dc-meal-info-name">Greek Yogurt Parfait</div>
+              <div class="dc-meal-info-time">Breakfast · 8:14 AM</div>
+            </div>
+            <div class="dc-meal-info-k">312 kcal</div>
+          </div>
+
+          <div class="dc-meal-item">
+            <div class="dc-meal-thumb">
+              <img src="https://images.unsplash.com/photo-1547592166-23ac45744acd?w=200&q=80&auto=format&fit=crop&crop=center" alt="">
+            </div>
+            <div class="dc-meal-info">
+              <div class="dc-meal-info-name">Salmon Poke Bowl</div>
+              <div class="dc-meal-info-time">Snack · 10:45 AM</div>
+            </div>
+            <div class="dc-meal-info-k">621 kcal</div>
+          </div>
+
+        </div>
+      </div>
+
+    </div><!-- /visual -->
+  </div><!-- /hero-inner -->
+
+  <div class="scroll-h">
+    <span>Scroll</span>
+    <div class="scroll-ring"><i class="fas fa-chevron-down"></i></div>
+  </div>
+</section>
+
+<!-- ═══════════ FEATURES STRIP ═══════════ -->
+<section class="strip">
+  <div class="strip-in">
+    <div class="feat reveal">
+      <div class="feat-ico" style="color:#60a5fa"><i class="fas fa-fire-flame-curved"></i></div>
+      <div>
+        <div class="feat-n">Macro Tracking</div>
+        <div class="feat-d">Live calories, protein, carbs, and fat vs. your daily goals.</div>
+      </div>
+    </div>
+    <div class="feat reveal">
+      <div class="feat-ico" style="color:#22d3ee"><i class="fas fa-weight-scale"></i></div>
+      <div>
+        <div class="feat-n">BMI Calculator</div>
+        <div class="feat-d">Track body mass index over time with visual history charts.</div>
+      </div>
+    </div>
+    <div class="feat reveal">
+      <div class="feat-ico" style="color:#a78bfa"><i class="fas fa-robot"></i></div>
+      <div>
+        <div class="feat-n">NutriAI Coach</div>
+        <div class="feat-d">AI suggestions tailored exactly to your body and goals.</div>
+      </div>
+    </div>
+    <div class="feat reveal">
+      <div class="feat-ico" style="color:#f59e0b"><i class="fas fa-cart-shopping"></i></div>
+      <div>
+        <div class="feat-n">Food Ordering</div>
+        <div class="feat-d">Order healthy meals that match your dietary preferences.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════ BENTO PHOTO GRID ═══════════ -->
+<div class="bento-wrap">
+  <div class="bento-head reveal">
+    <div class="chip"><i class="fas fa-leaf"></i>&nbsp; Real food. Real results.</div>
+    <h2 class="sec-title">Eat well. Feel incredible.</h2>
+    <p class="sec-sub">Discover thousands of nutrient-rich meals and make every bite count.</p>
+  </div>
+
+  <div class="bento reveal">
+    <div class="bcell bcell-tall">
+      <img src="https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=900&q=90&auto=format&fit=crop&crop=center" alt="Colourful nutrition spread" loading="lazy">
+      <div class="bfade"></div>
+      <div class="bstat">
+        <div class="bstat-v">98<em>%</em></div>
+        <div class="bstat-l">Goal success rate</div>
+      </div>
+      <div class="btag">Nutrition</div>
+    </div>
+    <div class="bcell">
+      <img src="https://images.unsplash.com/photo-1547592166-23ac45744acd?w=700&q=90&auto=format&fit=crop&crop=center" alt="Poke bowl" loading="lazy">
+      <div class="bfade"></div>
+      <div class="btag">Poke Bowl</div>
+    </div>
+    <div class="bcell">
+      <img src="https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=700&q=90&auto=format&fit=crop&crop=center" alt="Healthy food spread" loading="lazy">
+      <div class="bfade"></div>
+      <div class="btag">Clean Eating</div>
+    </div>
+    <div class="bcell">
+      <img src="https://images.unsplash.com/photo-1490474418585-ba9bad8fd0ea?w=700&q=90&auto=format&fit=crop&crop=center" alt="Smoothie bowl" loading="lazy">
+      <div class="bfade"></div>
+      <div class="btag">Smoothie Bowl</div>
+    </div>
+    <div class="bcell">
+      <img src="https://images.unsplash.com/photo-1567620905732-2d1ec7ab7445?w=700&q=90&auto=format&fit=crop&crop=center" alt="Healthy breakfast" loading="lazy">
+      <div class="bfade"></div>
+      <div class="btag">Breakfast</div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ HOW IT WORKS ═══════════ -->
+<section class="how">
+  <div class="how-top">
+    <div class="reveal">
+      <div class="chip"><i class="fas fa-circle-nodes"></i>&nbsp; How it works</div>
+      <h2 class="sec-title">Three steps to a<br>healthier you</h2>
+      <p class="sec-sub">NutriConnect makes nutrition effortless and keeps you motivated every day.</p>
+    </div>
+    {% if not current_user.is_authenticated %}
+    <div style="display:flex;align-items:center;padding-top:1rem" class="reveal">
+      <a href="{{ url_for('auth.register') }}" class="btn-p">
+        <i class="fas fa-arrow-right"></i> Start for free
+      </a>
+    </div>
+    {% endif %}
+  </div>
+
+  <div class="steps">
+    <div class="step reveal">
+      <div class="step-n">01</div>
+      <div class="step-ico"><i class="fas fa-user-pen"></i></div>
+      <div class="step-t">Set up your profile</div>
+      <div class="step-d">Add your goals, macros, and diet preferences in under two minutes. We do the rest.</div>
+    </div>
+    <div class="step reveal" style="transition-delay:.1s">
+      <div class="step-n">02</div>
+      <div class="step-ico"><i class="fas fa-magnifying-glass"></i></div>
+      <div class="step-t">Find &amp; log your food</div>
+      <div class="step-d">Search our full food database, log each meal, and watch your progress update live.</div>
+    </div>
+    <div class="step reveal" style="transition-delay:.2s">
+      <div class="step-n">03</div>
+      <div class="step-ico"><i class="fas fa-chart-line"></i></div>
+      <div class="step-t">Hit your goals</div>
+      <div class="step-d">Visual dashboards and AI coaching guide you every single day until you succeed.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════ CTA BAND ═══════════ -->
+<section class="cta">
+  <div class="cta-in reveal">
+    <h2 class="cta-title">Ready to eat<br><span class="g">smarter?</span></h2>
+    <p class="cta-sub">
+      Join thousands of users who transformed their health with NutriConnect.
+      Free to start — powerful from day one.
+    </p>
+    <div class="cta-btns">
+      {% if current_user.is_authenticated %}
+        <a href="{{ url_for('user_dashboard.index') }}" class="btn-p">
+          <i class="fas fa-table-cells-large"></i> Go to Dashboard
+        </a>
+      {% else %}
+        <a href="{{ url_for('auth.register') }}" class="btn-p">
+          <i class="fas fa-seedling"></i> Create Free Account
+        </a>
+        <a href="{{ url_for('auth.login') }}" class="btn-g">
+          <i class="fas fa-right-to-bracket"></i> Sign In
+        </a>
+      {% endif %}
+    </div>
+  </div>
+</section>
+
+</div><!-- /pg -->
+
+<script>
+(function(){
+  var els=document.querySelectorAll('.reveal');
+  if(!els.length)return;
+  var io=new IntersectionObserver(function(entries){
+    entries.forEach(function(e){
+      if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target)}
+    });
+  },{threshold:.12});
+  els.forEach(function(el){io.observe(el)});
+})();
+</script>
+{% endblock %}
