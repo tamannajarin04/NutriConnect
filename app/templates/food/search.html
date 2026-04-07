@@ -1082,7 +1082,7 @@
 })();
 
 /* ════════════════════════════════════════════════════════════════════════════
-   AI FOOD ADVICE — v2 with circular macro rings
+   AI FOOD ADVICE — localStorage caching (24h TTL, zero re-calls on cache hit)
 ════════════════════════════════════════════════════════════════════════════ */
 (function () {
   'use strict';
@@ -1097,16 +1097,49 @@
   /* Daily reference values for ring % */
   const DAILY = { cal: 2000, prot: 200, carb: 250, fat: 65 };
 
-  /* Ring circumference for r=17: 2π×17 ≈ 106.8 */
-  const RING_C = 106.8;
+  /* Circumferences */
+  const RING_C  = 106.8;   /* 2π × 17 (macro rings r=17) */
+  const SCORE_C = 94.25;   /* 2π × 15 (score donut r=15) */
 
-  /* Score arc circumference for r=15: 2π×15 ≈ 94.25 */
-  const SCORE_C = 94.25;
+  /* ── localStorage cache helpers ──────────────────────────────
+     Key format : nc_advice_<foodId>
+     Value      : JSON { data: <API response>, ts: <epoch ms> }
+     TTL        : 24 hours — advice won't change within a day
+  ────────────────────────────────────────────────────────────── */
+  const CACHE_PREFIX = 'nc_advice_';
+  const CACHE_TTL_MS = 24 * 60 * 60 * 1000; // 24 hours
 
+  function cacheGet(foodId) {
+    try {
+      const raw = localStorage.getItem(CACHE_PREFIX + foodId);
+      if (!raw) return null;
+      const { data, ts } = JSON.parse(raw);
+      if (Date.now() - ts > CACHE_TTL_MS) {
+        localStorage.removeItem(CACHE_PREFIX + foodId);
+        return null;
+      }
+      return data;
+    } catch {
+      return null; // parse error or storage disabled
+    }
+  }
+
+  function cacheSet(foodId, data) {
+    try {
+      localStorage.setItem(
+        CACHE_PREFIX + foodId,
+        JSON.stringify({ data, ts: Date.now() })
+      );
+    } catch {
+      /* Storage full or disabled — silently skip caching */
+    }
+  }
+
+  /* ── DOM helpers ── */
   function show(el, mode = 'flex') { if (el) el.style.display = mode; }
   function hide(el)                { if (el) el.style.display = 'none'; }
 
-  /* Animate the top score donut */
+  /* ── Animate the top score donut ── */
   function animateScoreArc(panel, score) {
     const arc = panel.querySelector('.adv2-score-arc');
     const num = panel.querySelector('.adv2-score-num');
@@ -1114,10 +1147,10 @@
 
     const offset = SCORE_C - (score / 100) * SCORE_C;
     requestAnimationFrame(() => {
-      arc.style.transition = 'none';
+      arc.style.transition       = 'none';
       arc.style.strokeDashoffset = SCORE_C;
       requestAnimationFrame(() => {
-        arc.style.transition = `stroke-dashoffset .85s cubic-bezier(.16,1,.3,1), stroke .3s`;
+        arc.style.transition       = `stroke-dashoffset .85s cubic-bezier(.16,1,.3,1), stroke .3s`;
         arc.style.strokeDashoffset = offset;
       });
     });
@@ -1132,7 +1165,7 @@
     }, 20);
   }
 
-  /* Animate the 4 macro ring SVGs */
+  /* ── Animate the 4 macro rings ── */
   function animateMacroRings(panel, card) {
     const vals = {
       cal:  parseInt(card.dataset.cal  || 0),
@@ -1141,28 +1174,25 @@
       fat:  parseInt(card.dataset.fat  || 0),
     };
 
-    ['cal','prot','carb','fat'].forEach((macro, i) => {
+    ['cal', 'prot', 'carb', 'fat'].forEach((macro, i) => {
       const circle = panel.querySelector(`.adv2-ring-fill--${macro}`);
       if (!circle) return;
       const pct    = Math.min(100, (vals[macro] / DAILY[macro]) * 100);
       const offset = RING_C - (pct / 100) * RING_C;
 
       setTimeout(() => {
-        circle.style.transition = 'none';
+        circle.style.transition       = 'none';
         circle.style.strokeDashoffset = RING_C;
         requestAnimationFrame(() => {
-          circle.style.transition = `stroke-dashoffset .9s cubic-bezier(.16,1,.3,1) ${i * 0.06}s`;
+          circle.style.transition       = `stroke-dashoffset .9s cubic-bezier(.16,1,.3,1) ${i * 0.06}s`;
           circle.style.strokeDashoffset = offset;
         });
       }, 60);
     });
   }
 
-  window.triggerFoodAdvice = async function (btn, foodId) {
-    const panel = document.getElementById(`advice-panel-${foodId}`);
-    if (!panel) return;
-
-    const card         = panel.closest('.food-card');
+  /* ── Shared render function (used by both cache hit & API response) ── */
+  function renderAdvice(panel, card, data) {
     const loadingEl    = panel.querySelector('.adv-loading');
     const resultEl     = panel.querySelector('.adv-result');
     const errorEl      = panel.querySelector('.adv-error');
@@ -1172,17 +1202,72 @@
     const suggWrap     = panel.querySelector('.adv-suggestion-wrap');
     const suggEl       = panel.querySelector('.adv-suggestion');
 
-    /* Toggle: close if open & idle */
+    hide(loadingEl);
+    hide(errorEl);
+
+    /* Apply verdict class & colours */
+    panel.classList.remove('adv-panel-good', 'adv-panel-limit', 'adv-panel-avoid');
+    const cfg = VERDICT_CFG[data.verdict] || VERDICT_CFG['Limit'];
+    panel.classList.add(cfg.panelCls);
+
+    if (verdictLabel) verdictLabel.textContent = cfg.label;
+    if (verdictIcon)  verdictIcon.textContent  = cfg.icon;
+    if (analysisEl)   analysisEl.textContent   = data.analysis || '';
+
+    /* Suggestion section */
+    const sugg = (data.suggestion || '').trim();
+    if (suggWrap) {
+      if (!sugg || sugg.toLowerCase() === 'none') {
+        hide(suggWrap);
+      } else {
+        if (suggEl) suggEl.textContent = sugg;
+        show(suggWrap, 'block');
+      }
+    }
+
+    /* Show result pane */
+    if (resultEl) {
+      resultEl.style.display       = 'flex';
+      resultEl.style.flexDirection = 'column';
+    }
+
+    /* Kick off animations */
+    animateScoreArc(panel, cfg.score);
+    if (card) animateMacroRings(panel, card);
+  }
+
+  /* ── Main entry point ── */
+  window.triggerFoodAdvice = async function (btn, foodId) {
+    const panel = document.getElementById(`advice-panel-${foodId}`);
+    if (!panel) return;
+
+    const card      = panel.closest('.food-card');
+    const loadingEl = panel.querySelector('.adv-loading');
+    const resultEl  = panel.querySelector('.adv-result');
+    const errorEl   = panel.querySelector('.adv-error');
+
+    /* Toggle: close if already open and not currently loading */
     const isOpen    = panel.style.display !== 'none';
     const isLoading = loadingEl && loadingEl.style.display === 'flex';
     if (isOpen && !isLoading) {
       panel.style.display = 'none';
-      btn.innerHTML = '<i class="fas fa-brain"></i> Eat This?';
+      btn.innerHTML = '<i class="fas fa-brain"></i> <span class="ff-label">Eat This?</span>';
       return;
     }
 
-    /* Open & reset */
+    /* Open the panel */
     panel.style.display = 'block';
+
+    /* ── Cache hit: render instantly, skip the API call entirely ── */
+    const cached = cacheGet(foodId);
+    if (cached) {
+      hide(loadingEl);
+      hide(errorEl);
+      renderAdvice(panel, card, cached);
+      return;
+    }
+
+    /* ── Cache miss: show spinner, hit the API ── */
     show(loadingEl, 'flex');
     hide(resultEl);
     hide(errorEl);
@@ -1208,36 +1293,10 @@
         return;
       }
 
-      /* Apply verdict */
-      const cfg = VERDICT_CFG[data.verdict] || VERDICT_CFG['Limit'];
-      panel.classList.add(cfg.panelCls);
+      /* Save to cache before rendering so next open is instant */
+      cacheSet(foodId, data);
 
-      if (verdictLabel) verdictLabel.textContent = cfg.label;
-      if (verdictIcon)  verdictIcon.textContent  = cfg.icon;
-
-      /* Analysis text */
-      if (analysisEl) analysisEl.textContent = data.analysis || '';
-
-      /* Suggestion */
-      const sugg = (data.suggestion || '').trim();
-      if (suggWrap) {
-        if (!sugg || sugg.toLowerCase() === 'none') {
-          hide(suggWrap);
-        } else {
-          if (suggEl) suggEl.textContent = sugg;
-          show(suggWrap, 'block');
-        }
-      }
-
-      /* Show result */
-      if (resultEl) {
-        resultEl.style.display       = 'flex';
-        resultEl.style.flexDirection = 'column';
-      }
-
-      /* Animate score arc + macro rings */
-      animateScoreArc(panel, cfg.score);
-      if (card) animateMacroRings(panel, card);
+      renderAdvice(panel, card, data);
 
     } catch (err) {
       hide(loadingEl);
@@ -1249,7 +1308,7 @@
 
     } finally {
       btn.disabled  = false;
-      btn.innerHTML = '<i class="fas fa-brain"></i> Eat This?';
+      btn.innerHTML = '<i class="fas fa-brain"></i> <span class="ff-label">Eat This?</span>';
     }
   };
 
