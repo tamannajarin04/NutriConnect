@@ -91,8 +91,9 @@
       <!-- ── Footer buttons (customers only) ── -->
       {% if current_user.is_authenticated and not current_user.is_food_provider() and not current_user.is_admin() %}
       <div class="food-footer">
-        <a href="{{ detail_url }}" onclick="event.stopPropagation();" class="ff-btn ff-btn--ghost">
-          <i class="fas fa-star"></i> Review
+
+        <a href="{{ detail_url }}" onclick="event.stopPropagation();" class="ff-btn ff-btn--ghost" title="Write a review">
+          <i class="fas fa-star"></i><span class="ff-label">Review</span>
         </a>
 
         <button
@@ -100,20 +101,24 @@
           class="ff-btn ff-btn--ai ai-advice-btn"
           onclick="event.stopPropagation(); window.triggerFoodAdvice(this, {{ food.id }});"
           data-food-id="{{ food.id }}"
+          title="Get AI nutrition advice"
         >
-          <i class="fas fa-brain"></i> Eat This?
+          <i class="fas fa-brain"></i><span class="ff-label">Eat This?</span>
         </button>
 
         {% if food.is_available %}
-          <form method="post" action="{{ url_for('orders.add_to_cart', food_id=food.id) }}" style="flex:1;margin:0;" onclick="event.stopPropagation();">
+          <form method="post" action="{{ url_for('orders.add_to_cart', food_id=food.id) }}" class="ff-form" onclick="event.stopPropagation();">
             <input type="hidden" name="quantity" value="1">
-            <button type="submit" onclick="event.stopPropagation();" class="ff-btn ff-btn--primary" style="width:100%;">
-              <i class="fas fa-cart-plus"></i> Add
+            <button type="submit" onclick="event.stopPropagation();" class="ff-btn ff-btn--primary ff-btn--add">
+              <i class="fas fa-cart-plus"></i><span class="ff-label">Add</span>
             </button>
           </form>
         {% else %}
-          <button type="button" disabled class="ff-btn ff-btn--disabled"><i class="fas fa-ban"></i> Out</button>
+          <button type="button" disabled class="ff-btn ff-btn--disabled ff-btn--add">
+            <i class="fas fa-ban"></i><span class="ff-label">Out</span>
+          </button>
         {% endif %}
+
       </div>
 
       <!-- ══════════════════════════════════════════
@@ -247,35 +252,109 @@
    STYLES — food footer + AI panel v2
 ═══════════════════════════════════════════════════════════════════════ #}
 <style>
-/* ── Food footer ── */
+/* ══════════════════════════════════
+   FOOD FOOTER — fixed button layout
+══════════════════════════════════ */
 .food-footer {
   display: flex;
-  align-items: center;
-  gap: .38rem;
-  padding: .62rem .75rem .72rem;
+  align-items: stretch;          /* all children same height */
+  gap: .3rem;
+  padding: .55rem .6rem .6rem;
   border-top: 1px solid var(--nc-border);
   background: var(--nc-surface-2);
   flex-wrap: nowrap;
 }
-.ff-btn {
-  display: inline-flex; align-items: center; justify-content: center;
-  gap: .3rem; border-radius: 10px; padding: .42rem .72rem;
-  font-family: 'Plus Jakarta Sans', sans-serif;
-  font-size: .72rem; font-weight: 800;
-  border: 1.5px solid transparent; cursor: pointer;
-  text-decoration: none; white-space: nowrap;
-  transition: background .14s, border-color .14s, color .14s, transform .14s;
-  flex-shrink: 0; line-height: 1;
+
+/* The form wrapping Add button must also stretch */
+.ff-form {
+  flex: 1;
+  margin: 0;
+  display: flex;
+  min-width: 0;
 }
-.ff-btn--ghost  { background: var(--nc-card-bg); border-color: var(--nc-border); color: var(--nc-text-muted); }
-.ff-btn--ghost:hover { background: rgba(251,191,36,.08); border-color: rgba(251,191,36,.35); color: #fbbf24; }
-.ff-btn--ai     { background: rgba(13,148,136,.1); border-color: rgba(13,148,136,.3); color: #0d9488; }
-[data-theme="dark"] .ff-btn--ai { background: rgba(13,148,136,.12); border-color: rgba(13,148,136,.32); color: #2dd4bf; }
-.ff-btn--ai:hover { background: rgba(13,148,136,.22) !important; border-color: rgba(13,148,136,.5) !important; transform: translateY(-1px); }
-.ff-btn--ai:disabled { opacity:.6; cursor:not-allowed !important; transform:none !important; }
-.ff-btn--primary { background: var(--nc-brand); border-color: var(--nc-brand); color: #fff; }
-.ff-btn--primary:hover { background: var(--nc-brand-d, #0284c7); border-color: var(--nc-brand-d,#0284c7); transform: translateY(-1px); }
-.ff-btn--disabled { background: var(--nc-surface-2); border-color: var(--nc-border); color: var(--nc-text-faint); cursor: not-allowed; opacity:.55; }
+
+.ff-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: .28rem;
+  border-radius: 9px;
+  padding: .38rem .52rem;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: .71rem;
+  font-weight: 800;
+  border: 1.5px solid transparent;
+  cursor: pointer;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: background .14s, border-color .14s, color .14s, transform .14s;
+  flex-shrink: 0;
+  line-height: 1;
+  /* prevent icon+label from overflowing */
+  overflow: hidden;
+}
+
+/* Label text inside buttons — can be hidden on very small cards if needed */
+.ff-label {
+  display: inline;
+}
+
+/* Add button fills remaining space */
+.ff-btn--add {
+  flex: 1;
+  width: 100%;
+}
+
+.ff-btn--ghost {
+  background: var(--nc-card-bg);
+  border-color: var(--nc-border);
+  color: var(--nc-text-muted);
+}
+.ff-btn--ghost:hover {
+  background: rgba(251,191,36,.08);
+  border-color: rgba(251,191,36,.35);
+  color: #fbbf24;
+}
+
+.ff-btn--ai {
+  background: rgba(13,148,136,.1);
+  border-color: rgba(13,148,136,.3);
+  color: #0d9488;
+}
+[data-theme="dark"] .ff-btn--ai {
+  background: rgba(13,148,136,.12);
+  border-color: rgba(13,148,136,.32);
+  color: #2dd4bf;
+}
+.ff-btn--ai:hover {
+  background: rgba(13,148,136,.22) !important;
+  border-color: rgba(13,148,136,.5) !important;
+  transform: translateY(-1px);
+}
+.ff-btn--ai:disabled {
+  opacity: .6;
+  cursor: not-allowed !important;
+  transform: none !important;
+}
+
+.ff-btn--primary {
+  background: var(--nc-brand);
+  border-color: var(--nc-brand);
+  color: #fff;
+}
+.ff-btn--primary:hover {
+  background: var(--nc-brand-d, #0284c7);
+  border-color: var(--nc-brand-d, #0284c7);
+  transform: translateY(-1px);
+}
+
+.ff-btn--disabled {
+  background: var(--nc-surface-2);
+  border-color: var(--nc-border);
+  color: var(--nc-text-faint);
+  cursor: not-allowed;
+  opacity: .55;
+}
 
 /* ══════════════════════════════════
    AI PANEL v2  — base
@@ -294,7 +373,7 @@
 [data-theme="dark"] .adv-panel-limit { --adv-cd:#fcd34d; }
 [data-theme="dark"] .adv-panel-avoid { --adv-cd:#f87171; }
 
-/* loading (unchanged — already good) */
+/* loading */
 .adv-loading {
   display:none; flex-direction:column; align-items:center; justify-content:center;
   gap:1rem; padding:2rem 1rem;
@@ -337,7 +416,7 @@
 .adv-result { display:none; flex-direction:column; }
 
 /* ──────────────────────────────────
-   VERDICT HEADER  (new)
+   VERDICT HEADER
 ────────────────────────────────── */
 .adv2-header {
   display: flex; align-items: center; justify-content: space-between; gap:.75rem;
@@ -349,7 +428,6 @@
 }
 .adv2-header__left { display:flex; align-items:center; gap:.65rem; min-width:0; flex:1; }
 
-/* verdict icon bubble */
 .adv2-verdict-icon {
   width: 36px; height: 36px;
   border-radius: 10px;
@@ -368,16 +446,12 @@
   color: var(--adv-cd, var(--nc-text)); line-height: 1; transition: color .3s;
 }
 
-/* score pill — compact donut */
+/* score pill */
 .adv2-score-pill {
   position: relative; width: 46px; height: 46px; flex-shrink: 0;
 }
-.adv2-score-svg {
-  width: 46px; height: 46px; transform: rotate(-90deg);
-}
-.adv2-score-track {
-  fill: none; stroke: var(--nc-border); stroke-width: 3.5;
-}
+.adv2-score-svg { width: 46px; height: 46px; transform: rotate(-90deg); }
+.adv2-score-track { fill: none; stroke: var(--nc-border); stroke-width: 3.5; }
 .adv2-score-arc {
   fill: none;
   stroke: var(--adv-c, #0ea5e9);
@@ -395,7 +469,7 @@
 }
 
 /* ──────────────────────────────────
-   MACRO RINGS ROW  (new design)
+   MACRO RINGS ROW
 ────────────────────────────────── */
 .adv2-rings {
   display: grid; grid-template-columns: repeat(4, 1fr);
@@ -405,19 +479,14 @@
   padding: .75rem .6rem .65rem;
   animation: adv-slideup .3s cubic-bezier(.16,1,.3,1) .05s both;
 }
-.adv2-ring-item {
-  display: flex; flex-direction: column; align-items: center; gap: .28rem;
-}
-.adv2-ring-wrap {
-  position: relative; width: 50px; height: 50px;
-}
-.adv2-ring-svg { width: 50px; height: 50px; transform: rotate(-90deg); }
+.adv2-ring-item { display: flex; flex-direction: column; align-items: center; gap: .28rem; }
+.adv2-ring-wrap { position: relative; width: 50px; height: 50px; }
+.adv2-ring-svg  { width: 50px; height: 50px; transform: rotate(-90deg); }
 
 .adv2-ring-track { fill: none; stroke: var(--nc-border); stroke-width: 3; }
 .adv2-ring-fill  {
   fill: none; stroke-width: 3; stroke-linecap: round;
-  stroke-dasharray: 106.8;
-  stroke-dashoffset: 106.8;
+  stroke-dasharray: 106.8; stroke-dashoffset: 106.8;
   transition: stroke-dashoffset .9s cubic-bezier(.16,1,.3,1);
 }
 .adv2-ring-fill--cal  { stroke: #f97316; }
@@ -496,4 +565,17 @@
   background: var(--nc-surface-2);
 }
 .adv2-footer i { font-size: .58rem; color: var(--nc-brand); }
+
+/* ──────────────────────────────────
+   CACHED BADGE (shows on instant load)
+────────────────────────────────── */
+.adv-cached-badge {
+  display: inline-flex; align-items: center; gap: .25rem;
+  font-size: .52rem; font-weight: 800; text-transform: uppercase;
+  letter-spacing: .09em; color: var(--nc-text-faint);
+  background: var(--nc-surface-2); border: 1px solid var(--nc-border);
+  border-radius: 99px; padding: .12rem .5rem;
+  margin-left: auto;
+}
+.adv-cached-badge i { font-size: .5rem; color: #10b981; }
 </style>
