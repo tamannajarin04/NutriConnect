@@ -606,7 +606,7 @@
                   </td>
 
                   <td>
-                    <div class="food-count">{{ provider.foods|length if provider.foods is not none else 0 }}</div>
+                    <div class="food-count">{{ provider.foods.count() }}</div>
                   </td>
 
                   <td class="actions-cell">

@@ -47,15 +47,38 @@ class User(UserMixin, db.Model):
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
-    roles = db.relationship("Role", secondary=user_roles, backref=db.backref("users", lazy="dynamic"))
+    roles = db.relationship(
+        "Role",
+        secondary=user_roles,
+        backref=db.backref("users", lazy="dynamic")
+    )
 
-    dietary_preference = db.relationship("DietaryPreference", backref="user", uselist=False, cascade="all, delete-orphan")
+    dietary_preference = db.relationship(
+        "DietaryPreference",
+        backref="user",
+        uselist=False,
+        cascade="all, delete-orphan"
+    )
 
-    upgrade_requests = db.relationship("RoleUpgradeRequest", back_populates="user", cascade="all, delete-orphan")
+    upgrade_requests = db.relationship(
+        "RoleUpgradeRequest",
+        back_populates="user",
+        cascade="all, delete-orphan"
+    )
 
-    bmi_records = db.relationship("BMIRecord", backref="user", lazy="dynamic", cascade="all, delete-orphan")
+    bmi_records = db.relationship(
+        "BMIRecord",
+        backref="user",
+        lazy="dynamic",
+        cascade="all, delete-orphan"
+    )
 
-    foods = db.relationship("FoodItem", backref="provider", lazy=True, cascade="all, delete-orphan")
+    foods = db.relationship(
+        "FoodItem",
+        backref="provider",
+        lazy="dynamic",
+        cascade="all, delete-orphan"
+    )
 
     meal_logs = db.relationship(
         "MealLog",
@@ -71,17 +94,47 @@ class User(UserMixin, db.Model):
         cascade="all, delete-orphan"
     )
 
-    orders = db.relationship("Order", foreign_keys="Order.user_id", backref="customer", lazy="dynamic")
+    orders = db.relationship(
+        "Order",
+        foreign_keys="Order.user_id",
+        backref="customer",
+        lazy="dynamic"
+    )
 
-    provider_orders = db.relationship("Order", foreign_keys="Order.provider_id", backref="provider_user", lazy="dynamic")
+    provider_orders = db.relationship(
+        "Order",
+        foreign_keys="Order.provider_id",
+        backref="provider_user",
+        lazy="dynamic"
+    )
 
-    favorite_foods = db.relationship("FavoriteFood", backref="user", lazy="dynamic", cascade="all, delete-orphan")
+    favorite_foods = db.relationship(
+        "FavoriteFood",
+        backref="user",
+        lazy="dynamic",
+        cascade="all, delete-orphan"
+    )
 
-    recent_views = db.relationship("RecentlyViewed", backref="user", lazy="dynamic", cascade="all, delete-orphan")
+    recent_views = db.relationship(
+        "RecentlyViewed",
+        backref="user",
+        lazy="dynamic",
+        cascade="all, delete-orphan"
+    )
 
-    ratings = db.relationship("FoodRating", backref="user", lazy="dynamic", cascade="all, delete-orphan")
+    ratings = db.relationship(
+        "FoodRating",
+        backref="user",
+        lazy="dynamic",
+        cascade="all, delete-orphan"
+    )
 
-    notifications = db.relationship("Notification", backref="user", lazy="dynamic", cascade="all, delete-orphan")
+    notifications = db.relationship(
+        "Notification",
+        backref="user",
+        lazy="dynamic",
+        cascade="all, delete-orphan"
+    )
 
     def set_password(self, password: str):
         self.password_hash = generate_password_hash(password)
@@ -153,24 +206,50 @@ class FoodItem(db.Model):
     description = db.Column(db.Text)
     price = db.Column(db.Float, default=0)
     diet_type = db.Column(db.String(50))
+
     calories = db.Column(db.Float)
     protein = db.Column(db.Float)
     carbs = db.Column(db.Float)
     fat = db.Column(db.Float)
+
     image = db.Column(db.String(255))
     availability_status = db.Column(db.String(20), default="available", nullable=False)
     order_count = db.Column(db.Integer, default=0)
     view_count = db.Column(db.Integer, default=0)
+
     provider_id = db.Column(db.Integer, db.ForeignKey("users.id"))
+
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
-    gallery_images = db.relationship("FoodImage", backref="food", lazy="dynamic", cascade="all, delete-orphan")
-    ratings = db.relationship("FoodRating", backref="food", lazy="dynamic", cascade="all, delete-orphan")
-    favorites = db.relationship("FavoriteFood", backref="food", lazy="dynamic", cascade="all, delete-orphan")
-    order_items = db.relationship("OrderItem", backref="food", lazy="dynamic")
-    recent_views = db.relationship("RecentlyViewed", backref="food", lazy="dynamic", cascade="all, delete-orphan")
-    views = db.relationship("FoodView", backref="food", lazy="dynamic", cascade="all, delete-orphan")
-
+    gallery_images = db.relationship(
+        "FoodImage",
+        backref="food",
+        lazy="dynamic",
+        cascade="all, delete-orphan"
+    )
+    ratings = db.relationship(
+        "FoodRating",
+        backref="food",
+        lazy="dynamic",
+        cascade="all, delete-orphan"
+    )
+    favorites = db.relationship(
+        "FavoriteFood",
+        backref="food",
+        lazy="dynamic",
+        cascade="all, delete-orphan"
+    )
+    order_items = db.relationship(
+        "OrderItem",
+        backref="food",
+        lazy="dynamic"
+    )
+    recent_views = db.relationship(
+        "RecentlyViewed",
+        backref="food",
+        lazy="dynamic",
+        cascade="all, delete-orphan"
+    )
     views = db.relationship(
         "FoodView",
         backref="food",
@@ -190,6 +269,35 @@ class FoodItem(db.Model):
     @property
     def rating_count(self):
         return FoodRating.query.filter_by(food_id=self.id).count()
+
+    def __repr__(self):
+        return f"<FoodItem {self.name}>"
+
+
+class FoodNutritionCache(db.Model):
+    __tablename__ = "food_nutrition_cache"
+
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(120), nullable=False)
+    normalized_name = db.Column(db.String(120), nullable=False, unique=True, index=True)
+
+    calories = db.Column(db.Float)
+    protein = db.Column(db.Float)
+    carbs = db.Column(db.Float)
+    fat = db.Column(db.Float)
+
+    nutrition_source = db.Column(db.String(50), default="ai_estimate", nullable=False)
+    nutrition_confidence = db.Column(db.String(20), default="medium", nullable=False)
+    nutrition_basis = db.Column(db.String(20), default="100g", nullable=False)
+
+    is_ai_estimated = db.Column(db.Boolean, default=False, nullable=False)
+    last_nutrition_sync = db.Column(db.DateTime, default=datetime.utcnow)
+
+    created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
+
+    def __repr__(self):
+        return f"<FoodNutritionCache {self.normalized_name}>"
 
 
 class FoodView(db.Model):
@@ -279,8 +387,18 @@ class Order(db.Model):
     created_at = db.Column(db.DateTime, default=datetime.utcnow, index=True)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
-    items = db.relationship("OrderItem", backref="order", lazy="dynamic", cascade="all, delete-orphan")
-    timeline = db.relationship("OrderTimeline", backref="order", lazy="dynamic", cascade="all, delete-orphan")
+    items = db.relationship(
+        "OrderItem",
+        backref="order",
+        lazy="dynamic",
+        cascade="all, delete-orphan"
+    )
+    timeline = db.relationship(
+        "OrderTimeline",
+        backref="order",
+        lazy="dynamic",
+        cascade="all, delete-orphan"
+    )
 
     @staticmethod
     def generate_order_number():
@@ -383,28 +501,32 @@ class RecentlyViewed(db.Model):
     )
 
 
-# ═══════════════════════════════════════════════════════
-#  WALLET & TRANSACTION MODELS
-# ═══════════════════════════════════════════════════════
-
 class Wallet(db.Model):
     __tablename__ = "wallets"
 
-    id         = db.Column(db.Integer, primary_key=True)
-    user_id    = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False, unique=True)
-    balance    = db.Column(db.Float, default=0.0, nullable=False)
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False, unique=True)
+    balance = db.Column(db.Float, default=0.0, nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
-    user         = db.relationship("User", backref=db.backref("wallet", uselist=False))
-    transactions = db.relationship("WalletTransaction", backref="wallet", lazy="dynamic", cascade="all, delete-orphan")
+    user = db.relationship("User", backref=db.backref("wallet", uselist=False))
+    transactions = db.relationship(
+        "WalletTransaction",
+        backref="wallet",
+        lazy="dynamic",
+        cascade="all, delete-orphan"
+    )
 
     def credit(self, amount, description, ref=None):
         self.balance = round(self.balance + amount, 2)
         tx = WalletTransaction(
-            wallet_id=self.id, type="credit",
-            amount=amount, description=description,
-            reference=ref, balance_after=self.balance
+            wallet_id=self.id,
+            type="credit",
+            amount=amount,
+            description=description,
+            reference=ref,
+            balance_after=self.balance
         )
         db.session.add(tx)
         return tx
@@ -414,9 +536,12 @@ class Wallet(db.Model):
             return False
         self.balance = round(self.balance - amount, 2)
         tx = WalletTransaction(
-            wallet_id=self.id, type="debit",
-            amount=amount, description=description,
-            reference=ref, balance_after=self.balance
+            wallet_id=self.id,
+            type="debit",
+            amount=amount,
+            description=description,
+            reference=ref,
+            balance_after=self.balance
         )
         db.session.add(tx)
         return tx
@@ -425,55 +550,57 @@ class Wallet(db.Model):
 class WalletTransaction(db.Model):
     __tablename__ = "wallet_transactions"
 
-    id            = db.Column(db.Integer, primary_key=True)
-    wallet_id     = db.Column(db.Integer, db.ForeignKey("wallets.id"), nullable=False, index=True)
-    type          = db.Column(db.String(10), nullable=False)
-    amount        = db.Column(db.Float, nullable=False)
+    id = db.Column(db.Integer, primary_key=True)
+    wallet_id = db.Column(db.Integer, db.ForeignKey("wallets.id"), nullable=False, index=True)
+    type = db.Column(db.String(10), nullable=False)
+    amount = db.Column(db.Float, nullable=False)
     balance_after = db.Column(db.Float, nullable=False)
-    description   = db.Column(db.String(255))
-    reference     = db.Column(db.String(100))
-    created_at    = db.Column(db.DateTime, default=datetime.utcnow, index=True)
+    description = db.Column(db.String(255))
+    reference = db.Column(db.String(100))
+    created_at = db.Column(db.DateTime, default=datetime.utcnow, index=True)
 
 
 class PaymentTransaction(db.Model):
     __tablename__ = "payment_transactions"
 
-    id             = db.Column(db.Integer, primary_key=True)
-    transaction_id = db.Column(db.String(80), unique=True, nullable=False,
-                               default=lambda: "TXN-" + uuid.uuid4().hex[:10].upper())
-    order_id       = db.Column(db.Integer, db.ForeignKey("orders.id"), nullable=False)
-    user_id        = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
-    method         = db.Column(db.String(30), nullable=False)
-    status         = db.Column(db.String(20), default="pending", nullable=False)
-    amount         = db.Column(db.Float, nullable=False)
-    currency       = db.Column(db.String(10), default="USD")
-    ssl_tran_id    = db.Column(db.String(100))
-    ssl_val_id     = db.Column(db.String(100))
-    ssl_status     = db.Column(db.String(50))
-    ssl_card_type  = db.Column(db.String(50))
-    wallet_amount  = db.Column(db.Float, default=0.0)
+    id = db.Column(db.Integer, primary_key=True)
+    transaction_id = db.Column(
+        db.String(80),
+        unique=True,
+        nullable=False,
+        default=lambda: "TXN-" + uuid.uuid4().hex[:10].upper()
+    )
+    order_id = db.Column(db.Integer, db.ForeignKey("orders.id"), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
+    method = db.Column(db.String(30), nullable=False)
+    status = db.Column(db.String(20), default="pending", nullable=False)
+    amount = db.Column(db.Float, nullable=False)
+    currency = db.Column(db.String(10), default="USD")
+    ssl_tran_id = db.Column(db.String(100))
+    ssl_val_id = db.Column(db.String(100))
+    ssl_status = db.Column(db.String(50))
+    ssl_card_type = db.Column(db.String(50))
+    wallet_amount = db.Column(db.Float, default=0.0)
     gateway_amount = db.Column(db.Float, default=0.0)
-    phone_number   = db.Column(db.String(20))
-    created_at     = db.Column(db.DateTime, default=datetime.utcnow)
-    updated_at     = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    phone_number = db.Column(db.String(20))
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
     order = db.relationship("Order", backref="payment_transactions")
-    user  = db.relationship("User",  backref="payment_transactions")
+    user = db.relationship("User", backref="payment_transactions")
 
-
-# ═══════════════════════════════════════════════════════
-#  NOTIFICATION MODEL
-# ═══════════════════════════════════════════════════════
 
 class Notification(db.Model):
     __tablename__ = "notifications"
 
-    id         = db.Column(db.Integer, primary_key=True)
-    user_id    = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False, index=True)
-    type       = db.Column(db.String(50), nullable=False)
-    title      = db.Column(db.String(120), nullable=False)
-    message    = db.Column(db.Text, nullable=False)
-    link       = db.Column(db.String(255))
-    is_read    = db.Column(db.Boolean, default=False, nullable=False)
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False, index=True)
+    type = db.Column(db.String(50), nullable=False)
+    title = db.Column(db.String(120), nullable=False)
+    message = db.Column(db.Text, nullable=False)
+    link = db.Column(db.String(255))
+    is_read = db.Column(db.Boolean, default=False, nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow, index=True)
-    
+
+    def __repr__(self):
+        return f"<Notification {self.title}>"

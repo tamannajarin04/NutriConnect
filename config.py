@@ -15,6 +15,9 @@ class Config:
     UPLOAD_FOLDER = os.path.join(BASEDIR, "app", "static", "uploads")
     MAX_CONTENT_LENGTH = 5 * 1024 * 1024  # 5MB
 
+    OLLAMA_BASE_URL = os.environ.get("OLLAMA_BASE_URL") or "http://localhost:11434"
+    OLLAMA_MODEL = os.environ.get("OLLAMA_MODEL") or "qwen3:4b"
+
 class DevelopmentConfig(Config):
     DEBUG = True
 

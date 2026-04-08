@@ -75,14 +75,33 @@ def clear_pending_topup():
 
 
 def mark_order_paid(order, method):
-    """Confirm order, give cashback, notify both user and provider."""
-    order.status = "confirmed"
+    """
+    Record payment safely.
 
-    db.session.add(OrderTimeline(
-        order_id=order.id,
-        status="confirmed",
-        note=f"Payment received via {method}"
-    ))
+    Rules:
+    - If the order is still pending, payment auto-confirms it.
+    - If provider already moved it beyond pending, do NOT move it backward.
+    - If order is cancelled, payment must not be applied.
+    """
+    current_status = (order.status or "pending").strip().lower()
+    method_label = TOPUP_METHOD_LABELS.get(method, method.replace("_", " ").title())
+
+    if current_status == "cancelled":
+        return False
+
+    if current_status == "pending":
+        order.status = "confirmed"
+        db.session.add(OrderTimeline(
+            order_id=order.id,
+            status="confirmed",
+            note=f"Payment received via {method_label}"
+        ))
+    else:
+        db.session.add(OrderTimeline(
+            order_id=order.id,
+            status=current_status,
+            note=f"Payment received via {method_label}"
+        ))
 
     cashback = round(order.total_price * CASHBACK_PERCENT / 100, 2)
     if cashback > 0:
@@ -93,7 +112,6 @@ def mark_order_paid(order, method):
             ref=order.order_number
         )
 
-    method_label = method.replace("_", " ").title()
     items_preview = ", ".join(
         [f"{i.food_name} ×{i.quantity}" for i in order.items.limit(3).all()]
     )
@@ -125,11 +143,13 @@ def mark_order_paid(order, method):
             f"{buyer_name} paid ${order.total_price:.2f} for order "
             f"{order.order_number} via {method_label}. "
             f"Items: {items_preview}. "
-            f"Please prepare the order."
+            f"Please continue the order flow."
         ),
         link=f"/provider/orders/{order.id}",
         is_read=False
     ))
+
+    return True
 
 
 # ══════════════════════════════════════════════════════
@@ -140,6 +160,10 @@ def mark_order_paid(order, method):
 @login_required
 def pay(order_id):
     order = Order.query.filter_by(id=order_id, user_id=current_user.id).first_or_404()
+
+    if (order.status or "").strip().lower() == "cancelled":
+        flash("This order was cancelled and can no longer be paid.", "warning")
+        return redirect(url_for("orders.order_detail", order_id=order.id))
 
     if is_order_paid(order):
         flash("This order is already paid.", "info")
@@ -155,6 +179,12 @@ def pay(order_id):
 @login_required
 def confirm_payment_ajax(order_id):
     order = Order.query.filter_by(id=order_id, user_id=current_user.id).first_or_404()
+
+    if (order.status or "").strip().lower() == "cancelled":
+        return jsonify({
+            "success": False,
+            "message": "This order was cancelled and can no longer be paid."
+        }), 400
 
     if is_order_paid(order):
         return jsonify({"success": True, "already_paid": True})
@@ -175,9 +205,15 @@ def confirm_payment_ajax(order_id):
         gateway_amount=0.0 if method == "wallet" else order.total_price,
     )
     db.session.add(txn)
-    mark_order_paid(order, method)
-    db.session.commit()
 
+    if not mark_order_paid(order, method):
+        db.session.rollback()
+        return jsonify({
+            "success": False,
+            "message": "This order was cancelled and can no longer be paid."
+        }), 400
+
+    db.session.commit()
     return jsonify({"success": True})
 
 
@@ -185,6 +221,10 @@ def confirm_payment_ajax(order_id):
 @login_required
 def pay_with_wallet(order_id):
     order = Order.query.filter_by(id=order_id, user_id=current_user.id).first_or_404()
+
+    if (order.status or "").strip().lower() == "cancelled":
+        flash("This order was cancelled and can no longer be paid.", "warning")
+        return redirect(url_for("orders.order_detail", order_id=order.id))
 
     if is_order_paid(order):
         flash("This order is already paid.", "info")
@@ -219,7 +259,12 @@ def pay_with_wallet(order_id):
         gateway_amount=0.0,
     )
     db.session.add(txn)
-    mark_order_paid(order, "wallet")
+
+    if not mark_order_paid(order, "wallet"):
+        db.session.rollback()
+        flash("This order was cancelled and can no longer be paid.", "warning")
+        return redirect(url_for("orders.order_detail", order_id=order.id))
+
     db.session.commit()
 
     flash(f"Payment successful! ${order.total_price:.2f} deducted from wallet.", "success")

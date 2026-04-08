@@ -88,6 +88,9 @@ def cart():
     )
 
     total = sum(item.subtotal for item in items if item.food and item.food.is_available)
+    total_units = sum(item.quantity for item in items)
+    distinct_items = len(items)
+
     orders = get_user_orders_paginated(
         page=page,
         per_page=ORDERS_PER_PAGE,
@@ -99,6 +102,8 @@ def cart():
         "orders/cart.html",
         items=items,
         total=round(total, 2),
+        total_units=total_units,
+        distinct_items=distinct_items,
         orders=orders,
         status_filter=status_filter,
         sort_by=sort_by
@@ -159,17 +164,49 @@ def add_to_cart(food_id):
 @login_required
 def update_cart(item_id):
     if not require_regular_user():
+        if request.headers.get("X-Requested-With") == "XMLHttpRequest":
+            return jsonify({"success": False, "message": "Unauthorized."}), 403
         return redirect(url_for("main.home"))
 
     item = CartItem.query.filter_by(id=item_id, user_id=current_user.id).first_or_404()
-    qty = request.form.get("quantity", 1, type=int)
 
-    if qty <= 0:
+    try:
+        qty = int(request.form.get("quantity", 1))
+    except (TypeError, ValueError):
+        qty = 1
+
+    removed = qty <= 0
+
+    if removed:
         db.session.delete(item)
     else:
-        item.quantity = min(qty, 99)
+        item.quantity = min(max(qty, 1), 99)
 
     db.session.commit()
+
+    if request.headers.get("X-Requested-With") == "XMLHttpRequest":
+        items = (
+            CartItem.query
+            .filter_by(user_id=current_user.id)
+            .join(FoodItem)
+            .all()
+        )
+
+        total = round(sum(cart_item.subtotal for cart_item in items if cart_item.food and cart_item.food.is_available), 2)
+        total_units = sum(cart_item.quantity for cart_item in items)
+        distinct_items = len(items)
+
+        return jsonify({
+            "success": True,
+            "removed": removed,
+            "item_id": item_id,
+            "quantity": None if removed else item.quantity,
+            "total": total,
+            "total_units": total_units,
+            "distinct_items": distinct_items,
+            "cart_count": distinct_items
+        })
+
     flash("Cart updated.", "success")
     return redirect(url_for("orders.cart"))
 
