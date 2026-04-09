@@ -1,0 +1,316 @@
+{% extends "base.html" %}
+{% block title %}Fitness Goal Estimator — NutriConnect{% endblock %}
+
+{% block extra_css %}
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;800&family=Sora:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+.fg{font-family:'Sora',sans-serif;}
+.fg-hero{background:linear-gradient(135deg,#0d1117 0%,#0c1f3d 50%,#0d1117 100%);border-radius:20px;padding:2.2rem;margin-bottom:1.75rem;position:relative;overflow:hidden;border:1px solid rgba(16,185,129,.18);}
+.fg-hero::before{content:'';position:absolute;top:-60px;right:-60px;width:200px;height:200px;border-radius:50%;background:radial-gradient(circle,rgba(16,185,129,.15) 0%,transparent 70%);pointer-events:none;}
+.fg-hero-title{font-family:'Playfair Display',serif;font-size:2rem;font-weight:800;color:#f0f6fc;margin:0;line-height:1.15;}
+.fg-hero-title span{background:linear-gradient(90deg,#34d399,#818cf8);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.fg-hero-sub{font-size:.85rem;color:rgba(240,246,252,.5);margin:.4rem 0 0;}
+.fg-card{background:var(--nc-card-bg);border:1.5px solid var(--nc-card-border);border-radius:18px;box-shadow:var(--nc-card-shadow);margin-bottom:1.25rem;overflow:hidden;}
+.fg-card-head{display:flex;align-items:center;gap:.75rem;padding:1rem 1.5rem;background:var(--nc-surface-2);border-bottom:1px solid var(--nc-border);}
+.fg-card-icon{width:34px;height:34px;border-radius:10px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:.85rem;flex-shrink:0;}
+.fg-card-title{font-family:'Playfair Display',serif;font-size:1rem;font-weight:700;color:var(--nc-text);margin:0;}
+.fg-card-sub{font-size:.72rem;color:var(--nc-text-muted);margin:0;}
+.fg-body{padding:1.35rem 1.5rem;}
+.fg-grid2{display:grid;grid-template-columns:1fr 1fr;gap:1rem;}
+.fg-grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:1rem;}
+.fg-label{display:block;font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--nc-text-muted);margin-bottom:.4rem;}
+.fg-input,.fg-select{width:100%;background:var(--nc-input-bg)!important;border:1.5px solid var(--nc-input-border)!important;border-radius:11px!important;padding:.62rem 1rem!important;font-family:'Sora',sans-serif;font-size:.85rem!important;color:var(--nc-input-text)!important;outline:none;}
+.fg-input:focus,.fg-select:focus{border-color:#10b981!important;box-shadow:0 0 0 3px rgba(16,185,129,.12)!important;}
+.fg-btn{display:flex;align-items:center;justify-content:center;gap:.5rem;width:100%;background:linear-gradient(135deg,#10b981,#059669);color:#fff;border:none;border-radius:12px;padding:.8rem;font-family:'Sora',sans-serif;font-size:.9rem;font-weight:700;cursor:pointer;transition:all .15s;margin-top:.75rem;}
+.fg-btn:hover{filter:brightness(1.08);transform:translateY(-1px);}
+.fg-btn:disabled{opacity:.6;cursor:not-allowed;transform:none;}
+.fg-result{display:none;}
+.fg-result.active{display:block;}
+.fg-big-card{background:linear-gradient(135deg,rgba(16,185,129,.1),rgba(129,140,248,.08));border:1.5px solid rgba(16,185,129,.25);border-radius:18px;padding:1.75rem;text-align:center;margin-bottom:1.25rem;}
+.fg-weeks-num{font-family:'Playfair Display',serif;font-size:3.5rem;font-weight:800;color:var(--nc-text);line-height:1;}
+.fg-weeks-label{font-size:.9rem;color:var(--nc-text-muted);margin-top:.35rem;}
+.fg-warn{background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.2);border-radius:12px;padding:.85rem 1rem;margin-bottom:1rem;font-size:.84rem;color:#dc2626;display:flex;align-items:flex-start;gap:.6rem;}
+.fg-metrics-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:.75rem;margin-bottom:1.25rem;}
+.fg-metric{background:var(--nc-card-bg);border:1.5px solid var(--nc-card-border);border-radius:14px;padding:.85rem 1rem;text-align:center;position:relative;overflow:hidden;}
+.fg-metric::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;border-radius:14px 14px 0 0;}
+.fg-m-label{font-size:.62rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--nc-text-muted);margin-bottom:.2rem;}
+.fg-m-value{font-family:'Playfair Display',serif;font-size:1.35rem;font-weight:700;color:var(--nc-text);}
+.fg-m-unit{font-size:.68rem;color:var(--nc-text-muted);}
+.fg-advice-box{background:var(--nc-surface-2);border:1px solid var(--nc-border);border-radius:14px;padding:1rem 1.25rem;margin-bottom:1rem;}
+.fg-advice-item{display:flex;align-items:flex-start;gap:.65rem;padding:.55rem 0;border-bottom:1px solid var(--nc-border);}
+.fg-advice-item:last-child{border-bottom:none;}
+.fg-advice-icon{width:28px;height:28px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:.8rem;flex-shrink:0;}
+.fg-advice-text{font-size:.84rem;color:var(--nc-text);line-height:1.5;}
+.fg-milestones{overflow-x:auto;}
+.fg-milestone-row{display:flex;align-items:center;gap:.75rem;padding:.55rem 0;border-bottom:1px solid var(--nc-border);}
+.fg-milestone-row:last-child{border-bottom:none;}
+.fg-ms-week{font-size:.72rem;color:var(--nc-text-muted);min-width:56px;font-family:'JetBrains Mono',monospace;}
+.fg-ms-weight{font-size:.9rem;font-weight:600;color:var(--nc-text);}
+.fg-ms-bar{flex:1;height:6px;background:var(--nc-surface-3);border-radius:99px;overflow:hidden;}
+.fg-ms-fill{height:100%;border-radius:99px;background:linear-gradient(90deg,#10b981,#059669);}
+.fg-feas-badge{display:inline-block;font-size:.75rem;font-weight:700;border-radius:99px;padding:.25rem .85rem;}
+.fg-feas-realistic{background:#d1fae5;color:#065f46;}
+.fg-feas-aggressive{background:#fef3c7;color:#92400e;}
+.fg-feas-very{background:#fee2e2;color:#991b1b;}
+.fg-feas-wrong{background:#fee2e2;color:#991b1b;}
+.fg-feas-slow{background:#e0f2fe;color:#075985;}
+.spinner-sm{width:14px;height:14px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .6s linear infinite;display:inline-block;}
+@keyframes spin{to{transform:rotate(360deg)}}
+@media(max-width:576px){.fg-grid2,.fg-grid3{grid-template-columns:1fr;}}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="fg" style="max-width:860px;margin:0 auto;">
+
+  <div class="fg-hero">
+    <div style="position:relative;z-index:1;">
+      <h1 class="fg-hero-title">Fitness Goal<br><span>Estimator</span></h1>
+      <p class="fg-hero-sub">Enter your stats — AI calculates your personalised timeline using Mifflin-St Jeor BMR + Groq intelligence</p>
+    </div>
+  </div>
+
+  <div class="fg-card">
+    <div class="fg-card-head">
+      <div class="fg-card-icon" style="background:linear-gradient(135deg,#10b981,#059669);"><i class="fas fa-person-running"></i></div>
+      <div><p class="fg-card-title">Your Stats</p><p class="fg-card-sub">Fill in your current measurements and daily intake</p></div>
+    </div>
+    <div class="fg-body">
+      <div class="fg-grid2" style="margin-bottom:1rem;">
+        <div>
+          <label class="fg-label">Current Weight (kg)</label>
+          <input type="number" id="gCurrentWeight" class="fg-input" placeholder="e.g. 78"
+            value="{% if latest_bmi %}{{ latest_bmi.weight }}{% endif %}" min="20" max="300" step="0.1">
+        </div>
+        <div>
+          <label class="fg-label">Target Weight (kg)</label>
+          <input type="number" id="gTargetWeight" class="fg-input" placeholder="e.g. 68" min="20" max="300" step="0.1"
+            value="{% if latest_goal %}{{ latest_goal.target_weight }}{% endif %}">
+        </div>
+        <div>
+          <label class="fg-label">Height (cm)</label>
+          <input type="number" id="gHeight" class="fg-input" placeholder="e.g. 170"
+            value="{% if latest_bmi %}{{ (latest_bmi.height * 100)|int }}{% endif %}" min="100" max="250">
+        </div>
+        <div>
+          <label class="fg-label">Age</label>
+          <input type="number" id="gAge" class="fg-input" placeholder="e.g. 28"
+            value="{% if latest_goal %}{{ latest_goal.age }}{% endif %}" min="10" max="120">
+        </div>
+      </div>
+      <div class="fg-grid3" style="margin-bottom:1rem;">
+        <div>
+          <label class="fg-label">Gender</label>
+          <select id="gGender" class="fg-select">
+            <option value="male">Male</option>
+            <option value="female">Female</option>
+          </select>
+        </div>
+        <div>
+          <label class="fg-label">Activity Level</label>
+          <select id="gActivity" class="fg-select">
+            <option value="1.2">Sedentary</option>
+            <option value="1.375" selected>Lightly active</option>
+            <option value="1.55">Moderately active</option>
+            <option value="1.725">Very active</option>
+            <option value="1.9">Extra active</option>
+          </select>
+        </div>
+        <div>
+          <label class="fg-label">Daily Calorie Intake (kcal)</label>
+          <input type="number" id="gCalories" class="fg-input" placeholder="e.g. 1800"
+            value="{% if calorie_goal %}{{ calorie_goal }}{% elif latest_goal %}{{ latest_goal.daily_calories }}{% endif %}"
+            min="500" max="10000">
+        </div>
+      </div>
+      <button class="fg-btn" id="estimateBtn" onclick="estimate()">
+        <i class="fas fa-wand-magic-sparkles"></i>
+        <span id="estimateBtnText">Estimate My Goal Timeline</span>
+      </button>
+      <div id="estimateError" style="display:none;margin-top:.75rem;padding:.65rem 1rem;background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.2);border-radius:10px;font-size:.84rem;color:#dc2626;"></div>
+    </div>
+  </div>
+
+  <div class="fg-result" id="resultSection">
+
+    <div class="fg-big-card">
+      <div id="resWeeks" class="fg-weeks-num">—</div>
+      <div class="fg-weeks-label" id="resWeeksLabel">weeks to reach your goal</div>
+      <div style="margin-top:.85rem;" id="resFeasBadge"></div>
+    </div>
+
+    <div id="resWarnBox" style="display:none;" class="fg-warn">
+      <i class="fas fa-triangle-exclamation" style="flex-shrink:0;margin-top:.1rem;"></i>
+      <span id="resWarnText"></span>
+    </div>
+
+    <div class="fg-metrics-grid" id="resMetrics"></div>
+
+    <div class="fg-card">
+      <div class="fg-card-head">
+        <div class="fg-card-icon" style="background:linear-gradient(135deg,#8b5cf6,#a78bfa);"><i class="fas fa-lightbulb"></i></div>
+        <div><p class="fg-card-title">AI Recommendations</p><p class="fg-card-sub">Personalised advice based on your numbers</p></div>
+      </div>
+      <div class="fg-body">
+        <div class="fg-advice-box" id="resAdvice"></div>
+      </div>
+    </div>
+
+    <div class="fg-card" id="resMilestonesCard" style="display:none;">
+      <div class="fg-card-head">
+        <div class="fg-card-icon" style="background:linear-gradient(135deg,#f59e0b,#d97706);"><i class="fas fa-flag-checkered"></i></div>
+        <div><p class="fg-card-title">Weight Milestones</p><p class="fg-card-sub">Projected weight every 4 weeks</p></div>
+      </div>
+      <div class="fg-body">
+        <div class="fg-milestones" id="resMilestones"></div>
+      </div>
+    </div>
+
+  </div>
+
+  {% if latest_result %}
+  <div class="fg-card">
+    <div class="fg-card-head">
+      <div class="fg-card-icon" style="background:linear-gradient(135deg,#64748b,#475569);"><i class="fas fa-clock-rotate-left"></i></div>
+      <div><p class="fg-card-title">Previous Estimate</p><p class="fg-card-sub">Last saved on {{ latest_goal.created_at.strftime('%B %d, %Y') }}</p></div>
+    </div>
+    <div class="fg-body" style="font-size:.84rem;color:var(--nc-text-muted);">
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:.6rem;">
+        <div><div style="font-size:.65rem;text-transform:uppercase;letter-spacing:.06em;margin-bottom:.15rem;">Current Weight</div><strong style="color:var(--nc-text);">{{ latest_result.current_weight }} kg</strong></div>
+        <div><div style="font-size:.65rem;text-transform:uppercase;letter-spacing:.06em;margin-bottom:.15rem;">Target Weight</div><strong style="color:var(--nc-text);">{{ latest_result.target_weight }} kg</strong></div>
+        <div><div style="font-size:.65rem;text-transform:uppercase;letter-spacing:.06em;margin-bottom:.15rem;">TDEE</div><strong style="color:var(--nc-text);">{{ latest_result.tdee }} kcal</strong></div>
+        <div><div style="font-size:.65rem;text-transform:uppercase;letter-spacing:.06em;margin-bottom:.15rem;">Estimated</div><strong style="color:var(--nc-text);">{{ latest_result.weeks_estimated or 'N/A' }} weeks</strong></div>
+        <div><div style="font-size:.65rem;text-transform:uppercase;letter-spacing:.06em;margin-bottom:.15rem;">Feasibility</div><strong style="color:var(--nc-text);">{{ latest_result.feasibility }}</strong></div>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+async function estimate() {
+  const cw  = parseFloat(document.getElementById('gCurrentWeight').value);
+  const tw  = parseFloat(document.getElementById('gTargetWeight').value);
+  const h   = parseFloat(document.getElementById('gHeight').value);
+  const age = parseInt(document.getElementById('gAge').value);
+  const gen = document.getElementById('gGender').value;
+  const act = parseFloat(document.getElementById('gActivity').value);
+  const cal = parseInt(document.getElementById('gCalories').value);
+
+  const errEl = document.getElementById('estimateError');
+  errEl.style.display = 'none';
+
+  if (!cw || !tw || !h || !age || !cal) {
+    errEl.textContent = 'Please fill in all fields.';
+    errEl.style.display = 'block';
+    return;
+  }
+  if (cw === tw) {
+    errEl.textContent = 'Current and target weight are the same — nothing to estimate.';
+    errEl.style.display = 'block';
+    return;
+  }
+
+  const btn = document.getElementById('estimateBtn');
+  const btnText = document.getElementById('estimateBtnText');
+  btn.disabled = true;
+  btnText.innerHTML = '<span class="spinner-sm"></span> Calculating with AI…';
+  document.getElementById('resultSection').classList.remove('active');
+
+  try {
+    const resp = await fetch('/dashboard/fitness-goal/estimate', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ current_weight:cw, target_weight:tw, height_cm:h, age, gender:gen, activity_level:act, daily_calories:cal })
+    });
+    const data = await resp.json();
+    if (!data.success) throw new Error(data.error || 'Estimation failed');
+
+    const r = data.result;
+
+    // Weeks
+    const weeksEl = document.getElementById('resWeeks');
+    weeksEl.textContent = r.weeks_estimated != null ? r.weeks_estimated : '∞';
+    const goalDir = r.target_weight < r.current_weight ? 'weight loss' : 'weight gain';
+    document.getElementById('resWeeksLabel').textContent = `weeks estimated to reach your ${goalDir} goal`;
+
+    // Feasibility badge
+    const feasMap = {
+      realistic: 'fg-feas-realistic',
+      aggressive: 'fg-feas-aggressive',
+      'very aggressive': 'fg-feas-very',
+      'counter-productive': 'fg-feas-wrong',
+      'very slow': 'fg-feas-slow',
+    };
+    const feasClass = feasMap[r.feasibility] || 'fg-feas-slow';
+    document.getElementById('resFeasBadge').innerHTML = `<span class="fg-feas-badge ${feasClass}">${r.feasibility}</span>`;
+
+    // Warning
+    const warnBox = document.getElementById('resWarnBox');
+    if (r.going_wrong_way || r.risk_warning) {
+      document.getElementById('resWarnText').textContent = r.risk_warning || 'Your calorie intake is working against your goal. Adjust your daily intake.';
+      warnBox.style.display = 'flex';
+    } else {
+      warnBox.style.display = 'none';
+    }
+
+    // Metrics
+    const balLabel = r.daily_balance < 0 ? 'Daily Deficit' : 'Daily Surplus';
+    const balColor = r.daily_balance < 0 ? '#10b981' : '#8b5cf6';
+    document.getElementById('resMetrics').innerHTML = `
+      <div class="fg-metric" style="border-top:3px solid #f59e0b;">
+        <div class="fg-m-label">TDEE</div><div class="fg-m-value">${r.tdee}</div><div class="fg-m-unit">kcal/day</div>
+      </div>
+      <div class="fg-metric" style="border-top:3px solid ${balColor};">
+        <div class="fg-m-label">${balLabel}</div><div class="fg-m-value">${Math.abs(r.daily_balance)}</div><div class="fg-m-unit">kcal/day</div>
+      </div>
+      <div class="fg-metric" style="border-top:3px solid #3b82f6;">
+        <div class="fg-m-label">Weekly Change</div><div class="fg-m-value">${r.weekly_change_kg}</div><div class="fg-m-unit">kg/week</div>
+      </div>
+      <div class="fg-metric" style="border-top:3px solid #ef4444;">
+        <div class="fg-m-label">Current BMI</div><div class="fg-m-value">${r.bmi_current}</div><div class="fg-m-unit">→ target ${r.bmi_target}</div>
+      </div>`;
+
+    // AI Advice
+    let adviceHtml = '';
+    if (r.recommendation) adviceHtml += `<div class="fg-advice-item"><div class="fg-advice-icon" style="background:#d1fae5;color:#065f46;"><i class="fas fa-brain"></i></div><div class="fg-advice-text">${r.recommendation}</div></div>`;
+    if (r.nutrition_tip)  adviceHtml += `<div class="fg-advice-item"><div class="fg-advice-icon" style="background:#dbeafe;color:#1e40af;"><i class="fas fa-utensils"></i></div><div class="fg-advice-text">${r.nutrition_tip}</div></div>`;
+    if (r.exercise_tip)   adviceHtml += `<div class="fg-advice-item"><div class="fg-advice-icon" style="background:#fef3c7;color:#92400e;"><i class="fas fa-dumbbell"></i></div><div class="fg-advice-text">${r.exercise_tip}</div></div>`;
+    document.getElementById('resAdvice').innerHTML = adviceHtml || '<p style="color:var(--nc-text-muted);font-size:.84rem;">No specific advice generated.</p>';
+
+    // Milestones
+    const milestones = r.milestones || [];
+    const milestonesCard = document.getElementById('resMilestonesCard');
+    if (milestones.length > 0) {
+      const totalChange = Math.abs(r.current_weight - r.target_weight);
+      const msHtml = milestones.map(m => {
+        const done = Math.abs(r.current_weight - m.weight_kg);
+        const pct  = Math.min(100, Math.round(done / totalChange * 100));
+        return `<div class="fg-milestone-row">
+          <span class="fg-ms-week">Week ${m.week}</span>
+          <div class="fg-ms-bar"><div class="fg-ms-fill" style="width:${pct}%;"></div></div>
+          <span class="fg-ms-weight">${m.weight_kg} kg</span>
+        </div>`;
+      }).join('');
+      document.getElementById('resMilestones').innerHTML = msHtml;
+      milestonesCard.style.display = 'block';
+    } else {
+      milestonesCard.style.display = 'none';
+    }
+
+    document.getElementById('resultSection').classList.add('active');
+    document.getElementById('resultSection').scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+  } catch(e) {
+    errEl.textContent = 'Error: ' + e.message;
+    errEl.style.display = 'block';
+  } finally {
+    btn.disabled = false;
+    btnText.innerHTML = '<i class="fas fa-wand-magic-sparkles"></i> Estimate My Goal Timeline';
+  }
+}
+</script>
+{% endblock %}

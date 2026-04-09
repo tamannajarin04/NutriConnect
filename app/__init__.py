@@ -47,6 +47,7 @@ def create_app(config_name="default"):
     from .routes.payment import payment_bp
     from app.routes.diet_suggestions import diet_suggestions_bp
     from app.routes.ai_food import ai_food_bp
+    from app.routes.fitness_goal import fitness_goal_bp
 
     app.register_blueprint(main_bp)
     app.register_blueprint(auth_bp, url_prefix="/auth")
@@ -58,6 +59,7 @@ def create_app(config_name="default"):
     app.register_blueprint(food_search_bp, url_prefix="/food")
 
     app.register_blueprint(meal_log_bp, url_prefix="/dashboard/meal-log")
+    app.register_blueprint(fitness_goal_bp, url_prefix="/dashboard")
 
     app.register_blueprint(orders_bp)
     app.register_blueprint(provider_bp, url_prefix="/provider")
