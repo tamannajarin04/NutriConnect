@@ -1,644 +1,733 @@
 {% extends "base.html" %}
 {% block title %}Role Requests · NutriConnect{% endblock %}
 
-{% block content %}
+{% block extra_css %}
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
-.admin-req {
-  --surf:     var(--nc-surface);
-  --s2:       var(--nc-surface-2);
-  --s3:       var(--nc-surface-3);
-  --bdr:      var(--nc-border);
-  --bdr2:     var(--nc-border-2);
-  --txt:      var(--nc-text);
-  --txt2:     var(--nc-text-2);
-  --mu:       var(--nc-text-muted);
-
-  --brand:    var(--nc-brand);
-  --brand-d:  var(--nc-brand-d);
-  --brand-l:  var(--nc-brand-l);
-
-  --teal:   #0d9488; --teal-l: #ccfbf1; --teal-d: #0f766e;
-  --amber:  #f59e0b; --amber-l:#fef3c7; --amber-d:#d97706;
-  --rose:   #f43f5e; --rose-l: #ffe4e6; --rose-d:#be123c;
-  --violet: #7c3aed; --violet-l:#ede9fe; --violet-d:#5b21b6;
-  --cyan:   #06b6d4; --cyan-l:#cffafe; --cyan-d:#0e7490;
-
-  --r: 18px;
-  font-family: 'Sora', sans-serif;
+.admin-req,
+.admin-req *{
+  font-family:'Plus Jakarta Sans',sans-serif !important;
+}
+.admin-req i,
+.admin-req i[class*="fa"]{
+  font-family:"Font Awesome 6 Free","Font Awesome 6 Brands","FontAwesome" !important;
+  font-style:normal;
+  font-variant:normal;
+  text-rendering:auto;
+  -webkit-font-smoothing:antialiased;
 }
 
-.req-shell {
-  display: grid;
-  grid-template-columns: repeat(12, 1fr);
-  gap: 1rem;
+.admin-req{
+  --surf:var(--nc-surface);
+  --s2:var(--nc-surface-2);
+  --s3:var(--nc-surface-3);
+  --bdr:var(--nc-border);
+  --bdr2:var(--nc-border-2);
+  --txt:var(--nc-text);
+  --txt2:var(--nc-text-2);
+  --mu:var(--nc-text-muted);
+  --fa:var(--nc-text-faint);
+
+  --brand:var(--nc-brand);
+  --brand-d:var(--nc-brand-d);
+  --brand-l:var(--nc-brand-l);
+
+  --emerald:#10b981;
+  --emerald-l:rgba(16,185,129,.12);
+  --amber:#f59e0b;
+  --amber-l:rgba(245,158,11,.12);
+  --rose:#f43f5e;
+  --rose-l:rgba(244,63,94,.12);
+  --violet:#8b5cf6;
+  --violet-l:rgba(139,92,246,.12);
+  --cyan:#06b6d4;
+  --cyan-l:rgba(6,182,212,.12);
+
+  --glass-bg-light:rgba(255,255,255,.70);
+  --glass-bg-dark:rgba(8,18,36,.74);
+  --glass-border-light:rgba(255,255,255,.38);
+  --glass-border-dark:rgba(148,163,184,.16);
+
+  --r:18px;
 }
 
-.req-card {
-  background: var(--nc-card-bg);
-  border: 1px solid var(--nc-card-border);
-  border-radius: var(--r);
-  overflow: hidden;
-  box-shadow: var(--nc-card-shadow);
+@keyframes req-rise{
+  from{opacity:0;transform:translateY(18px)}
+  to{opacity:1;transform:none}
 }
 
-.r-hero   { grid-column: span 12; }
-.r-stat-1 { grid-column: span 3; }
-.r-stat-2 { grid-column: span 3; }
-.r-stat-3 { grid-column: span 3; }
-.r-stat-4 { grid-column: span 3; }
-.r-pend   { grid-column: span 12; }
-.r-hist   { grid-column: span 12; }
-
-@media (max-width: 992px) {
-  .r-stat-1, .r-stat-2, .r-stat-3, .r-stat-4 { grid-column: span 6; }
-}
-@media (max-width: 576px) {
-  .r-stat-1, .r-stat-2, .r-stat-3, .r-stat-4 { grid-column: span 12; }
+.req-wrap{
+  width:100%;
+  margin:0;
+  padding:0;
 }
 
-.req-hero {
-  position: relative;
-  overflow: hidden;
-  border-radius: var(--r);
-  padding: 2rem 2.3rem;
-  background: linear-gradient(135deg, #082f49 0%, #0c4a6e 45%, #155e75 100%);
-  color: #fff;
+.req-shell{
+  display:grid;
+  grid-template-columns:repeat(12,1fr);
+  gap:1rem;
 }
-.req-hero::before {
-  content: "";
-  position: absolute;
-  inset: 0;
+
+.r-hero{grid-column:span 12;}
+.r-stat-1,.r-stat-2,.r-stat-3,.r-stat-4{grid-column:span 3;}
+.r-pend,.r-hist{grid-column:span 12;}
+
+@media(max-width:992px){
+  .r-stat-1,.r-stat-2,.r-stat-3,.r-stat-4{grid-column:span 6;}
+}
+@media(max-width:576px){
+  .r-stat-1,.r-stat-2,.r-stat-3,.r-stat-4{grid-column:span 12;}
+}
+
+/* compact banner like second file */
+.req-hero{
+  position:relative;
+  overflow:hidden;
+  border-radius:20px;
+  min-height:128px;
+  padding:1rem 1.4rem;
+  margin-bottom:.1rem;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
   background:
-    radial-gradient(circle at 10% 20%, rgba(255,255,255,.12), transparent 28%),
-    radial-gradient(circle at 90% 15%, rgba(255,255,255,.08), transparent 24%),
-    radial-gradient(circle at 55% 120%, rgba(255,255,255,.06), transparent 32%);
+    radial-gradient(ellipse 65% 90% at 0% 0%, rgba(34,211,238,.16) 0%, transparent 55%),
+    radial-gradient(ellipse 45% 65% at 100% 20%, rgba(139,92,246,.14) 0%, transparent 55%),
+    linear-gradient(145deg,#06101f 0%,#0a1830 42%,#0d2345 100%);
+  border:1px solid rgba(56,189,248,.14);
+  box-shadow:
+    0 12px 30px rgba(3,10,28,.22),
+    inset 0 1px 0 rgba(255,255,255,.05);
+  animation:req-rise .45s cubic-bezier(.16,1,.3,1) both;
 }
-.req-hero > * { position: relative; z-index: 1; }
-
-.req-badge-top {
-  display: inline-flex;
-  align-items: center;
-  gap: .45rem;
-  padding: .32rem .82rem;
-  border-radius: 999px;
-  font-size: .72rem;
-  font-weight: 800;
-  letter-spacing: .08em;
-  text-transform: uppercase;
-  background: rgba(255,255,255,.12);
-  border: 1px solid rgba(255,255,255,.16);
-  margin-bottom: .9rem;
+.req-hero::after{
+  content:'';
+  position:absolute;
+  inset:0;
+  background-image:radial-gradient(circle, rgba(255,255,255,.045) 1px, transparent 1px);
+  background-size:26px 26px;
+  opacity:.36;
+  pointer-events:none;
 }
-.req-title {
-  font-size: clamp(1.65rem, 3vw, 2.3rem);
-  font-weight: 800;
-  letter-spacing: -.04em;
-  margin-bottom: .4rem;
+.req-hero > *{
+  position:relative;
+  z-index:1;
 }
-.req-sub {
-  font-size: .9rem;
-  color: rgba(255,255,255,.8);
-  line-height: 1.6;
-  max-width: 760px;
+.req-badge-top{
+  display:inline-flex;
+  align-items:center;
+  gap:.4rem;
+  width:fit-content;
+  padding:.28rem .82rem;
+  border-radius:999px;
+  background:rgba(72,117,255,.14);
+  border:1px solid rgba(120,160,255,.18);
+  color:rgba(255,255,255,.82);
+  font-size:.62rem;
+  font-weight:800;
+  text-transform:uppercase;
+  letter-spacing:.08em;
+  margin-bottom:.38rem;
 }
-.req-actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: .7rem;
-  margin-top: 1.2rem;
+.req-title{
+  font-size:clamp(1.45rem,2.3vw,2rem);
+  line-height:1.08;
+  font-weight:900;
+  letter-spacing:-.05em;
+  color:#fff;
+  margin-bottom:.18rem;
 }
-.req-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: .45rem;
-  text-decoration: none;
-  border-radius: 11px;
-  padding: .66rem 1.05rem;
-  font-size: .83rem;
-  font-weight: 700;
-  transition: all .15s ease;
+.req-title .hl{
+  background:linear-gradient(135deg,#7aa2ff 0%,#8ab4ff 45%,#c4b5fd 100%);
+  -webkit-background-clip:text;
+  -webkit-text-fill-color:transparent;
+  background-clip:text;
 }
-.req-btn-light {
-  background: #fff;
-  color: #0c4a6e;
+.req-sub{
+  font-size:.82rem;
+  color:rgba(255,255,255,.68);
+  max-width:720px;
+  line-height:1.45;
+  margin-bottom:.62rem;
 }
-.req-btn-light:hover {
-  color: #082f49;
-  transform: translateY(-1px);
+.req-actions{
+  display:flex;
+  gap:.75rem;
+  flex-wrap:wrap;
 }
-.req-btn-soft {
-  background: rgba(255,255,255,.1);
-  color: #fff;
-  border: 1px solid rgba(255,255,255,.16);
+.req-btn{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:.42rem;
+  border-radius:11px;
+  padding:.64rem .95rem;
+  font-size:.78rem;
+  font-weight:800;
+  text-decoration:none;
+  transition:all .15s ease;
 }
-.req-btn-soft:hover {
-  background: rgba(255,255,255,.16);
-  color: #fff;
+.req-btn-light{
+  background:linear-gradient(135deg,var(--brand-d),var(--brand));
+  color:#fff;
+  border:none;
+  box-shadow:0 10px 24px rgba(14,165,233,.2);
 }
-
-.stat-top {
-  height: 3px;
-}
-.st-pending  { background: linear-gradient(90deg, #f59e0b, #fbbf24); }
-.st-approved { background: linear-gradient(90deg, #0d9488, #06b6d4); }
-.st-rejected { background: linear-gradient(90deg, #f43f5e, #fb7185); }
-.st-total    { background: linear-gradient(90deg, #7c3aed, #a78bfa); }
-
-.stat-body {
-  padding: 1.2rem 1.3rem;
-}
-.stat-head {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: .78rem;
-}
-.stat-icon {
-  width: 38px;
-  height: 38px;
-  border-radius: 11px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: .9rem;
-}
-.si-pending  { background: var(--amber-l); color: var(--amber-d); }
-.si-approved { background: var(--teal-l); color: var(--teal-d); }
-.si-rejected { background: var(--rose-l); color: var(--rose-d); }
-.si-total    { background: var(--violet-l); color: var(--violet-d); }
-
-[data-theme="dark"] .si-pending  { background: rgba(245,158,11,.12); color: #fcd34d; }
-[data-theme="dark"] .si-approved { background: rgba(13,148,136,.13); color: #2dd4bf; }
-[data-theme="dark"] .si-rejected { background: rgba(244,63,94,.10); color: #fb7185; }
-[data-theme="dark"] .si-total    { background: rgba(124,58,237,.12); color: #c4b5fd; }
-
-.stat-value {
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 1.8rem;
-  font-weight: 600;
-  line-height: 1;
-  color: var(--txt);
-}
-.stat-label {
-  margin-top: .38rem;
-  color: var(--mu);
-  font-size: .72rem;
-  font-weight: 700;
-  letter-spacing: .08em;
-  text-transform: uppercase;
+.req-btn-light:hover{
+  color:#fff;
+  transform:translateY(-1px);
 }
 
-.sec-head {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
-  padding: 1rem 1.3rem;
-  border-bottom: 1px solid var(--bdr);
+/* glass cards */
+.req-card{
+  position:relative;
+  overflow:hidden;
+  border-radius:var(--r);
+  animation:req-rise .45s cubic-bezier(.16,1,.3,1) both;
+  background:var(--glass-bg-light);
+  border:1px solid var(--glass-border-light);
+  box-shadow:0 14px 38px rgba(15,23,42,.08);
+  backdrop-filter:blur(18px);
+  -webkit-backdrop-filter:blur(18px);
 }
-.sec-left {
-  display: flex;
-  align-items: center;
-  gap: .65rem;
+[data-theme="dark"] .req-card{
+  background:var(--glass-bg-dark);
+  border-color:var(--glass-border-dark);
+  box-shadow:0 18px 44px rgba(0,0,0,.35);
 }
-.sec-icon {
-  width: 34px;
-  height: 34px;
-  border-radius: 10px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: .82rem;
+.req-card::before{
+  content:"";
+  position:absolute;
+  inset:0;
+  background:linear-gradient(180deg,rgba(255,255,255,.06),transparent 40%);
+  pointer-events:none;
 }
-.sec-amber { background: var(--amber-l); color: var(--amber-d); }
-.sec-brand { background: var(--brand-l); color: var(--brand-d); }
 
-[data-theme="dark"] .sec-amber { background: rgba(245,158,11,.12); color: #fcd34d; }
-[data-theme="dark"] .sec-brand { background: rgba(14,165,233,.13); color: #38bdf8; }
+.stat-top{height:3px;}
+.st-pending{background:linear-gradient(90deg,#f59e0b,#fbbf24);}
+.st-approved{background:linear-gradient(90deg,#10b981,#34d399);}
+.st-rejected{background:linear-gradient(90deg,#f43f5e,#fb7185);}
+.st-total{background:linear-gradient(90deg,#8b5cf6,#a78bfa);}
 
-.sec-title {
-  font-size: .9rem;
-  font-weight: 800;
-  color: var(--txt);
-  letter-spacing: -.02em;
+.stat-body{
+  padding:1rem 1.05rem;
 }
-.sec-sub {
-  font-size: .7rem;
-  color: var(--mu);
-  margin-top: .05rem;
+.stat-head{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:.8rem;
+  margin-bottom:.65rem;
 }
-.sec-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: .3rem;
-  padding: .24rem .72rem;
-  border-radius: 999px;
-  font-size: .7rem;
-  font-weight: 800;
-  background: var(--brand-l);
-  color: var(--brand-d);
+.stat-label-top{
+  font-size:.63rem;
+  font-weight:700;
+  color:var(--fa);
+  letter-spacing:.03em;
+  text-transform:uppercase;
 }
-[data-theme="dark"] .sec-badge { background: rgba(14,165,233,.13); color: #38bdf8; }
+.stat-icon{
+  width:34px;
+  height:34px;
+  border-radius:10px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:14px;
+}
+.si-pending{background:var(--amber-l);color:#d97706;}
+.si-approved{background:var(--emerald-l);color:var(--emerald);}
+.si-rejected{background:var(--rose-l);color:var(--rose);}
+.si-total{background:var(--violet-l);color:var(--violet);}
 
-.table-wrap {
-  overflow-x: auto;
+.stat-value{
+  font-family:'JetBrains Mono',monospace !important;
+  font-size:1.38rem;
+  font-weight:600;
+  line-height:1;
+  color:var(--txt);
+  letter-spacing:-.03em;
 }
-.table-clean {
-  width: 100%;
-  border-collapse: collapse;
+.stat-label{
+  margin-top:.34rem;
+  color:var(--fa);
+  font-size:.65rem;
+  font-weight:700;
+}
+
+.sec-head{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:1rem;
+  padding:.95rem 1.15rem;
+  border-bottom:1px solid var(--bdr);
+  background:rgba(255,255,255,.24);
+  flex-wrap:wrap;
+}
+[data-theme="dark"] .sec-head{
+  background:rgba(255,255,255,.03);
+}
+.sec-left{
+  display:flex;
+  align-items:center;
+  gap:.7rem;
+}
+.sec-icon{
+  width:34px;
+  height:34px;
+  border-radius:10px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:14px;
+}
+.sec-amber{background:var(--amber-l);color:#d97706;}
+.sec-brand{background:var(--brand-l);color:var(--brand);}
+.sec-title{
+  font-size:.9rem;
+  font-weight:800;
+  color:var(--txt);
+  letter-spacing:-.018em;
+}
+.sec-sub{
+  font-size:.7rem;
+  color:var(--mu);
+  margin-top:.05rem;
+}
+.sec-badge{
+  display:inline-flex;
+  align-items:center;
+  gap:.3rem;
+  padding:.24rem .72rem;
+  border-radius:999px;
+  font-size:.7rem;
+  font-weight:800;
+  background:var(--brand-l);
+  color:var(--brand-d);
+}
+
+.table-wrap{
+  overflow-x:auto;
+}
+.table-clean{
+  width:100%;
+  border-collapse:collapse;
 }
 .table-clean th,
-.table-clean td {
-  padding: .95rem 1rem;
-  border-bottom: 1px solid var(--bdr);
-  vertical-align: top;
+.table-clean td{
+  padding:.95rem 1rem;
+  border-bottom:1px solid var(--bdr);
+  vertical-align:top;
 }
-.table-clean th {
-  font-size: .72rem;
-  text-transform: uppercase;
-  letter-spacing: .08em;
-  color: var(--mu);
-  font-weight: 800;
-  background: var(--s2);
-  white-space: nowrap;
+.table-clean th{
+  font-size:.72rem;
+  text-transform:uppercase;
+  letter-spacing:.08em;
+  color:var(--mu);
+  font-weight:800;
+  background:rgba(255,255,255,.16);
+  white-space:nowrap;
 }
-.table-clean td {
-  font-size: .84rem;
-  color: var(--txt2);
+[data-theme="dark"] .table-clean th{
+  background:rgba(255,255,255,.02);
 }
-.table-clean tr:hover td {
-  background: var(--s2);
+.table-clean td{
+  font-size:.84rem;
+  color:var(--txt2);
 }
-.table-clean tbody tr:last-child td {
-  border-bottom: none;
+.table-clean tr:hover td{
+  background:var(--s2);
+}
+.table-clean tbody tr:last-child td{
+  border-bottom:none;
 }
 
-.user-main {
-  font-weight: 800;
-  color: var(--txt);
+.user-main{
+  font-weight:800;
+  color:var(--txt);
 }
-.user-sub {
-  margin-top: .18rem;
-  font-size: .72rem;
-  color: var(--mu);
+.user-sub{
+  margin-top:.18rem;
+  font-size:.72rem;
+  color:var(--mu);
 }
-.note-text {
-  color: var(--txt2);
-  line-height: 1.5;
-  max-width: 280px;
-  word-break: break-word;
+.note-text{
+  color:var(--txt2);
+  line-height:1.5;
+  max-width:280px;
+  word-break:break-word;
 }
-.empty-box {
-  padding: 2rem 1.2rem;
-  text-align: center;
-  color: var(--mu);
+.empty-box{
+  padding:2rem 1.2rem;
+  text-align:center;
+  color:var(--mu);
 }
 
 .role-badge,
-.status-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: .3rem;
-  border-radius: 999px;
-  padding: .24rem .72rem;
-  font-size: .68rem;
-  font-weight: 800;
-  white-space: nowrap;
+.status-badge{
+  display:inline-flex;
+  align-items:center;
+  gap:.3rem;
+  border-radius:999px;
+  padding:.24rem .72rem;
+  font-size:.68rem;
+  font-weight:800;
+  white-space:nowrap;
 }
 
-.role-admin {
-  background: var(--rose-l);
-  color: var(--rose-d);
-}
-.role-provider {
-  background: var(--amber-l);
-  color: #92400e;
-}
-.role-generic {
-  background: var(--s3);
-  color: var(--txt2);
-}
+.role-admin{background:var(--rose-l);color:#be123c;}
+.role-provider{background:var(--amber-l);color:#92400e;}
+.role-generic{background:var(--s3);color:var(--txt2);}
 
-.status-pending {
-  background: var(--amber-l);
-  color: #92400e;
-}
-.status-approved {
-  background: var(--teal-l);
-  color: var(--teal-d);
-}
-.status-rejected {
-  background: var(--rose-l);
-  color: var(--rose-d);
-}
+.status-pending{background:var(--amber-l);color:#92400e;}
+.status-approved{background:var(--emerald-l);color:#047857;}
+.status-rejected{background:var(--rose-l);color:#be123c;}
 
-[data-theme="dark"] .role-admin { background: rgba(244,63,94,.10); color: #fb7185; }
-[data-theme="dark"] .role-provider { background: rgba(245,158,11,.12); color: #fcd34d; }
-[data-theme="dark"] .role-generic { background: var(--s3); color: var(--txt2); }
+[data-theme="dark"] .role-admin{background:rgba(244,63,94,.10);color:#fb7185;}
+[data-theme="dark"] .role-provider{background:rgba(245,158,11,.12);color:#fcd34d;}
+[data-theme="dark"] .role-generic{background:var(--s3);color:var(--txt2);}
 
-[data-theme="dark"] .status-pending { background: rgba(245,158,11,.12); color: #fcd34d; }
-[data-theme="dark"] .status-approved { background: rgba(13,148,136,.13); color: #2dd4bf; }
-[data-theme="dark"] .status-rejected { background: rgba(244,63,94,.10); color: #fb7185; }
+[data-theme="dark"] .status-pending{background:rgba(245,158,11,.12);color:#fcd34d;}
+[data-theme="dark"] .status-approved{background:rgba(16,185,129,.12);color:#34d399;}
+[data-theme="dark"] .status-rejected{background:rgba(244,63,94,.12);color:#fb7185;}
 
-.action-stack {
-  display: flex;
-  justify-content: flex-end;
-  flex-wrap: wrap;
-  gap: .45rem;
+.action-stack{
+  display:flex;
+  justify-content:flex-end;
+  flex-wrap:wrap;
+  gap:.45rem;
 }
 .btn-note,
 .btn-approve,
-.btn-reject {
-  border: none;
-  border-radius: 10px;
-  padding: .48rem .78rem;
-  font-size: .76rem;
-  font-weight: 700;
-  transition: all .15s ease;
+.btn-reject{
+  border:none;
+  border-radius:10px;
+  padding:.48rem .78rem;
+  font-size:.76rem;
+  font-weight:700;
+  transition:all .15s ease;
 }
-.btn-note {
-  background: var(--s3);
-  color: var(--txt2);
-  border: 1px solid var(--bdr);
+.btn-note{
+  background:rgba(255,255,255,.42);
+  color:var(--txt2);
+  border:1px solid var(--bdr);
 }
-.btn-note:hover {
-  background: var(--s2);
-  color: var(--txt);
+[data-theme="dark"] .btn-note{
+  background:rgba(255,255,255,.04);
 }
-.btn-approve {
-  background: #2563eb;
-  color: #fff;
+.btn-note:hover{
+  background:var(--s2);
+  color:var(--txt);
 }
-.btn-approve:hover {
-  background: #1d4ed8;
-  color: #fff;
+.btn-approve{
+  background:linear-gradient(135deg,#2563eb,#3b82f6);
+  color:#fff;
 }
-.btn-reject {
-  background: #0ea5e9;
-  color: #fff;
+.btn-approve:hover{
+  color:#fff;
+  transform:translateY(-1px);
 }
-.btn-reject:hover {
-  background: #0284c7;
-  color: #fff;
+.btn-reject{
+  background:linear-gradient(135deg,#0ea5e9,#38bdf8);
+  color:#fff;
+}
+.btn-reject:hover{
+  color:#fff;
+  transform:translateY(-1px);
 }
 
-.modal-content {
-  background: var(--nc-surface);
-  color: var(--nc-text);
-  border: 1px solid var(--nc-border);
-  border-radius: 16px;
+.modal-content{
+  background:var(--nc-surface);
+  color:var(--nc-text);
+  border:1px solid var(--nc-border);
+  border-radius:16px;
 }
 .modal-header,
-.modal-footer {
-  border-color: var(--nc-border);
+.modal-footer{
+  border-color:var(--nc-border);
 }
-.modal-title {
-  font-weight: 800;
+.modal-title{
+  font-weight:800;
+}
+.btn-close{
+  filter:var(--close-filter,none);
+}
+[data-theme="dark"] .btn-close{
+  filter:invert(1) grayscale(100%);
+}
+
+@media(max-width:768px){
+  .req-hero{
+    min-height:118px;
+    padding:.92rem 1rem;
+  }
+  .req-badge-top{
+    font-size:.58rem;
+    margin-bottom:.32rem;
+  }
+  .req-title{
+    font-size:1.28rem;
+    margin-bottom:.12rem;
+  }
+  .req-sub{
+    font-size:.76rem;
+    margin-bottom:.54rem;
+  }
+  .action-stack{
+    justify-content:flex-start;
+  }
 }
 </style>
+{% endblock %}
 
+{% block content %}
 <div class="admin-req">
-  <div class="req-shell">
+  <div class="req-wrap">
+    <div class="req-shell">
 
-    <div class="r-hero">
-      <div class="req-hero">
-        <div class="req-badge-top">
-          <i class="fas fa-clipboard-check"></i> Admin Review Queue
-        </div>
-        <div class="req-title">Role Upgrade Requests</div>
-        <div class="req-sub">
-          Review pending requests, save admin notes, and approve or reject access changes across the platform.
-        </div>
-        <div class="req-actions">
-          <a href="{{ url_for('admin.dashboard') }}" class="req-btn req-btn-light">
-            <i class="fas fa-arrow-left"></i> Back to Dashboard
-          </a>
-        </div>
-      </div>
-    </div>
-
-    <div class="req-card r-stat-1">
-      <div class="stat-top st-pending"></div>
-      <div class="stat-body">
-        <div class="stat-head">
-          <div class="stat-icon si-pending"><i class="fas fa-clock"></i></div>
-        </div>
-        <div class="stat-value">{{ pending_count or 0 }}</div>
-        <div class="stat-label">Pending</div>
-      </div>
-    </div>
-
-    <div class="req-card r-stat-2">
-      <div class="stat-top st-approved"></div>
-      <div class="stat-body">
-        <div class="stat-head">
-          <div class="stat-icon si-approved"><i class="fas fa-check"></i></div>
-        </div>
-        <div class="stat-value">{{ approved_count or 0 }}</div>
-        <div class="stat-label">Approved</div>
-      </div>
-    </div>
-
-    <div class="req-card r-stat-3">
-      <div class="stat-top st-rejected"></div>
-      <div class="stat-body">
-        <div class="stat-head">
-          <div class="stat-icon si-rejected"><i class="fas fa-times"></i></div>
-        </div>
-        <div class="stat-value">{{ rejected_count or 0 }}</div>
-        <div class="stat-label">Rejected</div>
-      </div>
-    </div>
-
-    <div class="req-card r-stat-4">
-      <div class="stat-top st-total"></div>
-      <div class="stat-body">
-        <div class="stat-head">
-          <div class="stat-icon si-total"><i class="fas fa-layer-group"></i></div>
-        </div>
-        <div class="stat-value">{{ total_count or 0 }}</div>
-        <div class="stat-label">Total</div>
-      </div>
-    </div>
-
-    <!-- Pending Requests -->
-    <div class="req-card r-pend">
-      <div class="sec-head">
-        <div class="sec-left">
-          <div class="sec-icon sec-amber"><i class="fas fa-hourglass-half"></i></div>
-          <div>
-            <div class="sec-title">Pending Requests</div>
-            <div class="sec-sub">Requests waiting for admin action</div>
+      <div class="r-hero">
+        <div class="req-hero">
+          <div class="req-badge-top">
+            <i class="fas fa-clipboard-check"></i> NUTRICONNECT · ADMIN REVIEW
+          </div>
+          <div class="req-title">Manage <span class="hl">Role Requests</span></div>
+          <div class="req-sub">
+            Review pending requests, save admin notes, and approve or reject access changes from one clean admin panel.
+          </div>
+          <div class="req-actions">
+            <a href="{{ url_for('admin.dashboard') }}" class="req-btn req-btn-light">
+              <i class="fas fa-arrow-left"></i> Back to Dashboard
+            </a>
           </div>
         </div>
-        <span class="sec-badge">
-          <i class="fas fa-clock"></i> {{ pending_requests|length if pending_requests else 0 }}
-        </span>
       </div>
 
-      {% if pending_requests and pending_requests|length > 0 %}
-      <div class="table-wrap">
-        <table class="table-clean">
-          <thead>
-            <tr>
-              <th>User</th>
-              <th>Email</th>
-              <th>Requested Role</th>
-              <th>User Note</th>
-              <th>Date</th>
-              <th style="text-align:right;">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {% for r in pending_requests %}
-            <tr>
-              <td>
-                <div class="user-main">{{ r.user.username }}</div>
-                <div class="user-sub">ID: {{ r.user.id }}</div>
-              </td>
-              <td>{{ r.user.email }}</td>
-              <td>
-                {% if r.requested_role == "admin" %}
-                  <span class="role-badge role-admin"><i class="fas fa-shield-halved"></i> Admin</span>
-                {% elif r.requested_role == "food_provider" %}
-                  <span class="role-badge role-provider"><i class="fas fa-store"></i> Food Provider</span>
-                {% else %}
-                  <span class="role-badge role-generic">{{ r.requested_role }}</span>
-                {% endif %}
-              </td>
-              <td>
-                <div class="note-text">{{ r.note or "-" }}</div>
-              </td>
-              <td>
-                <div>{{ r.created_at.strftime("%Y-%m-%d") if r.created_at else "" }}</div>
-                <div class="user-sub">{{ r.created_at.strftime("%H:%M") if r.created_at else "" }}</div>
-              </td>
-              <td style="text-align:right;">
-                <div class="action-stack">
-                  <button class="btn-note"
-                          data-bs-toggle="modal"
-                          data-bs-target="#noteModal{{ r.id }}">
-                    <i class="fas fa-comment-dots"></i> Note
-                  </button>
+      <div class="req-card r-stat-1">
+        <div class="stat-top st-pending"></div>
+        <div class="stat-body">
+          <div class="stat-head">
+            <span class="stat-label-top">Pending Requests</span>
+            <div class="stat-icon si-pending"><i class="fas fa-clock"></i></div>
+          </div>
+          <div class="stat-value">{{ pending_count or 0 }}</div>
+          <div class="stat-label">Waiting for review</div>
+        </div>
+      </div>
 
-                  <form method="POST" action="{{ url_for('admin.approve_request', req_id=r.id) }}">
-                    <input type="hidden" name="admin_comment" id="approveNote{{ r.id }}">
-                    <button class="btn-approve" type="submit">
-                      <i class="fas fa-check"></i> Approve
+      <div class="req-card r-stat-2">
+        <div class="stat-top st-approved"></div>
+        <div class="stat-body">
+          <div class="stat-head">
+            <span class="stat-label-top">Approved</span>
+            <div class="stat-icon si-approved"><i class="fas fa-check"></i></div>
+          </div>
+          <div class="stat-value">{{ approved_count or 0 }}</div>
+          <div class="stat-label">Successfully approved</div>
+        </div>
+      </div>
+
+      <div class="req-card r-stat-3">
+        <div class="stat-top st-rejected"></div>
+        <div class="stat-body">
+          <div class="stat-head">
+            <span class="stat-label-top">Rejected</span>
+            <div class="stat-icon si-rejected"><i class="fas fa-times"></i></div>
+          </div>
+          <div class="stat-value">{{ rejected_count or 0 }}</div>
+          <div class="stat-label">Declined requests</div>
+        </div>
+      </div>
+
+      <div class="req-card r-stat-4">
+        <div class="stat-top st-total"></div>
+        <div class="stat-body">
+          <div class="stat-head">
+            <span class="stat-label-top">Total Requests</span>
+            <div class="stat-icon si-total"><i class="fas fa-layer-group"></i></div>
+          </div>
+          <div class="stat-value">{{ total_count or 0 }}</div>
+          <div class="stat-label">Complete request history</div>
+        </div>
+      </div>
+
+      <div class="req-card r-pend">
+        <div class="sec-head">
+          <div class="sec-left">
+            <div class="sec-icon sec-amber"><i class="fas fa-hourglass-half"></i></div>
+            <div>
+              <div class="sec-title">Pending Requests</div>
+              <div class="sec-sub">Requests waiting for admin action</div>
+            </div>
+          </div>
+          <span class="sec-badge">
+            <i class="fas fa-clock"></i> {{ pending_requests|length if pending_requests else 0 }}
+          </span>
+        </div>
+
+        {% if pending_requests and pending_requests|length > 0 %}
+        <div class="table-wrap">
+          <table class="table-clean">
+            <thead>
+              <tr>
+                <th>User</th>
+                <th>Email</th>
+                <th>Requested Role</th>
+                <th>User Note</th>
+                <th>Date</th>
+                <th style="text-align:right;">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for r in pending_requests %}
+              <tr>
+                <td>
+                  <div class="user-main">{{ r.user.username }}</div>
+                  <div class="user-sub">ID: {{ r.user.id }}</div>
+                </td>
+                <td>{{ r.user.email }}</td>
+                <td>
+                  {% if r.requested_role == "admin" %}
+                    <span class="role-badge role-admin"><i class="fas fa-shield-halved"></i> Admin</span>
+                  {% elif r.requested_role == "food_provider" %}
+                    <span class="role-badge role-provider"><i class="fas fa-store"></i> Food Provider</span>
+                  {% else %}
+                    <span class="role-badge role-generic">{{ r.requested_role }}</span>
+                  {% endif %}
+                </td>
+                <td>
+                  <div class="note-text">{{ r.note or "-" }}</div>
+                </td>
+                <td>
+                  <div>{{ r.created_at.strftime("%Y-%m-%d") if r.created_at else "" }}</div>
+                  <div class="user-sub">{{ r.created_at.strftime("%H:%M") if r.created_at else "" }}</div>
+                </td>
+                <td style="text-align:right;">
+                  <div class="action-stack">
+                    <button class="btn-note"
+                            data-bs-toggle="modal"
+                            data-bs-target="#noteModal{{ r.id }}">
+                      <i class="fas fa-comment-dots"></i> Note
                     </button>
-                  </form>
 
-                  <form method="POST" action="{{ url_for('admin.reject_request', req_id=r.id) }}">
-                    <input type="hidden" name="admin_comment" id="rejectNote{{ r.id }}">
-                    <button class="btn-reject" type="submit">
-                      <i class="fas fa-times"></i> Reject
-                    </button>
-                  </form>
-                </div>
+                    <form method="POST" action="{{ url_for('admin.approve_request', req_id=r.id) }}">
+                      <input type="hidden" name="admin_comment" id="approveNote{{ r.id }}">
+                      <button class="btn-approve" type="submit">
+                        <i class="fas fa-check"></i> Approve
+                      </button>
+                    </form>
 
-                <div class="modal fade" id="noteModal{{ r.id }}" tabindex="-1" aria-hidden="true">
-                  <div class="modal-dialog modal-dialog-centered">
-                    <div class="modal-content">
-                      <div class="modal-header">
-                        <h5 class="modal-title">Admin Note</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                      </div>
-                      <div class="modal-body">
-                        <input type="text" class="form-control" id="noteInput{{ r.id }}" placeholder="Reason or comment...">
-                        <div class="text-muted small mt-2">
-                          This note will be saved as <strong>admin_comment</strong>.
+                    <form method="POST" action="{{ url_for('admin.reject_request', req_id=r.id) }}">
+                      <input type="hidden" name="admin_comment" id="rejectNote{{ r.id }}">
+                      <button class="btn-reject" type="submit">
+                        <i class="fas fa-times"></i> Reject
+                      </button>
+                    </form>
+                  </div>
+
+                  <div class="modal fade" id="noteModal{{ r.id }}" tabindex="-1" aria-hidden="true">
+                    <div class="modal-dialog modal-dialog-centered">
+                      <div class="modal-content">
+                        <div class="modal-header">
+                          <h5 class="modal-title">Admin Note</h5>
+                          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                         </div>
-                      </div>
-                      <div class="modal-footer">
-                        <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
-                        <button type="button" class="btn btn-primary"
-                                onclick="
-                                  const v=document.getElementById('noteInput{{ r.id }}').value;
-                                  document.getElementById('approveNote{{ r.id }}').value=v;
-                                  document.getElementById('rejectNote{{ r.id }}').value=v;
-                                  bootstrap.Modal.getInstance(document.getElementById('noteModal{{ r.id }}')).hide();
-                                ">
-                          Save Note
-                        </button>
+                        <div class="modal-body">
+                          <input type="text" class="form-control" id="noteInput{{ r.id }}" placeholder="Reason or comment...">
+                          <div class="text-muted small mt-2">
+                            This note will be saved as <strong>admin_comment</strong>.
+                          </div>
+                        </div>
+                        <div class="modal-footer">
+                          <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
+                          <button type="button" class="btn btn-primary"
+                                  onclick="
+                                    const v=document.getElementById('noteInput{{ r.id }}').value;
+                                    document.getElementById('approveNote{{ r.id }}').value=v;
+                                    document.getElementById('rejectNote{{ r.id }}').value=v;
+                                    bootstrap.Modal.getInstance(document.getElementById('noteModal{{ r.id }}')).hide();
+                                  ">
+                            Save Note
+                          </button>
+                        </div>
                       </div>
                     </div>
                   </div>
-                </div>
-              </td>
-            </tr>
-            {% endfor %}
-          </tbody>
-        </table>
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+        {% else %}
+        <div class="empty-box">No pending requests.</div>
+        {% endif %}
       </div>
-      {% else %}
-      <div class="empty-box">No pending requests.</div>
-      {% endif %}
-    </div>
 
-    <!-- History -->
-    <div class="req-card r-hist">
-      <div class="sec-head">
-        <div class="sec-left">
-          <div class="sec-icon sec-brand"><i class="fas fa-history"></i></div>
-          <div>
-            <div class="sec-title">Recent History</div>
-            <div class="sec-sub">Latest request activity across the system</div>
+      <div class="req-card r-hist">
+        <div class="sec-head">
+          <div class="sec-left">
+            <div class="sec-icon sec-brand"><i class="fas fa-history"></i></div>
+            <div>
+              <div class="sec-title">Recent History</div>
+              <div class="sec-sub">Latest request activity across the system</div>
+            </div>
           </div>
         </div>
-      </div>
 
-      {% if all_requests and all_requests|length > 0 %}
-      <div class="table-wrap">
-        <table class="table-clean">
-          <thead>
-            <tr>
-              <th>User</th>
-              <th>Requested Role</th>
-              <th>Status</th>
-              <th>Admin Comment</th>
-              <th>Date</th>
-            </tr>
-          </thead>
-          <tbody>
-            {% for r in all_requests %}
-            <tr>
-              <td>
-                <div class="user-main">{{ r.user.username }}</div>
-              </td>
-              <td>
-                {% if r.requested_role == "admin" %}
-                  <span class="role-badge role-admin"><i class="fas fa-shield-halved"></i> Admin</span>
-                {% elif r.requested_role == "food_provider" %}
-                  <span class="role-badge role-provider"><i class="fas fa-store"></i> Food Provider</span>
-                {% else %}
-                  <span class="role-badge role-generic">{{ r.requested_role }}</span>
-                {% endif %}
-              </td>
-              <td>
-                <span class="status-badge status-{{ r.status }}">
-                  {{ r.status.title() }}
-                </span>
-              </td>
-              <td>
-                <div class="note-text">
-                  {% if r.admin_comment %}
-                    {{ r.admin_comment[:60] ~ ("..." if r.admin_comment|length > 60 else "") }}
+        {% if all_requests and all_requests|length > 0 %}
+        <div class="table-wrap">
+          <table class="table-clean">
+            <thead>
+              <tr>
+                <th>User</th>
+                <th>Requested Role</th>
+                <th>Status</th>
+                <th>Admin Comment</th>
+                <th>Date</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for r in all_requests %}
+              <tr>
+                <td>
+                  <div class="user-main">{{ r.user.username }}</div>
+                </td>
+                <td>
+                  {% if r.requested_role == "admin" %}
+                    <span class="role-badge role-admin"><i class="fas fa-shield-halved"></i> Admin</span>
+                  {% elif r.requested_role == "food_provider" %}
+                    <span class="role-badge role-provider"><i class="fas fa-store"></i> Food Provider</span>
                   {% else %}
-                    -
+                    <span class="role-badge role-generic">{{ r.requested_role }}</span>
                   {% endif %}
-                </div>
-              </td>
-              <td>{{ r.created_at.strftime("%Y-%m-%d %H:%M") if r.created_at else "" }}</td>
-            </tr>
-            {% endfor %}
-          </tbody>
-        </table>
+                </td>
+                <td>
+                  <span class="status-badge status-{{ r.status }}">
+                    {{ r.status.title() }}
+                  </span>
+                </td>
+                <td>
+                  <div class="note-text">
+                    {% if r.admin_comment %}
+                      {{ r.admin_comment[:60] ~ ("..." if r.admin_comment|length > 60 else "") }}
+                    {% else %}
+                      -
+                    {% endif %}
+                  </div>
+                </td>
+                <td>{{ r.created_at.strftime("%Y-%m-%d %H:%M") if r.created_at else "" }}</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+        {% else %}
+        <div class="empty-box">No requests found.</div>
+        {% endif %}
       </div>
-      {% else %}
-      <div class="empty-box">No requests found.</div>
-      {% endif %}
-    </div>
 
+    </div>
   </div>
 </div>
 {% endblock %}
