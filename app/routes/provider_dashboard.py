@@ -4,12 +4,16 @@ from flask import Blueprint, render_template, request, redirect, url_for, flash
 from flask_login import login_required, current_user
 from sqlalchemy import func
 
-from app.models import db, Order, OrderTimeline, FoodItem, FoodRating, FoodView
+from app.models import (
+    db, Order, OrderTimeline, FoodItem, FoodRating, FoodView,
+    PaymentTransaction
+)
 
 provider_bp = Blueprint("provider", __name__)
 
 PROVIDER_ORDERS_PER_PAGE = 5
 RECENT_ORDER_DAYS = 5
+PROVIDER_STATUS_FLOW = ["pending", "confirmed", "preparing", "ready", "delivered"]
 
 
 def provider_required():
@@ -92,7 +96,6 @@ def get_recent_order_management_bounds(days=RECENT_ORDER_DAYS):
     today = datetime.utcnow().date()
     days = max(int(days or 1), 1)
 
-    # Includes today + previous (days - 1) calendar days
     start_date = today - timedelta(days=days - 1)
     end_date = today
 
@@ -120,6 +123,36 @@ def apply_provider_order_sort(query, sort_by):
         return query.order_by(Order.created_at.asc())
 
     return query.order_by(Order.created_at.desc())
+
+
+def normalize_provider_order_status(status):
+    status = (status or "pending").strip().lower()
+    allowed = set(PROVIDER_STATUS_FLOW + ["cancelled"])
+    return status if status in allowed else "pending"
+
+
+def get_next_provider_status(current_status):
+    current_status = normalize_provider_order_status(current_status)
+
+    next_map = {
+        "pending": "confirmed",
+        "confirmed": "preparing",
+        "preparing": "ready",
+        "ready": "delivered",
+    }
+    return next_map.get(current_status)
+
+
+def get_primary_status_button_label(current_status):
+    current_status = normalize_provider_order_status(current_status)
+
+    label_map = {
+        "pending": "Confirm",
+        "confirmed": "Preparing",
+        "preparing": "Ready",
+        "ready": "Delivered",
+    }
+    return label_map.get(current_status)
 
 
 def get_food_views_count(food):
@@ -573,7 +606,57 @@ def provider_order_detail(order_id):
         flash("Access denied.", "danger")
         return redirect(url_for("provider.provider_orders"))
 
-    return render_template("dashboard/provider_order_detail.html", order=order)
+    paid_txn = (
+        PaymentTransaction.query
+        .filter_by(order_id=order.id, status="success")
+        .order_by(PaymentTransaction.created_at.desc())
+        .first()
+    )
+    is_paid = paid_txn is not None
+
+    current_status = normalize_provider_order_status(order.status)
+
+    if is_paid and current_status == "pending":
+        order.status = "confirmed"
+
+        already_has_confirmed_timeline = (
+            order.timeline
+            .filter(OrderTimeline.status == "confirmed")
+            .first()
+            is not None
+        )
+
+        if not already_has_confirmed_timeline:
+            db.session.add(OrderTimeline(
+                order_id=order.id,
+                status="confirmed",
+                note="Payment received"
+            ))
+
+        db.session.commit()
+        current_status = "confirmed"
+
+    timeline_entries = (
+        order.timeline
+        .order_by(OrderTimeline.created_at.asc(), OrderTimeline.id.asc())
+        .all()
+    )
+
+    next_status = get_next_provider_status(current_status)
+    primary_action_label = get_primary_status_button_label(current_status)
+    can_cancel = current_status not in {"delivered", "cancelled"}
+
+    return render_template(
+        "dashboard/provider_order_detail.html",
+        order=order,
+        items=order.items.all(),
+        timeline_entries=timeline_entries,
+        current_status=current_status,
+        is_paid=is_paid,
+        next_status=next_status,
+        primary_action_label=primary_action_label,
+        can_cancel=can_cancel,
+    )
 
 
 @provider_bp.route("/orders/<int:order_id>/status", methods=["POST"])
@@ -585,28 +668,38 @@ def update_order_status(order_id):
         flash("Access denied.", "danger")
         return redirect(url_for("provider.provider_orders"))
 
-    current_status = (order.status or "").strip().lower()
+    current_status = normalize_provider_order_status(order.status)
+    action = (request.form.get("action") or "").strip().lower()
 
     if current_status == "delivered":
         flash("Delivered orders are locked and cannot be changed again.", "warning")
         return redirect(url_for("provider.provider_order_detail", order_id=order.id))
 
-    new_status = (request.form.get("status") or "").strip().lower()
-    valid_statuses = [
-        "pending",
-        "confirmed",
-        "preparing",
-        "ready",
-        "delivered",
-        "cancelled",
-    ]
-
-    if new_status not in valid_statuses:
-        flash("Invalid order status.", "danger")
+    if current_status == "cancelled":
+        flash("Cancelled orders are locked and cannot be changed again.", "warning")
         return redirect(url_for("provider.provider_order_detail", order_id=order.id))
 
-    if new_status == current_status:
-        flash("Order status is already set to that value.", "info")
+    if action == "cancel":
+        new_status = "cancelled"
+        note = "Cancelled by provider"
+
+    elif action == "advance":
+        new_status = get_next_provider_status(current_status)
+
+        if not new_status:
+            flash("No further status step is available for this order.", "info")
+            return redirect(url_for("provider.provider_order_detail", order_id=order.id))
+
+        note_map = {
+            "confirmed": "Confirmed by provider",
+            "preparing": "Order is now being prepared",
+            "ready": "Order is ready",
+            "delivered": "Order marked as delivered",
+        }
+        note = note_map.get(new_status, f"Updated by provider to {new_status.title()}")
+
+    else:
+        flash("Invalid action.", "danger")
         return redirect(url_for("provider.provider_order_detail", order_id=order.id))
 
     order.status = new_status
@@ -614,13 +707,13 @@ def update_order_status(order_id):
     if hasattr(order, "cancelled_at"):
         if new_status == "cancelled":
             order.cancelled_at = datetime.utcnow()
-        elif current_status == "cancelled":
+        else:
             order.cancelled_at = None
 
     db.session.add(OrderTimeline(
         order_id=order.id,
         status=new_status,
-        note=f"Updated by provider to {new_status.title()}",
+        note=note,
     ))
     db.session.commit()
 

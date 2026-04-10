@@ -183,6 +183,12 @@
     align-items: start;
   }
 
+  .pod-right-stack {
+    display: flex;
+    flex-direction: column;
+    gap: 1.2rem;
+  }
+
   .pod-card {
     background: var(--surf);
     border: 1px solid var(--bdr);
@@ -308,79 +314,6 @@
     font-weight: 800;
   }
 
-  .pod-select {
-    width: 100%;
-    height: 46px;
-    border-radius: 12px;
-    border: 1px solid var(--bdr);
-    background: var(--s2);
-    color: var(--txt);
-    padding: 0 .95rem;
-    outline: none;
-    box-shadow: none;
-    transition: border-color .15s ease, background .15s ease;
-  }
-
-  .pod-select:focus {
-    border-color: rgba(56,189,248,.38);
-    background: var(--surf);
-  }
-
-  .pod-select:disabled {
-    opacity: .72;
-    cursor: not-allowed;
-    background: var(--s3);
-    color: var(--mu);
-  }
-
-  .pod-submit {
-    width: 100%;
-    height: 46px;
-    margin-top: .85rem;
-    border: none;
-    border-radius: 12px;
-    background: linear-gradient(135deg, var(--brand-d), var(--brand));
-    color: #fff;
-    font-size: .84rem;
-    font-weight: 800;
-    box-shadow: 0 6px 18px rgba(14,165,233,.22);
-    transition: transform .14s ease, filter .14s ease;
-  }
-
-  .pod-submit:hover {
-    transform: translateY(-1px);
-    filter: brightness(1.05);
-  }
-
-  .pod-submit:disabled {
-    opacity: .65;
-    cursor: not-allowed;
-    transform: none;
-    filter: none;
-    box-shadow: none;
-    background: linear-gradient(135deg, #64748b, #475569);
-  }
-
-  .pod-status-row {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: .8rem;
-    margin-bottom: .85rem;
-    padding: .8rem .95rem;
-    border: 1px solid var(--bdr);
-    background: var(--s2);
-    border-radius: 14px;
-  }
-
-  .pod-status-label {
-    font-size: .74rem;
-    color: var(--mu);
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: .08em;
-  }
-
   .pod-badge {
     display: inline-flex;
     align-items: center;
@@ -396,8 +329,8 @@
   .st-pending   { background: var(--amber-l);  color: #a16207; }
   .st-confirmed { background: var(--cyan-l);   color: #0e7490; }
   .st-preparing { background: var(--violet-l); color: #6d28d9; }
-  .st-ready     { background: var(--emerald-l);color: #047857; }
-  .st-delivered { background: var(--emerald-l);color: #047857; }
+  .st-ready     { background: var(--emerald-l); color: #047857; }
+  .st-delivered { background: var(--emerald-l); color: #047857; }
   .st-cancelled { background: var(--rose-l);   color: #be123c; }
 
   [data-theme="dark"] .st-pending   { background: rgba(245,158,11,.12); color: #fcd34d; }
@@ -406,6 +339,46 @@
   [data-theme="dark"] .st-ready     { background: rgba(16,185,129,.12); color: #34d399; }
   [data-theme="dark"] .st-delivered { background: rgba(16,185,129,.12); color: #34d399; }
   [data-theme="dark"] .st-cancelled { background: rgba(244,63,94,.12);  color: #fb7185; }
+
+  .pay-paid {
+    background: rgba(16,185,129,.12);
+    color: #047857;
+  }
+
+  .pay-unpaid {
+    background: rgba(245,158,11,.12);
+    color: #a16207;
+  }
+
+  [data-theme="dark"] .pay-paid {
+    background: rgba(16,185,129,.12);
+    color: #34d399;
+  }
+
+  [data-theme="dark"] .pay-unpaid {
+    background: rgba(245,158,11,.12);
+    color: #fcd34d;
+  }
+
+  .pod-status-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: .8rem;
+    margin-bottom: .8rem;
+    padding: .82rem .95rem;
+    border: 1px solid var(--bdr);
+    background: var(--s2);
+    border-radius: 14px;
+  }
+
+  .pod-status-label {
+    font-size: .74rem;
+    color: var(--mu);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .08em;
+  }
 
   .pod-lock-note {
     display: flex;
@@ -419,10 +392,19 @@
     color: var(--txt2);
   }
 
+  .pod-lock-note.cancelled {
+    border-color: rgba(244,63,94,.2);
+    background: rgba(244,63,94,.08);
+  }
+
   .pod-lock-note i {
     margin-top: .12rem;
     color: var(--emerald);
     flex: 0 0 auto;
+  }
+
+  .pod-lock-note.cancelled i {
+    color: var(--rose);
   }
 
   .pod-lock-title {
@@ -436,6 +418,52 @@
     font-size: .76rem;
     line-height: 1.6;
     color: var(--mu);
+  }
+
+  .pod-form-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: .7rem;
+    margin-top: .15rem;
+  }
+
+  .pod-submit,
+  .pod-cancel-btn {
+    width: 100%;
+    height: 40px;
+    border: none;
+    border-radius: 11px;
+    font-size: .77rem;
+    font-weight: 800;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: .42rem;
+    transition: transform .14s ease, filter .14s ease;
+    padding: 0 .8rem;
+  }
+
+  .pod-submit {
+    background: linear-gradient(135deg, var(--brand-d), var(--brand));
+    color: #fff;
+    box-shadow: 0 6px 18px rgba(14,165,233,.18);
+  }
+
+  .pod-submit:hover {
+    transform: translateY(-1px);
+    filter: brightness(1.05);
+  }
+
+  .pod-cancel-btn {
+    background: rgba(244,63,94,.10);
+    color: #ff5f7a;
+    border: 1px solid rgba(244,63,94,.18);
+  }
+
+  .pod-cancel-btn:hover {
+    transform: translateY(-1px);
+    background: #e11d48;
+    color: #fff;
   }
 
   .pod-timeline {
@@ -527,12 +555,12 @@
       padding-left: .9rem;
       padding-right: .9rem;
     }
+
+    .pod-form-actions {
+      grid-template-columns: 1fr;
+    }
   }
 </style>
-
-{% set items = order.items.all() if order and order.items else [] %}
-{% set timeline_entries = order.timeline.all() if order and order.timeline else [] %}
-{% set is_delivered = (order.status == 'delivered') %}
 
 <div class="pod">
   <div class="pod-wrap">
@@ -573,7 +601,7 @@
               <div class="pod-card-sub">Everything included in this order</div>
             </div>
           </div>
-          <span class="pod-badge st-{{ order.status }}">{{ order.status.title() }}</span>
+          <span class="pod-badge st-{{ current_status }}">{{ current_status.title() }}</span>
         </div>
 
         <div class="pod-body">
@@ -600,14 +628,14 @@
         </div>
       </div>
 
-      <div style="display:flex; flex-direction:column; gap:1.2rem;">
+      <div class="pod-right-stack">
         <div class="pod-card">
           <div class="pod-card-head">
             <div class="pod-card-head-left">
               <div class="pod-icon"><i class="fas fa-arrows-rotate"></i></div>
               <div>
-                <div class="pod-card-title">Update Status</div>
-                <div class="pod-card-sub">Keep the customer informed with the latest progress</div>
+                <div class="pod-card-title">Status Actions</div>
+                <div class="pod-card-sub">Move the order step by step</div>
               </div>
             </div>
           </div>
@@ -615,36 +643,51 @@
           <div class="pod-body">
             <div class="pod-status-row">
               <div class="pod-status-label">Current Status</div>
-              <span class="pod-badge st-{{ order.status }}">{{ order.status.title() }}</span>
+              <span class="pod-badge st-{{ current_status }}">{{ current_status.title() }}</span>
             </div>
 
-            {% if is_delivered %}
+            <div class="pod-status-row">
+              <div class="pod-status-label">Payment Status</div>
+              <span class="pod-badge {% if is_paid %}pay-paid{% else %}pay-unpaid{% endif %}">
+                {% if is_paid %}Paid{% else %}Unpaid{% endif %}
+              </span>
+            </div>
+
+            {% if current_status == 'delivered' %}
             <div class="pod-lock-note">
               <i class="fas fa-lock"></i>
               <div>
                 <div class="pod-lock-title">Delivered order is locked</div>
                 <div class="pod-lock-sub">
-                  This order has already been marked as delivered, so the provider cannot change its status again.
+                  This order has already been delivered, so it cannot be cancelled or changed again.
                 </div>
               </div>
             </div>
-            {% endif %}
-
-            <form method="post" action="{{ url_for('provider.update_order_status', order_id=order.id) }}">
-              <select name="status" class="pod-select" {% if is_delivered %}disabled{% endif %}>
-                {% for s in ['pending','confirmed','preparing','ready','delivered','cancelled'] %}
-                <option value="{{ s }}" {% if order.status == s %}selected{% endif %}>{{ s.title() }}</option>
-                {% endfor %}
-              </select>
-
-              <button class="pod-submit" type="submit" {% if is_delivered %}disabled{% endif %}>
-                {% if is_delivered %}
-                  <i class="fas fa-lock"></i> Delivered Locked
-                {% else %}
-                  Save Status
-                {% endif %}
+            {% elif current_status == 'cancelled' %}
+            <div class="pod-lock-note cancelled">
+              <i class="fas fa-ban"></i>
+              <div>
+                <div class="pod-lock-title">Cancelled order is locked</div>
+                <div class="pod-lock-sub">
+                  This order has already been cancelled, so no further status changes are allowed.
+                </div>
+              </div>
+            </div>
+            {% else %}
+            <form method="post" action="{{ url_for('provider.update_order_status', order_id=order.id) }}" class="pod-form-actions">
+              {% if next_status %}
+              <button type="submit" name="action" value="advance" class="pod-submit">
+                <i class="fas fa-arrow-right"></i> {{ primary_action_label }}
               </button>
+              {% endif %}
+
+              {% if can_cancel %}
+              <button type="submit" name="action" value="cancel" class="pod-cancel-btn">
+                <i class="fas fa-ban"></i> Cancel Order
+              </button>
+              {% endif %}
             </form>
+            {% endif %}
           </div>
         </div>
 
