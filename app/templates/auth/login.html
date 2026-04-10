@@ -3,27 +3,69 @@
 
 {% block content %}
 <div class="row justify-content-center">
-  <div class="col-md-6">
-    <div class="card">
-      <div class="card-header"><h4 class="mb-0"><i class="fas fa-sign-in-alt"></i> Login</h4></div>
+  <div class="col-md-5">
+    <div class="card shadow-sm">
+      <div class="card-header">
+        <h4 class="mb-0"><i class="fas fa-sign-in-alt"></i> Login</h4>
+      </div>
+
       <div class="card-body">
+
+        {# ── Google Sign-In ───────────────────────────────────────────── #}
+        <a href="{{ url_for('auth.google_login') }}"
+           style="display:flex;align-items:center;justify-content:center;gap:10px;
+                  width:100%;padding:12px 20px;border-radius:12px;
+                  background:rgba(255,255,255,0.08);
+                  color:#fff;font-weight:600;font-size:.95rem;
+                  border:1px solid rgba(255,255,255,0.15);
+                  text-decoration:none;
+                  backdrop-filter:blur(10px);
+                  transition:all .2s ease;"
+           onmouseover="this.style.background='rgba(255,255,255,0.14)';this.style.borderColor='rgba(255,255,255,0.3)'"
+           onmouseout="this.style.background='rgba(255,255,255,0.08)';this.style.borderColor='rgba(255,255,255,0.15)'">
+          <img src="https://www.svgrepo.com/show/475656/google-color.svg"
+               width="20" height="20" alt="Google logo">
+          Continue with Google
+        </a>
+
+        <div class="d-flex align-items-center my-3">
+          <hr class="flex-grow-1">
+          <span class="px-2 text-muted small">or</span>
+          <hr class="flex-grow-1">
+        </div>
+
+        {# ── Username / Password form ─────────────────────────────────── #}
         <form method="POST" action="{{ url_for('auth.login') }}">
           <div class="mb-3">
             <label class="form-label" for="username">Username</label>
             <input class="form-control" id="username" name="username" required autofocus>
           </div>
+
           <div class="mb-3">
             <label class="form-label" for="password">Password</label>
             <input class="form-control" id="password" name="password" type="password" required>
           </div>
-          <div class="mb-3 form-check">
-            <input class="form-check-input" type="checkbox" id="remember" name="remember">
-            <label class="form-check-label" for="remember">Remember me</label>
+
+          <div class="d-flex justify-content-between align-items-center mb-3">
+            <div class="form-check mb-0">
+              <input class="form-check-input" type="checkbox" id="remember" name="remember">
+              <label class="form-check-label" for="remember">Remember me</label>
+            </div>
+            <a href="{{ url_for('auth.forgot_password') }}" class="small text-muted">
+              Forgot password?
+            </a>
           </div>
-          <button class="btn btn-primary w-100" type="submit"><i class="fas fa-sign-in-alt"></i> Login</button>
+
+          <button class="btn btn-primary w-100" type="submit">
+            <i class="fas fa-sign-in-alt"></i> Login
+          </button>
         </form>
+
         <hr>
-        <p class="text-center mb-0">Don't have an account? <a href="{{ url_for('auth.register') }}">Register here</a></p>
+        <p class="text-center mb-0">
+          Don't have an account?
+          <a href="{{ url_for('auth.register') }}">Register here</a>
+        </p>
       </div>
     </div>
   </div>
