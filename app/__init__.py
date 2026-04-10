@@ -1,15 +1,22 @@
+from dotenv import load_dotenv
+load_dotenv()
 import os
 from datetime import datetime
 
 from flask import Flask
 from flask_login import LoginManager, current_user
 from flask_migrate import Migrate
+from flask_mail import Mail
+from authlib.integrations.flask_client import OAuth
 
 from config import config
 from app.models import db, User
 
 login_manager = LoginManager()
 migrate = Migrate()
+mail = Mail()
+oauth = OAuth()
+
 
 def create_app(config_name="default"):
     app = Flask(__name__)
@@ -20,6 +27,17 @@ def create_app(config_name="default"):
     db.init_app(app)
     login_manager.init_app(app)
     migrate.init_app(app, db)
+    mail.init_app(app)
+    oauth.init_app(app)
+
+    # ── Google OAuth client ──────────────────────────────────────────────────
+    oauth.register(
+        name="google",
+        client_id=app.config.get("GOOGLE_CLIENT_ID"),
+        client_secret=app.config.get("GOOGLE_CLIENT_SECRET"),
+        server_metadata_url="https://accounts.google.com/.well-known/openid-configuration",
+        client_kwargs={"scope": "openid email profile"},
+    )
 
     login_manager.login_view = "auth.login"
     login_manager.login_message = "Please log in to access this page."
@@ -54,13 +72,10 @@ def create_app(config_name="default"):
     app.register_blueprint(user_dashboard_bp, url_prefix="/dashboard")
     app.register_blueprint(bmi_bp, url_prefix="/dashboard")
     app.register_blueprint(admin_bp, url_prefix="/admin")
-
     app.register_blueprint(food_bp, url_prefix="/provider")
     app.register_blueprint(food_search_bp, url_prefix="/food")
-
     app.register_blueprint(meal_log_bp, url_prefix="/dashboard/meal-log")
     app.register_blueprint(fitness_goal_bp, url_prefix="/dashboard")
-
     app.register_blueprint(orders_bp)
     app.register_blueprint(provider_bp, url_prefix="/provider")
     app.register_blueprint(analytics_bp, url_prefix="/admin")
