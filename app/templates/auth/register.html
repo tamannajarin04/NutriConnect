@@ -6,74 +6,66 @@
   <div class="col-md-8">
     <div class="card shadow-sm">
       <div class="card-header">
-        <h4 class="mb-0">
-          <i class="fas fa-user-plus"></i> Register
-        </h4>
+        <h4 class="mb-0"><i class="fas fa-user-plus"></i> Register</h4>
       </div>
 
       <div class="card-body">
+
+        {# ── Google Sign-Up ───────────────────────────────────────────── #}
+        <a href="{{ url_for('auth.google_login') }}"
+           style="display:flex;align-items:center;justify-content:center;gap:10px;
+                  width:100%;padding:12px 20px;border-radius:12px;
+                  background:rgba(255,255,255,0.08);
+                  color:#fff;font-weight:600;font-size:.95rem;
+                  border:1px solid rgba(255,255,255,0.15);
+                  text-decoration:none;
+                  backdrop-filter:blur(10px);
+                  transition:all .2s ease;"
+           onmouseover="this.style.background='rgba(255,255,255,0.14)';this.style.borderColor='rgba(255,255,255,0.3)'"
+           onmouseout="this.style.background='rgba(255,255,255,0.08)';this.style.borderColor='rgba(255,255,255,0.15)'">
+          <img src="https://www.svgrepo.com/show/475656/google-color.svg"
+               width="20" height="20" alt="Google logo">
+          Sign up with Google
+        </a>
+
+        <div class="d-flex align-items-center my-3">
+          <hr class="flex-grow-1">
+          <span class="px-2 text-muted small">or register with email</span>
+          <hr class="flex-grow-1">
+        </div>
+
+        {# ── Email registration form ──────────────────────────────────── #}
         <form method="POST" action="{{ url_for('auth.register') }}">
-          
+
           <div class="row">
             <div class="col-md-6 mb-3">
               <label class="form-label" for="first_name">First Name</label>
-              <input
-                type="text"
-                class="form-control"
-                id="first_name"
-                name="first_name"
-                placeholder="First name"
-                required
-              >
+              <input type="text" class="form-control" id="first_name"
+                     name="first_name" placeholder="First name" required>
             </div>
-
             <div class="col-md-6 mb-3">
               <label class="form-label" for="last_name">Last Name</label>
-              <input
-                type="text"
-                class="form-control"
-                id="last_name"
-                name="last_name"
-                placeholder="Last name"
-                required
-              >
+              <input type="text" class="form-control" id="last_name"
+                     name="last_name" placeholder="Last name" required>
             </div>
           </div>
 
           <div class="mb-3">
             <label class="form-label" for="username">Username</label>
-            <input
-              type="text"
-              class="form-control"
-              id="username"
-              name="username"
-              placeholder="Choose a username"
-              required
-            >
+            <input type="text" class="form-control" id="username"
+                   name="username" placeholder="Choose a username" required>
           </div>
 
           <div class="mb-3">
             <label class="form-label" for="email">Email</label>
-            <input
-              type="email"
-              class="form-control"
-              id="email"
-              name="email"
-              placeholder="example@email.com"
-              required
-            >
+            <input type="email" class="form-control" id="email"
+                   name="email" placeholder="example@email.com" required>
           </div>
 
           <div class="mb-3">
             <label class="form-label" for="password">Password</label>
-            <input
-              type="password"
-              class="form-control"
-              id="password"
-              name="password"
-              placeholder="Enter a strong password"
-              required
-            >
+            <input type="password" class="form-control" id="password"
+                   name="password" placeholder="At least 8 characters" required minlength="8">
           </div>
 
           <button type="submit" class="btn btn-primary w-100">
@@ -82,7 +74,6 @@
         </form>
 
         <hr>
-
         <p class="text-center mb-0">
           Already have an account?
           <a href="{{ url_for('auth.login') }}">Login here</a>
