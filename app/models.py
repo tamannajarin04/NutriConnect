@@ -233,12 +233,62 @@ class MealLog(db.Model):
 
     goal = db.Column(db.String(30), nullable=True, default=None)
 
+    # ── Nutrition fields (populated by hybrid AI+DB pipeline) ──
+    calories = db.Column(db.Float, nullable=True)
+    protein  = db.Column(db.Float, nullable=True)
+    carbs    = db.Column(db.Float, nullable=True)
+    fat      = db.Column(db.Float, nullable=True)
+
+    # Where did the nutrition data come from?
+    # Values: 'local_db', 'food_items_table', 'open_food_facts', 'ai_estimate', 'manual'
+    nutrition_source     = db.Column(db.String(30), nullable=True)
+    nutrition_confidence = db.Column(db.String(10), nullable=True)  # 'high', 'medium', 'low'
+    is_ai_estimated      = db.Column(db.Boolean, default=False, nullable=False)
+
+    # Raw parsed items from AI (JSON list) for display
+    parsed_items_json = db.Column(db.Text, nullable=True)
+
     logged_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
     log_date = db.Column(db.Date, default=date.today, nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
     def __repr__(self):
         return f"<MealLog user_id={self.user_id} food={self.food_name} meal_type={self.meal_type} goal={self.goal}>"
+
+    @property
+    def has_nutrition(self):
+        return self.calories is not None
+
+
+class FitnessGoal(db.Model):
+    """Stores a user's fitness goal estimation request and AI result."""
+    __tablename__ = "fitness_goals"
+
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False, index=True)
+
+    # User inputs
+    current_weight  = db.Column(db.Float, nullable=False)
+    target_weight   = db.Column(db.Float, nullable=False)
+    height_cm       = db.Column(db.Float, nullable=False)
+    age             = db.Column(db.Integer, nullable=False)
+    gender          = db.Column(db.String(10), nullable=False)
+    activity_level  = db.Column(db.Float, nullable=False)   # PAL multiplier
+    daily_calories  = db.Column(db.Integer, nullable=False)
+
+    # Calculated values
+    tdee            = db.Column(db.Integer, nullable=True)
+    daily_deficit   = db.Column(db.Integer, nullable=True)  # negative = surplus
+
+    # AI result (stored as JSON text)
+    ai_result_json  = db.Column(db.Text, nullable=True)
+
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+    user = db.relationship("User", backref=db.backref("fitness_goals", lazy="dynamic"))
+
+    def __repr__(self):
+        return f"<FitnessGoal user_id={self.user_id} cw={self.current_weight} tw={self.target_weight}>"
 
 
 class CartItem(db.Model):
