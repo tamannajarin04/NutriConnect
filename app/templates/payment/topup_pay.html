@@ -2,12 +2,55 @@
 {% block title %}Top Up Wallet · NutriConnect{% endblock %}
 
 {% block extra_css %}
-<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet">
 <style>
+.wtu-page,
+.wtu-page *{
+  font-family:'Plus Jakarta Sans',sans-serif !important;
+}
+.wtu-page i,
+.wtu-page i[class*="fa"]{
+  font-family:"Font Awesome 6 Free","Font Awesome 6 Brands","FontAwesome" !important;
+  font-style:normal;
+  font-variant:normal;
+  text-rendering:auto;
+  -webkit-font-smoothing:antialiased;
+}
+
 .wtu-page{
-  max-width:1320px;
+  --surf:var(--nc-surface);
+  --s2:var(--nc-surface-2);
+  --s3:var(--nc-surface-3);
+  --bdr:var(--nc-border);
+  --bdr2:var(--nc-border-2);
+  --txt:var(--nc-text);
+  --txt2:var(--nc-text-2);
+  --mu:var(--nc-text-muted);
+  --fa:var(--nc-text-faint);
+  --brand:var(--nc-brand);
+  --brand-d:var(--nc-brand-d);
+  --brand-l:var(--nc-brand-l);
+
+  --cyan:#38bdf8;
+  --emerald:#10b981;
+  --amber:#f59e0b;
+  --violet:#8b5cf6;
+  --rose:#f43f5e;
+
+  --cyan-l:rgba(56,189,248,.12);
+  --emerald-l:rgba(16,185,129,.12);
+  --amber-l:rgba(245,158,11,.12);
+  --violet-l:rgba(139,92,246,.12);
+  --rose-l:rgba(244,63,94,.12);
+
+  --glass-bg-light:rgba(255,255,255,.70);
+  --glass-bg-dark:rgba(8,18,36,.74);
+  --glass-border-light:rgba(255,255,255,.38);
+  --glass-border-dark:rgba(148,163,184,.16);
+
+  width:100%;
+  max-width:1180px;
   margin:0 auto;
-  font-family:'Sora',sans-serif;
   animation:wtuFadeUp .32s ease;
 }
 @keyframes wtuFadeUp{
@@ -22,19 +65,25 @@
   to{opacity:1;transform:scale(1)}
 }
 
-/* hero */
+/* compact hero */
 .wtu-hero{
   position:relative;
   overflow:hidden;
-  border-radius:24px;
-  padding:1.3rem 1.45rem;
+  border-radius:20px;
+  min-height:128px;
+  padding:1rem 1.4rem;
   margin-bottom:1rem;
+  display:flex;
+  flex-direction:column;
+  justify-content:flex-start;
   background:
-    radial-gradient(circle at 12% 18%, rgba(56,189,248,.12), transparent 28%),
-    radial-gradient(circle at 88% 12%, rgba(52,211,153,.09), transparent 24%),
-    linear-gradient(135deg,#07111d 0%,#0c1d33 52%,#113055 100%);
-  border:1px solid rgba(125,211,252,.16);
-  box-shadow:var(--nc-card-shadow);
+    radial-gradient(ellipse 65% 90% at 0% 0%, rgba(34,211,238,.16) 0%, transparent 55%),
+    radial-gradient(ellipse 45% 65% at 100% 20%, rgba(139,92,246,.14) 0%, transparent 55%),
+    linear-gradient(145deg,#06101f 0%,#0a1830 42%,#0d2345 100%);
+  border:1px solid rgba(56,189,248,.14);
+  box-shadow:
+    0 12px 30px rgba(3,10,28,.22),
+    inset 0 1px 0 rgba(255,255,255,.05);
 }
 .wtu-hero::after{
   content:"";
@@ -43,46 +92,50 @@
   background-image:radial-gradient(circle, rgba(255,255,255,.045) 1px, transparent 1px);
   background-size:26px 26px;
   pointer-events:none;
+  opacity:.36;
 }
-.wtu-hero > *{position:relative;z-index:1;}
-
+.wtu-hero > *{
+  position:relative;
+  z-index:1;
+}
 .wtu-badge{
   display:inline-flex;
   align-items:center;
-  gap:.45rem;
-  padding:.32rem .82rem;
+  gap:.4rem;
+  width:fit-content;
+  padding:.28rem .82rem;
   border-radius:999px;
-  background:rgba(255,255,255,.08);
-  border:1px solid rgba(255,255,255,.14);
-  color:#fff;
-  font-size:.68rem;
+  background:rgba(72,117,255,.14);
+  border:1px solid rgba(120,160,255,.18);
+  color:rgba(255,255,255,.82);
+  font-size:.62rem;
   font-weight:800;
   text-transform:uppercase;
   letter-spacing:.08em;
-  margin-bottom:.85rem;
+  margin-bottom:.38rem;
 }
 .wtu-title{
   margin:0;
-  font-size:1.55rem;
-  line-height:1.15;
-  font-weight:800;
-  letter-spacing:-.03em;
+  font-size:clamp(1.45rem,2.3vw,2rem);
+  line-height:1.08;
+  font-weight:900;
+  letter-spacing:-.05em;
   color:#fff;
 }
 .wtu-sub{
-  margin-top:.28rem;
-  font-size:.84rem;
-  color:rgba(255,255,255,.76);
-  line-height:1.6;
+  margin-top:.22rem;
+  font-size:.82rem;
+  color:rgba(255,255,255,.68);
+  line-height:1.45;
 }
 .wtu-mini{
   display:flex;
   flex-wrap:wrap;
   gap:.75rem;
-  margin-top:.85rem;
+  margin-top:.75rem;
 }
 .wtu-mini-chip{
-  padding:.48rem .72rem;
+  padding:.46rem .72rem;
   border-radius:12px;
   background:rgba(255,255,255,.08);
   border:1px solid rgba(255,255,255,.12);
@@ -96,7 +149,7 @@
   font-weight:600;
 }
 
-/* top aligned area */
+/* main cards */
 .wtu-top-grid{
   display:grid;
   grid-template-columns:minmax(0,1.55fr) minmax(300px,.8fr);
@@ -109,22 +162,51 @@
   }
 }
 
-.wtu-card{
-  background:var(--nc-card-bg);
-  border:1px solid var(--nc-card-border);
-  border-radius:22px;
+.wtu-card,
+.wtu-form-panel,
+.wtu-select-hint{
+  position:relative;
   overflow:hidden;
-  box-shadow:var(--nc-card-shadow);
-  min-height:100%;
+  border-radius:22px;
+  background:var(--glass-bg-light);
+  border:1px solid var(--glass-border-light);
+  box-shadow:0 14px 38px rgba(15,23,42,.08);
+  backdrop-filter:blur(18px);
+  -webkit-backdrop-filter:blur(18px);
+}
+[data-theme="dark"] .wtu-card,
+[data-theme="dark"] .wtu-form-panel,
+[data-theme="dark"] .wtu-select-hint{
+  background:var(--glass-bg-dark);
+  border-color:var(--glass-border-dark);
+  box-shadow:0 18px 44px rgba(0,0,0,.35);
+}
+.wtu-card::before,
+.wtu-form-panel::before,
+.wtu-select-hint::before{
+  content:"";
+  position:absolute;
+  inset:0;
+  background:linear-gradient(180deg,rgba(255,255,255,.06),transparent 40%);
+  pointer-events:none;
 }
 
-.wtu-card-head{
+.wtu-card-head,
+.wtu-summary-head,
+.wtu-form-head{
+  position:relative;
+  z-index:1;
   padding:.95rem 1.1rem;
-  border-bottom:1px solid var(--nc-border);
-  background:linear-gradient(180deg, rgba(14,165,233,.05), transparent);
+  border-bottom:1px solid var(--bdr);
+  background:rgba(255,255,255,.24);
   display:flex;
   align-items:center;
   gap:.8rem;
+}
+[data-theme="dark"] .wtu-card-head,
+[data-theme="dark"] .wtu-summary-head,
+[data-theme="dark"] .wtu-form-head{
+  background:rgba(255,255,255,.03);
 }
 .wtu-card-head-icon{
   width:40px;
@@ -133,24 +215,40 @@
   display:flex;
   align-items:center;
   justify-content:center;
-  background:var(--nc-brand-l);
-  color:var(--nc-brand);
+  background:var(--brand-l);
+  color:var(--brand);
   font-size:1rem;
   flex-shrink:0;
 }
-.wtu-card-head-title{
-  font-size:1rem;
+.wtu-card-head-title,
+.wtu-form-title{
+  font-size:.98rem;
   font-weight:800;
-  color:var(--nc-text);
+  color:var(--txt);
 }
-.wtu-card-head-sub{
+.wtu-card-head-sub,
+.wtu-form-sub{
   font-size:.78rem;
-  color:var(--nc-text-muted);
+  color:var(--mu);
   margin-top:.08rem;
+}
+.wtu-form-logo{
+  width:42px;
+  height:42px;
+  border-radius:14px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  color:#fff;
+  font-weight:800;
+  font-size:1rem;
+  flex-shrink:0;
 }
 
 /* methods */
 .wtu-methods-body{
+  position:relative;
+  z-index:1;
   padding:1rem;
   display:grid;
   grid-template-columns:1fr 1fr;
@@ -164,11 +262,10 @@
     min-height:auto;
   }
 }
-
 .wtu-method{
-  border:1px solid var(--nc-border);
+  border:1px solid var(--bdr);
   border-radius:18px;
-  background:linear-gradient(180deg, rgba(255,255,255,.02), transparent);
+  background:rgba(255,255,255,.28);
   padding:1rem;
   display:flex;
   align-items:flex-start;
@@ -178,12 +275,15 @@
   transition:.15s ease;
   min-height:126px;
 }
+[data-theme="dark"] .wtu-method{
+  background:rgba(255,255,255,.03);
+}
 .wtu-method:hover{
   transform:translateY(-1px);
   border-color:rgba(14,165,233,.28);
 }
 .wtu-method.active{
-  border-color:var(--nc-brand);
+  border-color:var(--brand);
   box-shadow:0 0 0 3px rgba(14,165,233,.12);
 }
 .wtu-method.bkash.active{
@@ -202,7 +302,6 @@
   border-color:#1a56db;
   box-shadow:0 0 0 3px rgba(26,86,219,.12);
 }
-
 .wtu-method-left{
   display:flex;
   gap:.85rem;
@@ -227,12 +326,12 @@
 .wtu-name{
   font-size:.95rem;
   font-weight:800;
-  color:var(--nc-text);
+  color:var(--txt);
 }
 .wtu-desc{
   margin-top:.15rem;
   font-size:.78rem;
-  color:var(--nc-text-muted);
+  color:var(--mu);
   line-height:1.55;
 }
 .wtu-chip{
@@ -240,8 +339,8 @@
   margin-top:.32rem;
   padding:.2rem .56rem;
   border-radius:999px;
-  background:var(--nc-surface-2);
-  color:var(--nc-text-faint);
+  background:var(--s2);
+  color:var(--fa);
   font-size:.64rem;
   font-weight:800;
   text-transform:uppercase;
@@ -251,17 +350,17 @@
   width:28px;
   height:28px;
   border-radius:50%;
-  border:1px solid var(--nc-border);
+  border:1px solid var(--bdr);
   display:flex;
   align-items:center;
   justify-content:center;
-  color:var(--nc-text-faint);
+  color:var(--fa);
   flex-shrink:0;
 }
 .wtu-method.active .wtu-check{
   background:rgba(14,165,233,.12);
   border-color:rgba(14,165,233,.24);
-  color:var(--nc-brand);
+  color:var(--brand);
 }
 
 /* summary */
@@ -271,62 +370,69 @@
   min-height:100%;
 }
 .wtu-summary-head{
-  padding:.95rem 1.1rem;
-  border-bottom:1px solid var(--nc-border);
-  background:var(--nc-surface-2);
-  display:flex;
-  align-items:center;
   justify-content:space-between;
-  gap:.8rem;
 }
 .wtu-summary-head-title{
-  font-size:.75rem;
-  font-weight:900;
+  font-size:.72rem;
+  font-weight:800;
   text-transform:uppercase;
   letter-spacing:.08em;
-  color:var(--nc-text-muted);
+  color:var(--mu);
 }
 .wtu-summary-head-total{
-  font-family:'JetBrains Mono',monospace;
+  font-family:'JetBrains Mono',monospace !important;
   font-size:.95rem;
   font-weight:700;
-  color:var(--nc-brand);
+  color:var(--brand);
 }
 .wtu-summary-body{
+  position:relative;
+  z-index:1;
   padding:1rem;
   display:flex;
   flex-direction:column;
   gap:.9rem;
   flex:1;
 }
-.wtu-summary-box{
-  border:1px solid var(--nc-border);
-  border-radius:14px;
-  background:var(--nc-surface-2);
-  padding:.88rem .9rem;
+.wtu-summary-box,
+.wtu-box,
+.wtu-note-card{
+  border:1px solid var(--bdr);
+  border-radius:16px;
+  background:rgba(255,255,255,.28);
+  padding:.9rem 1rem;
+  min-width:0;
 }
-.wtu-summary-label{
-  font-size:.64rem;
+[data-theme="dark"] .wtu-summary-box,
+[data-theme="dark"] .wtu-box,
+[data-theme="dark"] .wtu-note-card{
+  background:rgba(255,255,255,.03);
+}
+.wtu-summary-label,
+.wtu-box-label{
+  font-size:.68rem;
   font-weight:800;
   text-transform:uppercase;
   letter-spacing:.08em;
-  color:var(--nc-text-faint);
+  color:var(--fa);
   margin-bottom:.24rem;
 }
-.wtu-summary-value{
+.wtu-summary-value,
+.wtu-box-value{
   font-size:.94rem;
   font-weight:700;
-  color:var(--nc-text);
+  color:var(--txt);
 }
-.wtu-summary-value.mono{
-  font-family:'JetBrains Mono',monospace;
+.wtu-summary-value.mono,
+.wtu-box-value{
+  font-family:'JetBrains Mono',monospace !important;
 }
 .wtu-summary-note{
   margin-top:auto;
   padding-top:.9rem;
-  border-top:1px solid var(--nc-border);
+  border-top:1px solid var(--bdr);
   font-size:.78rem;
-  color:var(--nc-text-muted);
+  color:var(--mu);
   line-height:1.65;
 }
 .wtu-summary-secure{
@@ -335,75 +441,38 @@
   justify-content:center;
   gap:.45rem;
   font-size:.72rem;
-  color:var(--nc-text-faint);
+  color:var(--fa);
   text-align:center;
 }
 
-/* forms */
+/* form shell */
 .wtu-form-shell{
   margin-top:1rem;
 }
 .wtu-select-hint{
-  background:var(--nc-card-bg);
-  border:1px dashed var(--nc-border);
-  border-radius:22px;
   padding:2.2rem 1rem;
   text-align:center;
-  color:var(--nc-text-faint);
+  color:var(--fa);
 }
 .wtu-select-hint i{
   display:block;
   font-size:1.8rem;
   margin-bottom:.75rem;
-  color:var(--nc-brand);
+  color:var(--brand);
   opacity:.65;
 }
 .wtu-select-hint strong{
   display:block;
-  color:var(--nc-text);
+  color:var(--txt);
   margin-bottom:.3rem;
   font-size:.98rem;
 }
-
 .wtu-form-panel{
   display:none;
-  background:var(--nc-card-bg);
-  border:1px solid var(--nc-card-border);
-  border-radius:22px;
-  overflow:hidden;
-  box-shadow:var(--nc-card-shadow);
-}
-.wtu-form-head{
-  padding:.95rem 1.1rem;
-  border-bottom:1px solid var(--nc-border);
-  background:var(--nc-surface-2);
-  display:flex;
-  align-items:center;
-  gap:.85rem;
-}
-.wtu-form-logo{
-  width:42px;
-  height:42px;
-  border-radius:14px;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  color:#fff;
-  font-weight:800;
-  font-size:1rem;
-  flex-shrink:0;
-}
-.wtu-form-title{
-  font-size:.98rem;
-  font-weight:800;
-  color:var(--nc-text);
-}
-.wtu-form-sub{
-  font-size:.78rem;
-  color:var(--nc-text-muted);
-  margin-top:.08rem;
 }
 .wtu-form-body{
+  position:relative;
+  z-index:1;
   padding:1rem 1.1rem 1.1rem;
 }
 .wtu-form-grid{
@@ -421,29 +490,16 @@
   }
 }
 .wtu-box{
-  border:1px solid var(--nc-border);
-  border-radius:16px;
-  background:var(--nc-surface-2);
-  padding:.95rem 1rem;
   margin-bottom:1rem;
 }
-.wtu-box:last-child{margin-bottom:0;}
+.wtu-box:last-child{
+  margin-bottom:0;
+}
 .wtu-box-row{
   display:flex;
   align-items:center;
   justify-content:space-between;
   gap:.8rem;
-}
-.wtu-box-label{
-  font-size:.78rem;
-  font-weight:700;
-  color:var(--nc-text-muted);
-}
-.wtu-box-value{
-  font-family:'JetBrains Mono',monospace;
-  font-size:1.08rem;
-  font-weight:700;
-  color:var(--nc-text);
 }
 .wtu-group{
   margin-bottom:.95rem;
@@ -455,15 +511,15 @@
   font-weight:800;
   text-transform:uppercase;
   letter-spacing:.07em;
-  color:var(--nc-text-faint);
+  color:var(--fa);
   margin-bottom:.42rem;
 }
 .wtu-input{
   width:100%;
-  border:1.5px solid var(--nc-border);
+  border:1.5px solid var(--bdr);
   border-radius:12px;
-  background:var(--nc-surface-2);
-  color:var(--nc-text);
+  background:rgba(255,255,255,.42);
+  color:var(--txt);
   padding:.76rem 1rem;
   font-size:.92rem;
   font-weight:600;
@@ -472,8 +528,11 @@
   box-sizing:border-box;
   min-width:0;
 }
+[data-theme="dark"] .wtu-input{
+  background:rgba(255,255,255,.04);
+}
 .wtu-input:focus{
-  border-color:var(--nc-brand);
+  border-color:var(--brand);
   box-shadow:0 0 0 3px rgba(14,165,233,.12);
 }
 .wtu-input.bkash:focus{
@@ -490,22 +549,278 @@
 }
 .wtu-hint{
   font-size:.72rem;
-  color:var(--nc-text-faint);
+  color:var(--fa);
   margin-top:.35rem;
   line-height:1.5;
 }
 
-/* fixed pin layout */
+/* manual country select + auto-detect phone */
+.intl-phone-field{
+  display:grid;
+  grid-template-columns:118px minmax(0,1fr);
+  gap:.55rem;
+  align-items:start;
+}
+.intl-select{
+  position:relative;
+  min-width:0;
+}
+.intl-prefix-box{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:.38rem;
+  min-height:50px;
+  padding:0 .72rem;
+  border:1.5px solid var(--bdr);
+  border-radius:12px;
+  background:rgba(255,255,255,.42);
+  color:var(--txt);
+  width:100%;
+  box-sizing:border-box;
+}
+[data-theme="dark"] .intl-prefix-box{
+  background:rgba(255,255,255,.04);
+}
+.intl-prefix-trigger{
+  cursor:pointer;
+  appearance:none;
+  -webkit-appearance:none;
+  outline:none;
+  transition:border-color .15s, box-shadow .15s, transform .15s;
+}
+.intl-prefix-trigger:hover{
+  transform:translateY(-1px);
+}
+.intl-prefix-trigger:focus{
+  border-color:var(--brand);
+  box-shadow:0 0 0 3px rgba(14,165,233,.12);
+}
+.intl-select.open .intl-prefix-trigger{
+  border-color:var(--brand);
+  box-shadow:0 0 0 3px rgba(14,165,233,.10);
+}
+.intl-flag{
+  flex-shrink:0;
+  display:block;
+  width:20px;
+  height:15px;
+  object-fit:cover;
+  border-radius:3px;
+  box-shadow:0 0 0 1px rgba(148,163,184,.18);
+  background:rgba(255,255,255,.8);
+}
+.intl-abbr{
+  font-size:.72rem;
+  font-weight:800;
+  letter-spacing:.04em;
+  color:var(--txt);
+}
+.intl-code{
+  font-family:'JetBrains Mono',monospace !important;
+  font-size:.74rem;
+  font-weight:700;
+  color:var(--txt);
+}
+.intl-caret{
+  color:var(--fa);
+  font-size:.75rem;
+  margin-left:auto;
+}
+.intl-dropdown{
+  position:absolute;
+  top:calc(100% + .45rem);
+  left:0;
+  width:min(320px, 82vw);
+  max-height:280px;
+  overflow:auto;
+  border-radius:16px;
+  border:1px solid var(--bdr);
+  background:rgba(255,255,255,.96);
+  box-shadow:0 18px 36px rgba(15,23,42,.16);
+  backdrop-filter:blur(18px);
+  -webkit-backdrop-filter:blur(18px);
+  padding:.35rem;
+  z-index:50;
+  display:none;
+}
+[data-theme="dark"] .intl-dropdown{
+  background:rgba(8,18,36,.96);
+  border-color:var(--glass-border-dark);
+  box-shadow:0 18px 44px rgba(0,0,0,.42);
+}
+.intl-select.open .intl-dropdown{
+  display:block;
+}
+.intl-option{
+  width:100%;
+  border:none;
+  background:transparent;
+  border-radius:12px;
+  padding:.62rem .7rem;
+  display:flex;
+  align-items:center;
+  gap:.65rem;
+  cursor:pointer;
+  text-align:left;
+}
+.intl-option:hover{
+  background:rgba(14,165,233,.08);
+}
+.intl-option.active{
+  background:rgba(14,165,233,.12);
+}
+.intl-option-flag{
+  flex-shrink:0;
+  display:block;
+  width:20px;
+  height:15px;
+  object-fit:cover;
+  border-radius:3px;
+  box-shadow:0 0 0 1px rgba(148,163,184,.18);
+  background:rgba(255,255,255,.8);
+}
+.intl-option-main{
+  min-width:0;
+  display:flex;
+  flex-direction:column;
+}
+.intl-option-name{
+  font-size:.82rem;
+  font-weight:700;
+  color:var(--txt);
+  line-height:1.2;
+}
+.intl-option-meta{
+  font-size:.7rem;
+  color:var(--fa);
+  margin-top:.08rem;
+}
+
+/* card */
+.card-entry-shell{
+  position:relative;
+}
+.card-entry-shell .wtu-input{
+  padding-right:240px;
+}
+.brand-strip{
+  position:absolute;
+  right:12px;
+  top:50%;
+  transform:translateY(-50%);
+  display:flex;
+  align-items:center;
+  gap:.38rem;
+  pointer-events:none;
+}
+.brand-chip{
+  height:24px;
+  min-width:36px;
+  padding:0 .45rem;
+  border-radius:7px;
+  border:1px solid rgba(148,163,184,.22);
+  background:rgba(255,255,255,.86);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  opacity:.32;
+  filter:grayscale(.15);
+  transform:scale(.96);
+  transition:all .16s ease;
+  box-shadow:0 1px 2px rgba(15,23,42,.08);
+}
+.brand-chip.active{
+  opacity:1;
+  filter:none;
+  transform:scale(1);
+  border-color:rgba(14,165,233,.28);
+}
+[data-theme="dark"] .brand-chip{
+  background:rgba(255,255,255,.92);
+}
+.brand-visa{
+  color:#1d4ed8;
+  font-weight:900;
+  font-style:italic;
+  letter-spacing:-.02em;
+  font-size:.92rem;
+}
+.brand-jcb{
+  font-weight:900;
+  font-size:.78rem;
+  letter-spacing:.03em;
+  background:linear-gradient(90deg,#0f9d58 0 33%, #1a73e8 33% 66%, #db4437 66% 100%);
+  color:#fff;
+}
+.brand-discover{
+  font-weight:900;
+  font-size:.56rem;
+  color:#111827;
+  position:relative;
+}
+.brand-discover::after{
+  content:"";
+  position:absolute;
+  right:3px;
+  bottom:3px;
+  width:12px;
+  height:2px;
+  border-radius:99px;
+  background:#ea580c;
+}
+.brand-amex{
+  background:#1d9bf0;
+  color:#fff;
+  font-weight:900;
+  font-size:.58rem;
+  letter-spacing:.04em;
+}
+.brand-mastercard{
+  position:relative;
+  width:42px;
+  min-width:42px;
+  padding:0;
+}
+.brand-mastercard .mc-a,
+.brand-mastercard .mc-b{
+  position:absolute;
+  top:50%;
+  width:13px;
+  height:13px;
+  border-radius:50%;
+  transform:translateY(-50%);
+}
+.brand-mastercard .mc-a{
+  left:10px;
+  background:#ef4444;
+}
+.brand-mastercard .mc-b{
+  right:10px;
+  background:#f59e0b;
+}
+.brand-mastercard .mc-mid{
+  position:absolute;
+  left:50%;
+  top:50%;
+  width:11px;
+  height:11px;
+  border-radius:50%;
+  transform:translate(-50%,-50%);
+  background:rgba(234,88,12,.75);
+}
+
+/* pin */
 .wtu-pin-row{
   display:grid;
   width:100%;
   min-width:0;
-  grid-template-columns:repeat(5, minmax(0, 1fr));
+  grid-template-columns:repeat(5,minmax(0,1fr));
   gap:.55rem;
   align-items:stretch;
 }
 .wtu-pin-row.pin-4{
-  grid-template-columns:repeat(4, minmax(0, 1fr));
+  grid-template-columns:repeat(4,minmax(0,1fr));
 }
 .wtu-pin{
   width:100%;
@@ -517,15 +832,18 @@
   font-weight:700;
   padding:.8rem 0;
   border-radius:12px;
-  border:1.5px solid var(--nc-border);
-  background:var(--nc-surface-2);
-  color:var(--nc-text);
+  border:1.5px solid var(--bdr);
+  background:rgba(255,255,255,.42);
+  color:var(--txt);
   outline:none;
   appearance:none;
   -webkit-appearance:none;
 }
+[data-theme="dark"] .wtu-pin{
+  background:rgba(255,255,255,.04);
+}
 .wtu-pin:focus{
-  border-color:var(--nc-brand);
+  border-color:var(--brand);
   box-shadow:0 0 0 3px rgba(14,165,233,.12);
 }
 .wtu-pin.bkash:focus{
@@ -557,19 +875,28 @@
     font-size:.95rem;
     padding:.76rem 0;
   }
-}
-.wtu-note-card{
-  border:1px solid var(--nc-border);
-  border-radius:16px;
-  background:linear-gradient(180deg, rgba(14,165,233,.06), transparent);
-  padding:1rem;
-  min-width:0;
+  .intl-phone-field{
+    grid-template-columns:104px minmax(0,1fr);
+  }
+  .intl-abbr{
+    display:none;
+  }
+  .card-entry-shell .wtu-input{
+    padding-right:1rem;
+  }
+  .brand-strip{
+    position:static;
+    transform:none;
+    margin-top:.65rem;
+    justify-content:flex-start;
+    flex-wrap:wrap;
+  }
 }
 .wtu-note-card h4{
   margin:0 0 .7rem;
   font-size:.88rem;
   font-weight:800;
-  color:var(--nc-text);
+  color:var(--txt);
 }
 .wtu-note-list{
   display:flex;
@@ -581,11 +908,11 @@
   align-items:flex-start;
   gap:.55rem;
   font-size:.78rem;
-  color:var(--nc-text-muted);
+  color:var(--mu);
   line-height:1.55;
 }
 .wtu-note-item i{
-  color:var(--nc-brand);
+  color:var(--brand);
   margin-top:.12rem;
 }
 .wtu-submit{
@@ -627,7 +954,7 @@
   display:flex;
 }
 .wtu-overlay-box{
-  width:min(92vw, 360px);
+  width:min(92vw,360px);
   background:var(--nc-card-bg);
   border:1px solid var(--nc-card-border);
   border-radius:24px;
@@ -641,19 +968,19 @@
   height:58px;
   margin:0 auto 1rem;
   border-radius:50%;
-  border:4px solid var(--nc-border);
-  border-top-color:var(--nc-brand);
+  border:4px solid var(--bdr);
+  border-top-color:var(--brand);
   animation:wtuSpin .8s linear infinite;
 }
 .wtu-overlay-title{
   font-size:1.04rem;
   font-weight:900;
-  color:var(--nc-text);
+  color:var(--txt);
   margin-bottom:.35rem;
 }
 .wtu-overlay-sub{
   font-size:.82rem;
-  color:var(--nc-text-muted);
+  color:var(--mu);
   line-height:1.6;
 }
 .wtu-success-icon{
@@ -687,6 +1014,64 @@
   color:#fff;
   opacity:.92;
 }
+
+@media(max-width:760px){
+  .wtu-hero{
+    min-height:118px;
+    padding:.92rem 1rem;
+  }
+  .wtu-badge{
+    font-size:.58rem;
+    margin-bottom:.32rem;
+  }
+  .wtu-title{
+    font-size:1.28rem;
+  }
+  .wtu-sub{
+    font-size:.76rem;
+  }
+}
+/* FIX: country dropdown reliably opens above the form */
+.pay-form-panel,
+.pay-form-body,
+.wtu-form-panel,
+.wtu-form-body{
+  overflow: visible !important;
+}
+
+.intl-select{
+  position: relative;
+  z-index: 40;
+}
+
+.intl-select.open{
+  z-index: 300;
+}
+
+.intl-prefix-trigger{
+  pointer-events: auto;
+  user-select: none;
+}
+
+.intl-dropdown{
+  display: none;
+  pointer-events: auto;
+}
+
+.intl-select.open .intl-dropdown{
+  display: block !important;
+}
+
+.intl-flag,
+.intl-option-flag{
+  display:block;
+  width:20px;
+  height:15px;
+  object-fit:cover;
+  border-radius:3px;
+  box-shadow:0 0 0 1px rgba(148,163,184,.18);
+  background:rgba(255,255,255,.8);
+}
 </style>
 {% endblock %}
 
@@ -695,7 +1080,7 @@
 
   <div class="wtu-hero">
     <div class="wtu-badge">
-      <i class="fas fa-wallet"></i> Wallet Top-Up
+      <i class="fas fa-wallet"></i> NUTRICONNECT · WALLET TOP-UP
     </div>
 
     <h1 class="wtu-title">Add Money to Wallet</h1>
@@ -828,8 +1213,35 @@
 
             <div class="wtu-group">
               <label class="wtu-label">bKash Account Number</label>
-              <input class="wtu-input bkash" type="tel" id="bkash-phone" placeholder="01XXXXXXXXX" maxlength="11">
-              <div class="wtu-hint">Enter your 11-digit bKash mobile number.</div>
+              <div class="intl-phone-field">
+                <div class="intl-select">
+                  <button
+                    type="button"
+                    class="intl-prefix-box intl-prefix-trigger"
+                    data-phone-trigger="bkash-phone"
+                    aria-haspopup="listbox"
+                    aria-expanded="false"
+                  >
+                    <img class="intl-flag" id="bkash-phone-flag" src="https://flagcdn.com/24x18/bd.png" alt="BD flag">
+                    <span class="intl-abbr" id="bkash-phone-abbr">BD</span>
+                    <span class="intl-code" id="bkash-phone-code">+880</span>
+                    <span class="intl-caret"><i class="fas fa-caret-down"></i></span>
+                  </button>
+                  <div class="intl-dropdown" id="bkash-phone-dropdown" role="listbox"></div>
+                </div>
+
+                <input
+                  class="wtu-input bkash"
+                  type="tel"
+                  id="bkash-phone"
+                  placeholder="1712-345678"
+                  maxlength="22"
+                  autocomplete="tel"
+                >
+              </div>
+              <div class="wtu-hint" id="bkash-phone-country">
+                Selected Bangladesh (+880). Enter only the mobile number, or type a full international number to auto-detect the flag.
+              </div>
             </div>
 
             <div class="wtu-group">
@@ -881,8 +1293,35 @@
 
             <div class="wtu-group">
               <label class="wtu-label">Nagad Account Number</label>
-              <input class="wtu-input nagad" type="tel" id="nagad-phone" placeholder="01XXXXXXXXX" maxlength="11">
-              <div class="wtu-hint">Enter your 11-digit Nagad number.</div>
+              <div class="intl-phone-field">
+                <div class="intl-select">
+                  <button
+                    type="button"
+                    class="intl-prefix-box intl-prefix-trigger"
+                    data-phone-trigger="nagad-phone"
+                    aria-haspopup="listbox"
+                    aria-expanded="false"
+                  >
+                    <img class="intl-flag" id="nagad-phone-flag" src="https://flagcdn.com/24x18/bd.png" alt="BD flag">
+                    <span class="intl-abbr" id="nagad-phone-abbr">BD</span>
+                    <span class="intl-code" id="nagad-phone-code">+880</span>
+                    <span class="intl-caret"><i class="fas fa-caret-down"></i></span>
+                  </button>
+                  <div class="intl-dropdown" id="nagad-phone-dropdown" role="listbox"></div>
+                </div>
+
+                <input
+                  class="wtu-input nagad"
+                  type="tel"
+                  id="nagad-phone"
+                  placeholder="1712-345678"
+                  maxlength="22"
+                  autocomplete="tel"
+                >
+              </div>
+              <div class="wtu-hint" id="nagad-phone-country">
+                Selected Bangladesh (+880). Enter only the mobile number, or type a full international number to auto-detect the flag.
+              </div>
             </div>
 
             <div class="wtu-group">
@@ -933,8 +1372,35 @@
 
             <div class="wtu-group">
               <label class="wtu-label">Rocket Account Number</label>
-              <input class="wtu-input rocket" type="tel" id="rocket-phone" placeholder="01XXXXXXXXX" maxlength="11">
-              <div class="wtu-hint">Enter your 11-digit Rocket number.</div>
+              <div class="intl-phone-field">
+                <div class="intl-select">
+                  <button
+                    type="button"
+                    class="intl-prefix-box intl-prefix-trigger"
+                    data-phone-trigger="rocket-phone"
+                    aria-haspopup="listbox"
+                    aria-expanded="false"
+                  >
+                    <img class="intl-flag" id="rocket-phone-flag" src="https://flagcdn.com/24x18/bd.png" alt="BD flag">
+                    <span class="intl-abbr" id="rocket-phone-abbr">BD</span>
+                    <span class="intl-code" id="rocket-phone-code">+880</span>
+                    <span class="intl-caret"><i class="fas fa-caret-down"></i></span>
+                  </button>
+                  <div class="intl-dropdown" id="rocket-phone-dropdown" role="listbox"></div>
+                </div>
+
+                <input
+                  class="wtu-input rocket"
+                  type="tel"
+                  id="rocket-phone"
+                  placeholder="1712-345678"
+                  maxlength="22"
+                  autocomplete="tel"
+                >
+              </div>
+              <div class="wtu-hint" id="rocket-phone-country">
+                Selected Bangladesh (+880). Enter only the mobile number, or type a full international number to auto-detect the flag.
+              </div>
             </div>
 
             <div class="wtu-group">
@@ -985,7 +1451,21 @@
 
             <div class="wtu-group">
               <label class="wtu-label">Card Number</label>
-              <input class="wtu-input" type="text" id="card-number" placeholder="1234 5678 9012 3456" maxlength="19">
+              <div class="card-entry-shell">
+                <input class="wtu-input" type="text" id="card-number" placeholder="1234 5678 9012 3456" maxlength="23">
+                <div class="brand-strip" id="topup-card-brand-strip">
+                  <div class="brand-chip brand-mastercard" data-brand="Mastercard" title="Mastercard">
+                    <span class="mc-a"></span>
+                    <span class="mc-b"></span>
+                    <span class="mc-mid"></span>
+                  </div>
+                  <div class="brand-chip brand-visa" data-brand="Visa" title="Visa">VISA</div>
+                  <div class="brand-chip brand-jcb" data-brand="JCB" title="JCB">JCB</div>
+                  <div class="brand-chip brand-discover" data-brand="Discover" title="Discover">DISC</div>
+                  <div class="brand-chip brand-amex" data-brand="American Express" title="American Express">AMEX</div>
+                </div>
+              </div>
+              <div class="wtu-hint" id="topup-card-brand-helper">Card type will be detected automatically.</div>
             </div>
 
             <div class="wtu-card-row">
@@ -1012,7 +1492,7 @@
           <div class="wtu-note-card">
             <h4>Before you continue</h4>
             <div class="wtu-note-list">
-              <div class="wtu-note-item"><i class="fas fa-circle-check"></i> Make sure your card details are correct before submitting payment.</div>
+              <div class="wtu-note-item"><i class="fas fa-circle-check"></i> Card type is detected automatically from the entered number.</div>
               <div class="wtu-note-item"><i class="fas fa-circle-check"></i> Your card will only be charged for the amount shown in the summary.</div>
               <div class="wtu-note-item"><i class="fas fa-circle-check"></i> The wallet is credited only after the card transaction is completed successfully.</div>
             </div>
@@ -1043,6 +1523,366 @@
 </div>
 
 <script>
+const PHONE_COUNTRIES = [
+  { code: '880', iso: 'bd', abbr: 'BD', name: 'Bangladesh', nationalMin: 10, placeholder: '1712-345678' },
+  { code: '91',  iso: 'in', abbr: 'IN', name: 'India', nationalMin: 10, placeholder: '9876543210' },
+  { code: '92',  iso: 'pk', abbr: 'PK', name: 'Pakistan', nationalMin: 10, placeholder: '3001234567' },
+  { code: '94',  iso: 'lk', abbr: 'LK', name: 'Sri Lanka', nationalMin: 9,  placeholder: '712345678' },
+  { code: '95',  iso: 'mm', abbr: 'MM', name: 'Myanmar', nationalMin: 8,  placeholder: '912345678' },
+  { code: '60',  iso: 'my', abbr: 'MY', name: 'Malaysia', nationalMin: 8,  placeholder: '123456789' },
+  { code: '65',  iso: 'sg', abbr: 'SG', name: 'Singapore', nationalMin: 8,  placeholder: '81234567' },
+  { code: '44',  iso: 'gb', abbr: 'GB', name: 'United Kingdom', nationalMin: 10, placeholder: '7123456789' },
+  { code: '1',   iso: 'us', abbr: 'US', name: 'United States / Canada', nationalMin: 10, placeholder: '2025550123' },
+  { code: '971', iso: 'ae', abbr: 'AE', name: 'United Arab Emirates', nationalMin: 9,  placeholder: '501234567' },
+  { code: '966', iso: 'sa', abbr: 'SA', name: 'Saudi Arabia', nationalMin: 9,  placeholder: '501234567' },
+  { code: '974', iso: 'qa', abbr: 'QA', name: 'Qatar', nationalMin: 8,  placeholder: '33123456' },
+  { code: '973', iso: 'bh', abbr: 'BH', name: 'Bahrain', nationalMin: 8,  placeholder: '36001234' },
+  { code: '968', iso: 'om', abbr: 'OM', name: 'Oman', nationalMin: 8,  placeholder: '92123456' },
+  { code: '965', iso: 'kw', abbr: 'KW', name: 'Kuwait', nationalMin: 8,  placeholder: '50012345' }
+];
+
+const PHONE_FIELD_STATE = {};
+
+function digitsOnly(value) {
+  return (value || '').toString().replace(/\D/g, '');
+}
+
+function getCountryByCode(code) {
+  return PHONE_COUNTRIES.find(country => country.code === String(code)) || null;
+}
+
+function getDefaultPhoneCountry() {
+  return getCountryByCode('880');
+}
+
+function getFlagUrl(country) {
+  return country && country.iso ? `https://flagcdn.com/24x18/${country.iso}.png` : '';
+}
+
+function getPhoneElements(inputId) {
+  return {
+    input: document.getElementById(inputId),
+    flag: document.getElementById(`${inputId}-flag`),
+    abbr: document.getElementById(`${inputId}-abbr`),
+    code: document.getElementById(`${inputId}-code`),
+    hint: document.getElementById(`${inputId}-country`),
+    dropdown: document.getElementById(`${inputId}-dropdown`),
+    trigger: document.querySelector(`[data-phone-trigger="${inputId}"]`)
+  };
+}
+
+function getPhoneState(inputId) {
+  if (!PHONE_FIELD_STATE[inputId]) {
+    PHONE_FIELD_STATE[inputId] = {
+      selectedCode: '880'
+    };
+  }
+  return PHONE_FIELD_STATE[inputId];
+}
+
+function formatNationalDisplay(country, nationalNumber) {
+  const digits = digitsOnly(nationalNumber);
+  if (!digits) return '';
+
+  if (country && country.code === '880') {
+    if (digits.length <= 4) return digits;
+    if (digits.length <= 10) return `${digits.slice(0, 4)}-${digits.slice(4)}`;
+    return `${digits.slice(0, 4)}-${digits.slice(4, 10)}${digits.slice(10)}`;
+  }
+
+  return digits;
+}
+
+function detectExplicitInternational(rawValue) {
+  const raw = (rawValue || '').trim();
+  if (!raw) return null;
+
+  const hasPlus = raw.startsWith('+');
+  const hasDoubleZero = raw.startsWith('00');
+
+  let normalizedDigits = digitsOnly(raw);
+  if (!normalizedDigits) return null;
+
+  if (hasDoubleZero) {
+    normalizedDigits = normalizedDigits.replace(/^00/, '');
+  }
+
+  const countries = [...PHONE_COUNTRIES].sort((a, b) => b.code.length - a.code.length);
+
+  for (const country of countries) {
+    const minTotalLength = country.code.length + country.nationalMin;
+    const allowWithoutPrefix = country.code.length >= 2 || normalizedDigits.length >= 11;
+
+    if (!(hasPlus || hasDoubleZero || allowWithoutPrefix)) continue;
+    if (!normalizedDigits.startsWith(country.code)) continue;
+    if (normalizedDigits.length < minTotalLength) continue;
+
+    const national = normalizedDigits.slice(country.code.length);
+    const trimmedNational = national.replace(/^0+/, '') || national;
+
+    return {
+      ...country,
+      countryCode: `+${country.code}`,
+      national: trimmedNational
+    };
+  }
+
+  return null;
+}
+
+function buildCountryDropdown(inputId) {
+  const { dropdown } = getPhoneElements(inputId);
+  const state = getPhoneState(inputId);
+  if (!dropdown) return;
+
+  dropdown.innerHTML = PHONE_COUNTRIES.map(country => `
+    <button
+      type="button"
+      class="intl-option ${country.code === state.selectedCode ? 'active' : ''}"
+      data-phone-option="${inputId}"
+      data-country-code="${country.code}"
+      role="option"
+      aria-selected="${country.code === state.selectedCode ? 'true' : 'false'}"
+    >
+      <img class="intl-option-flag" src="${getFlagUrl(country)}" alt="${country.abbr} flag">
+      <span class="intl-option-main">
+        <span class="intl-option-name">${country.name}</span>
+        <span class="intl-option-meta">${country.abbr} · +${country.code}</span>
+      </span>
+    </button>
+  `).join('');
+}
+
+function setPhoneView(inputId, country, nationalNumber, hintText) {
+  const els = getPhoneElements(inputId);
+  if (!els.input) return;
+
+  els.input.dataset.countryCode = `+${country.code}`;
+  els.input.dataset.countryName = country.name;
+  els.input.dataset.nationalNumber = digitsOnly(nationalNumber);
+
+  if (els.flag) {
+    els.flag.src = getFlagUrl(country);
+    els.flag.alt = `${country.abbr} flag`;
+  }
+  if (els.abbr) els.abbr.textContent = country.abbr;
+  if (els.code) els.code.textContent = `+${country.code}`;
+  if (els.hint) els.hint.textContent = hintText || '';
+  if (country.placeholder) els.input.placeholder = country.placeholder;
+
+  buildCountryDropdown(inputId);
+}
+
+function closeAllPhoneDropdowns(exceptInputId = null) {
+  document.querySelectorAll('.intl-select.open').forEach(selectEl => {
+    const trigger = selectEl.querySelector('[data-phone-trigger]');
+    const currentInputId = trigger ? trigger.getAttribute('data-phone-trigger') : null;
+
+    if (exceptInputId && currentInputId === exceptInputId) return;
+
+    selectEl.classList.remove('open');
+    if (trigger) trigger.setAttribute('aria-expanded', 'false');
+  });
+}
+
+function togglePhoneDropdown(inputId) {
+  const { trigger } = getPhoneElements(inputId);
+  if (!trigger) return;
+
+  const wrapper = trigger.closest('.intl-select');
+  if (!wrapper) return;
+
+  const willOpen = !wrapper.classList.contains('open');
+  closeAllPhoneDropdowns(willOpen ? inputId : null);
+
+  wrapper.classList.toggle('open', willOpen);
+  trigger.setAttribute('aria-expanded', willOpen ? 'true' : 'false');
+}
+
+function normalizeCurrentInputToNational(inputId, countryCodeToApply) {
+  const els = getPhoneElements(inputId);
+  if (!els.input) return;
+
+  const explicit = detectExplicitInternational(els.input.value);
+  const targetCountry = getCountryByCode(countryCodeToApply) || getDefaultPhoneCountry();
+
+  let nationalDigits = explicit ? digitsOnly(explicit.national) : digitsOnly(els.input.value);
+  els.input.value = formatNationalDisplay(targetCountry, nationalDigits) || nationalDigits;
+}
+
+function selectPhoneCountry(inputId, countryCode) {
+  const state = getPhoneState(inputId);
+  state.selectedCode = String(countryCode);
+
+  normalizeCurrentInputToNational(inputId, state.selectedCode);
+  renderPhoneField(inputId);
+  closeAllPhoneDropdowns();
+
+  const { input } = getPhoneElements(inputId);
+  if (input) input.focus();
+}
+
+function renderPhoneField(inputId) {
+  const state = getPhoneState(inputId);
+  const els = getPhoneElements(inputId);
+  if (!els.input) return;
+
+  const explicit = detectExplicitInternational(els.input.value);
+
+  if (explicit) {
+    state.selectedCode = explicit.code;
+
+    const pretty = formatNationalDisplay(explicit, explicit.national);
+    if (pretty !== els.input.value) {
+      els.input.value = pretty;
+    }
+
+    setPhoneView(
+      inputId,
+      explicit,
+      explicit.national,
+      `${explicit.name} detected from full number. You can continue with the local number only.`
+    );
+    return;
+  }
+
+  const selectedCountry = getCountryByCode(state.selectedCode) || getDefaultPhoneCountry();
+  const nationalDigits = digitsOnly(els.input.value);
+
+  if (selectedCountry.code === '880') {
+    const pretty = formatNationalDisplay(selectedCountry, nationalDigits);
+    if (pretty !== els.input.value) {
+      els.input.value = pretty;
+    }
+  }
+
+  setPhoneView(
+    inputId,
+    selectedCountry,
+    nationalDigits,
+    `Selected ${selectedCountry.name} (+${selectedCountry.code}). Enter only the mobile number, or type a full international number to auto-detect the flag.`
+  );
+}
+
+function bindPhoneUI(inputId) {
+  const els = getPhoneElements(inputId);
+  if (!els.input || !els.trigger || !els.dropdown) return;
+
+  getPhoneState(inputId);
+  buildCountryDropdown(inputId);
+  renderPhoneField(inputId);
+
+  els.trigger.addEventListener('click', function (e) {
+    e.preventDefault();
+    e.stopPropagation();
+    togglePhoneDropdown(inputId);
+  });
+
+  els.dropdown.addEventListener('click', function (e) {
+    const option = e.target.closest('.intl-option');
+    if (!option) return;
+
+    e.preventDefault();
+    e.stopPropagation();
+
+    selectPhoneCountry(inputId, option.dataset.countryCode);
+  });
+
+  els.input.addEventListener('input', function () {
+    renderPhoneField(inputId);
+  });
+
+  els.input.addEventListener('blur', function () {
+    renderPhoneField(inputId);
+  });
+}
+
+function getPhonePayload(inputId) {
+  const input = document.getElementById(inputId);
+  const countryCode = input?.dataset.countryCode || '+880';
+  const countryName = input?.dataset.countryName || 'Bangladesh';
+  const nationalNumber = input?.dataset.nationalNumber || digitsOnly(input?.value || '');
+  const raw = nationalNumber ? `${countryCode}${nationalNumber}` : '';
+
+  return {
+    raw,
+    countryCode,
+    countryName,
+    nationalNumber
+  };
+}
+
+function validatePhoneInput(inputId, label) {
+  const payload = getPhonePayload(inputId);
+  if (!payload.nationalNumber || payload.nationalNumber.length < 8) {
+    alert(`Please enter a valid ${label} number`);
+    return null;
+  }
+  return payload;
+}
+
+
+function detectCardBrand(raw) {
+  const digits = digitsOnly(raw);
+  if (!digits) return null;
+  if (/^4/.test(digits)) return 'Visa';
+  if (/^(5[1-5]|2(2[2-9]|[3-6]\d|7[01]|720))/.test(digits)) return 'Mastercard';
+  if (/^3[47]/.test(digits)) return 'American Express';
+  if (/^(?:35|2131|1800)/.test(digits)) return 'JCB';
+  if (/^6(?:011|5|4[4-9])/.test(digits)) return 'Discover';
+  return null;
+}
+
+function formatCardNumber(rawDigits, brand) {
+  const digits = digitsOnly(rawDigits);
+
+  if (brand === 'American Express') {
+    const capped = digits.slice(0, 15);
+    const parts = [
+      capped.slice(0, 4),
+      capped.slice(4, 10),
+      capped.slice(10, 15)
+    ].filter(Boolean);
+    return parts.join(' ');
+  }
+
+  const capped = digits.slice(0, 19);
+  return (capped.match(/.{1,4}/g) || []).join(' ');
+}
+
+function bindCardUI() {
+  const input = document.getElementById('card-number');
+  const helper = document.getElementById('topup-card-brand-helper');
+  const chips = document.querySelectorAll('#topup-card-brand-strip .brand-chip');
+  const cvv = document.getElementById('card-cvv');
+  if (!input) return;
+
+  const render = () => {
+    const brand = detectCardBrand(input.value);
+    input.dataset.cardBrand = brand || '';
+    input.value = formatCardNumber(input.value, brand);
+
+    chips.forEach(chip => {
+      chip.classList.toggle('active', chip.dataset.brand === brand);
+    });
+
+    if (helper) {
+      helper.textContent = brand
+        ? `${brand} detected from card number`
+        : 'Card type will be detected automatically.';
+    }
+
+    if (cvv) {
+      cvv.maxLength = brand === 'American Express' ? 4 : 3;
+      cvv.placeholder = brand === 'American Express' ? '••••' : '•••';
+    }
+  };
+
+  input.addEventListener('input', render);
+  input.addEventListener('blur', render);
+  render();
+}
+
 function selectTopupMethod(method, buttonEl) {
   document.querySelectorAll('.wtu-method').forEach(card => card.classList.remove('active'));
   document.querySelectorAll('.wtu-form-panel').forEach(panel => panel.style.display = 'none');
@@ -1060,36 +1900,43 @@ function selectTopupMethod(method, buttonEl) {
 }
 
 function processTopup(method) {
+  let phonePayload = null;
+  let cardBrand = '';
+
   if (method === 'bkash') {
-    const phone = document.getElementById('bkash-phone').value.trim();
+    phonePayload = validatePhoneInput('bkash-phone', 'bKash');
     const pin = Array.from(document.querySelectorAll('#form-bkash .wtu-pin')).map(el => el.value).join('');
-    if (phone.length < 11) { alert('Please enter a valid bKash number'); return; }
+    if (!phonePayload) return;
     if (pin.length < 5) { alert('Please enter your 5-digit bKash PIN'); return; }
   }
 
   if (method === 'nagad') {
-    const phone = document.getElementById('nagad-phone').value.trim();
+    phonePayload = validatePhoneInput('nagad-phone', 'Nagad');
     const pin = Array.from(document.querySelectorAll('#form-nagad .wtu-pin')).map(el => el.value).join('');
-    if (phone.length < 11) { alert('Please enter a valid Nagad number'); return; }
+    if (!phonePayload) return;
     if (pin.length < 4) { alert('Please enter your 4-digit Nagad PIN'); return; }
   }
 
   if (method === 'rocket') {
-    const phone = document.getElementById('rocket-phone').value.trim();
+    phonePayload = validatePhoneInput('rocket-phone', 'Rocket');
     const pin = Array.from(document.querySelectorAll('#form-rocket .wtu-pin')).map(el => el.value).join('');
-    if (phone.length < 11) { alert('Please enter a valid Rocket number'); return; }
+    if (!phonePayload) return;
     if (pin.length < 4) { alert('Please enter your 4-digit Rocket PIN'); return; }
   }
 
   if (method === 'card') {
-    const num = document.getElementById('card-number').value.replace(/\s/g, '');
+    const numberInput = document.getElementById('card-number');
+    const num = digitsOnly(numberInput.value);
     const exp = document.getElementById('card-expiry').value.trim();
     const cvv = document.getElementById('card-cvv').value.trim();
     const name = document.getElementById('card-name').value.trim();
 
-    if (num.length < 16) { alert('Please enter a valid card number'); return; }
+    cardBrand = numberInput.dataset.cardBrand || '';
+    const requiredCvvLength = cardBrand === 'American Express' ? 4 : 3;
+
+    if (num.length < 13) { alert('Please enter a valid card number'); return; }
     if (!exp.includes('/')) { alert('Please enter expiry date in MM/YY format'); return; }
-    if (cvv.length < 3) { alert('Please enter CVV'); return; }
+    if (cvv.length < requiredCvvLength) { alert(`Please enter ${requiredCvvLength}-digit CVV`); return; }
     if (!name) { alert('Please enter cardholder name'); return; }
   }
 
@@ -1099,7 +1946,7 @@ function processTopup(method) {
     bkash:  ['Connecting to bKash...', 'Verifying PIN...', 'Adding money to wallet...'],
     nagad:  ['Connecting to Nagad...', 'Verifying PIN...', 'Adding money to wallet...'],
     rocket: ['Connecting to Rocket...', 'Verifying PIN...', 'Adding money to wallet...'],
-    card:   ['Verifying card...', 'Authorizing transaction...', 'Adding money to wallet...']
+    card:   ['Detecting card brand...', 'Authorizing transaction...', 'Adding money to wallet...']
   };
 
   let step = 0;
@@ -1118,7 +1965,14 @@ function processTopup(method) {
     fetch("{{ url_for('payment.wallet_topup_confirm_ajax') }}", {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ method: method })
+      body: JSON.stringify({
+        method: method,
+        phone: phonePayload ? phonePayload.raw : '',
+        phone_country_code: phonePayload ? phonePayload.countryCode : '',
+        phone_country_name: phonePayload ? phonePayload.countryName : '',
+        phone_national_number: phonePayload ? phonePayload.nationalNumber : '',
+        card_brand: cardBrand
+      })
     })
     .then(r => r.json())
     .then(data => {
@@ -1146,19 +2000,18 @@ function processTopup(method) {
 
 document.querySelectorAll('.wtu-pin').forEach((dot) => {
   dot.addEventListener('input', () => {
+    dot.value = dot.value.replace(/\D/g, '').slice(0, 1);
     const siblings = Array.from(dot.parentElement.querySelectorAll('.wtu-pin'));
     const idx = siblings.indexOf(dot);
     if (dot.value && idx < siblings.length - 1) siblings[idx + 1].focus();
   });
-});
 
-const topupCardInput = document.getElementById('card-number');
-if (topupCardInput) {
-  topupCardInput.addEventListener('input', e => {
-    let v = e.target.value.replace(/\D/g, '').substring(0, 16);
-    e.target.value = v.replace(/(.{4})/g, '$1 ').trim();
+  dot.addEventListener('keydown', (e) => {
+    const siblings = Array.from(dot.parentElement.querySelectorAll('.wtu-pin'));
+    const idx = siblings.indexOf(dot);
+    if (e.key === 'Backspace' && !dot.value && idx > 0) siblings[idx - 1].focus();
   });
-}
+});
 
 const topupExpiryInput = document.getElementById('card-expiry');
 if (topupExpiryInput) {
@@ -1168,5 +2021,16 @@ if (topupExpiryInput) {
     e.target.value = v;
   });
 }
+
+document.addEventListener('click', function (e) {
+  if (!e.target.closest('.intl-select')) {
+    closeAllPhoneDropdowns();
+  }
+});
+
+bindPhoneUI('bkash-phone');
+bindPhoneUI('nagad-phone');
+bindPhoneUI('rocket-phone');
+bindCardUI();
 </script>
 {% endblock %}
