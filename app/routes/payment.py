@@ -1,9 +1,8 @@
 """
 app/routes/payment.py
 Order payments + wallet top-up checkout flow.
-Wallet top-up is now staged first and only credited after payment confirmation.
+Wallet top-up is staged first and only credited after payment confirmation.
 """
-from datetime import datetime
 from flask import (
     Blueprint, render_template, request, redirect,
     url_for, flash, jsonify, session
@@ -72,6 +71,40 @@ def get_pending_topup_amount():
 
 def clear_pending_topup():
     session.pop(TOPUP_SESSION_KEY, None)
+
+
+def normalize_card_brand(raw_brand):
+    brand = (raw_brand or "").strip().lower()
+    mapping = {
+        "visa": "Visa",
+        "mastercard": "Mastercard",
+        "master card": "Mastercard",
+        "american express": "American Express",
+        "amex": "American Express",
+        "discover": "Discover",
+        "jcb": "JCB",
+        "diners club": "Diners Club",
+        "unionpay": "UnionPay",
+    }
+    return mapping.get(brand, "")
+
+
+def format_phone_value(raw_phone="", country_code="", national_number=""):
+    raw_phone = str(raw_phone or "").strip()
+    country_digits = "".join(ch for ch in str(country_code or "") if ch.isdigit())
+    national_digits = "".join(ch for ch in str(national_number or "") if ch.isdigit())
+    phone_digits = "".join(ch for ch in raw_phone if ch.isdigit())
+
+    if country_digits and national_digits:
+        if national_digits.startswith(country_digits):
+            national_digits = national_digits[len(country_digits):]
+        national_digits = national_digits.lstrip("0") or national_digits
+        return f"+{country_digits}{national_digits}"
+
+    if raw_phone.startswith("+") and phone_digits:
+        return f"+{phone_digits}"
+
+    return raw_phone
 
 
 def mark_order_paid(order, method):
@@ -161,7 +194,13 @@ def confirm_payment_ajax(order_id):
 
     data = request.get_json(silent=True) or {}
     method = (data.get("method") or "unknown").strip().lower()
-    phone = (data.get("phone") or "").strip()
+
+    phone = format_phone_value(
+        raw_phone=data.get("phone"),
+        country_code=data.get("phone_country_code"),
+        national_number=data.get("phone_national_number")
+    )
+    card_brand = normalize_card_brand(data.get("card_brand"))
 
     txn = PaymentTransaction(
         order_id=order.id,
@@ -171,6 +210,7 @@ def confirm_payment_ajax(order_id):
         currency="USD",
         status="success",
         phone_number=phone,
+        ssl_card_type=card_brand if method == "card" and card_brand else None,
         wallet_amount=order.total_price if method == "wallet" else 0.0,
         gateway_amount=0.0 if method == "wallet" else order.total_price,
     )

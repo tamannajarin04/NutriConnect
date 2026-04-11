@@ -4,97 +4,450 @@
 {% block extra_css %}
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet">
 <style>
-.rc { font-family:'Plus Jakarta Sans',sans-serif; max-width:680px; margin:0 auto; }
-@keyframes up { from{opacity:0;transform:translateY(14px)} to{opacity:1;transform:translateY(0)} }
-@keyframes pop { from{opacity:0;transform:scale(.8)} to{opacity:1;transform:scale(1)} }
-
-/* Success banner */
-.rc-success {
-  background:linear-gradient(135deg,#059669 0%,#0d9488 100%);
-  border-radius:20px;padding:2rem;text-align:center;color:#fff;
-  margin-bottom:1.25rem;animation:up .4s cubic-bezier(.16,1,.3,1) both;
+.rc,
+.rc *{
+  font-family:'Plus Jakarta Sans',sans-serif !important;
 }
-.rc-check {
-  width:64px;height:64px;border-radius:50%;background:rgba(255,255,255,.2);
-  display:flex;align-items:center;justify-content:center;font-size:1.6rem;
-  margin:0 auto .85rem;animation:pop .4s cubic-bezier(.34,1.56,.64,1) .15s both;
-}
-.rc-success h2 { font-size:1.45rem;font-weight:900;letter-spacing:-.03em;margin:0 0 .3rem; }
-.rc-success p  { font-size:.88rem;opacity:.82;margin:0; }
-.rc-order-num {
-  font-family:'JetBrains Mono',monospace;font-size:.85rem;font-weight:700;
-  background:rgba(255,255,255,.15);border-radius:8px;padding:.3rem .85rem;
-  display:inline-block;margin-top:.75rem;
+.rc i,
+.rc i[class*="fa"]{
+  font-family:"Font Awesome 6 Free","Font Awesome 6 Brands","FontAwesome" !important;
+  font-style:normal;
+  font-variant:normal;
+  text-rendering:auto;
+  -webkit-font-smoothing:antialiased;
 }
 
-/* Panel */
-.rc-panel { background:var(--nc-card-bg);border:1px solid var(--nc-card-border);border-radius:20px;overflow:hidden;box-shadow:var(--nc-card-shadow);margin-bottom:1rem;animation:up .4s cubic-bezier(.16,1,.3,1) .08s both; }
-.rc-panel-hd { padding:.85rem 1.25rem;background:var(--nc-surface-2);border-bottom:1px solid var(--nc-border);font-size:.75rem;font-weight:900;text-transform:uppercase;letter-spacing:.09em;color:var(--nc-text-muted);display:flex;align-items:center;gap:.4rem; }
-.rc-panel-hd i { color:var(--nc-brand); }
+.rc{
+  --surf:var(--nc-surface);
+  --s2:var(--nc-surface-2);
+  --s3:var(--nc-surface-3);
+  --bdr:var(--nc-border);
+  --bdr2:var(--nc-border-2);
+  --txt:var(--nc-text);
+  --txt2:var(--nc-text-2);
+  --mu:var(--nc-text-muted);
+  --fa:var(--nc-text-faint);
+  --brand:var(--nc-brand);
+  --brand-d:var(--nc-brand-d);
+  --brand-l:var(--nc-brand-l);
 
-/* Items */
-.rc-item { display:flex;align-items:center;gap:.85rem;padding:.85rem 1.25rem;border-bottom:1px solid var(--nc-border); }
-.rc-item:last-child { border-bottom:none; }
-.rc-item-img { width:46px;height:46px;border-radius:10px;overflow:hidden;background:var(--nc-surface-2);flex-shrink:0; }
-.rc-item-img img { width:100%;height:100%;object-fit:cover; }
-.rc-item-img-ph { width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:1rem;color:var(--nc-text-faint); }
-.rc-item-name  { flex:1;font-size:.88rem;font-weight:800;color:var(--nc-text); }
-.rc-item-qty   { font-size:.78rem;color:var(--nc-text-faint);font-weight:600; }
-.rc-item-price { font-family:'JetBrains Mono',monospace;font-size:.88rem;font-weight:700;color:var(--nc-text); }
+  --emerald:#10b981;
+  --emerald-l:rgba(16,185,129,.12);
+  --amber:#f59e0b;
+  --amber-l:rgba(245,158,11,.12);
+  --rose:#f43f5e;
+  --rose-l:rgba(244,63,94,.12);
+  --violet:#8b5cf6;
+  --violet-l:rgba(139,92,246,.12);
+  --cyan:#38bdf8;
+  --cyan-l:rgba(56,189,248,.12);
 
-/* Info rows */
-.rc-info-row { display:flex;justify-content:space-between;align-items:center;padding:.65rem 1.25rem;border-bottom:1px solid var(--nc-border);font-size:.84rem; }
-.rc-info-row:last-child { border-bottom:none; }
-.rc-info-lbl { font-weight:700;color:var(--nc-text-faint); }
-.rc-info-val { font-weight:700;color:var(--nc-text); }
-.rc-info-val.mono { font-family:'JetBrains Mono',monospace; }
-.rc-info-val.brand { color:var(--nc-brand); }
-.rc-info-val.green { color:#16a34a; }
-[data-theme="dark"] .rc-info-val.green { color:#86efac; }
+  --glass-bg-light:rgba(255,255,255,.70);
+  --glass-bg-dark:rgba(8,18,36,.74);
+  --glass-border-light:rgba(255,255,255,.38);
+  --glass-border-dark:rgba(148,163,184,.16);
 
-/* Cashback badge */
-.rc-cashback {
-  display:flex;align-items:center;gap:.75rem;
-  background:rgba(16,185,129,.08);border:1.5px solid rgba(16,185,129,.2);
-  border-radius:14px;padding:.85rem 1.1rem;margin-bottom:1rem;
-  animation:up .4s cubic-bezier(.16,1,.3,1) .16s both;
+  width:100%;
+  max-width:760px;
+  margin:0 auto;
 }
-.rc-cashback-ico { font-size:1.5rem; }
-.rc-cashback-title { font-size:.85rem;font-weight:800;color:#059669; }
-[data-theme="dark"] .rc-cashback-title { color:#34d399; }
-.rc-cashback-sub { font-size:.74rem;color:var(--nc-text-muted);margin-top:.1rem; }
 
-/* Action buttons */
-.rc-actions { display:flex;gap:.75rem;flex-wrap:wrap;margin-top:1rem; }
-.rc-btn {
-  display:inline-flex;align-items:center;gap:.4rem;
-  padding:.65rem 1.1rem;border-radius:12px;border:none;
-  font-family:'Plus Jakarta Sans',sans-serif;font-size:.82rem;font-weight:800;
-  text-decoration:none;cursor:pointer;transition:all .15s;flex:1;justify-content:center;
+@keyframes rc-rise{
+  from{opacity:0;transform:translateY(14px)}
+  to{opacity:1;transform:translateY(0)}
 }
-.rc-btn-primary { background:var(--nc-brand);color:#fff; }
-.rc-btn-primary:hover { background:var(--nc-brand-d);color:#fff; }
-.rc-btn-outline { background:var(--nc-surface-2);border:1.5px solid var(--nc-border);color:var(--nc-text-muted); }
-.rc-btn-outline:hover { border-color:var(--nc-brand);color:var(--nc-brand); }
+@keyframes rc-pop{
+  from{opacity:0;transform:scale(.8)}
+  to{opacity:1;transform:scale(1)}
+}
+
+/* compact hero */
+.rc-success{
+  position:relative;
+  overflow:hidden;
+  border-radius:20px;
+  min-height:128px;
+  padding:1rem 1.4rem;
+  margin-bottom:1rem;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  background:
+    radial-gradient(ellipse 65% 90% at 0% 0%, rgba(34,211,238,.16) 0%, transparent 55%),
+    radial-gradient(ellipse 45% 65% at 100% 20%, rgba(139,92,246,.14) 0%, transparent 55%),
+    linear-gradient(145deg,#06101f 0%,#0a1830 42%,#0d2345 100%);
+  border:1px solid rgba(56,189,248,.14);
+  box-shadow:
+    0 12px 30px rgba(3,10,28,.22),
+    inset 0 1px 0 rgba(255,255,255,.05);
+  animation:rc-rise .4s cubic-bezier(.16,1,.3,1) both;
+}
+.rc-success::after{
+  content:'';
+  position:absolute;
+  inset:0;
+  background-image:radial-gradient(circle, rgba(255,255,255,.045) 1px, transparent 1px);
+  background-size:26px 26px;
+  opacity:.36;
+  pointer-events:none;
+}
+.rc-success > *{
+  position:relative;
+  z-index:1;
+}
+.rc-success-badge{
+  display:inline-flex;
+  align-items:center;
+  gap:.4rem;
+  width:fit-content;
+  padding:.28rem .82rem;
+  border-radius:999px;
+  background:rgba(72,117,255,.14);
+  border:1px solid rgba(120,160,255,.18);
+  color:rgba(255,255,255,.82);
+  font-size:.62rem;
+  font-weight:800;
+  text-transform:uppercase;
+  letter-spacing:.08em;
+  margin-bottom:.38rem;
+}
+.rc-success-row{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:1rem;
+  flex-wrap:wrap;
+}
+.rc-success-left{
+  display:flex;
+  align-items:center;
+  gap:.95rem;
+  flex-wrap:wrap;
+}
+.rc-check{
+  width:58px;
+  height:58px;
+  border-radius:18px;
+  background:rgba(16,185,129,.18);
+  border:1px solid rgba(16,185,129,.22);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  color:#86efac;
+  font-size:1.4rem;
+  animation:rc-pop .4s cubic-bezier(.34,1.56,.64,1) .15s both;
+  flex-shrink:0;
+}
+.rc-success h2{
+  font-size:1.38rem;
+  font-weight:900;
+  letter-spacing:-.03em;
+  color:#fff;
+  margin:0 0 .18rem;
+}
+.rc-success p{
+  font-size:.8rem;
+  color:rgba(255,255,255,.7);
+  margin:0;
+  line-height:1.5;
+}
+.rc-order-num{
+  font-family:'JetBrains Mono',monospace !important;
+  font-size:.78rem;
+  font-weight:700;
+  background:rgba(255,255,255,.08);
+  border:1px solid rgba(255,255,255,.12);
+  color:#fff;
+  border-radius:12px;
+  padding:.58rem .9rem;
+  white-space:nowrap;
+}
+
+/* glass cards */
+.rc-panel,
+.rc-cashback{
+  position:relative;
+  overflow:hidden;
+  border-radius:20px;
+  background:var(--glass-bg-light);
+  border:1px solid var(--glass-border-light);
+  box-shadow:0 14px 38px rgba(15,23,42,.08);
+  backdrop-filter:blur(18px);
+  -webkit-backdrop-filter:blur(18px);
+}
+[data-theme="dark"] .rc-panel,
+[data-theme="dark"] .rc-cashback{
+  background:var(--glass-bg-dark);
+  border-color:var(--glass-border-dark);
+  box-shadow:0 18px 44px rgba(0,0,0,.35);
+}
+.rc-panel::before,
+.rc-cashback::before{
+  content:"";
+  position:absolute;
+  inset:0;
+  background:linear-gradient(180deg,rgba(255,255,255,.06),transparent 40%);
+  pointer-events:none;
+}
+
+.rc-panel{
+  margin-bottom:1rem;
+  animation:rc-rise .4s cubic-bezier(.16,1,.3,1) .08s both;
+}
+.rc-panel-hd{
+  position:relative;
+  z-index:1;
+  padding:.95rem 1.15rem;
+  background:rgba(255,255,255,.24);
+  border-bottom:1px solid var(--bdr);
+  font-size:.72rem;
+  font-weight:800;
+  text-transform:uppercase;
+  letter-spacing:.08em;
+  color:var(--mu);
+  display:flex;
+  align-items:center;
+  gap:.45rem;
+}
+[data-theme="dark"] .rc-panel-hd{
+  background:rgba(255,255,255,.03);
+}
+.rc-panel-hd i{
+  color:var(--brand);
+}
+
+/* items */
+.rc-item{
+  position:relative;
+  z-index:1;
+  display:flex;
+  align-items:center;
+  gap:.85rem;
+  padding:.9rem 1.15rem;
+  border-bottom:1px solid var(--bdr);
+}
+.rc-item:last-child{
+  border-bottom:none;
+}
+.rc-item-img{
+  width:48px;
+  height:48px;
+  border-radius:12px;
+  overflow:hidden;
+  background:var(--s2);
+  flex-shrink:0;
+  border:1px solid var(--bdr);
+}
+.rc-item-img img{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+}
+.rc-item-img-ph{
+  width:100%;
+  height:100%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:1rem;
+  color:var(--fa);
+}
+.rc-item-name{
+  flex:1;
+  font-size:.88rem;
+  font-weight:800;
+  color:var(--txt);
+}
+.rc-item-qty{
+  font-size:.76rem;
+  color:var(--fa);
+  font-weight:700;
+}
+.rc-item-price{
+  font-family:'JetBrains Mono',monospace !important;
+  font-size:.88rem;
+  font-weight:700;
+  color:var(--txt);
+}
+
+/* info rows */
+.rc-info-row{
+  position:relative;
+  z-index:1;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:1rem;
+  padding:.78rem 1.15rem;
+  border-bottom:1px solid var(--bdr);
+  font-size:.84rem;
+}
+.rc-info-row:last-child{
+  border-bottom:none;
+}
+.rc-info-lbl{
+  font-weight:700;
+  color:var(--fa);
+}
+.rc-info-val{
+  font-weight:700;
+  color:var(--txt);
+  text-align:right;
+}
+.rc-info-val.mono{
+  font-family:'JetBrains Mono',monospace !important;
+}
+.rc-info-val.brand{
+  color:var(--brand);
+}
+.rc-info-val.green{
+  color:#16a34a;
+}
+[data-theme="dark"] .rc-info-val.green{
+  color:#86efac;
+}
+
+/* cashback */
+.rc-cashback{
+  display:flex;
+  align-items:center;
+  gap:.75rem;
+  padding:.9rem 1.05rem;
+  margin-bottom:1rem;
+  animation:rc-rise .4s cubic-bezier(.16,1,.3,1) .16s both;
+}
+.rc-cashback-ico{
+  width:46px;
+  height:46px;
+  border-radius:14px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:var(--emerald-l);
+  color:var(--emerald);
+  font-size:1.18rem;
+  flex-shrink:0;
+}
+.rc-cashback-title{
+  font-size:.84rem;
+  font-weight:800;
+  color:#059669;
+}
+[data-theme="dark"] .rc-cashback-title{
+  color:#34d399;
+}
+.rc-cashback-sub{
+  font-size:.74rem;
+  color:var(--mu);
+  margin-top:.1rem;
+}
+
+/* actions */
+.rc-actions{
+  display:flex;
+  gap:.75rem;
+  flex-wrap:wrap;
+  margin-top:1rem;
+}
+.rc-btn{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:.4rem;
+  padding:.7rem 1.05rem;
+  border-radius:12px;
+  border:none;
+  font-size:.8rem;
+  font-weight:800;
+  text-decoration:none;
+  cursor:pointer;
+  transition:all .15s ease;
+  flex:1;
+  min-width:180px;
+}
+.rc-btn-primary{
+  background:linear-gradient(135deg,var(--brand-d),var(--brand));
+  color:#fff;
+  box-shadow:0 10px 24px rgba(14,165,233,.18);
+}
+.rc-btn-primary:hover{
+  color:#fff;
+  transform:translateY(-1px);
+}
+.rc-btn-outline{
+  background:rgba(255,255,255,.42);
+  border:1px solid var(--bdr);
+  color:var(--txt2);
+}
+[data-theme="dark"] .rc-btn-outline{
+  background:rgba(255,255,255,.04);
+}
+.rc-btn-outline:hover{
+  border-color:var(--brand);
+  color:var(--brand);
+  background:var(--brand-l);
+}
+
+@media(max-width:760px){
+  .rc-success{
+    min-height:118px;
+    padding:.92rem 1rem;
+  }
+  .rc-success-badge{
+    font-size:.58rem;
+    margin-bottom:.32rem;
+  }
+  .rc-success h2{
+    font-size:1.2rem;
+  }
+  .rc-success p{
+    font-size:.76rem;
+  }
+  .rc-check{
+    width:50px;
+    height:50px;
+    font-size:1.2rem;
+  }
+  .rc-order-num{
+    width:100%;
+    text-align:center;
+  }
+  .rc-info-row{
+    align-items:flex-start;
+    flex-direction:column;
+  }
+  .rc-info-val{
+    text-align:left;
+  }
+}
 </style>
 {% endblock %}
 
 {% block content %}
 <div class="rc">
 
-  <!-- Success banner -->
   <div class="rc-success">
-    <div class="rc-check"><i class="fas fa-check"></i></div>
-    <h2>Payment Successful!</h2>
-    <p>Your order has been confirmed and is being prepared.</p>
-    <div class="rc-order-num">{{ order.order_number }}</div>
+    <div class="rc-success-badge">
+      <i class="fas fa-receipt"></i> NUTRICONNECT · PAYMENT RECEIPT
+    </div>
+
+    <div class="rc-success-row">
+      <div class="rc-success-left">
+        <div class="rc-check"><i class="fas fa-check"></i></div>
+        <div>
+          <h2>Payment Successful!</h2>
+          <p>Your order has been confirmed and is being prepared.</p>
+        </div>
+      </div>
+
+      <div class="rc-order-num">{{ order.order_number }}</div>
+    </div>
   </div>
 
-  <!-- Cashback notification -->
   {% set cashback = (order.total_price * 0.02)|round(2) %}
   {% if cashback > 0 %}
   <div class="rc-cashback">
-    <div class="rc-cashback-ico">🎉</div>
+    <div class="rc-cashback-ico"><i class="fas fa-gift"></i></div>
     <div>
       <div class="rc-cashback-title">+${{ "%.2f"|format(cashback) }} cashback added to your wallet!</div>
       <div class="rc-cashback-sub">2% cashback reward for completing this order.</div>
@@ -102,7 +455,6 @@
   </div>
   {% endif %}
 
-  <!-- Order items -->
   <div class="rc-panel">
     <div class="rc-panel-hd"><i class="fas fa-bag-shopping"></i> Items Ordered</div>
     {% for item in items %}
@@ -121,7 +473,6 @@
     {% endfor %}
   </div>
 
-  <!-- Payment details -->
   <div class="rc-panel">
     <div class="rc-panel-hd"><i class="fas fa-receipt"></i> Payment Details</div>
     <div class="rc-info-row">
@@ -167,7 +518,6 @@
     </div>
   </div>
 
-  <!-- Delivery info -->
   <div class="rc-panel">
     <div class="rc-panel-hd"><i class="fas fa-location-dot"></i> Delivery Info</div>
     <div class="rc-info-row">
@@ -180,7 +530,6 @@
     </div>
   </div>
 
-  <!-- Actions -->
   <div class="rc-actions">
     <a href="{{ url_for('orders.order_detail', order_id=order.id) }}" class="rc-btn rc-btn-primary">
       <i class="fas fa-bag-shopping"></i> Track Order
