@@ -17,18 +17,14 @@
   /* ════════════════════════════════════════════
      HERO BANNER — Navy Glassmorphism
   ════════════════════════════════════════════ */
-
-  /* Dark scene backdrop behind the hero */
   .bmi-hero-wrap {
     position: relative;
     border-radius: var(--radius-lg);
     margin-bottom: 1.5rem;
     overflow: hidden;
-    /* Deep navy base — visible as outer glow / BG */
     background: #060d1f;
   }
 
-  /* Ambient blobs that give the glass something to blur against */
   .bmi-hero-wrap::before {
     content: '';
     position: absolute;
@@ -41,7 +37,6 @@
     z-index: 0;
   }
 
-  /* Dot-grid texture */
   .bmi-hero-wrap::after {
     content: '';
     position: absolute;
@@ -61,27 +56,19 @@
     justify-content: space-between;
     gap: 1.25rem;
     padding: .9rem 1.5rem;
-
-    /* Glass layer */
     background: rgba(8, 20, 55, 0.55);
     backdrop-filter: blur(22px) saturate(160%);
     -webkit-backdrop-filter: blur(22px) saturate(160%);
-
-    /* Frosted border */
     border: 1px solid rgba(80, 140, 255, 0.18);
     border-radius: var(--radius-lg);
-
-    /* Subtle inner top highlight */
     box-shadow:
       inset 0 1px 0 rgba(255,255,255,.07),
       inset 0 -1px 0 rgba(0,0,0,.2),
       0 12px 48px rgba(0,10,40,.5),
       0 2px 8px rgba(0,0,0,.3);
-
     color: #fff;
   }
 
-  /* Sheen sweep across top-left */
   .bmi-hero::before {
     content: '';
     position: absolute;
@@ -95,7 +82,6 @@
 
   .bmi-hero__left { position: relative; z-index: 1; }
 
-  /* Eyebrow pill — matches reference "NUTRICONNECT · BMI TRACKER" style */
   .bmi-hero__eyebrow {
     display: inline-flex;
     align-items: center;
@@ -113,10 +99,8 @@
     backdrop-filter: blur(8px);
   }
 
-  /* Teal pulsing dot — exactly like the reference */
   .bmi-hero__eyebrow-dot {
-    width: 7px;
-    height: 7px;
+    width: 7px; height: 7px;
     border-radius: 50%;
     background: #00e5cc;
     box-shadow: 0 0 6px #00e5cc, 0 0 12px rgba(0,229,204,.4);
@@ -129,7 +113,6 @@
     50%       { opacity: .7; transform: scale(1.3); }
   }
 
-  /* Headline — white base with teal gradient on key word */
   .bmi-hero h1 {
     font-size: 1.25rem;
     font-weight: 800;
@@ -183,13 +166,10 @@
 
   .bmi-hero__pill i { font-size: .63rem; color: #00e5cc; }
 
-  /* Range legend */
   .bmi-hero__graphic {
     position: relative;
     z-index: 1;
     flex-shrink: 0;
-
-    /* Glass sub-panel */
     background: rgba(255,255,255,.04);
     border: 1px solid rgba(255,255,255,.08);
     border-radius: 12px;
@@ -218,8 +198,7 @@
   }
 
   .bmi-range-dot {
-    width: 8px;
-    height: 8px;
+    width: 8px; height: 8px;
     border-radius: 50%;
     flex-shrink: 0;
     box-shadow: 0 0 6px currentColor;
@@ -260,14 +239,11 @@
   }
 
   .bmi-card__icon {
-    width: 32px;
-    height: 32px;
+    width: 32px; height: 32px;
     border-radius: var(--radius-sm);
     background: var(--brand-l);
     border: 1px solid rgba(79,110,247,.18);
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    display: flex; align-items: center; justify-content: center;
     color: var(--brand);
     font-size: .78rem;
     flex-shrink: 0;
@@ -355,11 +331,7 @@
     letter-spacing: .01em;
   }
 
-  .bmi-submit:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 24px var(--brand-glow);
-  }
-
+  .bmi-submit:hover { transform: translateY(-2px); box-shadow: 0 8px 24px var(--brand-glow); }
   .bmi-submit:active { transform: none; }
 
   .bmi-hint {
@@ -385,14 +357,11 @@
   }
 
   .bmi-result-empty__icon {
-    width: 54px;
-    height: 54px;
+    width: 54px; height: 54px;
     border-radius: var(--radius);
     background: var(--surface-2);
     border: 1px solid var(--border);
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    display: flex; align-items: center; justify-content: center;
     font-size: 1.3rem;
     color: var(--text-faint);
   }
@@ -444,30 +413,32 @@
     border: 1px solid transparent;
   }
 
-  .bmi-cat--underweight { background: rgba(245,166,35,.12); color: #92400e; border-color: rgba(245,166,35,.25); }
-  .bmi-cat--normal      { background: rgba(34,196,114,.12); color: #065f46; border-color: rgba(34,196,114,.25); }
-  .bmi-cat--overweight  { background: rgba(247,86,79,.12);  color: #9a3412; border-color: rgba(247,86,79,.25); }
-  .bmi-cat--obese       { background: rgba(239,68,68,.12);  color: #991b1b; border-color: rgba(239,68,68,.25); }
+  .bmi-cat--underweight { background: rgba(245,166,35,.12);  color: #92400e; border-color: rgba(245,166,35,.25); }
+  .bmi-cat--normal      { background: rgba(34,196,114,.12);  color: #065f46; border-color: rgba(34,196,114,.25); }
+  .bmi-cat--overweight  { background: rgba(247,86,79,.12);   color: #9a3412; border-color: rgba(247,86,79,.25); }
+  .bmi-cat--obese       { background: rgba(239,68,68,.12);   color: #991b1b; border-color: rgba(239,68,68,.25); }
 
   [data-theme="dark"] .bmi-cat--underweight { color: #fbbf24; }
   [data-theme="dark"] .bmi-cat--normal      { color: #34d399; }
   [data-theme="dark"] .bmi-cat--overweight  { color: #fb923c; }
   [data-theme="dark"] .bmi-cat--obese       { color: #f87171; }
 
-  /* Gauge */
+  /* ════════════════════════════════════════════
+     GAUGE — Fixed semicircle arc
+     viewBox 0 0 120 70  (wide, half-circle feel)
+     Arc: cx=60 cy=60 r=46
+     Starts at 180° (left), sweeps 180° clockwise to 0° (right)
+     path: M 14,60  A 46,46 0 0,1 106,60
+     circumference of half-arc = π * r = 3.14159 * 46 ≈ 144.51
+  ════════════════════════════════════════════ */
   .bmi-gauge-wrap { flex-shrink: 0; }
-  .bmi-gauge { width: 76px; height: 76px; display: block; }
-  .bmi-gauge-track { fill: none; stroke: var(--border); stroke-width: 8; stroke-linecap: round; }
-  .bmi-gauge-fill  {
-    fill: none; stroke-width: 8; stroke-linecap: round;
-    transform-origin: center;
-    transform: rotate(-220deg);
-    transition: stroke-dashoffset 1.1s cubic-bezier(.22,1,.36,1);
+
+  .bmi-gauge {
+    width: 120px;
+    height: 72px;
+    display: block;
+    overflow: visible;
   }
-  .g-underweight { stroke: #f5a623; }
-  .g-normal      { stroke: #22c472; }
-  .g-overweight  { stroke: #f7564f; }
-  .g-obese       { stroke: #ef4444; }
 
   /* Metric tiles */
   .bmi-tiles { display: grid; grid-template-columns: 1fr 1fr; gap: .6rem; }
@@ -536,12 +507,7 @@
     background: var(--brand-l);
   }
 
-  .bmi-dot {
-    width: 9px; height: 9px;
-    border-radius: 50%;
-    flex-shrink: 0;
-  }
-
+  .bmi-dot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
   .d-u  { background: #f5a623; }
   .d-n  { background: #22c472; }
   .d-o  { background: #f7564f; }
@@ -628,7 +594,6 @@
   .bmi-tbl tbody td:first-child { border-left: 1px solid var(--border); border-radius: var(--radius-sm) 0 0 var(--radius-sm); }
   .bmi-tbl tbody td:last-child  { border-right: 1px solid var(--border); border-radius: 0 var(--radius-sm) var(--radius-sm) 0; }
 
-  .bmi-tbl tbody tr { transition: transform .12s, box-shadow .12s; }
   .bmi-tbl tbody tr:hover td { background: var(--surface-3); }
 
   .td-date { font-size: .76rem; color: var(--text-muted); white-space: nowrap; }
@@ -636,7 +601,6 @@
   .td-unit { font-size: .68em; color: var(--text-muted); margin-left: .1rem; font-family: 'DM Mono', monospace; }
   .td-bmi  { font-weight: 800 !important; font-variant-numeric: tabular-nums; }
 
-  /* Empty state */
   .bmi-empty {
     display: flex;
     flex-direction: column;
@@ -656,7 +620,7 @@
 {% block content %}
 <div class="bmi-page">
 
-  <!-- ══ Hero — Navy Glassmorphism ══ -->
+  <!-- ══ Hero ══ -->
   <div class="bmi-hero-wrap s1">
     <div class="bmi-hero">
       <div class="bmi-hero__left">
@@ -740,40 +704,79 @@
         </div>
         <div class="bmi-card__body">
           {% if result %}
+            {% set cat = result.category|lower %}
             <div class="bmi-score-row">
+
+              <!-- ════ FIXED GAUGE ════
+                   viewBox: 0 0 120 70
+                   Semi-circle: cx=60, cy=62, r=48
+                   Arc path: M 12,62  A 48,48 0 0,1 108,62
+                   Half-circumference = π × 48 = 150.796
+                   We use pathLength="150.796" so dasharray/offset are in "degrees of arc" 0..150.796
+                   BMI range mapped: 10 → 0%, 40 → 100%  (covers all real-world BMI values)
+              ════ -->
               <div class="bmi-gauge-wrap">
-                <svg class="bmi-gauge" viewBox="0 0 100 100">
-                  <path class="bmi-gauge-track" d="M 18,78 A 38,38 0 1,1 82,78"/>
+                <svg class="bmi-gauge" viewBox="0 0 120 70" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                  <!-- Track (full grey half-arc) -->
                   <path
-                    class="bmi-gauge-fill g-{{ result.category|lower }}"
-                    d="M 18,78 A 38,38 0 1,1 82,78"
-                    stroke-dasharray="211"
-                    stroke-dashoffset="211"
-                    id="gaugeFill"
-                    data-bmi="{{ result.bmi }}"
+                    d="M 12,62 A 48,48 0 0,1 108,62"
+                    fill="none"
+                    stroke="var(--border)"
+                    stroke-width="9"
+                    stroke-linecap="round"
+                    pathLength="150.796"
                   />
-                  <text x="50" y="55" text-anchor="middle"
-                    font-size="15" font-weight="800" font-family="Plus Jakarta Sans,sans-serif"
+                  <!-- Coloured fill arc -->
+                  <path
+                    id="gaugeFill"
+                    d="M 12,62 A 48,48 0 0,1 108,62"
+                    fill="none"
+                    stroke-width="9"
+                    stroke-linecap="round"
+                    pathLength="150.796"
+                    stroke-dasharray="150.796"
+                    stroke-dashoffset="150.796"
+                    data-bmi="{{ result.bmi }}"
+                    style="
+                      {% if cat == 'underweight' %}stroke:#f5a623;
+                      {% elif cat == 'normal'    %}stroke:#22c472;
+                      {% elif cat == 'overweight'%}stroke:#f7564f;
+                      {% else                    %}stroke:#ef4444;
+                      {% endif %}
+                      transition: stroke-dashoffset 1.2s cubic-bezier(.22,1,.36,1);
+                    "
+                  />
+                  <!-- Centre label -->
+                  <text x="60" y="52"
+                    text-anchor="middle"
+                    font-size="13"
+                    font-weight="800"
+                    font-family="Plus Jakarta Sans,sans-serif"
                     fill="var(--text)">{{ result.bmi }}</text>
-                  <text x="50" y="67" text-anchor="middle"
-                    font-size="7" font-weight="600" font-family="Plus Jakarta Sans,sans-serif"
+                  <text x="60" y="63"
+                    text-anchor="middle"
+                    font-size="7"
+                    font-weight="600"
+                    font-family="Plus Jakarta Sans,sans-serif"
                     fill="var(--text-muted)">BMI</text>
                 </svg>
               </div>
+
               <div class="bmi-score-right">
                 <div class="bmi-score-lbl">Your BMI Score</div>
                 <div class="bmi-score-num">{{ result.bmi }}</div>
                 <div style="margin-top:.45rem;">
-                  <span class="bmi-cat bmi-cat--{{ result.category|lower }}">
-                    {% if result.category|lower == 'underweight' %}<i class="fas fa-arrow-down"></i>
-                    {% elif result.category|lower == 'normal'     %}<i class="fas fa-circle-check"></i>
-                    {% elif result.category|lower == 'overweight' %}<i class="fas fa-arrow-up"></i>
+                  <span class="bmi-cat bmi-cat--{{ cat }}">
+                    {% if cat == 'underweight' %}<i class="fas fa-arrow-down"></i>
+                    {% elif cat == 'normal'     %}<i class="fas fa-circle-check"></i>
+                    {% elif cat == 'overweight' %}<i class="fas fa-arrow-up"></i>
                     {% else %}<i class="fas fa-triangle-exclamation"></i>{% endif %}
                     {{ result.category }}
                   </span>
                 </div>
               </div>
             </div>
+
             <div class="bmi-tiles">
               <div class="bmi-tile">
                 <span class="bmi-tile__lbl">Height</span>
@@ -902,23 +905,34 @@
       </div>
     </div>
 
-  </div><!-- /row -->
-</div><!-- /bmi-page -->
+  </div>
+</div>
 {% endblock %}
 
 
 {% block extra_js %}
 <script>
-  (function () {
-    const fill = document.getElementById('gaugeFill');
-    if (!fill) return;
-    const bmi      = parseFloat(fill.dataset.bmi) || 0;
-    const TOTAL    = 211;
-    const fraction = Math.min(Math.max((bmi - 10) / 30, 0), 1);
-    const offset   = TOTAL - fraction * TOTAL;
-    requestAnimationFrame(() => requestAnimationFrame(() => {
-      fill.style.strokeDashoffset = offset;
-    }));
-  })();
+(function () {
+  const fill = document.getElementById('gaugeFill');
+  if (!fill) return;
+
+  /*
+    Arc uses pathLength="150.796" (= π × r = π × 48)
+    BMI range: 10 = 0% … 40 = 100%
+    stroke-dashoffset: 150.796 = empty, 0 = full
+  */
+  const bmi      = parseFloat(fill.dataset.bmi) || 0;
+  const PATH_LEN = 150.796;
+  const MIN_BMI  = 10;
+  const MAX_BMI  = 40;
+
+  const fraction = Math.min(Math.max((bmi - MIN_BMI) / (MAX_BMI - MIN_BMI), 0), 1);
+  const offset   = PATH_LEN - fraction * PATH_LEN;
+
+  /* Double rAF ensures the transition fires after initial paint */
+  requestAnimationFrame(() => requestAnimationFrame(() => {
+    fill.style.strokeDashoffset = offset;
+  }));
+})();
 </script>
 {% endblock %}
