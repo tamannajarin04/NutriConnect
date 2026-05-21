@@ -225,7 +225,7 @@
   border-radius:14px;
   display:flex;
   align-items:center;
-  justify-content:flex-start;
+  justify-content:center;
   background:var(--brand-l);
   color:var(--brand);
   font-size:1rem;
@@ -666,147 +666,43 @@
   line-height:1.5;
 }
 
-/* manual country select + auto-detect phone */
-.intl-phone-field{
+/* BD phone field — static prefix + number input */
+.bd-phone-field{
   display:grid;
-  grid-template-columns:118px minmax(0,1fr);
+  grid-template-columns:80px minmax(0,1fr);
   gap:.55rem;
-  align-items:start;
+  align-items:center;
 }
-.intl-select{
-  position:relative;
-  min-width:0;
-}
-.intl-prefix-box{
+.bd-prefix-box{
   display:flex;
   align-items:center;
   justify-content:center;
   gap:.38rem;
-  min-height:50px;
+  height:50px;
   padding:0 .72rem;
   border:1.5px solid var(--bdr);
   border-radius:12px;
-  background:rgba(255,255,255,.42);
-  color:var(--txt);
-  width:100%;
+  background:rgba(255,255,255,.28);
   box-sizing:border-box;
 }
-[data-theme="dark"] .intl-prefix-box{
-  background:rgba(255,255,255,.04);
+[data-theme="dark"] .bd-prefix-box{
+  background:rgba(255,255,255,.05);
 }
-.intl-prefix-trigger{
-  cursor:pointer;
-  appearance:none;
-  -webkit-appearance:none;
-  outline:none;
-  transition:border-color .15s, box-shadow .15s, transform .15s;
-}
-.intl-prefix-trigger:hover{
-  transform:translateY(-1px);
-}
-.intl-prefix-trigger:focus{
-  border-color:var(--brand);
-  box-shadow:0 0 0 3px rgba(14,165,233,.12);
-}
-.intl-select.open .intl-prefix-trigger{
-  border-color:var(--brand);
-  box-shadow:0 0 0 3px rgba(14,165,233,.10);
-}
-.intl-flag{
-  flex-shrink:0;
+.bd-prefix-flag{
   display:block;
   width:20px;
   height:15px;
   object-fit:cover;
   border-radius:3px;
   box-shadow:0 0 0 1px rgba(148,163,184,.18);
-  background:rgba(255,255,255,.8);
+  flex-shrink:0;
 }
-.intl-abbr{
-  font-size:.72rem;
-  font-weight:800;
-  letter-spacing:.04em;
-  color:var(--txt);
-}
-.intl-code{
+.bd-prefix-code{
   font-family:'JetBrains Mono',monospace !important;
-  font-size:.74rem;
+  font-size:.78rem;
   font-weight:700;
   color:var(--txt);
-}
-.intl-caret{
-  color:var(--fa);
-  font-size:.75rem;
-  margin-left:auto;
-}
-.intl-dropdown{
-  position:absolute;
-  top:calc(100% + .45rem);
-  left:0;
-  width:min(320px, 82vw);
-  max-height:280px;
-  overflow:auto;
-  border-radius:16px;
-  border:1px solid var(--bdr);
-  background:rgba(255,255,255,.96);
-  box-shadow:0 18px 36px rgba(15,23,42,.16);
-  backdrop-filter:blur(18px);
-  -webkit-backdrop-filter:blur(18px);
-  padding:.35rem;
-  z-index:50;
-  display:none;
-}
-[data-theme="dark"] .intl-dropdown{
-  background:rgba(8,18,36,.96);
-  border-color:var(--glass-border-dark);
-  box-shadow:0 18px 44px rgba(0,0,0,.42);
-}
-.intl-select.open .intl-dropdown{
-  display:block;
-}
-.intl-option{
-  width:100%;
-  border:none;
-  background:transparent;
-  border-radius:12px;
-  padding:.62rem .7rem;
-  display:flex;
-  align-items:center;
-  gap:.65rem;
-  cursor:pointer;
-  text-align:left;
-}
-.intl-option:hover{
-  background:rgba(14,165,233,.08);
-}
-.intl-option.active{
-  background:rgba(14,165,233,.12);
-}
-.intl-option-flag{
-  flex-shrink:0;
-  display:block;
-  width:20px;
-  height:15px;
-  object-fit:cover;
-  border-radius:3px;
-  box-shadow:0 0 0 1px rgba(148,163,184,.18);
-  background:rgba(255,255,255,.8);
-}
-.intl-option-main{
-  min-width:0;
-  display:flex;
-  flex-direction:column;
-}
-.intl-option-name{
-  font-size:.82rem;
-  font-weight:700;
-  color:var(--txt);
-  line-height:1.2;
-}
-.intl-option-meta{
-  font-size:.7rem;
-  color:var(--fa);
-  margin-top:.08rem;
+  white-space:nowrap;
 }
 
 /* card brand */
@@ -987,11 +883,8 @@
     font-size:.95rem;
     padding:.76rem 0;
   }
-  .intl-phone-field{
-    grid-template-columns:104px minmax(0,1fr);
-  }
-  .intl-abbr{
-    display:none;
+  .bd-phone-field{
+    grid-template-columns:76px minmax(0,1fr);
   }
   .card-entry-shell .pf-input{
     padding-right:1rem;
@@ -1152,46 +1045,9 @@
     font-size:.76rem;
   }
 }
-/* FIX: country dropdown reliably opens above the form */
 .pay-form-panel,
-.pay-form-body,
-.wtu-form-panel,
-.wtu-form-body{
+.pay-form-body{
   overflow: visible !important;
-}
-
-.intl-select{
-  position: relative;
-  z-index: 40;
-}
-
-.intl-select.open{
-  z-index: 300;
-}
-
-.intl-prefix-trigger{
-  pointer-events: auto;
-  user-select: none;
-}
-
-.intl-dropdown{
-  display: none;
-  pointer-events: auto;
-}
-
-.intl-select.open .intl-dropdown{
-  display: block !important;
-}
-
-.intl-flag,
-.intl-option-flag{
-  display:block;
-  width:20px;
-  height:15px;
-  object-fit:cover;
-  border-radius:3px;
-  box-shadow:0 0 0 1px rgba(148,163,184,.18);
-  background:rgba(255,255,255,.8);
 }
 </style>
 {% endblock %}
@@ -1347,6 +1203,7 @@
         Pick one of the options above to reveal its payment form. The selected method will open in the same aligned checkout area.
       </div>
 
+      <!-- ── bKash ──────────────────────────────────── -->
       <div class="pay-form-panel" id="form-bkash">
         <div class="pay-form-head">
           <div class="pay-form-logo" style="background:#e2136e;">bKash</div>
@@ -1367,35 +1224,23 @@
 
               <div class="pf-group">
                 <label class="pf-label">bKash Account Number</label>
-                <div class="intl-phone-field">
-                  <div class="intl-select">
-                    <button
-                      type="button"
-                      class="intl-prefix-box intl-prefix-trigger"
-                      data-phone-trigger="bkash-phone"
-                      aria-haspopup="listbox"
-                      aria-expanded="false"
-                    >
-                      <img class="intl-flag" id="bkash-phone-flag" src="https://flagcdn.com/24x18/bd.png" alt="BD flag">
-                      <span class="intl-abbr" id="bkash-phone-abbr">BD</span>
-                      <span class="intl-code" id="bkash-phone-code">+880</span>
-                      <span class="intl-caret"><i class="fas fa-caret-down"></i></span>
-                    </button>
-                    <div class="intl-dropdown" id="bkash-phone-dropdown" role="listbox"></div>
+                <div class="bd-phone-field">
+                  <div class="bd-prefix-box">
+                    <img class="bd-prefix-flag" src="https://flagcdn.com/24x18/bd.png" alt="Bangladesh flag">
+                    <span class="bd-prefix-code">+880</span>
                   </div>
-
                   <input
                     class="pf-input bkash"
                     type="tel"
                     id="bkash-phone"
-                    placeholder="1712-345678"
-                    maxlength="22"
+                    placeholder="1XXXXXXXXX"
+                    maxlength="10"
+                    inputmode="numeric"
+                    pattern="[0-9]*"
                     autocomplete="tel"
                   >
                 </div>
-                <div class="pf-hint" id="bkash-phone-country">
-                  Selected Bangladesh (+880). Enter only the mobile number, or type a full international number to auto-detect the flag.
-                </div>
+                <div class="pf-hint" id="bkash-phone-hint">Enter your 10-digit bKash number (e.g. 1712345678).</div>
               </div>
 
               <div class="pf-group">
@@ -1427,6 +1272,7 @@
         </div>
       </div>
 
+      <!-- ── Nagad ──────────────────────────────────── -->
       <div class="pay-form-panel" id="form-nagad">
         <div class="pay-form-head">
           <div class="pay-form-logo" style="background:linear-gradient(135deg,#f05323,#f7941d);">Nagad</div>
@@ -1447,35 +1293,23 @@
 
               <div class="pf-group">
                 <label class="pf-label">Nagad Account Number</label>
-                <div class="intl-phone-field">
-                  <div class="intl-select">
-                    <button
-                      type="button"
-                      class="intl-prefix-box intl-prefix-trigger"
-                      data-phone-trigger="nagad-phone"
-                      aria-haspopup="listbox"
-                      aria-expanded="false"
-                    >
-                      <img class="intl-flag" id="nagad-phone-flag" src="https://flagcdn.com/24x18/bd.png" alt="BD flag">
-                      <span class="intl-abbr" id="nagad-phone-abbr">BD</span>
-                      <span class="intl-code" id="nagad-phone-code">+880</span>
-                      <span class="intl-caret"><i class="fas fa-caret-down"></i></span>
-                    </button>
-                    <div class="intl-dropdown" id="nagad-phone-dropdown" role="listbox"></div>
+                <div class="bd-phone-field">
+                  <div class="bd-prefix-box">
+                    <img class="bd-prefix-flag" src="https://flagcdn.com/24x18/bd.png" alt="Bangladesh flag">
+                    <span class="bd-prefix-code">+880</span>
                   </div>
-
                   <input
                     class="pf-input nagad"
                     type="tel"
                     id="nagad-phone"
-                    placeholder="1712-345678"
-                    maxlength="22"
+                    placeholder="1XXXXXXXXX"
+                    maxlength="10"
+                    inputmode="numeric"
+                    pattern="[0-9]*"
                     autocomplete="tel"
                   >
                 </div>
-                <div class="pf-hint" id="nagad-phone-country">
-                  Selected Bangladesh (+880). Enter only the mobile number, or type a full international number to auto-detect the flag.
-                </div>
+                <div class="pf-hint" id="nagad-phone-hint">Enter your 10-digit Nagad number (e.g. 1712345678).</div>
               </div>
 
               <div class="pf-group">
@@ -1506,6 +1340,7 @@
         </div>
       </div>
 
+      <!-- ── Rocket ─────────────────────────────────── -->
       <div class="pay-form-panel" id="form-rocket">
         <div class="pay-form-head">
           <div class="pay-form-logo" style="background:#8b1a7a;">Rocket</div>
@@ -1526,35 +1361,23 @@
 
               <div class="pf-group">
                 <label class="pf-label">Rocket Account Number</label>
-                <div class="intl-phone-field">
-                  <div class="intl-select">
-                    <button
-                      type="button"
-                      class="intl-prefix-box intl-prefix-trigger"
-                      data-phone-trigger="rocket-phone"
-                      aria-haspopup="listbox"
-                      aria-expanded="false"
-                    >
-                      <img class="intl-flag" id="rocket-phone-flag" src="https://flagcdn.com/24x18/bd.png" alt="BD flag">
-                      <span class="intl-abbr" id="rocket-phone-abbr">BD</span>
-                      <span class="intl-code" id="rocket-phone-code">+880</span>
-                      <span class="intl-caret"><i class="fas fa-caret-down"></i></span>
-                    </button>
-                    <div class="intl-dropdown" id="rocket-phone-dropdown" role="listbox"></div>
+                <div class="bd-phone-field">
+                  <div class="bd-prefix-box">
+                    <img class="bd-prefix-flag" src="https://flagcdn.com/24x18/bd.png" alt="Bangladesh flag">
+                    <span class="bd-prefix-code">+880</span>
                   </div>
-
                   <input
                     class="pf-input rocket"
                     type="tel"
                     id="rocket-phone"
-                    placeholder="1712-345678"
-                    maxlength="22"
+                    placeholder="1XXXXXXXXX"
+                    maxlength="10"
+                    inputmode="numeric"
+                    pattern="[0-9]*"
                     autocomplete="tel"
                   >
                 </div>
-                <div class="pf-hint" id="rocket-phone-country">
-                  Selected Bangladesh (+880). Enter only the mobile number, or type a full international number to auto-detect the flag.
-                </div>
+                <div class="pf-hint" id="rocket-phone-hint">Enter your 10-digit Rocket number (e.g. 1712345678).</div>
               </div>
 
               <div class="pf-group">
@@ -1585,6 +1408,7 @@
         </div>
       </div>
 
+      <!-- ── Card ───────────────────────────────────── -->
       <div class="pay-form-panel" id="form-card">
         <div class="pay-form-head">
           <div class="pay-form-logo" style="background:linear-gradient(135deg,#1a56db,#1c64f2);"><i class="fas fa-credit-card"></i></div>
@@ -1726,375 +1550,167 @@
 </div>
 
 <script>
-const PHONE_COUNTRIES = [
-  { code: '880', iso: 'bd', abbr: 'BD', name: 'Bangladesh', nationalMin: 10, placeholder: '1712-345678' },
-  { code: '91',  iso: 'in', abbr: 'IN', name: 'India', nationalMin: 10, placeholder: '9876543210' },
-  { code: '92',  iso: 'pk', abbr: 'PK', name: 'Pakistan', nationalMin: 10, placeholder: '3001234567' },
-  { code: '94',  iso: 'lk', abbr: 'LK', name: 'Sri Lanka', nationalMin: 9,  placeholder: '712345678' },
-  { code: '95',  iso: 'mm', abbr: 'MM', name: 'Myanmar', nationalMin: 8,  placeholder: '912345678' },
-  { code: '60',  iso: 'my', abbr: 'MY', name: 'Malaysia', nationalMin: 8,  placeholder: '123456789' },
-  { code: '65',  iso: 'sg', abbr: 'SG', name: 'Singapore', nationalMin: 8,  placeholder: '81234567' },
-  { code: '44',  iso: 'gb', abbr: 'GB', name: 'United Kingdom', nationalMin: 10, placeholder: '7123456789' },
-  { code: '1',   iso: 'us', abbr: 'US', name: 'United States / Canada', nationalMin: 10, placeholder: '2025550123' },
-  { code: '971', iso: 'ae', abbr: 'AE', name: 'United Arab Emirates', nationalMin: 9,  placeholder: '501234567' },
-  { code: '966', iso: 'sa', abbr: 'SA', name: 'Saudi Arabia', nationalMin: 9,  placeholder: '501234567' },
-  { code: '974', iso: 'qa', abbr: 'QA', name: 'Qatar', nationalMin: 8,  placeholder: '33123456' },
-  { code: '973', iso: 'bh', abbr: 'BH', name: 'Bahrain', nationalMin: 8,  placeholder: '36001234' },
-  { code: '968', iso: 'om', abbr: 'OM', name: 'Oman', nationalMin: 8,  placeholder: '92123456' },
-  { code: '965', iso: 'kw', abbr: 'KW', name: 'Kuwait', nationalMin: 8,  placeholder: '50012345' }
-];
-
-const PHONE_FIELD_STATE = {};
-
+/* ─────────────────────────────────────────────
+   UTILITIES
+───────────────────────────────────────────── */
 function digitsOnly(value) {
   return (value || '').toString().replace(/\D/g, '');
 }
 
-function getCountryByCode(code) {
-  return PHONE_COUNTRIES.find(country => country.code === String(code)) || null;
-}
+/* ─────────────────────────────────────────────
+   BD PHONE VALIDATION
+   Valid BD mobile: 10 digits, starts with 1[3-9]
+   Full number with +880 prefix = 01XXXXXXXXX (11 digits)
+   User enters the 10-digit part after +880.
+───────────────────────────────────────────── */
+const BD_10_RE = /^1[3-9]\d{8}$/;   // 10 digits entered by user: 1[3-9]XXXXXXXX
 
-function getDefaultPhoneCountry() {
-  return getCountryByCode('880');
-}
+function validateBdPhone(inputId, label) {
+  const input  = document.getElementById(inputId);
+  const hint   = document.getElementById(inputId + '-hint');
+  const digits = digitsOnly(input ? input.value : '');
 
-function getFlagUrl(country) {
-  return country && country.iso ? `https://flagcdn.com/24x18/${country.iso}.png` : '';
-}
-
-function getPhoneElements(inputId) {
-  return {
-    input: document.getElementById(inputId),
-    flag: document.getElementById(`${inputId}-flag`),
-    abbr: document.getElementById(`${inputId}-abbr`),
-    code: document.getElementById(`${inputId}-code`),
-    hint: document.getElementById(`${inputId}-country`),
-    dropdown: document.getElementById(`${inputId}-dropdown`),
-    trigger: document.querySelector(`[data-phone-trigger="${inputId}"]`)
-  };
-}
-
-function getPhoneState(inputId) {
-  if (!PHONE_FIELD_STATE[inputId]) {
-    PHONE_FIELD_STATE[inputId] = {
-      selectedCode: '880'
-    };
-  }
-  return PHONE_FIELD_STATE[inputId];
-}
-
-function formatNationalDisplay(country, nationalNumber) {
-  const digits = digitsOnly(nationalNumber);
-  if (!digits) return '';
-
-  if (country && country.code === '880') {
-    if (digits.length <= 4) return digits;
-    if (digits.length <= 10) return `${digits.slice(0, 4)}-${digits.slice(4)}`;
-    return `${digits.slice(0, 4)}-${digits.slice(4, 10)}${digits.slice(10)}`;
-  }
-
-  return digits;
-}
-
-function detectExplicitInternational(rawValue) {
-  const raw = (rawValue || '').trim();
-  if (!raw) return null;
-
-  const hasPlus = raw.startsWith('+');
-  const hasDoubleZero = raw.startsWith('00');
-
-  let normalizedDigits = digitsOnly(raw);
-  if (!normalizedDigits) return null;
-
-  if (hasDoubleZero) {
-    normalizedDigits = normalizedDigits.replace(/^00/, '');
-  }
-
-  const countries = [...PHONE_COUNTRIES].sort((a, b) => b.code.length - a.code.length);
-
-  for (const country of countries) {
-    const minTotalLength = country.code.length + country.nationalMin;
-    const allowWithoutPrefix = country.code.length >= 2 || normalizedDigits.length >= 11;
-
-    if (!(hasPlus || hasDoubleZero || allowWithoutPrefix)) continue;
-    if (!normalizedDigits.startsWith(country.code)) continue;
-    if (normalizedDigits.length < minTotalLength) continue;
-
-    const national = normalizedDigits.slice(country.code.length);
-    const trimmedNational = national.replace(/^0+/, '') || national;
-
-    return {
-      ...country,
-      countryCode: `+${country.code}`,
-      national: trimmedNational
-    };
-  }
-
-  return null;
-}
-
-function buildCountryDropdown(inputId) {
-  const { dropdown } = getPhoneElements(inputId);
-  const state = getPhoneState(inputId);
-  if (!dropdown) return;
-
-  dropdown.innerHTML = PHONE_COUNTRIES.map(country => `
-    <button
-      type="button"
-      class="intl-option ${country.code === state.selectedCode ? 'active' : ''}"
-      data-phone-option="${inputId}"
-      data-country-code="${country.code}"
-      role="option"
-      aria-selected="${country.code === state.selectedCode ? 'true' : 'false'}"
-    >
-      <img class="intl-option-flag" src="${getFlagUrl(country)}" alt="${country.abbr} flag">
-      <span class="intl-option-main">
-        <span class="intl-option-name">${country.name}</span>
-        <span class="intl-option-meta">${country.abbr} · +${country.code}</span>
-      </span>
-    </button>
-  `).join('');
-}
-
-function setPhoneView(inputId, country, nationalNumber, hintText) {
-  const els = getPhoneElements(inputId);
-  if (!els.input) return;
-
-  els.input.dataset.countryCode = `+${country.code}`;
-  els.input.dataset.countryName = country.name;
-  els.input.dataset.nationalNumber = digitsOnly(nationalNumber);
-
-  if (els.flag) {
-    els.flag.src = getFlagUrl(country);
-    els.flag.alt = `${country.abbr} flag`;
-  }
-  if (els.abbr) els.abbr.textContent = country.abbr;
-  if (els.code) els.code.textContent = `+${country.code}`;
-  if (els.hint) els.hint.textContent = hintText || '';
-  if (country.placeholder) els.input.placeholder = country.placeholder;
-
-  buildCountryDropdown(inputId);
-}
-
-function closeAllPhoneDropdowns(exceptInputId = null) {
-  document.querySelectorAll('.intl-select.open').forEach(selectEl => {
-    const trigger = selectEl.querySelector('[data-phone-trigger]');
-    const currentInputId = trigger ? trigger.getAttribute('data-phone-trigger') : null;
-
-    if (exceptInputId && currentInputId === exceptInputId) return;
-
-    selectEl.classList.remove('open');
-    if (trigger) trigger.setAttribute('aria-expanded', 'false');
-  });
-}
-
-function togglePhoneDropdown(inputId) {
-  const { trigger } = getPhoneElements(inputId);
-  if (!trigger) return;
-
-  const wrapper = trigger.closest('.intl-select');
-  if (!wrapper) return;
-
-  const willOpen = !wrapper.classList.contains('open');
-  closeAllPhoneDropdowns(willOpen ? inputId : null);
-
-  wrapper.classList.toggle('open', willOpen);
-  trigger.setAttribute('aria-expanded', willOpen ? 'true' : 'false');
-}
-
-function normalizeCurrentInputToNational(inputId, countryCodeToApply) {
-  const els = getPhoneElements(inputId);
-  if (!els.input) return;
-
-  const explicit = detectExplicitInternational(els.input.value);
-  const targetCountry = getCountryByCode(countryCodeToApply) || getDefaultPhoneCountry();
-
-  let nationalDigits = explicit ? digitsOnly(explicit.national) : digitsOnly(els.input.value);
-  els.input.value = formatNationalDisplay(targetCountry, nationalDigits) || nationalDigits;
-}
-
-function selectPhoneCountry(inputId, countryCode) {
-  const state = getPhoneState(inputId);
-  state.selectedCode = String(countryCode);
-
-  normalizeCurrentInputToNational(inputId, state.selectedCode);
-  renderPhoneField(inputId);
-  closeAllPhoneDropdowns();
-
-  const { input } = getPhoneElements(inputId);
-  if (input) input.focus();
-}
-
-function renderPhoneField(inputId) {
-  const state = getPhoneState(inputId);
-  const els = getPhoneElements(inputId);
-  if (!els.input) return;
-
-  const explicit = detectExplicitInternational(els.input.value);
-
-  if (explicit) {
-    state.selectedCode = explicit.code;
-
-    const pretty = formatNationalDisplay(explicit, explicit.national);
-    if (pretty !== els.input.value) {
-      els.input.value = pretty;
-    }
-
-    setPhoneView(
-      inputId,
-      explicit,
-      explicit.national,
-      `${explicit.name} detected from full number. You can continue with the local number only.`
-    );
-    return;
-  }
-
-  const selectedCountry = getCountryByCode(state.selectedCode) || getDefaultPhoneCountry();
-  const nationalDigits = digitsOnly(els.input.value);
-
-  if (selectedCountry.code === '880') {
-    const pretty = formatNationalDisplay(selectedCountry, nationalDigits);
-    if (pretty !== els.input.value) {
-      els.input.value = pretty;
-    }
-  }
-
-  setPhoneView(
-    inputId,
-    selectedCountry,
-    nationalDigits,
-    `Selected ${selectedCountry.name} (+${selectedCountry.code}). Enter only the mobile number, or type a full international number to auto-detect the flag.`
-  );
-}
-
-function bindPhoneUI(inputId) {
-  const els = getPhoneElements(inputId);
-  if (!els.input || !els.trigger || !els.dropdown) return;
-
-  getPhoneState(inputId);
-  buildCountryDropdown(inputId);
-  renderPhoneField(inputId);
-
-  els.trigger.addEventListener('click', function (e) {
-    e.preventDefault();
-    e.stopPropagation();
-    togglePhoneDropdown(inputId);
-  });
-
-  els.dropdown.addEventListener('click', function (e) {
-    const option = e.target.closest('.intl-option');
-    if (!option) return;
-
-    e.preventDefault();
-    e.stopPropagation();
-
-    selectPhoneCountry(inputId, option.dataset.countryCode);
-  });
-
-  els.input.addEventListener('input', function () {
-    renderPhoneField(inputId);
-  });
-
-  els.input.addEventListener('blur', function () {
-    renderPhoneField(inputId);
-  });
-}
-
-function getPhonePayload(inputId) {
-  const input = document.getElementById(inputId);
-  const countryCode = input?.dataset.countryCode || '+880';
-  const countryName = input?.dataset.countryName || 'Bangladesh';
-  const nationalNumber = input?.dataset.nationalNumber || digitsOnly(input?.value || '');
-  const raw = nationalNumber ? `${countryCode}${nationalNumber}` : '';
-
-  return {
-    raw,
-    countryCode,
-    countryName,
-    nationalNumber
-  };
-}
-
-function validatePhoneInput(inputId, label) {
-  const payload = getPhonePayload(inputId);
-  if (!payload.nationalNumber || payload.nationalNumber.length < 8) {
-    alert(`Please enter a valid ${label} number`);
+  if (!digits) {
+    if (input) input.style.borderColor = '#f43f5e';
+    if (hint)  { hint.textContent = `Please enter your ${label} number.`; hint.style.color = '#f43f5e'; }
     return null;
   }
-  return payload;
+
+  if (!BD_10_RE.test(digits)) {
+    if (input) input.style.borderColor = '#f43f5e';
+    if (hint)  { hint.textContent = `Enter a valid BD mobile number starting with 13–19 (e.g. 1712345678).`; hint.style.color = '#f43f5e'; }
+    return null;
+  }
+
+  if (input) input.style.borderColor = '';
+  if (hint)  { hint.textContent = `Valid Bangladesh (+880) number.`; hint.style.color = ''; }
+
+  return {
+    raw:           `+880${digits}`,
+    countryCode:   '+880',
+    countryName:   'Bangladesh',
+    nationalNumber: digits
+  };
 }
 
+function bindBdPhoneInput(inputId) {
+  const input = document.getElementById(inputId);
+  if (!input) return;
+  input.addEventListener('input', () => {
+    input.value = digitsOnly(input.value).slice(0, 10);
+    input.style.borderColor = '';
+    const hint = document.getElementById(inputId + '-hint');
+    if (hint) hint.style.color = '';
+  });
+}
 
+/* ─────────────────────────────────────────────
+   PIN VALIDATION
+───────────────────────────────────────────── */
+function validatePin(ids, requiredLength, label) {
+  const pin = ids.map(id => {
+    const el = document.getElementById(id);
+    return el ? el.value.trim() : '';
+  }).join('');
+
+  if (pin.length < requiredLength || !/^\d+$/.test(pin)) {
+    ids.forEach(id => {
+      const el = document.getElementById(id);
+      if (el && !el.value) el.style.borderColor = '#f43f5e';
+    });
+    alert(`Please enter your complete ${requiredLength}-digit ${label} PIN.`);
+    return null;
+  }
+
+  ids.forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.style.borderColor = '';
+  });
+  return pin;
+}
+
+/* ─────────────────────────────────────────────
+   CARD BRAND DETECTION
+───────────────────────────────────────────── */
 function detectCardBrand(raw) {
   const digits = digitsOnly(raw);
   if (!digits) return null;
-  if (/^4/.test(digits)) return 'Visa';
-  if (/^(5[1-5]|2(2[2-9]|[3-6]\d|7[01]|720))/.test(digits)) return 'Mastercard';
-  if (/^3[47]/.test(digits)) return 'American Express';
-  if (/^(?:35|2131|1800)/.test(digits)) return 'JCB';
-  if (/^6(?:011|5|4[4-9])/.test(digits)) return 'Discover';
+  if (/^4/.test(digits))                                        return 'Visa';
+  if (/^(5[1-5]|2(2[2-9]|[3-6]\d|7[01]|720))/.test(digits))   return 'Mastercard';
+  if (/^3[47]/.test(digits))                                    return 'American Express';
+  if (/^(?:35|2131|1800)/.test(digits))                         return 'JCB';
+  if (/^6(?:011|5|4[4-9])/.test(digits))                        return 'Discover';
   return null;
 }
 
 function formatCardNumber(rawDigits, brand) {
   const digits = digitsOnly(rawDigits);
-
   if (brand === 'American Express') {
     const capped = digits.slice(0, 15);
-    const parts = [
-      capped.slice(0, 4),
-      capped.slice(4, 10),
-      capped.slice(10, 15)
-    ].filter(Boolean);
-    return parts.join(' ');
+    return [capped.slice(0,4), capped.slice(4,10), capped.slice(10,15)].filter(Boolean).join(' ');
   }
-
   const capped = digits.slice(0, 19);
   return (capped.match(/.{1,4}/g) || []).join(' ');
 }
 
+/* ─────────────────────────────────────────────
+   CARD EXPIRY VALIDATION
+───────────────────────────────────────────── */
+function validateCardExpiry(value) {
+  const clean = value.replace(/\D/g, '');
+  if (clean.length < 4) return { ok: false, msg: 'Please enter a valid expiry date (MM/YY).' };
+  const mm = parseInt(clean.slice(0, 2), 10);
+  const yy = parseInt(clean.slice(2, 4), 10);
+  if (mm < 1 || mm > 12) return { ok: false, msg: 'Month must be between 01 and 12.' };
+  const now      = new Date();
+  const nowYear  = now.getFullYear() % 100;
+  const nowMonth = now.getMonth() + 1;
+  if (yy < nowYear || (yy === nowYear && mm < nowMonth)) {
+    return { ok: false, msg: 'Your card has expired. Please use a valid card.' };
+  }
+  return { ok: true };
+}
+
+/* ─────────────────────────────────────────────
+   CARD UI BINDING
+───────────────────────────────────────────── */
 function bindCardUI() {
-  const input = document.getElementById('card-number');
+  const input  = document.getElementById('card-number');
   const helper = document.getElementById('card-brand-helper');
-  const chips = document.querySelectorAll('#card-brand-strip .brand-chip');
-  const cvv = document.getElementById('card-cvv');
+  const chips  = document.querySelectorAll('#card-brand-strip .brand-chip');
+  const cvv    = document.getElementById('card-cvv');
   if (!input) return;
 
   const render = () => {
     const brand = detectCardBrand(input.value);
     input.dataset.cardBrand = brand || '';
     input.value = formatCardNumber(input.value, brand);
-
-    chips.forEach(chip => {
-      chip.classList.toggle('active', chip.dataset.brand === brand);
-    });
-
+    chips.forEach(chip => chip.classList.toggle('active', chip.dataset.brand === brand));
     if (helper) {
       helper.textContent = brand
         ? `${brand} detected from card number`
         : 'Card type will be detected automatically.';
     }
-
     if (cvv) {
-      cvv.maxLength = brand === 'American Express' ? 4 : 3;
+      cvv.maxLength   = brand === 'American Express' ? 4 : 3;
       cvv.placeholder = brand === 'American Express' ? '••••' : '•••';
     }
   };
 
   input.addEventListener('input', render);
-  input.addEventListener('blur', render);
+  input.addEventListener('blur',  render);
   render();
 }
 
+/* ─────────────────────────────────────────────
+   METHOD SELECTION
+───────────────────────────────────────────── */
 function selectMethod(method, buttonEl) {
   document.querySelectorAll('.pm-card').forEach(card => card.classList.remove('active'));
   document.querySelectorAll('.pay-form-panel').forEach(panel => panel.style.display = 'none');
-
   const hint = document.getElementById('select-hint');
   if (hint) hint.style.display = 'none';
-
   if (buttonEl) buttonEl.classList.add('active');
-
   const form = document.getElementById('form-' + method);
   if (form) {
     form.style.display = 'block';
@@ -2102,48 +1718,82 @@ function selectMethod(method, buttonEl) {
   }
 }
 
+/* ─────────────────────────────────────────────
+   PROCESS PAYMENT
+───────────────────────────────────────────── */
 function processPayment(method) {
   let phonePayload = null;
-  let cardBrand = '';
+  let cardBrand    = '';
 
   if (method === 'bkash') {
-    phonePayload = validatePhoneInput('bkash-phone', 'bKash');
-    const pin = ['bkash-p1','bkash-p2','bkash-p3','bkash-p4','bkash-p5']
-      .map(id => document.getElementById(id).value).join('');
+    phonePayload = validateBdPhone('bkash-phone', 'bKash');
     if (!phonePayload) return;
-    if (pin.length < 5) { alert('Please enter your 5-digit PIN'); return; }
+    const pin = validatePin(['bkash-p1','bkash-p2','bkash-p3','bkash-p4','bkash-p5'], 5, 'bKash');
+    if (!pin) return;
   }
 
   if (method === 'nagad') {
-    phonePayload = validatePhoneInput('nagad-phone', 'Nagad');
-    const pin = ['nagad-p1','nagad-p2','nagad-p3','nagad-p4']
-      .map(id => document.getElementById(id).value).join('');
+    phonePayload = validateBdPhone('nagad-phone', 'Nagad');
     if (!phonePayload) return;
-    if (pin.length < 4) { alert('Please enter your 4-digit PIN'); return; }
+    const pin = validatePin(['nagad-p1','nagad-p2','nagad-p3','nagad-p4'], 4, 'Nagad');
+    if (!pin) return;
   }
 
   if (method === 'rocket') {
-    phonePayload = validatePhoneInput('rocket-phone', 'Rocket');
-    const pin = ['rocket-p1','rocket-p2','rocket-p3','rocket-p4']
-      .map(id => document.getElementById(id).value).join('');
+    phonePayload = validateBdPhone('rocket-phone', 'Rocket');
     if (!phonePayload) return;
-    if (pin.length < 4) { alert('Please enter your 4-digit PIN'); return; }
+    const pin = validatePin(['rocket-p1','rocket-p2','rocket-p3','rocket-p4'], 4, 'Rocket');
+    if (!pin) return;
   }
 
   if (method === 'card') {
     const numberInput = document.getElementById('card-number');
-    const num = digitsOnly(numberInput.value);
-    const exp = document.getElementById('card-expiry').value.trim();
-    const cvv = document.getElementById('card-cvv').value.trim();
-    const name = document.getElementById('card-name').value.trim();
+    const expiryInput = document.getElementById('card-expiry');
+    const cvvInput    = document.getElementById('card-cvv');
+    const nameInput   = document.getElementById('card-name');
+
+    const num  = digitsOnly(numberInput.value);
+    const exp  = expiryInput.value.trim();
+    const cvv  = cvvInput.value.trim();
+    const name = nameInput.value.trim();
 
     cardBrand = numberInput.dataset.cardBrand || '';
-    const requiredCvvLength = cardBrand === 'American Express' ? 4 : 3;
 
-    if (num.length < 13) { alert('Please enter a valid card number'); return; }
-    if (!exp.includes('/')) { alert('Please enter expiry date in MM/YY format'); return; }
-    if (cvv.length < requiredCvvLength) { alert(`Please enter ${requiredCvvLength}-digit CVV`); return; }
-    if (!name) { alert('Please enter cardholder name'); return; }
+    const minLen = cardBrand === 'American Express' ? 15 : 13;
+    const maxLen = cardBrand === 'American Express' ? 15 : 19;
+    if (num.length < minLen || num.length > maxLen) {
+      numberInput.style.borderColor = '#f43f5e';
+      alert(cardBrand ? `Please enter a valid ${cardBrand} card number.` : 'Please enter a valid card number (13–19 digits).');
+      numberInput.focus();
+      return;
+    }
+    numberInput.style.borderColor = '';
+
+    const expiryCheck = validateCardExpiry(exp);
+    if (!expiryCheck.ok) {
+      expiryInput.style.borderColor = '#f43f5e';
+      alert(expiryCheck.msg);
+      expiryInput.focus();
+      return;
+    }
+    expiryInput.style.borderColor = '';
+
+    const requiredCvvLen = cardBrand === 'American Express' ? 4 : 3;
+    if (cvv.length < requiredCvvLen || !/^\d+$/.test(cvv)) {
+      cvvInput.style.borderColor = '#f43f5e';
+      alert(`Please enter the ${requiredCvvLen}-digit CVV${cardBrand === 'American Express' ? ' (4 digits for Amex)' : ''}.`);
+      cvvInput.focus();
+      return;
+    }
+    cvvInput.style.borderColor = '';
+
+    if (!name || name.length < 2 || !/^[a-zA-Z\s\-'.]+$/.test(name)) {
+      nameInput.style.borderColor = '#f43f5e';
+      alert('Please enter the cardholder name as it appears on the card.');
+      nameInput.focus();
+      return;
+    }
+    nameInput.style.borderColor = '';
   }
 
   document.getElementById('processingOverlay').classList.add('show');
@@ -2151,13 +1801,12 @@ function processPayment(method) {
   const labels = {
     bkash:  ['Connecting to bKash...', 'Verifying PIN...', 'Processing payment...'],
     nagad:  ['Connecting to Nagad...', 'Verifying PIN...', 'Processing payment...'],
-    rocket: ['Connecting to Rocket...', 'Verifying PIN...', 'Processing payment...'],
-    card:   ['Detecting card brand...', 'Authorizing payment...', 'Processing payment...'],
+    rocket: ['Connecting to Rocket...','Verifying PIN...', 'Processing payment...'],
+    card:   ['Detecting card brand...','Authorizing payment...','Processing payment...'],
   };
 
   let step = 0;
-  const steps = labels[method] || ['Processing...', 'Please wait...', 'Confirming...'];
-
+  const steps    = labels[method] || ['Processing...', 'Please wait...', 'Confirming...'];
   const interval = setInterval(() => {
     if (step < steps.length) {
       document.getElementById('procTitle').textContent = steps[step];
@@ -2169,21 +1818,20 @@ function processPayment(method) {
     clearInterval(interval);
 
     fetch("{{ url_for('payment.confirm_payment_ajax', order_id=order.id) }}", {
-      method: 'POST',
+      method:  'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        method: method,
-        phone: phonePayload ? phonePayload.raw : '',
-        phone_country_code: phonePayload ? phonePayload.countryCode : '',
-        phone_country_name: phonePayload ? phonePayload.countryName : '',
+      body:    JSON.stringify({
+        method:                method,
+        phone:                 phonePayload ? phonePayload.raw            : '',
+        phone_country_code:    phonePayload ? phonePayload.countryCode    : '',
+        phone_country_name:    phonePayload ? phonePayload.countryName    : '',
         phone_national_number: phonePayload ? phonePayload.nationalNumber : '',
-        card_brand: cardBrand
+        card_brand:            cardBrand
       })
     })
     .then(r => r.json())
     .then(data => {
       document.getElementById('processingOverlay').classList.remove('show');
-
       if (data.success) {
         document.getElementById('successMsg').innerHTML =
           `Your <strong>${method.charAt(0).toUpperCase() + method.slice(1)}</strong> payment of <strong>${{ "%.2f"|format(order.total_price) }}</strong> was successful.<br>Your order is now confirmed.`;
@@ -2199,42 +1847,44 @@ function processPayment(method) {
   }, 2800);
 }
 
+/* ─────────────────────────────────────────────
+   PIN DOT KEYBOARD HANDLING
+───────────────────────────────────────────── */
 document.querySelectorAll('.pin-dot').forEach((dot) => {
   dot.addEventListener('input', () => {
     dot.value = dot.value.replace(/\D/g, '').slice(0, 1);
+    dot.style.borderColor = '';
     const siblings = Array.from(dot.parentElement.querySelectorAll('.pin-dot'));
-    const idx = siblings.indexOf(dot);
+    const idx      = siblings.indexOf(dot);
     if (dot.value && idx < siblings.length - 1) siblings[idx + 1].focus();
   });
 
   dot.addEventListener('keydown', (e) => {
     const siblings = Array.from(dot.parentElement.querySelectorAll('.pin-dot'));
-    const idx = siblings.indexOf(dot);
-
-    if (e.key === 'Backspace' && !dot.value && idx > 0) {
-      siblings[idx - 1].focus();
-    }
+    const idx      = siblings.indexOf(dot);
+    if (e.key === 'Backspace' && !dot.value && idx > 0) siblings[idx - 1].focus();
   });
 });
 
+/* ─────────────────────────────────────────────
+   CARD EXPIRY AUTO-FORMAT
+───────────────────────────────────────────── */
 const expiryInput = document.getElementById('card-expiry');
 if (expiryInput) {
   expiryInput.addEventListener('input', e => {
     let v = e.target.value.replace(/\D/g, '');
     if (v.length >= 2) v = v.substring(0, 2) + '/' + v.substring(2, 4);
-    e.target.value = v;
+    e.target.value             = v;
+    e.target.style.borderColor = '';
   });
 }
 
-document.addEventListener('click', function (e) {
-  if (!e.target.closest('.intl-select')) {
-    closeAllPhoneDropdowns();
-  }
-});
-
-bindPhoneUI('bkash-phone');
-bindPhoneUI('nagad-phone');
-bindPhoneUI('rocket-phone');
+/* ─────────────────────────────────────────────
+   INIT
+───────────────────────────────────────────── */
+bindBdPhoneInput('bkash-phone');
+bindBdPhoneInput('nagad-phone');
+bindBdPhoneInput('rocket-phone');
 bindCardUI();
 </script>
 {% endblock %}
