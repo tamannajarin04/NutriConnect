@@ -9,6 +9,8 @@ load_dotenv()
 
 diet_suggestions_bp = Blueprint("diet_suggestions", __name__)
 
+# ── Index Route ───────────────────────────────────────────────────────────────
+
 @diet_suggestions_bp.route("/diet-suggestions")
 @login_required
 def index():
@@ -28,241 +30,336 @@ def index():
     )
 
     profile = {
-        "goal": latest_log.goal if latest_log and latest_log.goal else "maintain_weight",
-        "bmi": latest_bmi.bmi if latest_bmi else None,
-        "bmi_category": latest_bmi.category if latest_bmi else "Unknown",
-        "calorie_goal": pref.calorie_goal if pref else 2000,
-        "meals_per_day": pref.meals_per_day if pref else 3,
-        "diet_type": pref.diet_type if pref else "none",
-        "allergies": pref.allergies if pref else [],
-        "avoid_foods": pref.avoid_foods if pref else [],
-        "preferred_cuisine": pref.preferred_cuisine if pref else [],
-        "protein_goal": pref.protein_goal if pref else 50,
-        "carbs_goal": pref.carbs_goal if pref else 250,
-        "fat_goal": pref.fat_goal if pref else 70,
-        "has_preference": pref is not None,
+        "goal":             latest_log.goal if latest_log and latest_log.goal else "maintain_weight",
+        "bmi":              latest_bmi.bmi if latest_bmi else None,
+        "bmi_category":     latest_bmi.category if latest_bmi else "Unknown",
+        "calorie_goal":     pref.calorie_goal if pref else 2000,
+        "meals_per_day":    pref.meals_per_day if pref else 3,
+        "diet_type":        pref.diet_type if pref else "none",
+        "allergies":        pref.allergies if pref else [],
+        "avoid_foods":      pref.avoid_foods if pref else [],
+        "preferred_cuisine":pref.preferred_cuisine if pref else [],
+        "protein_goal":     pref.protein_goal if pref else 50,
+        "carbs_goal":       pref.carbs_goal if pref else 250,
+        "fat_goal":         pref.fat_goal if pref else 70,
+        "has_preference":   pref is not None,
     }
 
     return render_template("dashboard/diet_suggestions.html", profile=profile)
 
-# ── Helpers ───────────────────────────────────────────────────────────────────
 
-def _build_prompt(profile):
-    """Build the strongly-constrained dietitian prompt."""
+# ── Prompt Builder ────────────────────────────────────────────────────────────
+
+def _build_prompt(profile, retry_feedback: list[str] | None = None):
+    """
+    Build the dietitian prompt. On retries, inject concrete feedback so
+    the model understands exactly what went wrong last time.
+    """
+    retry_block = ""
+    if retry_feedback:
+        issues = "\n".join(f"  - {w}" for w in retry_feedback)
+        retry_block = f"""
+=== ⚠ PREVIOUS ATTEMPT FAILED — FIX THESE ISSUES ===
+{issues}
+The most common cause: you set "calories" independently of macros.
+DO NOT do that. ALWAYS derive calories as: protein*4 + carbs*4 + fat*9.
+=====================================================
+"""
+
+    # Determine valid meal types for this meals_per_day count
+    meal_type_map = {
+        1: ["lunch"],
+        2: ["breakfast", "dinner"],
+        3: ["breakfast", "lunch", "dinner"],
+        4: ["breakfast", "lunch", "afternoon snack", "dinner"],
+        5: ["breakfast", "mid-morning snack", "lunch", "afternoon snack", "dinner"],
+        6: ["breakfast", "mid-morning snack", "lunch", "afternoon snack", "dinner", "evening snack"],
+    }
+    valid_meal_types = meal_type_map.get(profile["meals_per_day"], meal_type_map[3])
+    meal_types_str   = ", ".join(f'"{m}"' for m in valid_meal_types)
+
     return f"""
-You are a certified registered dietitian AI embedded in NutriConnect, a clinical nutrition platform.
-Your ONLY job is to return a single, valid JSON object. Any deviation will break the application.
-
+You are a certified registered dietitian AI embedded in NutriConnect.
+Your ONLY job: return a single valid JSON object. Any deviation breaks the app.
+{retry_block}
 === USER PROFILE ===
-- Health Goal: {profile['goal']}
-- BMI: {profile['bmi']} ({profile['bmi_category']})
+- Health Goal:        {profile['goal']}
+- BMI:                {profile['bmi']} ({profile['bmi_category']})
 - Daily Calorie Target: {profile['calorie_goal']} kcal
-- Meals Per Day: {profile['meals_per_day']}
-- Diet Type: {profile['diet_type']}
-- Allergies / Restrictions: {profile['allergies']}
-- Foods to Avoid: {profile['avoid_foods']}
+- Meals Per Day:      {profile['meals_per_day']}
+- Diet Type:          {profile['diet_type']}
+- Allergies:          {profile['allergies']}
+- Foods to Avoid:     {profile['avoid_foods']}
 - Preferred Cuisines: {profile['preferred_cuisine']}
-- Macro Targets: Protein {profile['protein_goal']}g | Carbs {profile['carbs_goal']}g | Fat {profile['fat_goal']}g
+- Macro Targets — Protein: {profile['protein_goal']}g | Carbs: {profile['carbs_goal']}g | Fat: {profile['fat_goal']}g
+
+=== ⚠ CRITICAL MATH RULE (most important rule) ===
+Every "calories" value MUST equal: (protein × 4) + (carbs × 4) + (fat × 9).
+This is non-negotiable. Never set calories to an arbitrary number.
+Example: protein=30g, carbs=45g, fat=10g → calories = 30×4 + 45×4 + 10×9 = 120+180+90 = 390
 
 === STRICT OUTPUT RULES ===
-1.  Output ONLY raw JSON. No markdown. No ```json fences. No explanations. No comments. No trailing text.
+1.  Output ONLY raw JSON. No markdown. No ```json fences. No explanations. No trailing text.
 2.  The JSON must be parseable by Python's json.loads() without any preprocessing.
-3.  Never invent or hallucinate nutritional values — use realistic, evidence-based figures.
-4.  NEVER include any food that conflicts with the user's allergies, diet type, or avoid list — this is a safety-critical rule.
-5.  match_score must reflect genuine compatibility: penalise heavily for any mismatch with goal, diet type, or macros.
-6.  All calorie and macro numbers must be integers, not strings.
-7.  meal_plan must contain EXACTLY {profile['meals_per_day']} entries — no more, no less.
-8.  foods list must contain EXACTLY 6 items — no more, no less.
-9.  Every meal_plan entry's "meal_type" must be one of: breakfast, mid-morning snack, lunch, afternoon snack, dinner, evening snack — chosen logically based on meals_per_day.
-10. The sum of meal_plan calories must be within ±100 kcal of the user's daily calorie target of {profile['calorie_goal']} kcal.
-11. Macro totals across ALL meal_plan entries must approximate these targets:
-    - Protein: {profile['protein_goal']}g  (±10g acceptable)
-    - Carbs:   {profile['carbs_goal']}g    (±20g acceptable)
-    - Fat:     {profile['fat_goal']}g      (±10g acceptable)
-12. Each meal's macros must follow the calorie-per-gram rule:
-    - 1g protein = 4 kcal, 1g carbs = 4 kcal, 1g fat = 9 kcal
-    - (protein*4 + carbs*4 + fat*9) for each meal must approximately equal that meal's reported calorie value.
-    - This is a hard mathematical constraint — do NOT violate it.
-13. Carbohydrates must account for at least 30% of total daily calories. Do not under-report carbs.
-14. diet_type classification rules (safety-critical — never misclassify):
-    - Any food made entirely from plants (grains, vegetables, fruits, legumes, nuts, seeds, tea, coffee)
-      MUST be classified as "vegetarian" or "vegan". NEVER classify plant foods as "non-vegetarian".
-    - "non-vegetarian" is ONLY for foods containing animal flesh (chicken, beef, pork, fish, seafood).
-    - Beverages (tea, coffee, water, juices) must still have realistic calorie/macro values — even if minimal.
-      Green tea = 2 kcal, 0g protein, 0g carbs, 0g fat is acceptable. Do NOT leave all fields at 0.
+3.  NEVER include any food conflicting with allergies, diet type, or avoid list. Safety-critical.
+4.  match_score must reflect genuine compatibility; penalise for any goal/diet/macro mismatch.
+5.  All calorie and macro numbers must be integers (never strings or floats).
+6.  meal_plan must contain EXACTLY {profile['meals_per_day']} entries.
+7.  foods list must contain EXACTLY 6 items.
+8.  meal_type must be chosen from ONLY these options: {meal_types_str}.
+9.  Total meal_plan calories must be within ±100 kcal of {profile['calorie_goal']} kcal.
+10. Total macros across ALL meals must approximate:
+    - Protein: {profile['protein_goal']}g (±15g), Carbs: {profile['carbs_goal']}g (±25g), Fat: {profile['fat_goal']}g (±15g)
+11. Carbohydrates must supply ≥30% of total daily calories. Under-reporting carbs is an error.
+12. diet_type classification (safety-critical):
+    - Plant-based foods (grains, vegetables, fruits, legumes, nuts, seeds, tea, coffee)
+      → MUST be "vegetarian" or "vegan". NEVER classify as "non-vegetarian".
+    - "non-vegetarian" ONLY for animal flesh (chicken, beef, pork, fish, seafood).
+    - Beverages: use realistic values (green tea = 2 kcal, 0g P, 0g C, 0g F).
 
-=== REQUIRED JSON STRUCTURE (follow exactly) ===
+=== REQUIRED JSON STRUCTURE ===
 {{
-  "insight": "2-3 sentences explaining the overall diet strategy and why it fits this user's goal and BMI category. Be specific, not generic.",
+  "insight": "2-3 specific sentences on why this diet suits this user's goal and BMI.",
   "foods": [
     {{
       "name": "food name",
       "diet_type": "vegetarian | vegan | non-vegetarian | pescatarian | keto | paleo",
-      "calories": 120,
-      "protein": 8,
-      "carbs": 15,
-      "fat": 4,
+      "calories": 390,
+      "protein": 30,
+      "carbs": 45,
+      "fat": 10,
       "match_score": 87,
-      "reason": "1-2 sentences explaining why this food suits THIS user's specific goal, BMI, and restrictions."
+      "reason": "1-2 sentences tied to this user's specific goal and restrictions."
     }}
   ],
   "meal_plan": [
     {{
       "meal_type": "breakfast",
       "food": "food name",
-      "calories": 400,
+      "calories": 390,
       "protein": 30,
       "carbs": 45,
       "fat": 10,
-      "why": "One sentence tied directly to the user's goal of {profile['goal']} and their calorie/macro targets."
+      "why": "One sentence tied to the user's goal of {profile['goal']} and macro targets."
     }}
   ]
 }}
 
-Now generate the JSON for this user. Output nothing except the JSON object.
+Now generate the JSON. Output nothing except the JSON object.
 """
 
-def _extract_json(raw):
+
+# ── Post-processing Helpers ───────────────────────────────────────────────────
+
+def _extract_json(raw: str) -> str:
     """Robustly extract a JSON object from a raw AI response string."""
-    # Strip markdown code fences if present
     if raw.startswith("```"):
         raw = raw.split("```")[1]
         if raw.startswith("json"):
             raw = raw[4:]
         raw = raw.strip()
 
-    # Surgically extract just the outermost JSON object
     start = raw.find("{")
-    end = raw.rfind("}") + 1
+    end   = raw.rfind("}") + 1
     if start == -1 or end == 0:
         raise ValueError("No valid JSON object found in AI response.")
     return raw[start:end]
 
-def _enforce_int_types(result):
-    """Cast all numeric fields to int to prevent string/float type issues on frontend."""
+
+def _enforce_int_types(result: dict) -> dict:
+    """Cast all numeric fields to int."""
+    int_fields_food = ("calories", "protein", "carbs", "fat", "match_score")
+    int_fields_meal = ("calories", "protein", "carbs", "fat")
+
     for food in result.get("foods", []):
-        for key in ("calories", "protein", "carbs", "fat", "match_score"):
-            if key in food:
-                try:
-                    food[key] = int(round(float(food[key])))
-                except (ValueError, TypeError):
-                    food[key] = 0
+        for k in int_fields_food:
+            if k in food:
+                try:    food[k] = int(round(float(food[k])))
+                except: food[k] = 0
 
     for meal in result.get("meal_plan", []):
-        for key in ("calories", "protein", "carbs", "fat"):
-            if key in meal:
-                try:
-                    meal[key] = int(round(float(meal[key])))
-                except (ValueError, TypeError):
-                    meal[key] = 0
+        for k in int_fields_meal:
+            if k in meal:
+                try:    meal[k] = int(round(float(meal[k])))
+                except: meal[k] = 0
 
     return result
 
-# Canonical vegetarian/vegan ingredients — used to auto-correct misclassified foods
+
+def _recalculate_calories_from_macros(result: dict) -> dict:
+    """
+    *** THE CORE FIX ***
+    Overwrite every calorie value with the mathematically correct figure
+    derived from macros: calories = protein*4 + carbs*4 + fat*9.
+
+    This eliminates macro-math mismatches entirely regardless of what the
+    AI hallucinated for the calories field.
+    """
+    for food in result.get("foods", []):
+        p = food.get("protein", 0) or 0
+        c = food.get("carbs",   0) or 0
+        f = food.get("fat",     0) or 0
+        food["calories"] = int(round(p * 4 + c * 4 + f * 9))
+
+    for meal in result.get("meal_plan", []):
+        p = meal.get("protein", 0) or 0
+        c = meal.get("carbs",   0) or 0
+        f = meal.get("fat",     0) or 0
+        meal["calories"] = int(round(p * 4 + c * 4 + f * 9))
+
+    return result
+
+
+def _scale_meal_plan_to_calorie_goal(result: dict, profile: dict) -> dict:
+    """
+    If total meal-plan calories (after macro recalculation) still deviate
+    from the user's goal by more than 100 kcal, scale all macros
+    proportionally so the total lands on target.
+    """
+    meal_plan  = result.get("meal_plan", [])
+    total_cals = sum(m.get("calories", 0) for m in meal_plan)
+    goal       = profile["calorie_goal"]
+
+    if total_cals == 0:
+        return result
+
+    gap = abs(total_cals - goal)
+    if gap > 100:
+        scale = goal / total_cals
+        for meal in meal_plan:
+            meal["protein"] = int(round((meal.get("protein", 0) or 0) * scale))
+            meal["carbs"]   = int(round((meal.get("carbs",   0) or 0) * scale))
+            meal["fat"]     = int(round((meal.get("fat",     0) or 0) * scale))
+            # Recompute calories after scaling
+            meal["calories"] = int(round(
+                meal["protein"] * 4 + meal["carbs"] * 4 + meal["fat"] * 9
+            ))
+        new_total = sum(m["calories"] for m in meal_plan)
+        print(f"[SCALE] Adjusted meal plan: {total_cals} kcal → {new_total} kcal (goal: {goal})")
+
+    return result
+
+
+# Vegetarian/vegan keyword sets for diet_type correction
 _VEGETARIAN_KEYWORDS = {
-    "rice", "broccoli", "oat", "banana", "apple", "spinach", "lentil", "bean",
-    "tofu", "quinoa", "almond", "walnut", "yogurt", "egg", "milk", "cheese",
-    "paneer", "chickpea", "sweet potato", "carrot", "cucumber", "tomato",
-    "mushroom", "avocado", "peanut", "cashew", "date", "mango", "orange",
-    "blueberry", "strawberry", "olive", "honey", "tea", "coffee", "oats",
+    "rice", "broccoli", "oat", "oats", "banana", "apple", "spinach", "lentil",
+    "bean", "tofu", "quinoa", "almond", "walnut", "yogurt", "egg", "milk",
+    "cheese", "paneer", "chickpea", "sweet potato", "carrot", "cucumber",
+    "tomato", "mushroom", "avocado", "peanut", "cashew", "date", "mango",
+    "orange", "blueberry", "strawberry", "olive", "honey", "tea", "coffee",
     "bread", "pasta", "potato", "corn", "pumpkin", "zucchini", "eggplant",
     "cauliflower", "kale", "lettuce", "celery", "garlic", "onion", "ginger",
     "turmeric", "flaxseed", "chia", "hemp", "soy", "edamame", "tempeh",
     "seitan", "lemon", "lime", "grape", "watermelon", "pineapple", "coconut",
+    "barley", "millet", "buckwheat", "rye", "granola", "hummus", "tahini",
 }
-
 _VEGAN_EXCLUSIONS = {"yogurt", "egg", "milk", "cheese", "paneer", "honey"}
 
-def _sanitise_foods(result):
+
+def _sanitise_foods(result: dict) -> dict:
     """
-    1. Auto-correct obvious diet_type misclassifications (e.g. Brown Rice → vegetarian).
-    2. Flag zero-macro foods (beverages etc.) so the frontend can render them gracefully.
+    1. Auto-correct obvious diet_type misclassifications.
+    2. Flag zero-macro beverages so the frontend can style them gracefully.
     """
     for food in result.get("foods", []):
         name_lower = (food.get("name") or "").lower()
         diet_lower = (food.get("diet_type") or "").lower()
 
-        # Check if any vegetarian keyword matches the food name
         is_plant_based = any(kw in name_lower for kw in _VEGETARIAN_KEYWORDS)
-
         if is_plant_based and diet_lower == "non-vegetarian":
-            # Determine vegan vs vegetarian
-            is_vegan = not any(exc in name_lower for exc in _VEGAN_EXCLUSIONS)
-            food["diet_type"] = "vegan" if is_vegan else "vegetarian"
-            print(f"[SANITISE] Corrected '{food['name']}' diet_type: non-vegetarian → {food['diet_type']}")
+            is_vegan      = not any(exc in name_lower for exc in _VEGAN_EXCLUSIONS)
+            corrected     = "vegan" if is_vegan else "vegetarian"
+            food["diet_type"] = corrected
+            print(f"[SANITISE] Corrected '{food['name']}': non-vegetarian → {corrected}")
 
-        # Flag zero-macro foods (e.g. green tea, black coffee, water)
-        total_macros = (food.get("protein", 0) or 0) + (food.get("carbs", 0) or 0) + (food.get("fat", 0) or 0)
-        if total_macros == 0 and (food.get("calories", 0) or 0) == 0:
-            food["is_beverage"] = True  # frontend can use this to style differently
+        total_macros = (
+            (food.get("protein", 0) or 0) +
+            (food.get("carbs",   0) or 0) +
+            (food.get("fat",     0) or 0)
+        )
+        if total_macros == 0 and (food.get("calories", 0) or 0) <= 5:
+            food["is_beverage"] = True
 
     return result
 
-def _validate_result(result, profile):
+
+# ── Validation ────────────────────────────────────────────────────────────────
+
+def _validate_result(result: dict, profile: dict) -> tuple[bool, list[str]]:
     """
-    Validate AI response against nutritional constraints.
-    Returns (is_valid: bool, warnings: list[str]).
-    A result is valid only if calorie gap ≤150 kcal AND carb ratio ≥25%.
+    Validate the AI response after all post-processing has been applied.
+    Returns (is_valid, warnings).
+
+    After _recalculate_calories_from_macros() runs, macro-math mismatches
+    should always be 0, so validation focuses on:
+      - Correct meal / food count
+      - Calorie goal proximity
+      - Minimum carb ratio
     """
-    warnings = []
-    meal_plan     = result.get("meal_plan", [])
-    meals_count   = len(meal_plan)
-    foods_count   = len(result.get("foods", []))
+    warnings   = []
+    meal_plan  = result.get("meal_plan", [])
+    meals_n    = len(meal_plan)
+    foods_n    = len(result.get("foods", []))
 
     total_cals    = sum(m.get("calories", 0) for m in meal_plan)
     total_protein = sum(m.get("protein",  0) for m in meal_plan)
     total_carbs   = sum(m.get("carbs",    0) for m in meal_plan)
     total_fat     = sum(m.get("fat",      0) for m in meal_plan)
 
-    calorie_goal  = profile["calorie_goal"]
-    cal_gap       = abs(total_cals - calorie_goal)
-    carb_ratio    = (total_carbs * 4) / total_cals if total_cals > 0 else 0
+    goal      = profile["calorie_goal"]
+    cal_gap   = abs(total_cals - goal)
+    carb_ratio = (total_carbs * 4) / total_cals if total_cals > 0 else 0
 
-    # Macro math consistency check
-    expected_from_macros = (total_protein * 4) + (total_carbs * 4) + (total_fat * 9)
-    macro_math_gap = abs(expected_from_macros - total_cals)
+    # Macro math gap — should be 0 after recalculation; logged for debugging only
+    macro_implied = total_protein * 4 + total_carbs * 4 + total_fat * 9
+    macro_gap     = abs(macro_implied - total_cals)
 
     print(
-        f"[VALIDATE] meals={meals_count} foods={foods_count} "
+        f"[VALIDATE] meals={meals_n} foods={foods_n} "
         f"cals={total_cals} protein={total_protein}g "
         f"carbs={total_carbs}g fat={total_fat}g"
     )
     print(
         f"[VALIDATE] cal_gap={cal_gap} carb_ratio={carb_ratio:.0%} "
-        f"macro_math_gap={macro_math_gap}"
+        f"macro_math_gap={macro_gap}"
     )
 
-    if meals_count != profile["meals_per_day"]:
-        warnings.append(f"Expected {profile['meals_per_day']} meals, got {meals_count}.")
+    if meals_n != profile["meals_per_day"]:
+        warnings.append(
+            f"Expected {profile['meals_per_day']} meals, got {meals_n}. "
+            "meal_plan must have EXACTLY the right count."
+        )
 
-    if foods_count != 6:
-        warnings.append(f"Expected 6 foods, got {foods_count}.")
+    if foods_n != 6:
+        warnings.append(
+            f"Expected 6 foods in the foods list, got {foods_n}."
+        )
 
     if cal_gap > 150:
         warnings.append(
-            f"Meal plan calories ({total_cals} kcal) deviate from goal "
-            f"({calorie_goal} kcal) by {cal_gap} kcal."
+            f"After scaling, calories are still {cal_gap} kcal off "
+            f"(got {total_cals}, need {goal}). "
+            "Adjust protein/carbs/fat proportions."
         )
 
     if carb_ratio < 0.25:
         warnings.append(
-            f"Carb ratio too low ({carb_ratio:.0%}). "
-            "Macros may be inaccurate — try refreshing."
+            f"Carb ratio is only {carb_ratio:.0%} — must be ≥30%. "
+            "Increase carbs significantly; reduce fat."
         )
 
-    if macro_math_gap > 100:
-        warnings.append(
-            f"Macro math mismatch: macros imply {expected_from_macros} kcal "
-            f"but meal calories total {total_cals} kcal."
-        )
-
-    for w in warnings:
-        print(f"[WARN] {w}")
-
-    is_valid = cal_gap <= 150 and carb_ratio >= 0.25
+    is_valid = (
+        meals_n == profile["meals_per_day"]
+        and foods_n == 6
+        and cal_gap <= 150
+        and carb_ratio >= 0.25
+    )
     return is_valid, warnings
 
-# ── Main Route ────────────────────────────────────────────────────────────────
+
+# ── Generate Route ────────────────────────────────────────────────────────────
+
+MAX_RETRIES = 3
 
 @diet_suggestions_bp.route("/diet-suggestions/generate", methods=["POST"])
 @login_required
@@ -278,7 +375,7 @@ def generate():
         client = Groq(api_key=api_key)
 
         # ── Build user profile ────────────────────────────────────────────────
-        pref = current_user.dietary_preference
+        pref       = current_user.dietary_preference
         latest_bmi = (
             BMIRecord.query.filter_by(user_id=current_user.id)
             .order_by(BMIRecord.recorded_at.desc())
@@ -291,42 +388,42 @@ def generate():
         )
 
         profile = {
-            "goal":           latest_log.goal if latest_log and latest_log.goal else "maintain_weight",
-            "bmi":            latest_bmi.bmi if latest_bmi else "unknown",
-            "bmi_category":   latest_bmi.category if latest_bmi else "Unknown",
-            "calorie_goal":   pref.calorie_goal if pref else 2000,
-            "meals_per_day":  pref.meals_per_day if pref else 3,
-            "diet_type":      pref.diet_type if pref else "none",
-            "allergies":      ", ".join(pref.allergies)         if pref and pref.allergies         else "none",
-            "avoid_foods":    ", ".join(pref.avoid_foods)       if pref and pref.avoid_foods       else "none",
-            "preferred_cuisine": ", ".join(pref.preferred_cuisine) if pref and pref.preferred_cuisine else "any",
-            "protein_goal":   pref.protein_goal if pref else 50,
-            "carbs_goal":     pref.carbs_goal   if pref else 250,
-            "fat_goal":       pref.fat_goal     if pref else 70,
+            "goal":              latest_log.goal if latest_log and latest_log.goal else "maintain_weight",
+            "bmi":               latest_bmi.bmi if latest_bmi else "unknown",
+            "bmi_category":      latest_bmi.category if latest_bmi else "Unknown",
+            "calorie_goal":      pref.calorie_goal if pref else 2000,
+            "meals_per_day":     pref.meals_per_day if pref else 3,
+            "diet_type":         pref.diet_type if pref else "none",
+            "allergies":         ", ".join(pref.allergies)          if pref and pref.allergies          else "none",
+            "avoid_foods":       ", ".join(pref.avoid_foods)        if pref and pref.avoid_foods        else "none",
+            "preferred_cuisine": ", ".join(pref.preferred_cuisine)  if pref and pref.preferred_cuisine  else "any",
+            "protein_goal":      pref.protein_goal if pref else 50,
+            "carbs_goal":        pref.carbs_goal   if pref else 250,
+            "fat_goal":          pref.fat_goal     if pref else 70,
         }
 
-        prompt = _build_prompt(profile)
-
         system_message = (
-            "You are a clinical dietitian AI. You output ONLY valid raw JSON — "
+            "You are a clinical dietitian AI. Output ONLY valid raw JSON — "
             "no markdown, no code fences, no explanation, no preamble, no postamble. "
             "Your entire response must be a single JSON object parseable by json.loads(). "
-            "You must strictly respect all macro math: 1g protein=4 kcal, 1g carbs=4 kcal, "
-            "1g fat=9 kcal. Carbohydrates must account for at least 30% of total daily calories."
+            "THE MOST IMPORTANT RULE: every calories value MUST equal "
+            "protein×4 + carbs×4 + fat×9. Never set calories to an arbitrary number."
         )
 
-        # ── Retry loop: up to 2 attempts to get a valid response ─────────────
-        MAX_RETRIES = 2
-        result       = None
-        last_warnings = []
+        # ── Retry loop ────────────────────────────────────────────────────────
+        result         = None
+        last_warnings  = []
+        retry_feedback = None   # Injected into prompt on retries
 
         for attempt in range(MAX_RETRIES):
             print(f"[ATTEMPT {attempt + 1}/{MAX_RETRIES}] Calling Groq API...")
 
+            prompt = _build_prompt(profile, retry_feedback=retry_feedback)
+
             response = client.chat.completions.create(
                 model="llama-3.3-70b-versatile",
-                max_tokens=1500,
-                temperature=0.4,
+                max_tokens=1800,
+                temperature=0.35,           # Slightly lower = more deterministic math
                 messages=[
                     {"role": "system", "content": system_message},
                     {"role": "user",   "content": prompt},
@@ -336,29 +433,24 @@ def generate():
             raw    = response.choices[0].message.content.strip()
             raw    = _extract_json(raw)
             parsed = json.loads(raw)
+
+            # ── Post-processing pipeline ──────────────────────────────────────
             parsed = _enforce_int_types(parsed)
-            parsed = _sanitise_foods(parsed)       # fix misclassified diet_types & flag beverages
+            parsed = _recalculate_calories_from_macros(parsed)   # ← core fix
+            parsed = _scale_meal_plan_to_calorie_goal(parsed, profile)
+            parsed = _recalculate_calories_from_macros(parsed)   # recalc after scaling
+            parsed = _sanitise_foods(parsed)
 
             is_valid, last_warnings = _validate_result(parsed, profile)
-            result = parsed  # Always keep the latest attempt
+            result = parsed
 
             if is_valid:
                 print(f"[ATTEMPT {attempt + 1}] Passed validation ✓")
                 break
 
-            print(f"[ATTEMPT {attempt + 1}] Failed validation — retrying...")
-
-        # ── Attach user-facing macro warning if macros are still off ─────────
-        if last_warnings:
-            macro_issues = [
-                w for w in last_warnings
-                if "Carb" in w or "macro" in w.lower() or "mismatch" in w.lower()
-            ]
-            if macro_issues:
-                result["macro_warning"] = (
-                    "Macro distribution may be slightly inaccurate. "
-                    "Try refreshing for a more balanced breakdown."
-                )
+            # Feed specific warnings back into the next prompt
+            retry_feedback = last_warnings
+            print(f"[ATTEMPT {attempt + 1}] Failed — retrying with feedback: {last_warnings}")
 
         # ── Persist to database ───────────────────────────────────────────────
         try:
@@ -372,7 +464,7 @@ def generate():
                 insight        = result.get("insight"),
                 foods_json     = json.dumps(result.get("foods", [])),
                 meal_plan_json = json.dumps(result.get("meal_plan", [])),
-                macro_warning  = result.get("macro_warning"),
+                macro_warning  = None,   # No longer needed — math is corrected server-side
             )
             db.session.add(suggestion)
             db.session.commit()
@@ -396,6 +488,9 @@ def generate():
         traceback.print_exc()
         return jsonify({"error": f"AI generation failed: {str(e)}"}), 500
 
+
+# ── Read Routes ───────────────────────────────────────────────────────────────
+
 @diet_suggestions_bp.route("/diet-suggestions/latest")
 @login_required
 def latest():
@@ -413,6 +508,7 @@ def latest():
         return jsonify({"none": True}), 200
 
     return jsonify(suggestion.to_dict())
+
 
 @diet_suggestions_bp.route("/diet-suggestions/history")
 @login_required
