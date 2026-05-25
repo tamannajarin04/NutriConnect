@@ -1,5 +1,5 @@
 import os
-
+import cloudinary.uploader
 from flask import Blueprint, render_template, redirect, url_for, flash, request, current_app
 from flask_login import login_required, current_user
 from werkzeug.utils import secure_filename
@@ -147,30 +147,22 @@ def edit_profile():
             current_user.email = new_email
 
         file = request.files.get("profile_picture")
+
         if file and file.filename:
-            allowed_exts = {"png", "jpg", "jpeg", "gif"}
+            allowed_exts = {"png", "jpg", "jpeg", "gif", "webp"}
             ext = file.filename.rsplit(".", 1)[-1].lower() if "." in file.filename else ""
 
             if ext not in allowed_exts:
-                flash("Invalid image type. Use PNG/JPG/JPEG/GIF only.", "danger")
+                flash("Invalid image type. Use PNG/JPG/JPEG/GIF/WEBP only.", "danger")
                 return redirect(url_for("user_dashboard.edit_profile"))
 
-            filename = secure_filename(f"{current_user.id}_{file.filename}")
-
-            upload_dir = os.path.join(
-                current_app.root_path,
-                "static",
-                "uploads",
-                "profiles",
+            result = cloudinary.uploader.upload(
+                file,
+                folder="nutriconnect/profiles"
             )
 
-            if os.path.exists(upload_dir) and not os.path.isdir(upload_dir):
-                raise RuntimeError("'profiles' exists but is not a directory")
-
-            os.makedirs(upload_dir, exist_ok=True)
-
-            file.save(os.path.join(upload_dir, filename))
-            current_user.profile_picture = f"uploads/profiles/{filename}"
+            # Save the full Cloudinary HTTPS URL directly
+            current_user.profile_picture = result["secure_url"]
 
         db.session.commit()
         flash("Profile updated successfully!", "success")

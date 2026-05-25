@@ -341,6 +341,17 @@
   }
 </style>
 
+{# ══ Reusable macro: renders profile picture correctly for both Cloudinary URLs and local paths ══ #}
+{% macro avatar_img(user, css_class="", style="") %}
+  {% if user.profile_picture %}
+    {% if user.profile_picture.startswith('http') %}
+      <img src="{{ user.profile_picture }}" alt="{{ user.username }}" {% if css_class %}class="{{ css_class }}"{% endif %} {% if style %}style="{{ style }}"{% endif %}>
+    {% else %}
+      <img src="{{ url_for('static', filename='uploads/profiles/' ~ user.profile_picture) }}" alt="{{ user.username }}" {% if css_class %}class="{{ css_class }}"{% endif %} {% if style %}style="{{ style }}"{% endif %}>
+    {% endif %}
+  {% endif %}
+{% endmacro %}
+
 <div class="ep">
   <div class="ep-layout">
 
@@ -352,7 +363,7 @@
 
           <div class="av-circle" id="sideAv">
             {% if user.profile_picture %}
-              <img src="{{ url_for('static', filename=user.profile_picture) }}" alt="av">
+              {{ avatar_img(user) }}
             {% else %}
               <span id="sideAvLetter">{{ (user.first_name or user.username or 'U')[0].upper() }}</span>
             {% endif %}
@@ -409,7 +420,7 @@
             <input type="file" name="profile_picture" accept="image/*" onchange="handlePhoto(this)">
             <div class="photo-thumb" id="photoThumb">
               {% if user.profile_picture %}
-                <img src="{{ url_for('static', filename=user.profile_picture) }}" alt="av">
+                {{ avatar_img(user) }}
               {% else %}
                 <span id="photoLetter">{{ (user.first_name or user.username or 'U')[0].upper() }}</span>
               {% endif %}
@@ -537,4 +548,3 @@
   }
 </script>
 {% endblock %}
-

@@ -487,6 +487,17 @@
   .mo-grid { display: grid; grid-template-columns: 1fr 1fr; gap: .75rem; }
 </style>
 
+{# ══ Reusable macro: renders profile picture correctly for both Cloudinary URLs and local paths ══ #}
+{% macro avatar_img(user, extra_style="") %}
+  {% if user.profile_picture %}
+    {% if user.profile_picture.startswith('http') %}
+      <img src="{{ user.profile_picture }}" alt="{{ user.username }}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;{{ extra_style }}">
+    {% else %}
+      <img src="{{ url_for('static', filename='uploads/profiles/' ~ user.profile_picture) }}" alt="{{ user.username }}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;{{ extra_style }}">
+    {% endif %}
+  {% endif %}
+{% endmacro %}
+
 {% if user.is_user() %}
   {% set steps = {
     'Name filled':         (user.first_name and user.last_name),
@@ -522,13 +533,16 @@
         </svg>
       </div>
       <div class="id-body">
+
+        {# ✅ FIX: Use macro — handles both Cloudinary https:// URLs and legacy local paths #}
         <div class="id-avatar">
           {% if user.profile_picture %}
-            <img src="{{ url_for('static', filename=user.profile_picture) }}" alt="avatar">
+            {{ avatar_img(user) }}
           {% else %}
             {{ (user.first_name or user.username or 'U')[0].upper() }}
           {% endif %}
         </div>
+
         <div class="id-name">
           {% if user.first_name or user.last_name %}
             {{ user.first_name or '' }} {{ user.last_name or '' }}
@@ -736,6 +750,7 @@
 </div>
 </div>
 
+{# ══ Edit Modal ══ #}
 <div class="mo-overlay" id="editModal" onclick="closeMoBackdrop(event)">
   <div class="mo-box">
     <div class="mo-head">
@@ -751,13 +766,16 @@
           id="moForm" novalidate>
       <div class="mo-body">
         <div class="mo-av-wrap">
+
+          {# ✅ FIX: Use macro — handles both Cloudinary https:// URLs and legacy local paths #}
           <div class="mo-av" id="moAv">
             {% if user.profile_picture %}
-              <img src="{{ url_for('static', filename=user.profile_picture) }}" alt="avatar">
+              {{ avatar_img(user) }}
             {% else %}
               {{ (user.first_name or user.username or 'U')[0].upper() }}
             {% endif %}
           </div>
+
           <label class="btn-photo" style="cursor:pointer;">
             <i class="fas fa-camera"></i> Change Photo
             <input type="file" name="profile_picture" accept="image/*" style="display:none" id="photoInp" onchange="previewPhoto(this)">

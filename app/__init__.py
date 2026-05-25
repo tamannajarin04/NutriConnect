@@ -1,6 +1,7 @@
 from dotenv import load_dotenv
 load_dotenv()
 import os
+import cloudinary
 from datetime import datetime
 
 from flask import Flask
@@ -17,7 +18,12 @@ migrate = Migrate()
 mail = Mail()
 oauth = OAuth()
 
-
+cloudinary.config(
+    cloud_name=os.getenv("CLOUDINARY_CLOUD_NAME"),
+    api_key=os.getenv("CLOUDINARY_API_KEY"),
+    api_secret=os.getenv("CLOUDINARY_API_SECRET"),
+    secure=True
+)
 def create_app(config_name="default"):
     app = Flask(__name__)
     app.config.from_object(config.get(config_name, config["default"]))
