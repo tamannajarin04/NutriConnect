@@ -23,12 +23,12 @@
       data-rating="{{ '%.1f'|format(avg_rating) }}"
       data-review-count="{{ review_count }}"
       data-detail-url="{{ detail_url }}"
-      data-img-url="{% if food.image %}{{ url_for('static', filename='uploads/' ~ food.image) }}{% endif %}"
+      data-img-url="{% if food.image %}{{ food.image }}{% endif %}"
     >
       <!-- ── Image ── -->
       <div class="fc-img">
         {% if food.image %}
-          <img src="{{ url_for('static', filename='uploads/' ~ food.image) }}" alt="{{ food.name }}">
+          <img src="{{ food.image }}" alt="{{ food.name }}">
         {% else %}
           <div class="fc-img-placeholder">
             <i class="fas fa-utensils"></i><span>No Image</span>

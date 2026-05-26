@@ -61,7 +61,6 @@
   padding:0;
 }
 
-/* compact banner */
 .providers-hero{
   position:relative;
   overflow:hidden;
@@ -174,7 +173,6 @@
   color:#fff;
 }
 
-/* glass cards */
 .stat-card,
 .panel,
 .empty-box{
@@ -537,7 +535,6 @@
   .providers-table td:nth-child(4){
     display:none;
   }
-
   .providers-hero{
     min-height:118px;
     padding:.92rem 1rem;
@@ -665,7 +662,11 @@
                     <div class="provider-meta">
                       <div class="provider-avatar">
                         {% if provider.profile_picture %}
-                          <img src="{{ url_for('static', filename=provider.profile_picture) }}" alt="{{ provider.username }}">
+                          {% if provider.profile_picture.startswith('http') %}
+                            <img src="{{ provider.profile_picture }}" alt="{{ provider.username }}">
+                          {% else %}
+                            <img src="{{ url_for('static', filename='uploads/profiles/' ~ provider.profile_picture) }}" alt="{{ provider.username }}">
+                          {% endif %}
                         {% else %}
                           {{ provider.username[0]|upper if provider.username else 'P' }}
                         {% endif %}

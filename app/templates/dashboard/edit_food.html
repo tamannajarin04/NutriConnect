@@ -1039,7 +1039,7 @@
 
             {% if food.image %}
             <div class="ef-cur-img">
-              <img src="{{ url_for('static', filename='uploads/' + food.image) }}" alt="{{ food.name }}">
+              <img src="{{ food.image }}" alt="{{ food.name }}">
               <div>
                 <div class="ef-cur-badge"><i class="fas fa-check"></i>&ensp;Current photo</div>
                 <p class="ef-cur-img__name">{{ food.image }}</p>

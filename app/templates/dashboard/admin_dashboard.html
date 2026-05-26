@@ -551,9 +551,15 @@
           <div class="admin-hero-line"></div>
           <div class="admin-hero-in">
             <div class="admin-hero-left">
+
               <div class="admin-hero-avatar">
+                {# ── FIX: Cloudinary URLs are absolute (https://), legacy paths are relative filenames ── #}
                 {% if user.profile_picture %}
-                  <img src="{{ url_for('static', filename=user.profile_picture) }}" alt="{{ user.username }}">
+                  {% if user.profile_picture.startswith('http://') or user.profile_picture.startswith('https://') %}
+                    <img src="{{ user.profile_picture }}" alt="{{ user.username }}">
+                  {% else %}
+                    <img src="{{ url_for('static', filename='uploads/profiles/' ~ user.profile_picture) }}" alt="{{ user.username }}">
+                  {% endif %}
                 {% else %}
                   <span class="admin-hero-avatar-init">{{ (user.first_name or user.username or 'A')[0].upper() }}</span>
                 {% endif %}

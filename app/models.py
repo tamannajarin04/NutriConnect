@@ -157,7 +157,7 @@ class FoodItem(db.Model):
     protein = db.Column(db.Float)
     carbs = db.Column(db.Float)
     fat = db.Column(db.Float)
-    image = db.Column(db.String(255))
+    image = db.Column(db.String(500))
     availability_status = db.Column(db.String(20), default="available", nullable=False)
     order_count = db.Column(db.Integer, default=0)
     view_count = db.Column(db.Integer, default=0)
@@ -396,7 +396,7 @@ class FoodImage(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     food_id = db.Column(db.Integer, db.ForeignKey("food_items.id"), nullable=False)
 
-    image_path = db.Column(db.String(255), nullable=False)
+    image_path = db.Column(db.String(500), nullable=False)
     sort_order = db.Column(db.Integer, default=0)
 
     created_at = db.Column(db.DateTime, default=datetime.utcnow)

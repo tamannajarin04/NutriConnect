@@ -326,13 +326,20 @@
     <div class="pd-hero-line"></div>
     <div class="pd-hero-in">
       <div style="display:flex;align-items:center;gap:1.1rem;flex-wrap:wrap;">
+
+        {# ── FIX 1: Hero avatar — dual-path guard for Cloudinary vs legacy local ── #}
         <div class="pd-hero-avatar">
           {% if current_user.profile_picture %}
-            <img src="{{ url_for('static', filename=current_user.profile_picture) }}" alt="{{ current_user.username }}">
+            {% if current_user.profile_picture.startswith('http') %}
+              <img src="{{ current_user.profile_picture }}" alt="{{ current_user.username }}">
+            {% else %}
+              <img src="{{ url_for('static', filename='uploads/profiles/' ~ current_user.profile_picture) }}" alt="{{ current_user.username }}">
+            {% endif %}
           {% else %}
             <span class="pd-hero-avatar-init">{{ (current_user.first_name or current_user.username or 'P')[0].upper() }}</span>
           {% endif %}
         </div>
+
         <div>
           <div class="pd-eyebrow"><span class="pd-pulse"></span>NutriConnect · Provider Dashboard</div>
           <h1 class="pd-hero-title">Manage your <span class="hl">menu and orders</span></h1>
@@ -421,11 +428,18 @@
             <div class="pd-card">
               <div class="pd-card-bar"></div>
               <div class="pd-card-img">
+
+                {# ── FIX 2: Food card image — dual-path guard for Cloudinary vs legacy local ── #}
                 {% if food.image %}
-                  <img src="{{ url_for('static',filename='uploads/'~food.image) }}" alt="{{ food.name }}">
+                  {% if food.image.startswith('http') %}
+                    <img src="{{ food.image }}" alt="{{ food.name }}">
+                  {% else %}
+                    <img src="{{ url_for('static', filename='uploads/foods/' ~ food.image) }}" alt="{{ food.name }}">
+                  {% endif %}
                 {% else %}
                   <div class="pd-no-img"><i class="fas fa-utensils"></i><span>No Image</span></div>
                 {% endif %}
+
                 {% if food.price is not none %}<div class="pd-price-badge">${{ "%.2f"|format(food.price) }}</div>{% endif %}
                 <div class="pd-status-badge {{ 'on' if available_flag else 'off' }}">{{ 'Available' if available_flag else 'Out of Stock' }}</div>
               </div>
@@ -643,11 +657,18 @@
               <div class="ins-rank {{ 'r1' if loop.index==1 else 'r2' if loop.index==2 else 'r3' if loop.index==3 else 'rn' }}">
                 {% if loop.index==1 %}🥇{% elif loop.index==2 %}🥈{% elif loop.index==3 %}🥉{% else %}{{ loop.index }}{% endif %}
               </div>
+
+              {# ── FIX 3: Insights thumbnail — dual-path guard for Cloudinary vs legacy local ── #}
               {% if item.food.image %}
-                <img class="ins-thumb" src="{{ url_for('static',filename='uploads/'~item.food.image) }}" alt="{{ item.food.name }}">
+                {% if item.food.image.startswith('http') %}
+                  <img class="ins-thumb" src="{{ item.food.image }}" alt="{{ item.food.name }}">
+                {% else %}
+                  <img class="ins-thumb" src="{{ url_for('static', filename='uploads/foods/' ~ item.food.image) }}" alt="{{ item.food.name }}">
+                {% endif %}
               {% else %}
                 <div class="ins-thumb-ph"><i class="fas fa-utensils"></i></div>
               {% endif %}
+
               <div class="ins-info">
                 <div class="ins-name">{{ item.food.name }}</div>
                 <div class="ins-chips">

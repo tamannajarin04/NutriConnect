@@ -772,7 +772,7 @@
               <div class="fs-qitem-left">
                 <div class="fs-qthumb">
                   {% if fav.food.image %}
-                    <img src="{{ url_for('static', filename='uploads/' ~ fav.food.image) }}" alt="{{ fav.food.name }}">
+                    <img src="{{ fav.food.image }}" alt="{{ fav.food.name }}">
                   {% else %}
                     <i class="fas fa-utensils"></i>
                   {% endif %}
@@ -824,7 +824,7 @@
               <div class="fs-qitem-left">
                 <div class="fs-qthumb">
                   {% if item.food.image %}
-                    <img src="{{ url_for('static', filename='uploads/' ~ item.food.image) }}" alt="{{ item.food.name }}">
+                    <img src="{{ item.food.image }}" alt="{{ item.food.name }}">
                   {% else %}
                     <i class="fas fa-utensils"></i>
                   {% endif %}

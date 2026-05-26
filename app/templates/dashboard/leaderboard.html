@@ -63,7 +63,11 @@
         </div>
 
         {% if food.image %}
-          <img class="lb-food-img" src="{{ url_for('static', filename='uploads/' ~ food.image) }}" alt="{{ food.name }}">
+          {% if food.image.startswith('http') %}
+            <img class="lb-food-img" src="{{ food.image }}" alt="{{ food.name }}">
+          {% else %}
+            <img class="lb-food-img" src="{{ url_for('static', filename='uploads/' ~ food.image) }}" alt="{{ food.name }}">
+          {% endif %}
         {% else %}
           <div class="lb-food-no-img"><i class="fas fa-utensils"></i></div>
         {% endif %}

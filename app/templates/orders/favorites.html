@@ -587,7 +587,11 @@
 
             <div class="fv-img">
               {% if fav.food.image %}
-                <img src="{{ url_for('static', filename='uploads/' ~ fav.food.image) }}" alt="{{ fav.food.name }}">
+                {% if fav.food.image.startswith('http') %}
+                  <img src="{{ fav.food.image }}" alt="{{ fav.food.name }}">
+                {% else %}
+                  <img src="{{ url_for('static', filename='uploads/' ~ fav.food.image) }}" alt="{{ fav.food.name }}">
+                {% endif %}
               {% else %}
                 <div class="fv-no-img">
                   <i class="fas fa-utensils"></i>

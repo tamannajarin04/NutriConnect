@@ -1,11 +1,9 @@
+import cloudinary
 from flask import Blueprint, render_template, request, redirect, url_for, flash, jsonify
 from flask_login import login_required, current_user
-from werkzeug.utils import secure_filename
 from functools import wraps
 from datetime import datetime
 from sqlalchemy import or_
-import os
-import uuid
 
 from app.models import (
     db,
@@ -22,7 +20,6 @@ from app.models import (
 food_bp = Blueprint("food", __name__)
 food_search_bp = Blueprint("food_search", __name__)
 
-UPLOAD_FOLDER = "app/static/uploads"
 ALLOWED_EXTENSIONS = {"png", "jpg", "jpeg", "gif", "webp"}
 
 VALID_DIET_TYPES = {
@@ -61,14 +58,15 @@ def save_uploaded_file(file_obj):
     if not allowed_file(file_obj.filename):
         return None
 
-    os.makedirs(UPLOAD_FOLDER, exist_ok=True)
-
-    original_name = secure_filename(file_obj.filename)
-    ext = original_name.rsplit(".", 1)[1].lower()
-    filename = f"{uuid.uuid4().hex}.{ext}"
-    file_path = os.path.join(UPLOAD_FOLDER, filename)
-    file_obj.save(file_path)
-    return filename
+    try:
+        result = cloudinary.uploader.upload(
+            file_obj,
+            folder="nutriconnect_foods"
+        )
+        return result.get("secure_url")
+    except Exception as e:
+        print("Cloudinary upload error:", e)
+        return None
 
 
 def food_provider_required(f):
@@ -172,11 +170,11 @@ def add_food():
             flash("Food name is required.", "danger")
             return render_template("dashboard/add_food.html")
 
-        image_filename = None
+        image_url = None
         image_file = request.files.get("image")
         if image_file and image_file.filename != "":
-            image_filename = save_uploaded_file(image_file)
-            if not image_filename:
+            image_url = save_uploaded_file(image_file)
+            if not image_url:
                 flash("Invalid image format. Allowed: png, jpg, jpeg, gif, webp", "danger")
                 return render_template("dashboard/add_food.html")
 
@@ -189,7 +187,7 @@ def add_food():
             protein=float(protein) if protein else None,
             carbs=float(carbs) if carbs else None,
             fat=float(fat) if fat else None,
-            image=image_filename,
+            image=image_url,
             availability_status=availability_status,
             provider_id=current_user.id,
         )
@@ -232,11 +230,11 @@ def edit_food(id):
 
         image_file = request.files.get("image")
         if image_file and image_file.filename != "":
-            image_filename = save_uploaded_file(image_file)
-            if not image_filename:
-                flash("Invalid image format.", "danger")
+            image_url = save_uploaded_file(image_file)
+            if not image_url:
+                flash("Invalid image format. Allowed: png, jpg, jpeg, gif, webp", "danger")
                 return render_template("dashboard/edit_food.html", food=food)
-            food.image = image_filename
+            food.image = image_url
 
         db.session.add(food)
         db.session.commit()
@@ -258,16 +256,15 @@ def upload_food_gallery(id):
         return redirect(url_for("provider.provider_dashboard"))
 
     files = request.files.getlist("gallery_images")
-    os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
     uploaded = 0
     for file_obj in files:
         if not file_obj or file_obj.filename == "":
             continue
 
-        filename = save_uploaded_file(file_obj)
-        if filename:
-            db.session.add(FoodImage(food_id=food.id, image_path=filename))
+        image_url = save_uploaded_file(file_obj)
+        if image_url:
+            db.session.add(FoodImage(food_id=food.id, image_path=image_url))
             uploaded += 1
 
     db.session.commit()

@@ -53,11 +53,9 @@
   }
   @keyframes pulse-dot { 0%,100%{opacity:1} 50%{opacity:.3} }
 
-  /* ════ COVER — no scan line, no bottom border, seamless fade ════ */
   .pp-cover {
     position: relative; height: 180px;
     border-radius: var(--r-lg);
-    /* Remove bottom corners so it blends into identity below */
     border-bottom-left-radius: 0;
     border-bottom-right-radius: 0;
     overflow: hidden; margin-bottom: 0;
@@ -66,7 +64,6 @@
       radial-gradient(ellipse 40% 70%  at 100%  0%, rgba(56,189,248,.12)  0%, transparent 55%),
       radial-gradient(ellipse 30% 50%  at 50%  110%,rgba(6,182,212,.1)    0%, transparent 50%),
       linear-gradient(145deg, #071525 0%, #0a1c35 40%, #0c1f3c 70%, #06111e 100%);
-    /* No border-bottom — that was the line */
     border: 1px solid rgba(56,189,248,.12);
     border-bottom: none;
     box-shadow: 0 1px 0 rgba(255,255,255,.04) inset, 0 8px 32px rgba(0,0,0,.35);
@@ -82,9 +79,7 @@
     content: ''; position: absolute; inset: 0; z-index: 0;
     background: linear-gradient(180deg, rgba(255,255,255,.04) 0%, transparent 40%);
   }
-  /* REMOVED .pp-cover-scan entirely — it was the bright horizontal line */
 
-  /* Taller, stronger fade so the bottom blends completely */
   .pp-cover-fade {
     position: absolute; bottom: 0; left: 0; right: 0;
     height: 100px; z-index: 2;
@@ -94,7 +89,6 @@
       var(--nc-bg, #0d1117) 100%);
     pointer-events: none;
   }
-  /* Light mode fade */
   [data-theme="light"] .pp-cover-fade {
     background: linear-gradient(to bottom,
       transparent 0%,
@@ -102,7 +96,6 @@
       var(--nc-bg, #f8faff) 100%);
   }
 
-  /* Identity sits right below cover, overlapping with negative margin */
   .pp-identity {
     display: flex; align-items: flex-end; gap: 1.4rem;
     padding: 0 .1rem; margin-top: -52px; margin-bottom: 1.5rem;
@@ -480,18 +473,36 @@
 {% set cal_foods  = foods | selectattr('calories') | list %}
 {% set priced     = foods | selectattr('price') | list %}
 
+{# ══════════════════════════════════════════════════════════════
+   MACRO: resolve_img_src
+   Returns the correct src string for any image field.
+   - Cloudinary URLs  → returned as-is (already absolute https://)
+   - Legacy filename  → prefixed with the static uploads path
+   - Empty / None     → returns empty string (caller shows fallback)
+   ══════════════════════════════════════════════════════════════ #}
+{% macro resolve_img_src(path, upload_subfolder) %}
+  {%- if path -%}
+    {%- if path.startswith('http://') or path.startswith('https://') -%}
+      {{ path }}
+    {%- else -%}
+      {{ url_for('static', filename='uploads/' ~ upload_subfolder ~ '/' ~ path) }}
+    {%- endif -%}
+  {%- endif -%}
+{% endmacro %}
+
 <div class="pp">
 
   <div class="pp-cover">
-    <!-- NO .pp-cover-scan element here — removed -->
     <div class="pp-cover-fade"></div>
   </div>
 
+  {# ── Identity header ── #}
   <div class="pp-identity">
     <div class="pp-avatar-wrap">
       <div class="pp-avatar">
-        {% if user.profile_picture %}
-          <img src="{{ url_for('static', filename=user.profile_picture) }}" alt="avatar">
+        {%- set avatar_src = resolve_img_src(user.profile_picture, 'profiles') | trim -%}
+        {% if avatar_src %}
+          <img src="{{ avatar_src }}" alt="{{ user.username }}">
         {% else %}
           {{ (user.first_name or user.username or 'U')[0].upper() }}
         {% endif %}
@@ -692,10 +703,11 @@
         {% if foods %}
           <div class="food-grid">
             {% for food in foods[:6] %}
+            {%- set food_img_src = resolve_img_src(food.image, 'foods') | trim -%}
             <div class="food-card">
               <div class="food-img">
-                {% if food.image %}
-                  <img src="{{ url_for('static', filename='uploads/' + food.image) }}" alt="{{ food.name }}">
+                {% if food_img_src %}
+                  <img src="{{ food_img_src }}" alt="{{ food.name }}" loading="lazy">
                 {% else %}
                   <i class="fas fa-utensils"></i>
                 {% endif %}
@@ -741,8 +753,9 @@
       <div class="mo-body">
         <div class="mo-avatar-row">
           <div class="mo-av" id="moAv">
-            {% if user.profile_picture %}
-              <img src="{{ url_for('static', filename=user.profile_picture) }}" alt="avatar">
+            {%- set modal_avatar_src = resolve_img_src(user.profile_picture, 'profiles') | trim -%}
+            {% if modal_avatar_src %}
+              <img src="{{ modal_avatar_src }}" alt="{{ user.username }}">
             {% else %}
               {{ (user.first_name or user.username or 'U')[0].upper() }}
             {% endif %}
