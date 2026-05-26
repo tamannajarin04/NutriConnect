@@ -8,9 +8,9 @@
 <br/>
 
 <!-- TYPING ANIMATION -->
-<a href="https://git.io/typing-svg">
-  <img src="https://readme-typing-svg.demolab.com?font=Fira+Code&weight=600&size=22&pause=1000&color=22C55E&center=true&vCenter=true&width=600&lines=🥗+Your+AI+Nutrition+Co-Pilot;🔬+Real-Time+Nutrition+Analysis;🍽️+Personalized+Meal+Recommendations;📊+Smart+Calorie+%26+Health+Tracking;🤖+Built+for+AI+Infinity+BuildFest+2026" alt="Typing SVG" />
-</a>
+<p align="center">
+  <img src="https://readme-typing-svg.demolab.com?font=Fira+Code&weight=600&size=24&pause=1000&color=22C55E&center=true&vCenter=true&width=700&lines=Your+AI+Nutrition+Co-Pilot;Real-Time+Nutrition+Analysis;Personalized+Meal+Recommendations;Smart+Calorie+and+Health+Tracking;Built+for+AI+Infinity+BuildFest+2026" alt="Typing SVG" />
+</p>
 
 <br/><br/>
 
